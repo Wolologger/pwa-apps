@@ -1,0 +1,312 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.hero { padding: 1.5rem 0 1rem; }
+.hero h1 { font-size: 22px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+.hero p { font-size: 14px; color: var(--color-text-secondary); }
+.tabs { display: flex; gap: 6px; margin: 1.2rem 0 1rem; flex-wrap: wrap; }
+.tab { padding: 7px 14px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); font-size: 13px; cursor: pointer; background: transparent; color: var(--color-text-secondary); transition: all 0.15s; }
+.tab.active { background: var(--color-background-secondary); color: var(--color-text-primary); border-color: var(--color-border-primary); font-weight: 500; }
+.section { display: none; }
+.section.active { display: block; }
+.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 12px; }
+.card-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 6px; }
+.card-desc { font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; }
+.highlight { background: var(--color-background-info); color: var(--color-text-info); padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; display: inline-block; margin-bottom: 8px; }
+.highlight.warn { background: var(--color-background-warning); color: var(--color-text-warning); }
+.highlight.success { background: var(--color-background-success); color: var(--color-text-success); }
+.highlight.danger { background: var(--color-background-danger); color: var(--color-text-danger); }
+.num-row { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 13px; }
+.num-row:last-child { border-bottom: none; }
+.num-row .label { color: var(--color-text-secondary); }
+.num-row .value { font-weight: 500; color: var(--color-text-primary); }
+.num-row .value.accent { color: var(--color-text-info); }
+.total-row { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0 0; font-size: 15px; font-weight: 500; color: var(--color-text-primary); border-top: 0.5px solid var(--color-border-primary); margin-top: 8px; }
+.pill-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.pill { padding: 6px 12px; border-radius: 20px; font-size: 12px; border: 0.5px solid var(--color-border-tertiary); }
+.p-p1 { background: #FAECE7; color: #993C1D; border-color: #F0997B; }
+.p-p2 { background: #E6F1FB; color: #185FA5; border-color: #85B7EB; }
+.p-p3 { background: #EAF3DE; color: #3B6D11; border-color: #97C459; }
+.bar-wrap { margin: 12px 0 4px; }
+.bar-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.bar-bg { height: 10px; border-radius: 6px; background: var(--color-background-secondary); overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 6px; transition: width 0.5s; }
+.tip { background: var(--color-background-secondary); border-left: 2px solid #378ADD; border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0; padding: 10px 14px; margin-top: 10px; font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; }
+.step { display: flex; gap: 12px; margin-bottom: 14px; }
+.step-num { min-width: 26px; height: 26px; border-radius: 50%; background: var(--color-background-secondary); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: var(--color-text-secondary); }
+.step-body { flex: 1; }
+.step-body .title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 3px; }
+.step-body .desc { font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; }
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.metric { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px; }
+.metric .m-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.metric .m-value { font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
+.metric .m-unit { font-size: 12px; color: var(--color-text-secondary); }
+.quiz-q { font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 12px; line-height: 1.5; }
+.quiz-opts { display: flex; flex-direction: column; gap: 8px; }
+.quiz-opt { padding: 10px 14px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; background: transparent; color: var(--color-text-primary); text-align: left; transition: all 0.15s; }
+.quiz-opt:hover { background: var(--color-background-secondary); }
+.quiz-opt.correct { background: var(--color-background-success); border-color: var(--color-text-success); color: var(--color-text-success); }
+.quiz-opt.wrong { background: var(--color-background-danger); border-color: var(--color-text-danger); color: var(--color-text-danger); }
+.quiz-feedback { font-size: 13px; margin-top: 10px; padding: 10px 14px; border-radius: var(--border-radius-md); line-height: 1.6; display: none; }
+.quiz-next { margin-top: 12px; padding: 8px 16px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); font-size: 13px; cursor: pointer; background: transparent; color: var(--color-text-primary); display: none; }
+.progress { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 16px; }
+</style>
+
+<div class="hero">
+  <div class="highlight">Tu factura de Plenitude — Ene 2026</div>
+  <h1>Aprende a leer tu factura de la luz</h1>
+  <p>Guía interactiva basada en tu factura real de 78,59 €</p>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('resumen')">Resumen</button>
+  <button class="tab" onclick="showTab('conceptos')">Conceptos</button>
+  <button class="tab" onclick="showTab('periodos')">Periodos P1/P2/P3</button>
+  <button class="tab" onclick="showTab('actores')">Quién es quién</button>
+  <button class="tab" onclick="showTab('quiz')">Comprueba lo aprendido</button>
+</div>
+
+<div id="tab-resumen" class="section active">
+  <div class="metrics">
+    <div class="metric"><div class="m-label">Total factura</div><div class="m-value">78,59 <span class="m-unit">€</span></div></div>
+    <div class="metric"><div class="m-label">Días facturados</div><div class="m-value">27 <span class="m-unit">días</span></div></div>
+    <div class="metric"><div class="m-label">Consumo total</div><div class="m-value">249 <span class="m-unit">kWh</span></div></div>
+    <div class="metric"><div class="m-label">Coste/día</div><div class="m-value">2,91 <span class="m-unit">€/día</span></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Desglose de tu factura</div>
+    <div class="num-row"><span class="label">Potencia contratada (fijo)</span><span class="value">9,54 €</span></div>
+    <div class="num-row"><span class="label">Energía consumida (variable)</span><span class="value">51,57 €</span></div>
+    <div class="num-row"><span class="label">Impuesto electricidad (5,11%)</span><span class="value">3,12 €</span></div>
+    <div class="num-row"><span class="label">Alquiler contador</span><span class="value">0,72 €</span></div>
+    <div class="num-row"><span class="label">IVA (21%)</span><span class="value">13,64 €</span></div>
+    <div class="total-row"><span>Total</span><span>78,59 €</span></div>
+  </div>
+
+  <div class="bar-wrap">
+    <div class="bar-label"><span>Energía consumida</span><span>65,6%</span></div>
+    <div class="bar-bg"><div class="bar-fill" style="width: 65.6%; background: #378ADD;"></div></div>
+  </div>
+  <div class="bar-wrap">
+    <div class="bar-label"><span>Impuestos (IE + IVA)</span><span>21,2%</span></div>
+    <div class="bar-bg"><div class="bar-fill" style="width: 21.2%; background: #D85A30;"></div></div>
+  </div>
+  <div class="bar-wrap">
+    <div class="bar-label"><span>Potencia (fijo)</span><span>12,1%</span></div>
+    <div class="bar-bg"><div class="bar-fill" style="width: 12.1%; background: #1D9E75;"></div></div>
+  </div>
+  <div class="bar-wrap">
+    <div class="bar-label"><span>Alquiler contador</span><span>0,9%</span></div>
+    <div class="bar-bg"><div class="bar-fill" style="width: 0.9%; background: #888780;"></div></div>
+  </div>
+
+  <div class="tip">Tu mayor gasto es la energía que consumes (65,6%). Los impuestos son el segundo mayor coste y no puedes evitarlos. La potencia es fija: pagas igual consumas o no.</div>
+</div>
+
+<div id="tab-conceptos" class="section">
+  <div class="card">
+    <div class="highlight">Término de potencia — 9,54 €</div>
+    <div class="card-title">¿Qué es?</div>
+    <div class="card-desc">Es lo que pagas por tener la línea disponible, aunque no consumas nada. Como la cuota mensual de un móvil aunque no hagas llamadas. En tu caso tienes contratados 4,6 kW en P1 y 4,6 kW en P2.</div>
+    <div class="tip">Lo pagas siempre. Si te vas de viaje un mes, lo sigues pagando. Solo lo puedes reducir bajando la potencia contratada.</div>
+  </div>
+
+  <div class="card">
+    <div class="highlight">Término de energía — 51,57 €</div>
+    <div class="card-title">¿Qué es?</div>
+    <div class="card-desc">Es lo que pagas por los kWh que realmente consumes. Se divide en 3 partes: peaje de acceso (va a la red), cargos del sistema (va al Estado) y coste de energía (va a Plenitude).</div>
+    <div class="num-row" style="margin-top:10px;"><span class="label">Peaje de acceso (red)</span><span class="value accent">3,52 €</span></div>
+    <div class="num-row"><span class="label">Cargos del sistema (Estado)</span><span class="value accent">7,56 €</span></div>
+    <div class="num-row"><span class="label">Coste de energía (Plenitude)</span><span class="value accent">42,49 €</span></div>
+  </div>
+
+  <div class="card">
+    <div class="highlight warn">Impuesto electricidad — 3,12 €</div>
+    <div class="card-title">¿Qué es?</div>
+    <div class="card-desc">Un impuesto especial del 5,11% que se aplica sobre potencia + energía (antes del IVA). No lo controla tu comercializadora, lo fija el Gobierno.</div>
+  </div>
+
+  <div class="card">
+    <div class="highlight warn">IVA — 13,64 €</div>
+    <div class="card-title">¿Qué es?</div>
+    <div class="card-desc">El IVA general del 21% se aplica sobre todo: potencia + energía + impuesto de electricidad + alquiler del contador. Es el segundo mayor coste de tu factura después de la energía.</div>
+    <div class="tip">Antes era el 10%. Subió al 21% en 2024. No puedes evitarlo.</div>
+  </div>
+
+  <div class="card">
+    <div class="highlight">Alquiler de equipos — 0,72 €</div>
+    <div class="card-title">¿Qué es?</div>
+    <div class="card-desc">Pagas por el alquiler del contador inteligente. En tu factura son 27 días × 0,026667 €/día = 0,72 €. Es un precio regulado igual para todos.</div>
+  </div>
+</div>
+
+<div id="tab-periodos" class="section">
+  <div class="card-desc" style="margin-bottom:14px; font-size:13px; color: var(--color-text-secondary); line-height:1.6;">Con la tarifa 2.0TD (la tuya), el precio de la electricidad varía según la hora del día. Hay 3 periodos con precios distintos.</div>
+
+  <div class="card">
+    <div class="highlight danger">P1 — Punta (precio más caro)</div>
+    <div class="card-title">De lunes a viernes, de 10h a 14h y de 18h a 22h</div>
+    <div class="card-desc">Consumiste 72 kWh a un coste medio de ~0,268 €/kWh. Es el periodo más caro porque hay más demanda.</div>
+    <div class="pill-grid"><span class="pill p-p1">72 kWh consumidos</span><span class="pill p-p1">~19,31 € de energía</span></div>
+  </div>
+
+  <div class="card">
+    <div class="highlight warn">P2 — Llano (precio medio)</div>
+    <div class="card-title">De lunes a viernes, de 8h a 10h, de 14h a 18h y de 22h a 24h</div>
+    <div class="card-desc">Consumiste 66 kWh a un coste medio de ~0,208 €/kWh. Precio intermedio.</div>
+    <div class="pill-grid"><span class="pill p-p2">66 kWh consumidos</span><span class="pill p-p2">~13,42 € de energía</span></div>
+  </div>
+
+  <div class="card">
+    <div class="highlight success">P3 — Valle (precio más barato)</div>
+    <div class="card-title">De 0h a 8h todos los días + fines de semana y festivos todo el día</div>
+    <div class="card-desc">Consumiste 111 kWh a un coste de ~0,171 €/kWh. Es casi la mitad que en P1. Aquí es cuando conviene poner lavadora, lavavajillas, cargadores...</div>
+    <div class="pill-grid"><span class="pill p-p3">111 kWh consumidos</span><span class="pill p-p3">~18,07 € de energía</span></div>
+  </div>
+
+  <div class="tip">Tienes el 44,6% de tu consumo en el valle (P3), que es bueno. Si pasas más consumo a P3 (noches y fines de semana) puedes ahorrar en la factura.</div>
+
+  <div class="card" style="margin-top:14px;">
+    <div class="card-title">Lectura del contador: ¿qué significan los kWh?</div>
+    <div class="card-desc">Tu contador acumula kWh por separado para P1, P2 y P3. La factura resta la lectura anterior de la actual:</div>
+    <div class="num-row" style="margin-top:10px;"><span class="label">P1: 782 − 710</span><span class="value">= 72 kWh</span></div>
+    <div class="num-row"><span class="label">P2: 2.155 − 2.089</span><span class="value">= 66 kWh</span></div>
+    <div class="num-row"><span class="label">P3: 4.927 − 4.816</span><span class="value">= 111 kWh</span></div>
+    <div class="tip">Tu lectura es "Estimada", no real. Eso significa que el distribuidor (Viesgo) no ha podido leer el contador y ha calculado un valor. Si el estimado no coincide con la realidad, te ajustarán en la siguiente factura.</div>
+  </div>
+</div>
+
+<div id="tab-actores" class="section">
+  <div class="card-desc" style="margin-bottom:14px; font-size:13px; color: var(--color-text-secondary); line-height:1.6;">En tu factura aparecen varias empresas con roles distintos. Aquí te explico quién es cada una.</div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <div class="title">Plenitude (Eni Plenitude Iberia) — tu comercializadora</div>
+      <div class="desc">Es quien te vende el gas y te manda la factura. Tú tienes contrato con ellos. Puedes cambiar de comercializadora cuando quieras (contrato libre de permanencia, vence dic. 2026).</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <div class="title">Viesgo Distribución — tu distribuidora</div>
+      <div class="desc">Es la empresa que mantiene los cables físicos que llegan a tu casa. No puedes elegirla, viene asignada por zona. Ante averías llamas a ellos: 900 101 051.</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <div class="title">Eneryt Servicios SL — distribuidor autorizado</div>
+      <div class="desc">Es el agente o intermediario que comercializa Plenitude en tu zona. No afecta a tu factura ni a tu contrato directamente.</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <div class="title">CNMC — el regulador</div>
+      <div class="desc">La Comisión Nacional de Mercados fija los peajes de acceso y supervisa que las comercializadoras cumplan las reglas. En comparador.cnmc.gob.es puedes comparar tarifas.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:4px;">
+    <div class="card-title">Datos importantes de tu contrato</div>
+    <div class="num-row"><span class="label">Tarifa</span><span class="value accent">2.0TD</span></div>
+    <div class="num-row"><span class="label">Potencia P1/P2</span><span class="value">4,6 kW / 4,6 kW</span></div>
+    <div class="num-row"><span class="label">CUPS</span><span class="value" style="font-size:11px;">ES0027700604222023KQ0F</span></div>
+    <div class="num-row"><span class="label">Fin de contrato</span><span class="value">18/12/2026</span></div>
+    <div class="num-row"><span class="label">Permanencia</span><span class="value accent">Sin permanencia</span></div>
+  </div>
+</div>
+
+<div id="tab-quiz" class="section">
+  <div class="progress" id="quiz-progress">Pregunta 1 de 5</div>
+  <div id="quiz-container"></div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "¿Cuánto pagarías en potencia aunque no consumieras ni un solo kWh en todo el mes?",
+    opts: ["0 € — si no consumes, no pagas nada", "9,54 € — el término fijo siempre se paga", "51,57 € — es el coste principal", "13,64 € — el IVA"],
+    correct: 1,
+    feedback: "Exacto. El término de potencia es fijo: pagas por tener la línea disponible independientemente del consumo. En tu factura son 9,54 € por 27 días."
+  },
+  {
+    q: "Si pones la lavadora a las 3 de la mañana un sábado, ¿en qué periodo estás?",
+    opts: ["P1 (punta) — el más caro", "P2 (llano) — precio medio", "P3 (valle) — el más barato", "Depende de la comercializadora"],
+    correct: 2,
+    feedback: "Correcto. Las noches (0h–8h) y los fines de semana y festivos todo el día son siempre P3 (valle), el periodo más barato. ¡Aprovéchalo para electrodomésticos grandes!"
+  },
+  {
+    q: "En tu factura aparece 'Lectura Estimada'. ¿Qué significa eso?",
+    opts: ["Que Plenitude ha estimado un precio más alto de lo normal", "Que Viesgo no pudo leer el contador y calculó un valor aproximado", "Que tu contador está averiado", "Que consumes más que la media"],
+    correct: 1,
+    feedback: "Así es. Cuando el distribuidor (Viesgo) no puede leer físicamente tu contador, estima el consumo. Si la estimación no es correcta, se ajusta en la siguiente factura con una lectura real."
+  },
+  {
+    q: "Quieres cambiar de comercializadora a una más barata. ¿Esto afecta a Viesgo (los cables de tu casa)?",
+    opts: ["Sí, tendrías que cambiar también el distribuidor", "No, el distribuidor es independiente de la comercializadora", "Sí, y puede tardar hasta 6 meses", "Solo si cambias a tarifa regulada (PVPC)"],
+    correct: 1,
+    feedback: "No afecta para nada. El distribuidor (Viesgo) está asignado por zona geográfica y no cambia nunca. Solo cambias quién te factura y el precio de la energía."
+  },
+  {
+    q: "¿Qué porcentaje de tu factura se va en impuestos (IE + IVA)?",
+    opts: ["Menos del 5%", "Entre el 10% y el 15%", "Alrededor del 21%", "Más del 30%"],
+    correct: 2,
+    feedback: "Correcto. En tu factura, 3,12 € de IE + 13,64 € de IVA = 16,76 €, que es el 21,3% del total de 78,59 €. Es el segundo mayor coste después de la energía consumida."
+  }
+];
+
+let current = 0;
+let answered = false;
+
+function renderQuestion() {
+  const q = questions[current];
+  document.getElementById('quiz-progress').textContent = `Pregunta ${current + 1} de ${questions.length}`;
+  document.getElementById('quiz-container').innerHTML = `
+    <div class="quiz-q">${q.q}</div>
+    <div class="quiz-opts">
+      ${q.opts.map((o, i) => `<button class="quiz-opt" onclick="answer(${i})">${o}</button>`).join('')}
+    </div>
+    <div class="quiz-feedback" id="qfeedback"></div>
+    ${current < questions.length - 1 ? `<button class="quiz-next" id="qnext" onclick="nextQ()">Siguiente pregunta →</button>` : `<button class="quiz-next" id="qnext" onclick="restartQ()">Volver a empezar</button>`}
+  `;
+  answered = false;
+}
+
+function answer(i) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach((o, idx) => {
+    if (idx === q.correct) o.classList.add('correct');
+    else if (idx === i && i !== q.correct) o.classList.add('wrong');
+    o.style.pointerEvents = 'none';
+  });
+  const fb = document.getElementById('qfeedback');
+  fb.style.display = 'block';
+  fb.style.background = i === q.correct ? 'var(--color-background-success)' : 'var(--color-background-danger)';
+  fb.style.color = i === q.correct ? 'var(--color-text-success)' : 'var(--color-text-danger)';
+  fb.textContent = q.feedback;
+  document.getElementById('qnext').style.display = 'inline-block';
+}
+
+function nextQ() { current++; renderQuestion(); }
+function restartQ() { current = 0; renderQuestion(); }
+
+function showTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+renderQuestion();
+</script>
