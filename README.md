@@ -76,12 +76,15 @@ Para forzar que todos los usuarios reciban una versión nueva, sube la constante
 
 ## Changelog
 
-### v2 — 2025-03
-- **Fix:** Service Worker cambiado a network-first para HTML. Los cambios en el panel y las herramientas ya se ven sin necesidad de Ctrl+F5 ni reinstalar la app
+### v1.5.0 — 2026-03
+- **Nuevo:** Visibilidad por herramienta — activa o desactiva cada app desde el editor de ajustes. Config guardada en `localStorage`
+- **Nuevo:** `editor-categorias.html` reescrito como panel de ajustes: toggle on/off por herramienta, sin secciones de categorías globales ni output de código
+- **Nuevo:** Botón ⚙ en el topbar del index para acceder al editor. Ya no aparece como herramienta en el listado
+- **Fix:** Service Worker cambiado a network-first para HTML (`wapps-v2`). Los cambios se ven sin Ctrl+F5
 - **Fix:** Limpieza automática de caché antigua al actualizar el SW
-- **Nuevo:** `editor-categorias.html` — editor visual para gestionar qué categorías tiene cada herramienta sin tocar `index.html` a mano
+- **Pendiente v2.0:** Sincronización de visibilidad y categorías con Firebase Firestore
 
-### v1 — inicial
+### v1.0.0 — inicial
 - Panel principal con listado de herramientas y filtros por categoría
 - PWA instalable con soporte offline
 - 12 herramientas: obra, gastos, despensa, finanzas, compra, setlist, instrumentos, semana, deseados, decisor, suministros, factura luz
