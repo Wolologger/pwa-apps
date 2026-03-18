@@ -1,10 +1,14 @@
-const CACHE = 'wapps-v2';
+const CACHE = 'wapps-v3';
 
+// Assets que se precachean al instalar — se sirven siempre desde caché
+// hasta que cambie la versión del SW (wapps-v4, v5...)
 const PRECACHE = [
   '/pwa-apps/manifest.json',
+  '/pwa-apps/wapps-store.js',
+  '/pwa-apps/wapps-firebase.js',
+  '/pwa-apps/wapps-onboarding.js',
 ];
 
-// Instalar — precachear solo assets estáticos (no HTML)
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE).then(cache => cache.addAll(PRECACHE))
@@ -12,7 +16,6 @@ self.addEventListener('install', e => {
   self.skipWaiting();
 });
 
-// Activar — limpiar caches viejas
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -22,26 +25,33 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// Fetch
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Dejar pasar llamadas a APIs externas sin cachear
+  // Dejar pasar sin cachear: APIs externas, Firebase, CDNs
   if (
     url.hostname.includes('api.github.com') ||
     url.hostname.includes('fonts.googleapis.com') ||
-    url.hostname.includes('fonts.gstatic.com')
+    url.hostname.includes('fonts.gstatic.com') ||
+    url.hostname.includes('googleapis.com') ||
+    url.hostname.includes('gstatic.com') ||
+    url.hostname.includes('workers.dev') ||
+    url.hostname.includes('edamam.com') ||
+    url.hostname.includes('firebaseapp.com') ||
+    url.hostname.includes('cdnjs.cloudflare.com')
   ) {
     return;
   }
 
-  // NETWORK FIRST para páginas HTML — siempre intenta red primero
-  // así los cambios en index.html y el resto de páginas se ven al instante
-  if (e.request.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname.endsWith('/')) {
+  // NETWORK FIRST para HTML — siempre fresco, con fallback offline
+  if (
+    e.request.mode === 'navigate' ||
+    url.pathname.endsWith('.html') ||
+    url.pathname.endsWith('/')
+  ) {
     e.respondWith(
       fetch(e.request)
         .then(response => {
-          // Guarda la respuesta fresca en caché
           if (response.ok) {
             const clone = response.clone();
             caches.open(CACHE).then(cache => cache.put(e.request, clone));
@@ -49,7 +59,6 @@ self.addEventListener('fetch', e => {
           return response;
         })
         .catch(() => {
-          // Sin red → sirve desde caché (offline fallback)
           return caches.match(e.request)
             || caches.match('/pwa-apps/index.html');
         })
@@ -57,12 +66,17 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // CACHE FIRST para assets estáticos (manifest, iconos, etc.)
+  // CACHE FIRST para JS y assets estáticos — rápido, se invalida al subir versión SW
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
       return fetch(e.request).then(response => {
-        if (response.ok && url.hostname.includes('github.io')) {
+        if (response.ok && (
+          url.hostname.includes('github.io') ||
+          url.pathname.endsWith('.js') ||
+          url.pathname.endsWith('.json') ||
+          url.pathname.match(/\.(png|jpg|svg|ico|webp)$/)
+        )) {
           const clone = response.clone();
           caches.open(CACHE).then(cache => cache.put(e.request, clone));
         }
