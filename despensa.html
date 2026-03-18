@@ -551,59 +551,10 @@ function changeStock(id, delta) {
   renderDespensa();
 }
 
-// ── RECETAS (Spoonacular) ──────────────────────────────────────
-function initRecetasTab() {
-  renderIngredientesChips();
-  if (!recetasCache) {
-    const body = document.getElementById('recetas-body');
-    if (body && !body.innerHTML.trim()) {
-      body.innerHTML = '<div class="recetas-empty">Selecciona los ingredientes que quieres usar<br>y pulsa 🔍 Buscar.</div>';
-    }
-  }
-}
-
-// API proxied via Cloudflare Worker (key never exposed in frontend)
-const SPOONACULAR_PROXY = 'https://shy-base-c7d4.wolologger.workers.dev';
+// ── RECETAS (Edamam) ──────────────────────────────────────────
+const EDAMAM_PROXY = 'https://shy-base-c7d4.wolologger.workers.dev/edamam';
 let recetasCache = null;
 let selectedIngredientes = new Set();
-
-// Diccionario español→inglés para ingredientes comunes
-const TRAD_ES_EN = {
-  'leche':'milk','huevo':'egg','huevos':'eggs','harina':'flour','azúcar':'sugar','azucar':'sugar',
-  'aceite':'oil','aceite de oliva':'olive oil','mantequilla':'butter','sal':'salt','pimienta':'pepper',
-  'tomate':'tomato','tomates':'tomatoes','cebolla':'onion','cebollas':'onions','ajo':'garlic',
-  'patata':'potato','patatas':'potatoes','zanahoria':'carrot','zanahorias':'carrots',
-  'pimiento':'pepper','pimientos':'peppers','lechuga':'lettuce','espinacas':'spinach',
-  'champiñones':'mushrooms','champiñon':'mushroom','arroz':'rice','pasta':'pasta',
-  'pan':'bread','queso':'cheese','jamón':'ham','jamon':'ham','pollo':'chicken',
-  'carne':'meat','ternera':'beef','cerdo':'pork','pescado':'fish','atún':'tuna','atun':'tuna',
-  'salmón':'salmon','salmon':'salmon','gambas':'shrimp','mejillones':'mussels',
-  'manzana':'apple','manzanas':'apples','naranja':'orange','naranjas':'oranges',
-  'plátano':'banana','platano':'banana','limón':'lemon','limon':'lemon',
-  'fresa':'strawberry','fresas':'strawberries','uvas':'grapes','pera':'pear',
-  'yogur':'yogurt','nata':'cream','crema':'cream','mantequilla':'butter',
-  'lentejas':'lentils','garbanzos':'chickpeas','alubias':'beans','judías':'beans',
-  'maíz':'corn','maiz':'corn','guisantes':'peas','brócoli':'broccoli','brocoli':'broccoli',
-  'coliflor':'cauliflower','berenjena':'eggplant','calabacín':'zucchini','calabacin':'zucchini',
-  'pepino':'cucumber','apio':'celery','puerro':'leek','espárrago':'asparagus','esparragos':'asparagus',
-  'nueces':'walnuts','almendras':'almonds','avellanas':'hazelnuts','pistachos':'pistachios',
-  'chocolate':'chocolate','cacao':'cocoa','vainilla':'vanilla','canela':'cinnamon',
-  'orégano':'oregano','oregano':'oregano','perejil':'parsley','albahaca':'basil',
-  'romero':'rosemary','tomillo':'thyme','pimentón':'paprika','pimenton':'paprika',
-  'vinagre':'vinegar','mostaza':'mustard','ketchup':'ketchup','mayonesa':'mayonnaise',
-  'soja':'soy sauce','limón':'lemon juice','zumo':'juice','vino':'wine','cerveza':'beer',
-  'agua':'water','caldo':'broth','tomate frito':'tomato sauce',
-};
-
-function traducirIngrediente(nombre) {
-  const lower = nombre.toLowerCase().trim();
-  if (TRAD_ES_EN[lower]) return TRAD_ES_EN[lower];
-  // Buscar coincidencia parcial
-  for (const [es, en] of Object.entries(TRAD_ES_EN)) {
-    if (lower.includes(es)) return en;
-  }
-  return nombre; // Si no hay traducción, enviar tal cual
-}
 
 function getIngredientesDisponibles() {
   return state.alimentos.map(a => a.nombre.toLowerCase().trim()).filter(Boolean);
@@ -617,7 +568,6 @@ function renderIngredientesChips() {
     el.innerHTML = '<span style="font-size:10px;color:var(--muted);font-family:var(--fm);">Añade alimentos a la despensa para buscar recetas.</span>';
     return;
   }
-  // Init selection con todos
   if (selectedIngredientes.size === 0) todos.forEach(i => selectedIngredientes.add(i));
   el.innerHTML = todos.map(ing => `
     <span class="ing-chip ${selectedIngredientes.has(ing) ? 'selected' : ''}"
@@ -650,20 +600,23 @@ async function buscarRecetas() {
   body.innerHTML = '<div class="recetas-spinner"><div class="spinner"></div>Buscando recetas…</div>';
 
   try {
-    const ingsEn = ingredientes.map(i => traducirIngrediente(i));
-    const ingsParam = ingsEn.join(',+');
-    const url = `${SPOONACULAR_PROXY}/recipes/findByIngredients?ingredients=${encodeURIComponent(ingsParam)}&number=8&ranking=2&ignorePantry=true`;
+    // Edamam: buscar por ingredientes, resultados en español
+    const q = ingredientes.join(' ');
+    const fields = 'label,image,ingredientLines,ingredients,url,cuisineType,totalTime';
+    const url = `${EDAMAM_PROXY}/api/recipes/v2?type=public&q=${encodeURIComponent(q)}&field=${fields.split(',').join('&field=')}&to=8`;
+
     const res  = await fetch(url);
     if (!res.ok) throw new Error(`API ${res.status}`);
     const data = await res.json();
+    const hits = data.hits || [];
 
-    if (!data.length) {
+    if (!hits.length) {
       body.innerHTML = '<div class="recetas-empty">No se encontraron recetas con esos ingredientes.<br>Prueba con menos filtros.</div>';
       return;
     }
 
-    recetasCache = data;
-    renderRecetas(data, ingredientes);
+    recetasCache = hits;
+    renderRecetas(hits, ingredientes);
   } catch(e) {
     body.innerHTML = `<div class="recetas-empty" style="color:var(--r);">Error al buscar recetas.<br>${e.message}</div>`;
   } finally {
@@ -672,51 +625,60 @@ async function buscarRecetas() {
   }
 }
 
-function renderRecetas(recetas, ingredientesDisponibles) {
+function renderRecetas(hits, ingredientesDisponibles) {
   const body = document.getElementById('recetas-body');
   const disponibles = new Set(ingredientesDisponibles.map(i => i.toLowerCase()));
 
-  body.innerHTML = recetas.map(r => {
-    const usados   = r.usedIngredients  || [];
-    const faltantes = r.missedIngredients || [];
-    const total    = usados.length + faltantes.length;
-    const matchPct = total > 0 ? Math.round((usados.length / total) * 100) : 0;
+  body.innerHTML = hits.map(hit => {
+    const r = hit.recipe;
+    const recipeIngredients = (r.ingredients || []).map(i => i.food?.toLowerCase() || '');
+
+    // Calcular qué tienes y qué te falta
+    const tienes   = recipeIngredients.filter(i => [...disponibles].some(d => i.includes(d) || d.includes(i)));
+    const faltantes = (r.ingredientLines || []).filter(line => {
+      const lineLow = line.toLowerCase();
+      return !([...disponibles].some(d => lineLow.includes(d)));
+    });
+
+    const total    = recipeIngredients.length || 1;
+    const matchPct = Math.round((tienes.length / total) * 100);
     const matchClass = matchPct >= 80 ? 'match-hi' : matchPct >= 50 ? 'match-md' : 'match-lo';
 
-    const usadosHtml = usados.map(i =>
-      `<span class="receta-ing tiene" title="${i.original || i.name}">${i.name}</span>`
-    ).join('');
+    const tienesHtml   = tienes.map(i => `<span class="receta-ing tiene">${i}</span>`).join('');
+    const faltantesHtml = faltantes.slice(0,6).map(i => `<span class="receta-ing falta">${i}</span>`).join('');
 
-    const faltantesHtml = faltantes.map(i =>
-      `<span class="receta-ing falta" title="${i.original || i.name}">${i.name}</span>`
-    ).join('');
-
-    const faltantesNombres = faltantes.map(i => i.name);
+    const faltantesNombres = (r.ingredients || [])
+      .filter(i => { const f = i.food?.toLowerCase()||''; return !([...disponibles].some(d => f.includes(d)||d.includes(f))); })
+      .map(i => i.food || '')
+      .filter(Boolean);
     const faltantesJSON = JSON.stringify(faltantesNombres).replace(/"/g, '&quot;');
 
+    const recipeId = r.url ? btoa(r.url).slice(0,12) : Math.random().toString(36).slice(2,8);
+    const tiempo = r.totalTime ? `⏱ ${r.totalTime} min · ` : '';
+    const cocina = r.cuisineType?.[0] ? `🌍 ${r.cuisineType[0]} · ` : '';
+
     return `<div class="receta-card">
-      ${r.image ? `<img class="receta-img" src="${r.image}" alt="${r.title}" loading="lazy" onerror="this.parentElement.querySelector('.receta-img-placeholder').style.display='flex';this.remove();">` : ''}
-      <div class="receta-img-placeholder" style="${r.image ? 'display:none' : 'display:flex'}">🍳</div>
+      ${r.image ? `<img class="receta-img" src="${r.image}" alt="${r.label}" loading="lazy" onerror="this.style.display='none'">` : '<div class="receta-img-placeholder">🍳</div>'}
       <div class="receta-body">
-        <div class="receta-title">${r.title}</div>
+        <div class="receta-title">${r.label}</div>
         <div class="receta-meta">
           <span class="receta-badge ${matchClass}">✓ ${matchPct}% ingredientes</span>
-          <span class="receta-badge">✅ ${usados.length} tienes</span>
-          ${faltantes.length ? `<span class="receta-badge" style="color:var(--o)">⚠ ${faltantes.length} te faltan</span>` : ''}
+          ${tiempo || cocina ? `<span class="receta-badge">${tiempo}${cocina}</span>`.replace(' · </span>','</span>') : ''}
+          ${faltantes.length ? `<span class="receta-badge" style="color:var(--o)">⚠ ${faltantesNombres.length} te faltan</span>` : ''}
         </div>
-        ${usados.length ? `<div class="receta-ing-section">
+        ${tienes.length ? `<div class="receta-ing-section">
           <div class="receta-ing-title">Tienes</div>
-          <div class="receta-ing-list">${usadosHtml}</div>
+          <div class="receta-ing-list">${tienesHtml}</div>
         </div>` : ''}
         ${faltantes.length ? `<div class="receta-ing-section">
           <div class="receta-ing-title">Te falta</div>
           <div class="receta-ing-list">${faltantesHtml}</div>
-          <button class="receta-compra-btn" id="compra-btn-${r.id}"
-            onclick="añadirFaltantesACompra(${r.id}, '${r.title.replace(/'/g,"\'")}', ${faltantesJSON})">
-            🛒 Añadir ingredientes que faltan a la compra
+          <button class="receta-compra-btn" id="compra-btn-${recipeId}"
+            onclick="añadirFaltantesACompra('${recipeId}', '${r.label.replace(/'/g,"\'")}', ${faltantesJSON})">
+            🛒 Añadir lo que falta a la compra
           </button>
         </div>` : `<div style="font-size:10px;color:var(--g);font-family:var(--fm);margin-bottom:8px;">✓ ¡Tienes todos los ingredientes!</div>`}
-        <a class="receta-ver-btn" href="https://spoonacular.com/recipes/${r.title.replace(/\s+/g,'-').toLowerCase()}-${r.id}" target="_blank">Ver receta completa →</a>
+        <a class="receta-ver-btn" href="${r.url}" target="_blank" rel="noopener">Ver receta completa →</a>
       </div>
     </div>`;
   }).join('');
@@ -724,7 +686,6 @@ function renderRecetas(recetas, ingredientesDisponibles) {
 
 function añadirFaltantesACompra(recetaId, recetaTitulo, faltantes) {
   if (!faltantes.length) return;
-
   const compra = WStore.get('compra', 'data') ||
     { lists:[{id:1,name:'Supermercado'}], items:[], cats:[], stores:[], nextId:10, history:[] };
 
@@ -733,17 +694,9 @@ function añadirFaltantesACompra(recetaId, recetaTitulo, faltantes) {
   let añadidos = 0;
 
   faltantes.forEach(nombre => {
-    // Evitar duplicados
     const yaExiste = compra.items.some(i => i.text?.toLowerCase() === nombre.toLowerCase() && !i.done);
     if (!yaExiste) {
-      compra.items.push({
-        id: ++nid,
-        text: nombre,
-        done: false,
-        listId: listaId,
-        cat: 'otros',
-        nota: `Para: ${recetaTitulo}`
-      });
+      compra.items.push({ id:++nid, text:nombre, done:false, listId:listaId, cat:'otros', nota:`Para: ${recetaTitulo}` });
       añadidos++;
     }
   });
@@ -752,7 +705,6 @@ function añadirFaltantesACompra(recetaId, recetaTitulo, faltantes) {
   WStore.set('compra', 'data', compra);
   try { localStorage.setItem('compra_v2', JSON.stringify(compra)); } catch(e) {}
 
-  // Feedback visual
   const btn = document.getElementById(`compra-btn-${recetaId}`);
   if (btn) {
     btn.classList.add('added');
@@ -760,6 +712,16 @@ function añadirFaltantesACompra(recetaId, recetaTitulo, faltantes) {
       ? `✓ ${añadidos} ingrediente${añadidos > 1 ? 's' : ''} añadido${añadidos > 1 ? 's' : ''} a la compra`
       : '✓ Ya estaban en la lista';
     btn.disabled = true;
+  }
+}
+
+function initRecetasTab() {
+  renderIngredientesChips();
+  if (!recetasCache) {
+    const b = document.getElementById('recetas-body');
+    if (b && !b.innerHTML.trim()) {
+      b.innerHTML = '<div class="recetas-empty">Selecciona los ingredientes que quieres usar<br>y pulsa 🔍 Buscar.</div>';
+    }
   }
 }
 
