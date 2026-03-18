@@ -9,11 +9,12 @@
 <meta name="theme-color" content="#1a1a18">
 <title>Mi Obra</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#1a1a18;--bg2:#222220;--bg3:#2c2c29;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);--text:#f0ede6;--muted:#8a8880;--accent:#d4f060;--accent2:#60c0f0;--warn:#f0b060;--danger:#f06060;--ok:#60d490;--radius:12px;--font-head:'Syne',sans-serif;--font-mono:'DM Mono',monospace;}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-mono);overflow:hidden;}
+.shell{display:flex;flex-direction:column;height:100dvh;max-width:480px;margin:0 auto;}
 .shell{display:flex;flex-direction:column;height:100dvh;max-width:480px;margin:0 auto;}
 .header{padding:16px 20px 12px;border-bottom:0.5px solid var(--border);flex-shrink:0;}
 .header-top{display:flex;justify-content:space-between;align-items:center;}
@@ -103,10 +104,32 @@ select option{background:var(--bg2);}
 .import-feedback{font-size:12px;padding:8px 12px;border-radius:8px;margin-top:8px;display:none;}
 .import-ok{background:rgba(96,212,144,0.12);color:var(--ok);border:0.5px solid rgba(96,212,144,0.25);}
 .import-err{background:rgba(240,96,96,0.12);color:var(--danger);border:0.5px solid rgba(240,96,96,0.25);}
+
+/* ═══ W//NAV SYSTEM ═══ */
+.wnav{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg);border-bottom:1px solid rgba(255,255,255,0.1);flex-shrink:0;position:sticky;top:0;z-index:100;}
+.wnav-back{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid rgba(255,255,255,0.13);background:transparent;color:#5a5850;text-decoration:none;transition:all 0.15s;flex-shrink:0;}
+.wnav-back:hover{background:rgba(255,255,255,0.06);color:#e8f040;}
+.wnav-back:active{transform:scale(0.94);}
+.wnav-logo{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;line-height:1;flex-shrink:0;}
+.wnav-logo a{color:#5a5850;text-decoration:none;transition:color 0.15s;}
+.wnav-logo a span{color:#e8f040;}
+.wnav-logo a:hover{color:#f0ebe0;}
+.wnav-sep{width:1px;height:16px;background:rgba(255,255,255,0.1);flex-shrink:0;}
+.wnav-title{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#5a5850;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 </style>
 </head>
 <body>
 <div class="shell">
+<!-- ═══ W//NAV ═══ -->
+<div class="wnav">
+  <a class="wnav-back" href="index.html" title="Inicio">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </a>
+  <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
+  <div class="wnav-sep"></div>
+  <div class="wnav-title">MI OBRA</div>
+</div>
+
   <div class="header">
     <div class="header-top">
       <div class="logo">mi<span>obra</span></div>

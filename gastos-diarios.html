@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Gastos">
 <meta name="theme-color" content="#0f0f0e">
 <title>Gastos</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#0f0f0e; --bg2:#1a1a18; --bg3:#242422;
@@ -143,10 +143,32 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .act-row{display:flex;gap:8px;margin-bottom:8px;}
 
 .empty{color:var(--muted);font-size:13px;text-align:center;padding:3rem 1rem;line-height:1.8;}
+
+/* ═══ W//NAV SYSTEM ═══ */
+.wnav{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg);border-bottom:1px solid rgba(255,255,255,0.1);flex-shrink:0;position:sticky;top:0;z-index:100;}
+.wnav-back{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid rgba(255,255,255,0.13);background:transparent;color:#5a5850;text-decoration:none;transition:all 0.15s;flex-shrink:0;}
+.wnav-back:hover{background:rgba(255,255,255,0.06);color:#e8f040;}
+.wnav-back:active{transform:scale(0.94);}
+.wnav-logo{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;line-height:1;flex-shrink:0;}
+.wnav-logo a{color:#5a5850;text-decoration:none;transition:color 0.15s;}
+.wnav-logo a span{color:#e8f040;}
+.wnav-logo a:hover{color:#f0ebe0;}
+.wnav-sep{width:1px;height:16px;background:rgba(255,255,255,0.1);flex-shrink:0;}
+.wnav-title{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#5a5850;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 </style>
 </head>
 <body>
 <div class="shell">
+<!-- ═══ W//NAV ═══ -->
+<div class="wnav">
+  <a class="wnav-back" href="index.html" title="Inicio">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </a>
+  <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
+  <div class="wnav-sep"></div>
+  <div class="wnav-title">GASTOS DIARIOS</div>
+</div>
+
 
   <!-- HERO -->
   <div class="hero">
