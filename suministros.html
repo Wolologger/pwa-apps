@@ -31,6 +31,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .wnav-logo a span{color:var(--y);}
 .wnav-sep{width:1px;height:16px;background:var(--border2);flex-shrink:0;}
 .wnav-title{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);flex:1;}
+.wnav-version{font-size:9px;color:var(--dim);font-family:var(--fm);letter-spacing:0.5px;border:1px solid var(--dim);padding:2px 6px;border-radius:3px;flex-shrink:0;}
 
 /* SHELL */
 .shell{display:flex;flex-direction:column;height:100dvh;max-width:520px;margin:0 auto;}
@@ -42,6 +43,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .tipo-btn.active-gas{background:rgba(240,112,48,0.15);color:var(--gas);border-color:rgba(240,112,48,0.35);}
 .tipo-btn.active-agua{background:rgba(48,184,240,0.15);color:var(--agua);border-color:rgba(48,184,240,0.35);}
 .tipo-btn:hover{background:var(--bg3);}
+
+/* Ocultar tipo-bar cuando estamos en guías */
+.tipo-bar.hidden{display:none;}
 
 /* TABS */
 .tabs{display:flex;padding:0 16px;gap:2px;border-bottom:1px solid var(--border2);flex-shrink:0;overflow-x:auto;scrollbar-width:none;background:var(--bg);}
@@ -141,10 +145,94 @@ select option{background:var(--bg2);}
 .fab-area{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;padding:12px 16px 24px;background:linear-gradient(to top,var(--bg) 60%,transparent);pointer-events:none;}
 .fab{pointer-events:all;width:100%;padding:13px;font-family:var(--fh);font-size:14px;font-weight:600;background:var(--y);color:#0a0a09;border:none;border-radius:12px;cursor:pointer;transition:transform 0.12s,opacity 0.12s;letter-spacing:0.3px;}
 .fab:active{transform:scale(0.97);opacity:0.85;}
-
 .empty{color:var(--muted);font-size:13px;text-align:center;padding:2.5rem 1rem;line-height:1.7;}
 .divider{height:0.5px;background:var(--border2);margin:12px 0;}
 .section-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:16px 0 8px;font-family:var(--fm);}
+
+/* ══════════════════════════
+   GUÍAS — estilos propios
+══════════════════════════ */
+.guias-hero{background:var(--bg2);border:0.5px solid var(--border2);border-radius:12px;padding:16px;margin-bottom:14px;}
+.guias-hero-label{font-size:9px;color:var(--muted);font-family:var(--fm);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;}
+.guias-hero-title{font-family:var(--fh);font-size:28px;letter-spacing:0.5px;line-height:1;color:var(--text);margin-bottom:6px;}
+.guias-hero-desc{font-size:12px;color:var(--muted);font-family:var(--fm);line-height:1.6;}
+
+.guia-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;overflow:hidden;margin-bottom:10px;cursor:pointer;transition:border-color 0.15s;}
+.guia-card:hover{border-color:rgba(232,240,64,0.3);}
+.guia-card-inner{display:flex;align-items:stretch;}
+.guia-card-accent{width:4px;flex-shrink:0;}
+.guia-card-body{flex:1;padding:14px 16px;}
+.guia-card-tag{font-size:9px;font-family:var(--fm);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.guia-card-name{font-family:var(--fh);font-size:20px;letter-spacing:0.5px;margin-bottom:4px;}
+.guia-card-desc{font-size:11px;color:var(--muted);line-height:1.5;}
+.guia-card-chips{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap;}
+.guia-chip{font-size:9px;padding:2px 7px;border-radius:3px;background:var(--bg3);color:var(--muted);font-family:var(--fm);border:0.5px solid var(--border2);}
+.guia-card-arrow{padding:14px 16px;display:flex;align-items:center;color:var(--dim);font-size:16px;transition:color 0.15s,transform 0.15s;flex-shrink:0;}
+.guia-card:hover .guia-card-arrow{color:var(--y);transform:translateX(3px);}
+
+/* Guía interna — contenido inline */
+.guia-content{display:none;padding-top:2px;}
+.guia-content.active{display:block;}
+
+.g-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:16px;margin-bottom:10px;}
+.g-card-title{font-family:var(--fh);font-size:18px;letter-spacing:0.5px;color:var(--text);margin-bottom:8px;}
+.g-card-desc{font-size:13px;color:var(--muted);line-height:1.7;}
+.g-hl{display:inline-block;font-family:var(--fm);font-size:10px;font-weight:500;padding:3px 10px;border-radius:4px;letter-spacing:0.5px;margin-bottom:10px;}
+.hl-info{background:rgba(48,168,240,0.12);color:var(--b);border:0.5px solid rgba(48,168,240,0.25);}
+.hl-warn{background:rgba(240,144,48,0.12);color:var(--o);border:0.5px solid rgba(240,144,48,0.25);}
+.hl-success{background:rgba(48,216,128,0.12);color:var(--g);border:0.5px solid rgba(48,216,128,0.25);}
+.hl-danger{background:rgba(240,64,48,0.12);color:var(--r);border:0.5px solid rgba(240,64,48,0.25);}
+.g-num-row{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:13px;gap:12px;}
+.g-num-row:last-child{border-bottom:none;}
+.g-num-row .lbl{color:var(--muted);font-family:var(--fm);}
+.g-num-row .val{font-weight:500;color:var(--text);font-family:var(--fm);flex-shrink:0;}
+.g-num-row .val.accent{color:var(--b);}
+.g-total-row{display:flex;justify-content:space-between;align-items:baseline;padding:12px 0 0;font-family:var(--fh);font-size:22px;letter-spacing:0.5px;color:var(--text);border-top:1px solid var(--border2);margin-top:8px;}
+.g-total-row span:last-child{color:var(--y);}
+.g-tip{background:var(--bg3);border-left:2px solid var(--y);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:12px;font-size:12px;color:var(--muted);line-height:1.7;font-family:var(--fm);}
+.g-tip strong{color:var(--text);}
+.g-bar-wrap{margin:10px 0 6px;}
+.g-bar-label{display:flex;justify-content:space-between;font-size:11px;font-family:var(--fm);color:var(--muted);margin-bottom:5px;}
+.g-bar-bg{height:6px;border-radius:3px;background:var(--dim);overflow:hidden;}
+.g-bar-fill{height:100%;border-radius:3px;transition:width 0.6s cubic-bezier(.4,0,.2,1);}
+.g-pill-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
+.g-pill{padding:5px 12px;border-radius:99px;font-size:11px;font-family:var(--fm);}
+.p-p1{background:rgba(240,72,40,0.1);color:var(--r);border:0.5px solid rgba(240,72,40,0.25);}
+.p-p2{background:rgba(240,144,40,0.1);color:var(--o);border:0.5px solid rgba(240,144,40,0.25);}
+.p-p3{background:rgba(40,216,120,0.1);color:var(--g);border:0.5px solid rgba(40,216,120,0.25);}
+.g-step{display:flex;gap:14px;margin-bottom:16px;}
+.g-step-num{width:30px;height:30px;flex-shrink:0;border-radius:50%;background:var(--y);display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:16px;color:#0a0a09;margin-top:2px;}
+.g-step-body .title{font-family:var(--fh);font-size:16px;letter-spacing:0.3px;color:var(--text);margin-bottom:4px;}
+.g-step-body .desc{font-size:13px;color:var(--muted);line-height:1.7;}
+.g-metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px;}
+.g-metric{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:14px;}
+.g-m-label{font-size:10px;color:var(--muted);font-family:var(--fm);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px;}
+.g-m-value{font-family:var(--fh);font-size:28px;line-height:1;color:var(--text);letter-spacing:0.5px;}
+.g-m-unit{font-size:13px;color:var(--muted);font-family:var(--fm);}
+
+/* sub-tabs de guía */
+.gtabs{display:flex;gap:2px;margin-bottom:14px;border-bottom:1px solid var(--border2);overflow-x:auto;scrollbar-width:none;}
+.gtabs::-webkit-scrollbar{display:none;}
+.gtab{flex-shrink:0;padding:7px 12px;font-size:10px;font-family:var(--fm);border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;white-space:nowrap;}
+.gtab.active{color:var(--y);border-bottom-color:var(--y);}
+.gsubsection{display:none;padding-top:4px;}
+.gsubsection.active{display:block;}
+
+/* quiz */
+.quiz-progress{font-size:10px;font-family:var(--fm);color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;}
+.quiz-q{font-family:var(--fh);font-size:20px;line-height:1.2;letter-spacing:0.3px;color:var(--text);margin-bottom:16px;}
+.quiz-opts{display:flex;flex-direction:column;gap:8px;}
+.quiz-opt{padding:12px 16px;border:0.5px solid var(--border2);border-radius:8px;font-size:13px;font-family:var(--fs);cursor:pointer;background:var(--bg2);color:var(--text);text-align:left;transition:all 0.15s;line-height:1.5;}
+.quiz-opt:hover{border-color:var(--y);color:var(--y);}
+.quiz-opt.correct{background:rgba(48,216,128,0.1);border-color:var(--g);color:var(--g);}
+.quiz-opt.wrong{background:rgba(240,64,48,0.1);border-color:var(--r);color:var(--r);}
+.quiz-feedback{font-size:13px;font-family:var(--fm);margin-top:12px;padding:12px 16px;border-radius:8px;line-height:1.7;display:none;}
+.quiz-next{margin-top:14px;padding:10px 20px;border-radius:8px;border:0.5px solid var(--y);font-size:13px;font-family:var(--fm);cursor:pointer;background:transparent;color:var(--y);display:none;transition:all 0.15s;letter-spacing:0.5px;}
+.quiz-next:hover{background:var(--y);color:#0a0a09;}
+
+/* back to list */
+.guias-back-btn{display:inline-flex;align-items:center;gap:6px;background:transparent;border:0.5px solid var(--border2);color:var(--muted);font-family:var(--fm);font-size:11px;padding:7px 12px;border-radius:8px;cursor:pointer;margin-bottom:16px;transition:all 0.15s;}
+.guias-back-btn:hover{color:var(--text);border-color:var(--y);}
 </style>
 </head>
 <body>
@@ -158,10 +246,11 @@ select option{background:var(--bg2);}
     <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
     <div class="wnav-sep"></div>
     <div class="wnav-title">SUMINISTROS</div>
+    <div class="wnav-version">v1.2</div>
   </div>
 
   <!-- TIPO SELECTOR -->
-  <div class="tipo-bar">
+  <div class="tipo-bar" id="tipo-bar">
     <button class="tipo-btn" id="btn-todos" onclick="setTipo('todos')">TODOS</button>
     <button class="tipo-btn" id="btn-luz" onclick="setTipo('luz')">⚡ LUZ</button>
     <button class="tipo-btn" id="btn-gas" onclick="setTipo('gas')">🔥 GAS</button>
@@ -173,6 +262,7 @@ select option{background:var(--bg2);}
     <button class="tab active" onclick="showTab('facturas',this)">Facturas</button>
     <button class="tab" onclick="showTab('graficas',this)">Gráficas</button>
     <button class="tab" onclick="showTab('resumen',this)">Resumen</button>
+    <button class="tab" onclick="showTab('guias',this)">📖 Guías</button>
     <button class="tab" onclick="showTab('datos',this)">Datos</button>
   </div>
 
@@ -229,7 +319,6 @@ select option{background:var(--bg2);}
           <button class="btn" onclick="closeAdd()">Cancelar</button>
         </div>
       </div>
-
       <div id="alert-area"></div>
       <div id="summary-bar"></div>
       <div class="filters" id="filters-area"></div>
@@ -257,6 +346,207 @@ select option{background:var(--bg2);}
       <div id="resumen-body"></div>
     </div>
 
+    <!-- ── GUÍAS ── -->
+    <div id="guias" class="section">
+      <!-- Lista de guías -->
+      <div id="guias-list">
+        <div class="guias-hero">
+          <div class="guias-hero-label">Biblioteca · Suministros</div>
+          <div class="guias-hero-title">GUÍAS DE FACTURAS</div>
+          <div class="guias-hero-desc">Aprende a leer y entender tus facturas de suministros. Conceptos, periodos, actores y test interactivo.</div>
+        </div>
+
+        <!-- Guía Luz -->
+        <div class="guia-card" onclick="openGuia('luz')">
+          <div class="guia-card-inner">
+            <div class="guia-card-accent" style="background:var(--luz)"></div>
+            <div class="guia-card-body">
+              <div class="guia-card-tag" style="color:var(--luz)">⚡ Electricidad</div>
+              <div class="guia-card-name">Factura de la Luz</div>
+              <div class="guia-card-desc">Entiende el término de potencia, energía consumida, periodos P1/P2/P3, impuestos y quién es quién en tu factura.</div>
+              <div class="guia-card-chips">
+                <span class="guia-chip">Resumen</span>
+                <span class="guia-chip">Conceptos</span>
+                <span class="guia-chip">P1/P2/P3</span>
+                <span class="guia-chip">Actores</span>
+                <span class="guia-chip">Test</span>
+              </div>
+            </div>
+            <div class="guia-card-arrow">→</div>
+          </div>
+        </div>
+
+        <!-- Próximamente Gas -->
+        <div class="guia-card" style="opacity:0.45;pointer-events:none;">
+          <div class="guia-card-inner">
+            <div class="guia-card-accent" style="background:var(--gas)"></div>
+            <div class="guia-card-body">
+              <div class="guia-card-tag" style="color:var(--gas)">🔥 Gas Natural</div>
+              <div class="guia-card-name">Factura del Gas</div>
+              <div class="guia-card-desc">Próximamente — término fijo, variable, caudal, presión, peajes y más.</div>
+              <div class="guia-card-chips">
+                <span class="guia-chip" style="color:var(--dim);border-color:var(--dim)">Próximamente</span>
+              </div>
+            </div>
+            <div class="guia-card-arrow">→</div>
+          </div>
+        </div>
+
+        <!-- Próximamente Agua -->
+        <div class="guia-card" style="opacity:0.45;pointer-events:none;">
+          <div class="guia-card-inner">
+            <div class="guia-card-accent" style="background:var(--agua)"></div>
+            <div class="guia-card-body">
+              <div class="guia-card-tag" style="color:var(--agua)">💧 Agua</div>
+              <div class="guia-card-name">Factura del Agua</div>
+              <div class="guia-card-desc">Próximamente — cuota de servicio, consumo por bloques, canon de saneamiento y más.</div>
+              <div class="guia-card-chips">
+                <span class="guia-chip" style="color:var(--dim);border-color:var(--dim)">Próximamente</span>
+              </div>
+            </div>
+            <div class="guia-card-arrow">→</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contenido Guía Luz -->
+      <div id="guia-luz" class="guia-content">
+        <button class="guias-back-btn" onclick="closeGuia()">← Volver a guías</button>
+
+        <!-- mini hero -->
+        <div class="guias-hero" style="margin-bottom:10px;">
+          <div class="guias-hero-label" style="color:var(--luz)">⚡ Electricidad · Ejemplo real</div>
+          <div class="guias-hero-title">FACTURA DE LA LUZ</div>
+          <div class="guias-hero-desc">Guía interactiva basada en una factura real de Plenitude, enero 2026.</div>
+          <div style="font-family:var(--fh);font-size:32px;color:var(--luz);margin-top:8px;">78,59 €</div>
+        </div>
+
+        <!-- sub-tabs -->
+        <div class="gtabs">
+          <button class="gtab active" onclick="showGtab('g-resumen',this)">Resumen</button>
+          <button class="gtab" onclick="showGtab('g-conceptos',this)">Conceptos</button>
+          <button class="gtab" onclick="showGtab('g-periodos',this)">P1/P2/P3</button>
+          <button class="gtab" onclick="showGtab('g-actores',this)">Actores</button>
+          <button class="gtab" onclick="showGtab('g-quiz',this)">Test</button>
+        </div>
+
+        <!-- g-resumen -->
+        <div id="g-resumen" class="gsubsection active">
+          <div class="g-metrics">
+            <div class="g-metric"><div class="g-m-label">Total factura</div><div class="g-m-value">78,59 <span class="g-m-unit">€</span></div></div>
+            <div class="g-metric"><div class="g-m-label">Días facturados</div><div class="g-m-value">27 <span class="g-m-unit">días</span></div></div>
+            <div class="g-metric"><div class="g-m-label">Consumo total</div><div class="g-m-value">249 <span class="g-m-unit">kWh</span></div></div>
+            <div class="g-metric"><div class="g-m-label">Coste / día</div><div class="g-m-value">2,91 <span class="g-m-unit">€</span></div></div>
+          </div>
+          <div class="g-card">
+            <div class="g-card-title">Desglose de tu factura</div>
+            <div class="g-num-row"><span class="lbl">Potencia contratada (fijo)</span><span class="val">9,54 €</span></div>
+            <div class="g-num-row"><span class="lbl">Energía consumida (variable)</span><span class="val">51,57 €</span></div>
+            <div class="g-num-row"><span class="lbl">Impuesto electricidad (5,11%)</span><span class="val">3,12 €</span></div>
+            <div class="g-num-row"><span class="lbl">Alquiler contador</span><span class="val">0,72 €</span></div>
+            <div class="g-num-row"><span class="lbl">IVA (21%)</span><span class="val">13,64 €</span></div>
+            <div class="g-total-row"><span>Total</span><span>78,59 €</span></div>
+          </div>
+          <div style="margin-top:4px;">
+            <div class="g-bar-wrap"><div class="g-bar-label"><span>Energía consumida</span><span style="color:var(--b)">65,6%</span></div><div class="g-bar-bg"><div class="g-bar-fill" style="width:65.6%;background:var(--b)"></div></div></div>
+            <div class="g-bar-wrap"><div class="g-bar-label"><span>Impuestos (IE + IVA)</span><span style="color:var(--r)">21,2%</span></div><div class="g-bar-bg"><div class="g-bar-fill" style="width:21.2%;background:var(--r)"></div></div></div>
+            <div class="g-bar-wrap"><div class="g-bar-label"><span>Potencia (fijo)</span><span style="color:var(--g)">12,1%</span></div><div class="g-bar-bg"><div class="g-bar-fill" style="width:12.1%;background:var(--g)"></div></div></div>
+            <div class="g-bar-wrap"><div class="g-bar-label"><span>Alquiler contador</span><span style="color:var(--muted)">0,9%</span></div><div class="g-bar-bg"><div class="g-bar-fill" style="width:0.9%;background:var(--muted)"></div></div></div>
+          </div>
+          <div class="g-tip">Tu mayor gasto es la energía que consumes <strong>(65,6%)</strong>. Los impuestos son el segundo mayor coste y no puedes evitarlos. La potencia es fija: pagas igual consumas o no.</div>
+        </div>
+
+        <!-- g-conceptos -->
+        <div id="g-conceptos" class="gsubsection">
+          <div class="g-card">
+            <div class="g-hl hl-info">Término de potencia — 9,54 €</div>
+            <div class="g-card-title">¿Qué es?</div>
+            <div class="g-card-desc">Es lo que pagas por tener la línea disponible, aunque no consumas nada. Como la cuota mensual de un móvil aunque no hagas llamadas. Tienes contratados 4,6 kW en P1 y 4,6 kW en P2.</div>
+            <div class="g-tip">Lo pagas siempre. Si te vas de viaje un mes, lo sigues pagando. Solo lo puedes reducir bajando la potencia contratada.</div>
+          </div>
+          <div class="g-card">
+            <div class="g-hl hl-info">Término de energía — 51,57 €</div>
+            <div class="g-card-title">¿Qué es?</div>
+            <div class="g-card-desc">Es lo que pagas por los kWh que realmente consumes. Se divide en 3 partes: peaje de acceso (va a la red), cargos del sistema (va al Estado) y coste de energía (va a tu comercializadora).</div>
+            <div class="g-num-row" style="margin-top:10px;"><span class="lbl">Peaje de acceso (red)</span><span class="val accent">3,52 €</span></div>
+            <div class="g-num-row"><span class="lbl">Cargos del sistema (Estado)</span><span class="val accent">7,56 €</span></div>
+            <div class="g-num-row"><span class="lbl">Coste de energía (comercializadora)</span><span class="val accent">40,49 €</span></div>
+          </div>
+          <div class="g-card">
+            <div class="g-hl hl-warn">Impuesto electricidad — 3,12 €</div>
+            <div class="g-card-title">¿Qué es?</div>
+            <div class="g-card-desc">Un impuesto especial del 5,11% que se aplica sobre potencia + energía (antes del IVA). No lo controla tu comercializadora, lo fija el Gobierno.</div>
+          </div>
+          <div class="g-card">
+            <div class="g-hl hl-warn">IVA — 13,64 €</div>
+            <div class="g-card-title">¿Qué es?</div>
+            <div class="g-card-desc">El IVA general del 21% se aplica sobre todo: potencia + energía + impuesto de electricidad + alquiler del contador. Es el segundo mayor coste de tu factura después de la energía.</div>
+            <div class="g-tip">Antes era el 10%. Subió al 21% en 2024. No puedes evitarlo.</div>
+          </div>
+          <div class="g-card">
+            <div class="g-hl hl-info">Alquiler de equipos — 0,72 €</div>
+            <div class="g-card-title">¿Qué es?</div>
+            <div class="g-card-desc">Pagas por el alquiler del contador inteligente. En este ejemplo son 27 días × 0,026667 €/día = 0,72 €. Es un precio regulado igual para todos.</div>
+          </div>
+        </div>
+
+        <!-- g-periodos -->
+        <div id="g-periodos" class="gsubsection">
+          <p style="margin-bottom:14px;font-size:13px;color:var(--muted);line-height:1.7;">Con la tarifa <strong style="color:var(--text)">2.0TD</strong>, el precio de la electricidad varía según la hora del día. Hay 3 periodos con precios distintos.</p>
+          <div class="g-card">
+            <div class="g-hl hl-danger">P1 — Punta (precio más caro)</div>
+            <div class="g-card-title">Lun–Vie · 10h–14h y 18h–22h</div>
+            <div class="g-card-desc">El periodo más caro porque hay más demanda. Ejemplo: 72 kWh a ~0,268 €/kWh.</div>
+            <div class="g-pill-grid"><span class="g-pill p-p1">72 kWh de ejemplo</span><span class="g-pill p-p1">~19,31 € de energía</span></div>
+          </div>
+          <div class="g-card">
+            <div class="g-hl hl-warn">P2 — Llano (precio medio)</div>
+            <div class="g-card-title">Lun–Vie · 8h–10h, 14h–18h y 22h–24h</div>
+            <div class="g-card-desc">Precio intermedio. Ejemplo: 66 kWh a ~0,208 €/kWh.</div>
+            <div class="g-pill-grid"><span class="g-pill p-p2">66 kWh de ejemplo</span><span class="g-pill p-p2">~13,42 € de energía</span></div>
+          </div>
+          <div class="g-card">
+            <div class="g-hl hl-success">P3 — Valle (precio más barato)</div>
+            <div class="g-card-title">0h–8h todos los días + fines de semana y festivos</div>
+            <div class="g-card-desc">Es casi la mitad que en P1. Aquí conviene poner lavadora, lavavajillas, cargadores... Ejemplo: 111 kWh a ~0,171 €/kWh.</div>
+            <div class="g-pill-grid"><span class="g-pill p-p3">111 kWh de ejemplo</span><span class="g-pill p-p3">~18,07 € de energía</span></div>
+          </div>
+          <div class="g-tip">Si tienes el <strong>44%+ de consumo en P3 (valle)</strong>, vas bien. Pasar más consumo a noches y fines de semana puede ahorrar dinero.</div>
+          <div class="g-card" style="margin-top:14px;">
+            <div class="g-card-title">Lectura del contador</div>
+            <div class="g-card-desc" style="margin-bottom:10px;">Tu contador acumula kWh por separado para P1, P2 y P3. La factura resta lectura anterior de la actual:</div>
+            <div class="g-num-row"><span class="lbl">P1: 782 − 710</span><span class="val">= 72 kWh</span></div>
+            <div class="g-num-row"><span class="lbl">P2: 2.155 − 2.089</span><span class="val">= 66 kWh</span></div>
+            <div class="g-num-row"><span class="lbl">P3: 4.927 − 4.816</span><span class="val">= 111 kWh</span></div>
+            <div class="g-tip">Si aparece <strong>"Lectura Estimada"</strong>, el distribuidor no pudo leer el contador y calculó un valor aproximado. Se ajusta en la siguiente factura.</div>
+          </div>
+        </div>
+
+        <!-- g-actores -->
+        <div id="g-actores" class="gsubsection">
+          <p style="margin-bottom:20px;font-size:13px;color:var(--muted);line-height:1.7;">En una factura de luz aparecen varias empresas con roles distintos. Aquí te explico quién es cada una.</p>
+          <div class="g-step"><div class="g-step-num">1</div><div class="g-step-body"><div class="title">Comercializadora</div><div class="desc">Es quien te vende la electricidad y te manda la factura (ej: Plenitude, Endesa, Naturgy…). Puedes cambiar de comercializadora cuando quieras sin cortar la luz.</div></div></div>
+          <div class="divider"></div>
+          <div class="g-step"><div class="g-step-num">2</div><div class="g-step-body"><div class="title">Distribuidora</div><div class="desc">Es la empresa que mantiene los cables físicos que llegan a tu casa (ej: Viesgo, Endesa Distribución, UFD…). No puedes elegirla, viene asignada por zona. Ante averías llamas a ellos.</div></div></div>
+          <div class="divider"></div>
+          <div class="g-step"><div class="g-step-num">3</div><div class="g-step-body"><div class="title">CNMC — el regulador</div><div class="desc">La Comisión Nacional de Mercados fija los peajes de acceso y supervisa que las comercializadoras cumplan las reglas. En <strong style="color:var(--text)">comparador.cnmc.gob.es</strong> puedes comparar tarifas.</div></div></div>
+          <div class="g-card" style="margin-top:6px;">
+            <div class="g-card-title">Tu contrato de ejemplo</div>
+            <div class="g-num-row"><span class="lbl">Tarifa</span><span class="val accent">2.0TD</span></div>
+            <div class="g-num-row"><span class="lbl">Potencia P1 / P2</span><span class="val">4,6 kW / 4,6 kW</span></div>
+            <div class="g-num-row"><span class="lbl">Permanencia</span><span class="val accent">Sin permanencia</span></div>
+          </div>
+        </div>
+
+        <!-- g-quiz -->
+        <div id="g-quiz" class="gsubsection">
+          <div class="quiz-progress" id="quiz-progress">Pregunta 1 de 5</div>
+          <div id="quiz-container"></div>
+        </div>
+
+      </div><!-- /guia-luz -->
+    </div>
+
     <!-- ── DATOS ── -->
     <div id="datos" class="section">
       <div class="section-label">Exportar / Importar</div>
@@ -276,6 +566,7 @@ select option{background:var(--bg2);}
   <div class="fab-area" id="fab-area">
     <button class="fab" onclick="toggleAdd()">+ Nueva factura</button>
   </div>
+
 </div>
 
 <script>
@@ -286,8 +577,6 @@ let tipoActivo = 'todos';
 let currentTab = 'facturas';
 let editId = null;
 let charts = {};
-
-// Filters
 let filterAnio = '';
 let filterTrimestre = '';
 let filterTipo = '';
@@ -295,7 +584,6 @@ let filterTipo = '';
 const TIPO_COLOR = { luz: '#f0c030', gas: '#f07030', agua: '#30b8f0' };
 const TIPO_UNIT  = { luz: 'kWh', gas: 'm³', agua: 'm³' };
 const TIPO_EMOJI = { luz: '⚡', gas: '🔥', agua: '💧' };
-const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
 function loadState() {
   try { const r = localStorage.getItem('suministros_v1'); if (r) return JSON.parse(r); } catch(e) {}
@@ -312,11 +600,6 @@ function fmt(n, dec=2) { return Number(n).toLocaleString('es-ES', {minimumFracti
 // ── TIPO ──
 function setTipo(t) {
   tipoActivo = t;
-  document.querySelectorAll('.tipo-btn').forEach(b => b.className = 'tipo-btn');
-  const btn = document.getElementById('btn-'+t);
-  if (t === 'todos') btn.style.background = 'var(--bg3)', btn.style.color = 'var(--text)', btn.style.borderColor = 'var(--border2)';
-  else { btn.classList.add('active-'+t); }
-  // Reset filter tipo
   filterTipo = t === 'todos' ? '' : t;
   render();
 }
@@ -328,7 +611,15 @@ function showTab(name, el) {
   document.getElementById(name).classList.add('active');
   el.classList.add('active');
   currentTab = name;
-  document.getElementById('fab-area').style.display = name === 'facturas' ? 'block' : 'none';
+  // Mostrar/ocultar tipo-bar y fab según tab
+  const tipoBar = document.getElementById('tipo-bar');
+  const fabArea = document.getElementById('fab-area');
+  if (name === 'guias' || name === 'datos' || name === 'resumen') {
+    tipoBar.classList.add('hidden');
+  } else {
+    tipoBar.classList.remove('hidden');
+  }
+  fabArea.style.display = name === 'facturas' ? 'block' : 'none';
   render();
 }
 
@@ -341,28 +632,19 @@ function toggleAdd() {
   }
 }
 function closeAdd() { document.getElementById('add-panel').classList.remove('open'); }
-
 function addFactura() {
-  const tipo    = document.getElementById('f-tipo').value;
-  const num     = document.getElementById('f-num').value.trim();
+  const tipo = document.getElementById('f-tipo').value;
+  const num = document.getElementById('f-num').value.trim();
   const empresa = document.getElementById('f-empresa').value.trim();
   const importe = parseFloat(document.getElementById('f-importe').value);
   const consumo = parseFloat(document.getElementById('f-consumo').value) || null;
-  const inicio  = document.getElementById('f-inicio').value;
-  const fin     = document.getElementById('f-fin').value;
-  const notas   = document.getElementById('f-notas').value.trim();
+  const inicio = document.getElementById('f-inicio').value;
+  const fin = document.getElementById('f-fin').value;
+  const notas = document.getElementById('f-notas').value.trim();
   if (!empresa || isNaN(importe) || !inicio) return;
   state.facturas.push({ id: nxtId(), tipo, num, empresa, importe, consumo, inicio, fin, notas });
-  document.getElementById('f-empresa').value = '';
-  document.getElementById('f-num').value = '';
-  document.getElementById('f-importe').value = '';
-  document.getElementById('f-consumo').value = '';
-  document.getElementById('f-inicio').value = '';
-  document.getElementById('f-fin').value = '';
-  document.getElementById('f-notas').value = '';
-  closeAdd();
-  save();
-  render();
+  ['f-empresa','f-num','f-importe','f-consumo','f-inicio','f-fin','f-notas'].forEach(id => document.getElementById(id).value = '');
+  closeAdd(); save(); render();
 }
 
 // ── FILTER HELPERS ──
@@ -399,7 +681,6 @@ function checkAlerts(facts) {
   return alerts;
 }
 
-// ── VARIATION BADGE ──
 function varBadge(current, prev) {
   if (!prev) return '';
   const pct = ((current - prev) / prev) * 100;
@@ -412,9 +693,8 @@ function varBadge(current, prev) {
 function render() {
   if (currentTab === 'facturas') renderFacturas();
   if (currentTab === 'graficas') renderGraficas();
-  if (currentTab === 'resumen')  renderResumen();
-  if (currentTab === 'datos')    renderDatos();
-  // Always sync tipo buttons style
+  if (currentTab === 'resumen') renderResumen();
+  if (currentTab === 'datos') renderDatos();
   syncTipoButtons();
 }
 
@@ -426,6 +706,7 @@ function syncTipoButtons() {
     btn.style = '';
   });
   const active = document.getElementById('btn-'+tipoActivo);
+  if (!active) return;
   if (tipoActivo === 'todos') {
     active.style.background = 'var(--bg3)';
     active.style.color = 'var(--text)';
@@ -437,8 +718,6 @@ function syncTipoButtons() {
 
 function renderFacturas() {
   const facts = filteredFacturas();
-
-  // Summary
   const total = facts.reduce((s,f) => s+f.importe, 0);
   const count = facts.length;
   const avg = count ? total/count : 0;
@@ -448,14 +727,10 @@ function renderFacturas() {
       <div class="scard"><div class="scard-label">Media</div><div class="scard-val">${fmt(avg,0)} €</div><div class="scard-sub">por factura</div></div>
       <div class="scard"><div class="scard-label">Última</div><div class="scard-val" style="font-size:18px">${facts.length?fmt(facts[0].importe,0)+' €':'—'}</div><div class="scard-sub">${facts.length?facts[0].tipo:''}</div></div>
     </div>`;
-
-  // Alerts
   const alerts = checkAlerts(state.facturas);
   document.getElementById('alert-area').innerHTML = alerts.length
     ? alerts.map(a => `<div class="alert-banner"><div class="alert-dot"></div><div>${a}</div></div>`).join('')
     : '';
-
-  // Filters
   const anios = allAnios();
   document.getElementById('filters-area').innerHTML = `
     <select class="filter-select" onchange="filterAnio=this.value;render()">
@@ -470,19 +745,15 @@ function renderFacturas() {
       <option value="Q4" ${filterTrimestre==='Q4'?'selected':''}>Q4 (Oct–Dic)</option>
     </select>
     ${(filterAnio||filterTrimestre)?`<button class="filter-clear" onclick="filterAnio='';filterTrimestre='';render()">✕ Limpiar</button>`:''}`;
-
   if (!facts.length) {
     document.getElementById('facturas-body').innerHTML = '<div class="empty">Sin facturas registradas.<br>Pulsa + para añadir la primera.</div>';
     return;
   }
-
-  // Build prev map for variation
   const prevMap = {};
   ['luz','gas','agua'].forEach(tipo => {
     const tf = state.facturas.filter(f => f.tipo===tipo).sort((a,b) => a.inicio.localeCompare(b.inicio));
     tf.forEach((f,i) => { prevMap[f.id] = i > 0 ? tf[i-1].importe : null; });
   });
-
   let html = '';
   facts.forEach(f => {
     const color = TIPO_COLOR[f.tipo] || 'var(--muted)';
@@ -534,19 +805,18 @@ function renderFacturas() {
   document.getElementById('facturas-body').innerHTML = html;
 }
 
-// ── EDIT ──
 function startEdit(id) { editId = (editId===id?null:id); renderFacturas(); }
 function cancelEdit() { editId = null; renderFacturas(); }
 function saveEdit(id) {
   const f = state.facturas.find(x => x.id===id); if (!f) return;
-  f.tipo    = document.getElementById('ei-tipo-'+id).value;
-  f.num     = document.getElementById('ei-num-'+id).value.trim();
+  f.tipo = document.getElementById('ei-tipo-'+id).value;
+  f.num = document.getElementById('ei-num-'+id).value.trim();
   f.empresa = document.getElementById('ei-emp-'+id).value.trim();
   f.importe = parseFloat(document.getElementById('ei-imp-'+id).value);
   f.consumo = parseFloat(document.getElementById('ei-con-'+id).value) || null;
-  f.inicio  = document.getElementById('ei-ini-'+id).value;
-  f.fin     = document.getElementById('ei-fin-'+id).value;
-  f.notas   = document.getElementById('ei-not-'+id).value.trim();
+  f.inicio = document.getElementById('ei-ini-'+id).value;
+  f.fin = document.getElementById('ei-fin-'+id).value;
+  f.notas = document.getElementById('ei-not-'+id).value.trim();
   editId = null; save(); render();
 }
 function delFactura(id) {
@@ -557,84 +827,41 @@ function delFactura(id) {
 
 // ── CHARTS ──
 function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
-
 function renderGraficas() {
   const tipos = tipoActivo === 'todos' ? ['luz','gas','agua'] : [tipoActivo];
   document.getElementById('chart1-sub').textContent = tipoActivo === 'todos' ? '(todos los suministros)' : tipoActivo;
-
-  // Chart 1: Importe por fecha
   destroyChart('importe');
   const ctx1 = document.getElementById('chart-importe').getContext('2d');
   const datasets1 = tipos.map(tipo => {
     const tf = state.facturas.filter(f=>f.tipo===tipo).sort((a,b)=>a.inicio.localeCompare(b.inicio));
-    return {
-      label: tipo.charAt(0).toUpperCase()+tipo.slice(1),
-      data: tf.map(f=>({x: f.inicio, y: f.importe})),
-      borderColor: TIPO_COLOR[tipo],
-      backgroundColor: TIPO_COLOR[tipo]+'22',
-      tension: 0.3, pointRadius: 4, pointHoverRadius: 6, fill: false, borderWidth: 2
-    };
-  }).filter(d => d.data.length);
-  charts['importe'] = new Chart(ctx1, {
-    type: 'line',
-    data: { datasets: datasets1 },
-    options: chartOpts('€')
-  });
-
-  // Chart 2: Consumo
+    return { label: tipo.charAt(0).toUpperCase()+tipo.slice(1), data: tf.map(f=>({x:f.inicio,y:f.importe})), borderColor: TIPO_COLOR[tipo], backgroundColor: TIPO_COLOR[tipo]+'22', tension:0.3, pointRadius:4, pointHoverRadius:6, fill:false, borderWidth:2 };
+  }).filter(d=>d.data.length);
+  charts['importe'] = new Chart(ctx1, { type:'line', data:{datasets:datasets1}, options:chartOpts('€') });
   destroyChart('consumo');
   const ctx2 = document.getElementById('chart-consumo').getContext('2d');
   const datasets2 = tipos.map(tipo => {
     const tf = state.facturas.filter(f=>f.tipo===tipo&&f.consumo).sort((a,b)=>a.inicio.localeCompare(b.inicio));
-    return {
-      label: `${tipo} (${TIPO_UNIT[tipo]})`,
-      data: tf.map(f=>({x: f.inicio, y: f.consumo})),
-      borderColor: TIPO_COLOR[tipo],
-      backgroundColor: TIPO_COLOR[tipo]+'22',
-      tension: 0.3, pointRadius: 4, fill: false, borderWidth: 2
-    };
-  }).filter(d => d.data.length);
-  charts['consumo'] = new Chart(ctx2, {
-    type: 'line',
-    data: { datasets: datasets2 },
-    options: chartOpts('')
-  });
-
-  // Chart 3: €/unidad ratio
+    return { label:`${tipo} (${TIPO_UNIT[tipo]})`, data:tf.map(f=>({x:f.inicio,y:f.consumo})), borderColor:TIPO_COLOR[tipo], backgroundColor:TIPO_COLOR[tipo]+'22', tension:0.3, pointRadius:4, fill:false, borderWidth:2 };
+  }).filter(d=>d.data.length);
+  charts['consumo'] = new Chart(ctx2, { type:'line', data:{datasets:datasets2}, options:chartOpts('') });
   destroyChart('ratio');
   const ctx3 = document.getElementById('chart-ratio').getContext('2d');
   const datasets3 = tipos.map(tipo => {
     const tf = state.facturas.filter(f=>f.tipo===tipo&&f.consumo&&f.consumo>0).sort((a,b)=>a.inicio.localeCompare(b.inicio));
-    return {
-      label: `${tipo} (€/${TIPO_UNIT[tipo]})`,
-      data: tf.map(f=>({x: f.inicio, y: +(f.importe/f.consumo).toFixed(4)})),
-      borderColor: TIPO_COLOR[tipo],
-      backgroundColor: TIPO_COLOR[tipo]+'22',
-      tension: 0.3, pointRadius: 4, fill: false, borderWidth: 2
-    };
-  }).filter(d => d.data.length);
-  charts['ratio'] = new Chart(ctx3, {
-    type: 'line',
-    data: { datasets: datasets3 },
-    options: chartOpts('€/u')
-  });
+    return { label:`${tipo} (€/${TIPO_UNIT[tipo]})`, data:tf.map(f=>({x:f.inicio,y:+(f.importe/f.consumo).toFixed(4)})), borderColor:TIPO_COLOR[tipo], backgroundColor:TIPO_COLOR[tipo]+'22', tension:0.3, pointRadius:4, fill:false, borderWidth:2 };
+  }).filter(d=>d.data.length);
+  charts['ratio'] = new Chart(ctx3, { type:'line', data:{datasets:datasets3}, options:chartOpts('€/u') });
 }
-
 function chartOpts(unit) {
   return {
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { labels: { color: '#5a5850', font: { family: 'DM Mono', size: 10 }, boxWidth: 12, padding: 12 } },
-      tooltip: {
-        backgroundColor: '#1e1e1b', borderColor: 'rgba(255,255,255,0.13)', borderWidth: 1,
-        titleColor: '#f0ebe0', bodyColor: '#5a5850',
-        titleFont: { family: 'DM Mono', size: 11 }, bodyFont: { family: 'DM Mono', size: 11 },
-        callbacks: { label: ctx => ` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)} ${unit}` }
-      }
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{labels:{color:'#5a5850',font:{family:'DM Mono',size:10},boxWidth:12,padding:12}},
+      tooltip:{backgroundColor:'#1e1e1b',borderColor:'rgba(255,255,255,0.13)',borderWidth:1,titleColor:'#f0ebe0',bodyColor:'#5a5850',titleFont:{family:'DM Mono',size:11},bodyFont:{family:'DM Mono',size:11},callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)} ${unit}`}}
     },
-    scales: {
-      x: { type: 'category', ticks: { color: '#5a5850', font: { family: 'DM Mono', size: 9 }, maxTicksLimit: 8 }, grid: { color: 'rgba(255,255,255,0.04)' } },
-      y: { ticks: { color: '#5a5850', font: { family: 'DM Mono', size: 9 } }, grid: { color: 'rgba(255,255,255,0.04)' } }
+    scales:{
+      x:{type:'category',ticks:{color:'#5a5850',font:{family:'DM Mono',size:9},maxTicksLimit:8},grid:{color:'rgba(255,255,255,0.04)'}},
+      y:{ticks:{color:'#5a5850',font:{family:'DM Mono',size:9}},grid:{color:'rgba(255,255,255,0.04)'}}
     }
   };
 }
@@ -643,8 +870,6 @@ function chartOpts(unit) {
 function renderResumen() {
   const anios = allAnios();
   let html = '';
-
-  // Per-tipo stats
   html += '<div class="section-label">Por suministro</div>';
   html += '<div style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;overflow:hidden;margin-bottom:14px;">';
   html += '<table class="stats-table" style="padding:0 14px;"><thead><tr><th style="padding:10px 14px 6px;">Tipo</th><th class="num" style="padding:10px 14px 6px;">Facturas</th><th class="num" style="padding:10px 14px 6px;">Total</th><th class="num" style="padding:10px 14px 6px;">Media</th></tr></thead><tbody>';
@@ -653,58 +878,25 @@ function renderResumen() {
     if (!tf.length) return;
     const total = tf.reduce((s,f)=>s+f.importe,0);
     const avg = total/tf.length;
-    html += `<tr>
-      <td style="padding:8px 14px;"><div class="tipo-col"><div class="tipo-dot" style="background:${TIPO_COLOR[tipo]}"></div>${TIPO_EMOJI[tipo]} ${tipo}</div></td>
-      <td class="num" style="padding:8px 14px;">${tf.length}</td>
-      <td class="num" style="padding:8px 14px;">${fmt(total)} €</td>
-      <td class="num" style="padding:8px 14px;">${fmt(avg)} €</td>
-    </tr>`;
+    html += `<tr><td style="padding:8px 14px;"><div class="tipo-col"><div class="tipo-dot" style="background:${TIPO_COLOR[tipo]}"></div>${TIPO_EMOJI[tipo]} ${tipo}</div></td><td class="num" style="padding:8px 14px;">${tf.length}</td><td class="num" style="padding:8px 14px;">${fmt(total)} €</td><td class="num" style="padding:8px 14px;">${fmt(avg)} €</td></tr>`;
   });
   html += '</tbody></table></div>';
-
-  // Per-year stats
   if (anios.length) {
     html += '<div class="section-label">Por año</div>';
     anios.forEach(anio => {
       const yf = state.facturas.filter(f=>getAnio(f)===anio);
       const total = yf.reduce((s,f)=>s+f.importe,0);
-      html += `<div style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:8px;">
-        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-          <span style="font-family:var(--fh);font-size:18px;letter-spacing:0.5px;">${anio}</span>
-          <span style="font-family:var(--fh);font-size:18px;color:var(--y)">${fmt(total)} €</span>
-        </div>`;
+      html += `<div style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:8px;"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="font-family:var(--fh);font-size:18px;letter-spacing:0.5px;">${anio}</span><span style="font-family:var(--fh);font-size:18px;color:var(--y)">${fmt(total)} €</span></div>`;
       ['luz','gas','agua'].forEach(tipo => {
         const tf = yf.filter(f=>f.tipo===tipo);
         if (!tf.length) return;
         const t = tf.reduce((s,f)=>s+f.importe,0);
         const pct = total > 0 ? t/total*100 : 0;
-        html += `<div style="margin-bottom:6px;">
-          <div style="display:flex;justify-content:space-between;font-size:11px;font-family:var(--fm);margin-bottom:3px;">
-            <span style="color:var(--muted)">${TIPO_EMOJI[tipo]} ${tipo}</span>
-            <span>${fmt(t)} € · ${fmt(pct,1)}%</span>
-          </div>
-          <div style="height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;">
-            <div style="height:100%;width:${pct}%;background:${TIPO_COLOR[tipo]};border-radius:2px;"></div>
-          </div>
-        </div>`;
+        html += `<div style="margin-bottom:6px;"><div style="display:flex;justify-content:space-between;font-size:11px;font-family:var(--fm);margin-bottom:3px;"><span style="color:var(--muted)">${TIPO_EMOJI[tipo]} ${tipo}</span><span>${fmt(t)} € · ${fmt(pct,1)}%</span></div><div style="height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${TIPO_COLOR[tipo]};border-radius:2px;"></div></div></div>`;
       });
       html += '</div>';
     });
   }
-
-  // Quarterly breakdown
-  html += '<div class="section-label">Por trimestre (año actual)</div>';
-  const anioActual = new Date().getFullYear().toString();
-  ['Q1','Q2','Q3','Q4'].forEach(q => {
-    const qf = state.facturas.filter(f=>getAnio(f)===anioActual&&getTrimestre(f)===q);
-    if (!qf.length) return;
-    const t = qf.reduce((s,f)=>s+f.importe,0);
-    html += `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:13px;font-family:var(--fm);">
-      <span style="color:var(--muted)">${q} ${anioActual}</span>
-      <span style="font-weight:500;">${fmt(t)} €</span>
-    </div>`;
-  });
-
   if (!state.facturas.length) html = '<div class="empty">Sin datos aún.<br>Añade facturas en la pestaña Facturas.</div>';
   document.getElementById('resumen-body').innerHTML = html;
 }
@@ -743,6 +935,69 @@ function importFile(e) {
   };
   r.readAsText(f);
 }
+
+// ── GUÍAS ──
+function openGuia(tipo) {
+  document.getElementById('guias-list').style.display = 'none';
+  document.getElementById('guia-'+tipo).classList.add('active');
+  renderQuiz();
+}
+function closeGuia() {
+  document.querySelectorAll('.guia-content').forEach(g => g.classList.remove('active'));
+  document.getElementById('guias-list').style.display = 'block';
+}
+function showGtab(id, el) {
+  el.closest('.guia-content').querySelectorAll('.gsubsection').forEach(s => s.classList.remove('active'));
+  el.closest('.guia-content').querySelectorAll('.gtab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── QUIZ ──
+const questions = [
+  {q:"¿Cuánto pagarías en potencia aunque no consumieras ni un kWh en todo el mes?",opts:["0 € — si no consumes, no pagas nada","9,54 € — el término fijo siempre se paga","51,57 € — es el coste principal","13,64 € — el IVA"],correct:1,feedback:"El término de potencia es fijo: pagas por tener la línea disponible independientemente del consumo."},
+  {q:"Si pones la lavadora a las 3 de la mañana un sábado, ¿en qué periodo estás?",opts:["P1 (punta) — el más caro","P2 (llano) — precio medio","P3 (valle) — el más barato","Depende de la comercializadora"],correct:2,feedback:"Las noches (0h–8h) y los fines de semana y festivos son siempre P3 (valle). ¡Aprovéchalo!"},
+  {q:"¿Qué significa 'Lectura Estimada' en tu factura?",opts:["Que la comercializadora ha subido el precio","Que el distribuidor calculó el consumo sin leer el contador","Que tu contador está averiado","Que consumes más que la media"],correct:1,feedback:"Cuando el distribuidor no puede leer físicamente el contador, estima el consumo. Se ajusta en la siguiente factura con lectura real."},
+  {q:"Quieres cambiar de comercializadora. ¿Esto afecta a tu distribuidora?",opts:["Sí, tendrías que cambiar también el distribuidor","No, el distribuidor es independiente de la comercializadora","Sí, y puede tardar hasta 6 meses","Solo si cambias a tarifa regulada (PVPC)"],correct:1,feedback:"El distribuidor está asignado por zona geográfica y no cambia. Solo cambia quién te factura y el precio de la energía."},
+  {q:"¿Qué porcentaje aproximado de una factura típica se va en impuestos (IE + IVA)?",opts:["Menos del 5%","Entre el 10% y el 15%","Alrededor del 21%","Más del 30%"],correct:2,feedback:"IE (~5%) + IVA (21%) aplicados sobre la factura suponen alrededor del 21% del total. Es el segundo mayor coste después de la energía."}
+];
+let quizCurrent = 0, quizAnswered = false;
+function renderQuiz() {
+  quizCurrent = 0; quizAnswered = false;
+  renderQuestion();
+}
+function renderQuestion() {
+  const q = questions[quizCurrent];
+  document.getElementById('quiz-progress').textContent = `Pregunta ${quizCurrent+1} de ${questions.length}`;
+  document.getElementById('quiz-container').innerHTML = `
+    <div class="quiz-q">${q.q}</div>
+    <div class="quiz-opts">${q.opts.map((o,i)=>`<button class="quiz-opt" onclick="answer(${i})">${o}</button>`).join('')}</div>
+    <div class="quiz-feedback" id="qfeedback"></div>
+    ${quizCurrent<questions.length-1?`<button class="quiz-next" id="qnext" onclick="nextQ()">Siguiente →</button>`:`<button class="quiz-next" id="qnext" onclick="restartQ()">Volver a empezar</button>`}
+  `;
+  quizAnswered = false;
+}
+function answer(i) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  const q = questions[quizCurrent];
+  document.querySelectorAll('.quiz-opt').forEach((o,idx) => {
+    if (idx===q.correct) o.classList.add('correct');
+    else if (idx===i && i!==q.correct) o.classList.add('wrong');
+    o.style.pointerEvents = 'none';
+  });
+  const fb = document.getElementById('qfeedback');
+  fb.style.display = 'block';
+  fb.style.background = i===q.correct?'rgba(48,216,128,0.1)':'rgba(240,64,48,0.1)';
+  fb.style.color = i===q.correct?'var(--g)':'var(--r)';
+  fb.style.border = `0.5px solid ${i===q.correct?'rgba(48,216,128,0.25)':'rgba(240,64,48,0.25)'}`;
+  fb.style.borderRadius = '8px';
+  fb.style.padding = '12px 16px';
+  fb.textContent = q.feedback;
+  document.getElementById('qnext').style.display = 'inline-block';
+}
+function nextQ() { quizCurrent++; renderQuestion(); }
+function restartQ() { quizCurrent = 0; renderQuestion(); }
 
 // ── INIT ──
 setTipo('todos');
