@@ -258,6 +258,28 @@ const CATS={
 const CAT_EMOJI={lacteos:'🥛',verdura:'🥦',carne:'🥩',conservas:'🥫',cereales:'🌾',congelados:'🧊',bebidas:'🧃',salsas:'🫙',otros:'📦'};
 
 // ── ★ STORE INTEGRATION ──
+// Fallback por si wapps-store.js no está disponible aún
+if (typeof WStore === 'undefined') {
+  window.WStore = {
+    get: (app, key) => {
+      const map = { 'despensa.items':'despensa_v1', 'compra.data':'compra_v2', 'finanzas.data':'finanzas_v1' };
+      const k = map[app+'.'+key] || ('wapps.'+app+'.'+key);
+      try { const r = localStorage.getItem(k); return r ? JSON.parse(r) : null; } catch(e) { return null; }
+    },
+    set: (app, key, val) => {
+      const map = { 'despensa.items':'despensa_v1', 'compra.data':'compra_v2', 'finanzas.data':'finanzas_v1' };
+      const k = map[app+'.'+key] || ('wapps.'+app+'.'+key);
+      const legacy = map[app+'.'+key];
+      try {
+        localStorage.setItem('wapps.'+app+'.'+key, JSON.stringify(val));
+        if (legacy) localStorage.setItem(legacy, JSON.stringify(val));
+      } catch(e) {}
+    },
+    on: () => () => {}
+  };
+  console.warn('[despensa] wapps-store.js no encontrado, usando fallback localStorage directo');
+}
+
 // Cargamos desde WStore (compatible con clave legacy despensa_v1)
 function loadState() {
   const d = WStore.get('despensa','items');
@@ -540,7 +562,8 @@ function initRecetasTab() {
   }
 }
 
-const SPOONACULAR_KEY = 'e901cbe291914cd9853080e418b61391';
+// API proxied via Cloudflare Worker (key never exposed in frontend)
+const SPOONACULAR_PROXY = 'https://shy-base-c7d4.wolologger.workers.dev';
 let recetasCache = null;
 let selectedIngredientes = new Set();
 
@@ -590,7 +613,7 @@ async function buscarRecetas() {
 
   try {
     const ingsParam = ingredientes.join(',+');
-    const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${encodeURIComponent(ingsParam)}&number=8&ranking=2&ignorePantry=true&apiKey=${SPOONACULAR_KEY}`;
+    const url = `${SPOONACULAR_PROXY}/recipes/findByIngredients?ingredients=${encodeURIComponent(ingsParam)}&number=8&ranking=2&ignorePantry=true`;
     const res  = await fetch(url);
     if (!res.ok) throw new Error(`API ${res.status}`);
     const data = await res.json();
