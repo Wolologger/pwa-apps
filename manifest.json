@@ -1,44 +1,77 @@
 {
+  "id": "/pwa-apps/",
   "name": "W//APPS — Wolologger",
   "short_name": "W//APPS",
   "description": "Panel de herramientas personales: obra, gastos, despensa y más",
   "start_url": "/pwa-apps/",
   "scope": "/pwa-apps/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
   "background_color": "#0a0a09",
   "theme_color": "#0a0a09",
   "lang": "es",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "iarc_rating_id": "",
   "icons": [
     {
       "src": "icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "icons/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "W//APPS — Panel principal"
     }
   ],
   "shortcuts": [
     {
       "name": "Mi Obra",
+      "short_name": "Obra",
       "url": "/pwa-apps/obra.html",
-      "description": "Gestión de la reforma"
+      "description": "Gestión de la reforma",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Gastos Diarios",
+      "short_name": "Gastos",
       "url": "/pwa-apps/gastos-diarios.html",
-      "description": "Control de gastos"
+      "description": "Control de gastos del día a día",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Despensa",
+      "short_name": "Despensa",
       "url": "/pwa-apps/despensa.html",
-      "description": "Inventario y caducidades"
+      "description": "Inventario y caducidades",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     }
   ],
-  "categories": ["productivity", "utilities"]
+  "categories": ["productivity", "utilities"],
+  "related_applications": []
 }
