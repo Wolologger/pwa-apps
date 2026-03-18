@@ -567,6 +567,44 @@ const SPOONACULAR_PROXY = 'https://shy-base-c7d4.wolologger.workers.dev';
 let recetasCache = null;
 let selectedIngredientes = new Set();
 
+// Diccionario español→inglés para ingredientes comunes
+const TRAD_ES_EN = {
+  'leche':'milk','huevo':'egg','huevos':'eggs','harina':'flour','azúcar':'sugar','azucar':'sugar',
+  'aceite':'oil','aceite de oliva':'olive oil','mantequilla':'butter','sal':'salt','pimienta':'pepper',
+  'tomate':'tomato','tomates':'tomatoes','cebolla':'onion','cebollas':'onions','ajo':'garlic',
+  'patata':'potato','patatas':'potatoes','zanahoria':'carrot','zanahorias':'carrots',
+  'pimiento':'pepper','pimientos':'peppers','lechuga':'lettuce','espinacas':'spinach',
+  'champiñones':'mushrooms','champiñon':'mushroom','arroz':'rice','pasta':'pasta',
+  'pan':'bread','queso':'cheese','jamón':'ham','jamon':'ham','pollo':'chicken',
+  'carne':'meat','ternera':'beef','cerdo':'pork','pescado':'fish','atún':'tuna','atun':'tuna',
+  'salmón':'salmon','salmon':'salmon','gambas':'shrimp','mejillones':'mussels',
+  'manzana':'apple','manzanas':'apples','naranja':'orange','naranjas':'oranges',
+  'plátano':'banana','platano':'banana','limón':'lemon','limon':'lemon',
+  'fresa':'strawberry','fresas':'strawberries','uvas':'grapes','pera':'pear',
+  'yogur':'yogurt','nata':'cream','crema':'cream','mantequilla':'butter',
+  'lentejas':'lentils','garbanzos':'chickpeas','alubias':'beans','judías':'beans',
+  'maíz':'corn','maiz':'corn','guisantes':'peas','brócoli':'broccoli','brocoli':'broccoli',
+  'coliflor':'cauliflower','berenjena':'eggplant','calabacín':'zucchini','calabacin':'zucchini',
+  'pepino':'cucumber','apio':'celery','puerro':'leek','espárrago':'asparagus','esparragos':'asparagus',
+  'nueces':'walnuts','almendras':'almonds','avellanas':'hazelnuts','pistachos':'pistachios',
+  'chocolate':'chocolate','cacao':'cocoa','vainilla':'vanilla','canela':'cinnamon',
+  'orégano':'oregano','oregano':'oregano','perejil':'parsley','albahaca':'basil',
+  'romero':'rosemary','tomillo':'thyme','pimentón':'paprika','pimenton':'paprika',
+  'vinagre':'vinegar','mostaza':'mustard','ketchup':'ketchup','mayonesa':'mayonnaise',
+  'soja':'soy sauce','limón':'lemon juice','zumo':'juice','vino':'wine','cerveza':'beer',
+  'agua':'water','caldo':'broth','tomate frito':'tomato sauce',
+};
+
+function traducirIngrediente(nombre) {
+  const lower = nombre.toLowerCase().trim();
+  if (TRAD_ES_EN[lower]) return TRAD_ES_EN[lower];
+  // Buscar coincidencia parcial
+  for (const [es, en] of Object.entries(TRAD_ES_EN)) {
+    if (lower.includes(es)) return en;
+  }
+  return nombre; // Si no hay traducción, enviar tal cual
+}
+
 function getIngredientesDisponibles() {
   return state.alimentos.map(a => a.nombre.toLowerCase().trim()).filter(Boolean);
 }
@@ -612,7 +650,8 @@ async function buscarRecetas() {
   body.innerHTML = '<div class="recetas-spinner"><div class="spinner"></div>Buscando recetas…</div>';
 
   try {
-    const ingsParam = ingredientes.join(',+');
+    const ingsEn = ingredientes.map(i => traducirIngrediente(i));
+    const ingsParam = ingsEn.join(',+');
     const url = `${SPOONACULAR_PROXY}/recipes/findByIngredients?ingredients=${encodeURIComponent(ingsParam)}&number=8&ranking=2&ignorePantry=true`;
     const res  = await fetch(url);
     if (!res.ok) throw new Error(`API ${res.status}`);

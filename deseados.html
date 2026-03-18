@@ -489,10 +489,9 @@ function addPriceRecord(id, e) {
 render();
 
 // Hide spinner when app is ready
-window.addEventListener('DOMContentLoaded', () => {
-  const el = document.getElementById('wapp-loading');
-  if(el){ el.classList.add('fade'); setTimeout(()=>el.remove(), 350); }
-});
+// DOM ya está listo (script al final del body) — ocultar spinner inmediatamente
+const _loadEl = document.getElementById('wapp-loading');
+if(_loadEl){ _loadEl.classList.add('fade'); setTimeout(()=>_loadEl.remove(), 350); }
 </script>
 </body>
 </html>

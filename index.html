@@ -172,7 +172,13 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
 <div class="login-screen" id="login-screen">
   <div class="login-logo">W<span>//</span>APPS</div>
   <div class="login-sub">Panel personal</div>
-  <div class="login-card">
+  <!-- Spinner mientras Firebase resuelve el estado de auth -->
+  <div id="login-resolving" style="display:flex;flex-direction:column;align-items:center;gap:14px;">
+    <div class="spinner" style="width:18px;height:18px;border-width:2px;border-top-color:var(--y);"></div>
+    <span style="font-size:9px;color:var(--muted);letter-spacing:1px;">VERIFICANDO SESIÓN…</span>
+  </div>
+  <!-- Card de login — oculta hasta que Firebase confirma que NO hay sesión -->
+  <div class="login-card" id="login-card" style="display:none">
     <div class="login-title">ACCESO</div>
     <div class="login-desc">Inicia sesión con tu cuenta de Google para acceder a tus herramientas.</div>
     <button class="login-google-btn" id="login-btn" onclick="doLogin()">
@@ -395,6 +401,11 @@ function showApp(user) {
 function showLogin() {
   document.getElementById('login-screen').style.display  = '';
   document.getElementById('app-shell').style.display     = 'none';
+  // Ocultar spinner de resolución, mostrar card de login
+  const resolving = document.getElementById('login-resolving');
+  const card      = document.getElementById('login-card');
+  if (resolving) resolving.style.display = 'none';
+  if (card)      card.style.display      = '';
   // Reset login btn
   const btn = document.getElementById('login-btn');
   const btnText = document.getElementById('login-btn-text');
