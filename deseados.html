@@ -410,6 +410,7 @@ function priceHistHTML(i) {
 function wishCard(i){
   const isEd=editId===i.id;
   const p=PRIOS[i.prio]||PRIOS.media;
+
   return`<div class="wish-card ${i.comprado?'comprado':''} prio-${i.prio}">
     <div class="wish-top">
       <div class="wish-check ${i.comprado?'done':''}" onclick="toggleComprado(${i.id})"></div>

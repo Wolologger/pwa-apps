@@ -104,7 +104,7 @@ select option{background:var(--bg2);}
 .empty{color:var(--muted);font-size:13px;text-align:center;padding:2rem 1rem;line-height:1.7;}
 
 /* ── GLOBAL SPINNER ── */
-.wapp-loading{position:fixed;inset:0;background:rgba(10,10,9,0.85);backdrop-filter:blur(4px);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:1;transition:opacity 0.3s;}
+.wapp-loading{position:fixed;inset:0;background:rgba(10,10,9,0.85);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:1;transition:opacity 0.3s;}
 .wapp-loading.fade{opacity:0;pointer-events:none;}
 .wapp-spinner{width:28px;height:28px;border:2px solid rgba(232,240,64,0.2);border-top-color:#e8f040;border-radius:50%;animation:wapp-spin 0.65s linear infinite;}
 @keyframes wapp-spin{to{transform:rotate(360deg)}}
@@ -731,10 +731,8 @@ renderDespensa();
 if(typeof WNotify !== 'undefined') WNotify.check();
 
 // Hide spinner when app is ready
-window.addEventListener('DOMContentLoaded', () => {
-  const el = document.getElementById('wapp-loading');
-  if(el){ el.classList.add('fade'); setTimeout(()=>el.remove(), 350); }
-});
+const _loadEl = document.getElementById('wapp-loading');
+if (_loadEl) { _loadEl.classList.add('fade'); setTimeout(() => { _loadEl.style.display='none'; _loadEl.remove(); }, 300); }
 
 // ── ONBOARDING ──
 const OB_STEPS = [
