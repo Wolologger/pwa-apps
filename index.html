@@ -11,106 +11,100 @@
 <title>W // APPS</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#0a0a09; --bg2:#141412; --bg3:#1e1e1b;
-  --line:rgba(255,255,255,0.06); --line2:rgba(255,255,255,0.12);
-  --text:#f0ebe0; --muted:#5a5850; --dim:#2a2a26;
-  --y:#e8f040; --r:#f04030; --g:#30d880; --b:#30a8f0;
-  --fh:'Bebas Neue',sans-serif; --fm:'DM Mono',monospace;
-}
+:root{--bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;--line:rgba(255,255,255,0.06);--line2:rgba(255,255,255,0.12);--text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;--y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;--fh:'Bebas Neue',sans-serif;--fm:'DM Mono',monospace;}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html{height:100%;background:var(--bg);}
+html{background:var(--bg);}
 body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm);overflow-x:hidden;}
-
-/* GRID BG */
-.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;
-  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
-  background-size:40px 40px;}
-
-.shell{position:relative;z-index:1;max-width:480px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;padding:0 0 60px;}
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:40px 40px;}
+.shell{position:relative;z-index:1;max-width:520px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;padding:0 0 60px;}
 
 /* TOPBAR */
-.topbar{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line2);}
-.topbar-left{display:flex;align-items:baseline;gap:10px;}
-.logo{font-family:var(--fh);font-size:28px;letter-spacing:2px;color:var(--text);line-height:1;}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line2);}
+.logo{font-family:var(--fh);font-size:26px;letter-spacing:2px;color:var(--text);line-height:1;}
 .logo-slash{color:var(--y);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
 .build-tag{font-size:9px;color:var(--muted);letter-spacing:1px;border:1px solid var(--dim);padding:3px 7px;border-radius:3px;}
-.clock{font-family:var(--fh);font-size:22px;letter-spacing:1px;color:var(--muted);}
+.clock{font-family:var(--fh);font-size:20px;letter-spacing:1px;color:var(--muted);}
 
 /* HERO */
-.hero{padding:32px 20px 24px;border-bottom:1px solid var(--line2);position:relative;overflow:hidden;}
-.hero-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
-.hero-title{font-family:var(--fh);font-size:64px;line-height:0.95;letter-spacing:1px;margin-bottom:16px;}
+.hero{padding:28px 20px 20px;border-bottom:1px solid var(--line2);position:relative;overflow:hidden;}
+.hero-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.hero-title{font-family:var(--fh);font-size:clamp(44px,14vw,64px);line-height:0.95;letter-spacing:1px;margin-bottom:14px;}
 .hero-title em{color:var(--y);font-style:normal;display:block;}
-.hero-meta{display:flex;gap:16px;flex-wrap:wrap;}
+.hero-meta{display:flex;gap:14px;flex-wrap:wrap;}
 .hero-stat{font-size:11px;color:var(--muted);}
 .hero-stat strong{color:var(--text);font-weight:500;}
-.hero-corner{position:absolute;bottom:20px;right:20px;font-family:var(--fh);font-size:80px;color:var(--dim);line-height:1;pointer-events:none;user-select:none;}
+.hero-corner{position:absolute;bottom:16px;right:20px;font-family:var(--fh);font-size:72px;color:var(--dim);line-height:1;pointer-events:none;user-select:none;}
+.status{display:inline-flex;align-items:center;gap:5px;font-size:9px;color:var(--g);letter-spacing:1px;}
+.status-dot{width:5px;height:5px;border-radius:50%;background:var(--g);animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 
 /* TICKER */
-.ticker{border-bottom:1px solid var(--line2);padding:8px 0;overflow:hidden;white-space:nowrap;}
-.ticker-inner{display:inline-block;animation:ticker 22s linear infinite;}
-.ticker-item{display:inline-block;font-size:10px;color:var(--muted);letter-spacing:1px;padding:0 24px;}
+.ticker{border-bottom:1px solid var(--line2);padding:7px 0;overflow:hidden;white-space:nowrap;}
+.ticker-inner{display:inline-block;animation:ticker 30s linear infinite;}
+.ticker-item{display:inline-block;font-size:10px;color:var(--muted);letter-spacing:1px;padding:0 20px;}
 .ticker-item span{color:var(--y);}
 @keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
+/* FILTER BAR */
+.filter-bar{display:flex;gap:6px;padding:10px 20px;border-bottom:1px solid var(--line2);overflow-x:auto;scrollbar-width:none;flex-shrink:0;}
+.filter-bar::-webkit-scrollbar{display:none;}
+.filter-chip{flex-shrink:0;padding:5px 12px;font-size:10px;font-family:var(--fm);border:0.5px solid var(--line2);border-radius:99px;background:transparent;color:var(--muted);cursor:pointer;letter-spacing:0.5px;transition:all 0.15s;}
+.filter-chip.active{background:var(--y);color:#0a0a09;border-color:var(--y);}
+.filter-chip:hover{color:var(--text);}
+
 /* SECTION HEADER */
-.section-hd{display:flex;justify-content:space-between;align-items:center;padding:16px 20px 10px;}
+.section-hd{display:flex;justify-content:space-between;align-items:center;padding:14px 20px 8px;}
 .section-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
 .section-count{font-size:9px;color:var(--dim);letter-spacing:1px;}
 
 /* APP CARDS */
 .apps-list{padding:0 20px;display:flex;flex-direction:column;gap:1px;}
-.app-card{display:block;text-decoration:none;color:var(--text);background:var(--bg2);border:1px solid var(--line2);padding:0;overflow:hidden;position:relative;transition:border-color 0.2s;animation:cardIn 0.4s ease both;}
-.app-card:nth-child(1){animation-delay:0.05s;}
-.app-card:nth-child(2){animation-delay:0.1s;}
-.app-card:nth-child(3){animation-delay:0.15s;}
-.app-card:nth-child(4){animation-delay:0.2s;}
-.app-card:nth-child(5){animation-delay:0.25s;}
-@keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.app-card{display:block;text-decoration:none;color:var(--text);background:var(--bg2);border:1px solid var(--line2);overflow:hidden;position:relative;transition:border-color 0.2s;animation:cardIn 0.4s ease both;}
+.app-card:nth-child(1){animation-delay:0.03s;} .app-card:nth-child(2){animation-delay:0.06s;} .app-card:nth-child(3){animation-delay:0.09s;}
+.app-card:nth-child(4){animation-delay:0.12s;} .app-card:nth-child(5){animation-delay:0.15s;} .app-card:nth-child(6){animation-delay:0.18s;}
+.app-card:nth-child(7){animation-delay:0.21s;} .app-card:nth-child(8){animation-delay:0.24s;} .app-card:nth-child(9){animation-delay:0.27s;}
+.app-card:nth-child(10){animation-delay:0.30s;} .app-card:nth-child(11){animation-delay:0.33s;} .app-card:nth-child(12){animation-delay:0.36s;}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .app-card:active{opacity:0.85;}
 .app-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--y);transform:scaleY(0);transform-origin:bottom;transition:transform 0.2s cubic-bezier(.4,0,.2,1);}
 .app-card:hover::before,.app-card:active::before{transform:scaleY(1);}
 .app-inner{display:flex;align-items:stretch;}
-.app-num{font-family:var(--fh);font-size:32px;color:var(--dim);padding:16px 14px 16px 18px;line-height:1;border-right:1px solid var(--line2);min-width:58px;display:flex;align-items:center;justify-content:center;transition:color 0.2s;}
+.app-num{font-family:var(--fh);font-size:28px;color:var(--dim);padding:14px 12px 14px 16px;line-height:1;border-right:1px solid var(--line2);min-width:52px;display:flex;align-items:center;justify-content:center;transition:color 0.2s;flex-shrink:0;}
 .app-card:hover .app-num{color:var(--y);}
-.app-body{flex:1;padding:14px 16px;min-width:0;}
-.app-name{font-family:var(--fh);font-size:22px;letter-spacing:0.5px;line-height:1;margin-bottom:5px;}
+.app-body{flex:1;padding:12px 14px;min-width:0;}
+.app-name{font-family:var(--fh);font-size:20px;letter-spacing:0.5px;line-height:1;margin-bottom:4px;}
 .app-desc{font-size:11px;color:var(--muted);line-height:1.4;}
-.app-tags{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;}
-.app-tag{font-size:9px;padding:2px 7px;border-radius:3px;border:1px solid var(--dim);color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;}
-.app-file{font-size:9px;color:var(--dim);margin-top:4px;letter-spacing:0.5px;}
-.app-arrow{padding:14px 18px;display:flex;align-items:center;color:var(--dim);font-size:20px;transition:color 0.2s,transform 0.2s;flex-shrink:0;}
-.app-card:hover .app-arrow{color:var(--y);transform:translateX(4px);}
+.app-tags{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap;}
+.app-tag{font-size:9px;padding:2px 6px;border-radius:3px;border:1px solid var(--dim);color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;}
+.app-file{font-size:9px;color:var(--dim);margin-top:3px;letter-spacing:0.5px;}
+.app-arrow{padding:12px 16px;display:flex;align-items:center;color:var(--dim);font-size:18px;transition:color 0.2s,transform 0.2s;flex-shrink:0;}
+.app-card:hover .app-arrow{color:var(--y);transform:translateX(3px);}
 
-/* LOADING / ERROR */
-.state-msg{padding:32px 20px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:12px;}
+/* LOADING */
+.state-msg{padding:28px 20px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:12px;}
 .spinner{width:14px;height:14px;border:1.5px solid var(--dim);border-top-color:var(--y);border-radius:50%;animation:spin 0.6s linear infinite;flex-shrink:0;}
 @keyframes spin{to{transform:rotate(360deg)}}
 .err-msg{color:var(--r);font-size:11px;line-height:1.7;padding:20px;}
 
 /* FOOTER */
-.footer{margin-top:auto;padding:24px 20px 0;border-top:1px solid var(--line2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.footer{margin-top:auto;padding:20px 20px 0;border-top:1px solid var(--line2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
 .footer-left{font-size:10px;color:var(--muted);line-height:1.6;}
 .footer-right{font-size:10px;color:var(--dim);}
 .footer a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--dim);}
-
-/* STATUS */
-.status{display:inline-flex;align-items:center;gap:5px;font-size:9px;color:var(--g);letter-spacing:1px;}
-.status-dot{width:5px;height:5px;border-radius:50%;background:var(--g);animation:pulse 2s ease-in-out infinite;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 </style>
 </head>
 <body>
 <div class="grid-bg"></div>
 <div class="shell">
-
   <div class="topbar">
-    <div class="topbar-left">
+    <div>
       <div class="logo">W<span class="logo-slash">//</span>APPS</div>
-      <div class="build-tag">PERSONAL</div>
     </div>
-    <div class="clock" id="clock">--:--</div>
+    <div class="topbar-right">
+      <div class="build-tag">PERSONAL</div>
+      <div class="clock" id="clock">--:--</div>
+    </div>
   </div>
 
   <div class="hero">
@@ -126,38 +120,26 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
 
   <div class="ticker">
     <div class="ticker-inner">
-      <span class="ticker-item">OBRA <span>●</span></span>
-      <span class="ticker-item">GASTOS DIARIOS <span>●</span></span>
-      <span class="ticker-item">FACTURA LUZ <span>●</span></span>
-      <span class="ticker-item">CONTROL TOTAL <span>●</span></span>
-      <span class="ticker-item">WOLOLOGGER <span>●</span></span>
-      <span class="ticker-item">APPS PERSONALES <span>●</span></span>
-      <span class="ticker-item">OBRA <span>●</span></span>
-      <span class="ticker-item">GASTOS DIARIOS <span>●</span></span>
-      <span class="ticker-item">FACTURA LUZ <span>●</span></span>
-      <span class="ticker-item">CONTROL TOTAL <span>●</span></span>
-      <span class="ticker-item">WOLOLOGGER <span>●</span></span>
-      <span class="ticker-item">APPS PERSONALES <span>●</span></span>
+      <span class="ticker-item">OBRA <span>●</span></span><span class="ticker-item">GASTOS <span>●</span></span><span class="ticker-item">DESPENSA <span>●</span></span><span class="ticker-item">SETLIST <span>●</span></span><span class="ticker-item">FINANZAS <span>●</span></span><span class="ticker-item">SEMANA <span>●</span></span><span class="ticker-item">DESEADOS <span>●</span></span><span class="ticker-item">COMPRA <span>●</span></span><span class="ticker-item">INSTRUMENTOS <span>●</span></span><span class="ticker-item">WOLOLOGGER <span>●</span></span>
+      <span class="ticker-item">OBRA <span>●</span></span><span class="ticker-item">GASTOS <span>●</span></span><span class="ticker-item">DESPENSA <span>●</span></span><span class="ticker-item">SETLIST <span>●</span></span><span class="ticker-item">FINANZAS <span>●</span></span><span class="ticker-item">SEMANA <span>●</span></span><span class="ticker-item">DESEADOS <span>●</span></span><span class="ticker-item">COMPRA <span>●</span></span><span class="ticker-item">INSTRUMENTOS <span>●</span></span><span class="ticker-item">WOLOLOGGER <span>●</span></span>
     </div>
   </div>
+
+  <div class="filter-bar" id="filter-bar"></div>
 
   <div class="section-hd">
     <div class="section-title">Apps disponibles</div>
-    <div class="section-count">WOLOLOGGER/PWA-APPS</div>
+    <div class="section-count" id="repo-tag">WOLOLOGGER/PWA-APPS</div>
   </div>
 
   <div class="apps-list" id="apps-list">
-    <div class="state-msg"><div class="spinner"></div>Cargando desde GitHub...</div>
+    <div class="state-msg"><div class="spinner"></div>Cargando desde GitHub…</div>
   </div>
 
   <div class="footer">
-    <div class="footer-left">
-      Actualizado <span id="updated-at">—</span><br>
-      <a href="https://github.com/Wolologger/pwa-apps" target="_blank">github.com/Wolologger/pwa-apps</a>
-    </div>
+    <div class="footer-left">Actualizado <span id="updated-at">—</span><br><a href="https://github.com/Wolologger/pwa-apps" target="_blank">github.com/Wolologger/pwa-apps</a></div>
     <div class="footer-right" id="file-count"></div>
   </div>
-
 </div>
 
 <script>
@@ -165,12 +147,23 @@ const GITHUB_USER='Wolologger';
 const GITHUB_REPO='pwa-apps';
 
 const META={
-  'obra.html':               {name:'Mi Obra',           desc:'Gestión de reforma · presupuesto · tareas · fases',              tags:['obra','finanzas']},
-  'gastos-diarios.html':     {name:'Gastos Diarios',    desc:'Control de gastos cotidianos · presupuesto mensual',              tags:['dinero','diario']},
-  'guia_factura_luz.html':   {name:'Factura Luz',       desc:'Guía interactiva para entender tu factura de la luz · test',     tags:['guía','luz']},
-  'despensa.html':           {name:'Despensa',          desc:'Inventario de alimentos · caducidades · recetas con lo que tienes', tags:['cocina','hogar']},
-  'suministros.html':        {name:'Suministros',       desc:'Facturas de luz · gas · agua · gráficas · alertas de precio',      tags:['hogar','finanzas']},
+  'obra.html':               {name:'Mi Obra',          desc:'Gestión de reforma · presupuesto · tareas · fases',                   tags:['obra','finanzas']},
+  'gastos-diarios.html':     {name:'Gastos Diarios',   desc:'Control de gastos cotidianos · presupuesto mensual',                   tags:['dinero','diario']},
+  'suministros.html':        {name:'Suministros',      desc:'Facturas de luz · gas · agua · gráficas · alertas',                    tags:['hogar','dinero']},
+  'finanzas.html':           {name:'Finanzas',         desc:'Ingresos vs gastos · conectado con otras apps · proyección anual',     tags:['dinero']},
+  'despensa.html':           {name:'Despensa',         desc:'Inventario de alimentos · caducidades',                                tags:['hogar','cocina']},
+  'compra.html':             {name:'Lista Compra',     desc:'Listas reutilizables · categorías custom · establecimientos',          tags:['hogar','cocina']},
+  'setlist.html':            {name:'Setlist',          desc:'Canciones por grupo · drag & drop · modo actuación · exportar',        tags:['música']},
+  'instrumentos.html':       {name:'Instrumentos',     desc:'Inventario de guitarras · bajos · amplis · pedales · setups',          tags:['música']},
+  'semana.html':             {name:'Semana',           desc:'Tareas semanales · calendario · vacaciones y eventos',                 tags:['productividad']},
+  'deseados.html':           {name:'Deseados',         desc:'Lista de deseos · prioridad · categorías · seguimiento de compras',    tags:['dinero']},
+  'decisor.html':            {name:'Decisor',          desc:'Elige por ti · presets editables · historial',                        tags:['utilidad']},
+  'guia_factura_luz.html':   {name:'Factura Luz',      desc:'Guía interactiva · entiende tu factura · test',                       tags:['hogar']},
 };
+
+const ALL_TAGS=[...new Set(Object.values(META).flatMap(m=>m.tags||[]))].sort();
+let activeTag='';
+let allFiles=[];
 
 function autoMeta(filename){
   const name=filename.replace('.html','').replace(/[-_]/g,' ').toUpperCase();
@@ -179,65 +172,63 @@ function autoMeta(filename){
 
 function updateClock(){
   const now=new Date();
-  const h=String(now.getHours()).padStart(2,'0');
-  const m=String(now.getMinutes()).padStart(2,'0');
-  document.getElementById('clock').textContent=`${h}:${m}`;
+  document.getElementById('clock').textContent=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
 }
-updateClock();
-setInterval(updateClock,10000);
+updateClock();setInterval(updateClock,10000);
+
+function renderFilterBar(){
+  document.getElementById('filter-bar').innerHTML=
+    `<button class="filter-chip ${!activeTag?'active':''}" onclick="setTag('')">Todas</button>`+
+    ALL_TAGS.map(t=>`<button class="filter-chip ${activeTag===t?'active':''}" onclick="setTag('${t}')">${t}</button>`).join('');
+}
+
+function setTag(t){activeTag=t;renderApps();}
+
+function renderApps(){
+  const filtered=activeTag?allFiles.filter(f=>{const m=META[f.name]||autoMeta(f.name);return(m.tags||[]).includes(activeTag);}):allFiles;
+  document.getElementById('app-count').textContent=filtered.length;
+  document.getElementById('file-count').textContent=`${filtered.length} app${filtered.length!==1?'s':''}`;
+  if(!filtered.length){document.getElementById('apps-list').innerHTML='<div class="err-msg">Sin apps en esta categoría.</div>';return;}
+  document.getElementById('apps-list').innerHTML=filtered.map((f,i)=>{
+    const m=META[f.name]||autoMeta(f.name);
+    const num=String(i+1).padStart(2,'0');
+    const tagsHtml=(m.tags||[]).length?`<div class="app-tags">${m.tags.map(t=>`<span class="app-tag">${t}</span>`).join('')}</div>`:'';
+    return`<a class="app-card" href="${f.name}">
+      <div class="app-inner">
+        <div class="app-num">${num}</div>
+        <div class="app-body">
+          <div class="app-name">${m.name}</div>
+          <div class="app-desc">${m.desc}</div>
+          ${tagsHtml}
+          <div class="app-file">${f.name}</div>
+        </div>
+        <div class="app-arrow">→</div>
+      </div>
+    </a>`;
+  }).join('');
+}
 
 async function loadApps(){
   const list=document.getElementById('apps-list');
   try{
     const res=await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/`);
-    if(!res.ok)throw new Error(`API ${res.status} — ¿el repo es público?`);
+    if(!res.ok)throw new Error(`API ${res.status}`);
     const files=await res.json();
-    const htmlFiles=files
-      .filter(f=>f.type==='file'&&f.name.endsWith('.html')&&f.name!=='index.html')
-      .sort((a,b)=>a.name.localeCompare(b.name));
-
-    document.getElementById('app-count').textContent=htmlFiles.length;
-    document.getElementById('file-count').textContent=`${htmlFiles.length} archivo${htmlFiles.length!==1?'s':''}`;
+    allFiles=files.filter(f=>f.type==='file'&&f.name.endsWith('.html')&&f.name!=='index.html').sort((a,b)=>a.name.localeCompare(b.name));
     document.getElementById('updated-at').textContent=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
-
-    if(!htmlFiles.length){
-      list.innerHTML='<div class="err-msg">No se encontraron archivos HTML en el repositorio.</div>';
-      return;
-    }
-
-    list.innerHTML=htmlFiles.map((f,i)=>{
-      const m=META[f.name]||autoMeta(f.name);
-      const num=String(i+1).padStart(2,'0');
-      const tagsHtml=m.tags&&m.tags.length?`<div class="app-tags">${m.tags.map(t=>`<span class="app-tag">${t}</span>`).join('')}</div>`:'';
-      return`<a class="app-card" href="${f.name}">
-        <div class="app-inner">
-          <div class="app-num">${num}</div>
-          <div class="app-body">
-            <div class="app-name">${m.name}</div>
-            <div class="app-desc">${m.desc}</div>
-            ${tagsHtml}
-            <div class="app-file">${f.name}</div>
-          </div>
-          <div class="app-arrow">→</div>
-        </div>
-      </a>`;
-    }).join('');
-
+    renderFilterBar();
+    renderApps();
   }catch(err){
     list.innerHTML=`<div class="err-msg">No se pudo cargar la lista.<br>${err.message}</div>`;
     document.getElementById('app-count').textContent='?';
   }
 }
 
-loadApps();
-
-// Registrar Service Worker para PWA
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/pwa-apps/sw.js')
-      .catch(err => console.log('SW error:', err));
-  });
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('/pwa-apps/sw.js').catch(()=>{});});
 }
+
+loadApps();
 </script>
 </body>
 </html>

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a09">
+<title>Finanzas — W//APPS</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;
+  --y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;--o:#f09030;
+  --fh:'Bebas Neue',sans-serif;--fm:'DM Mono',monospace;--fs:'DM Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--fs);overflow-x:hidden;}
+
+.wnav{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:100;flex-shrink:0;}
+.wnav-back{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--muted);text-decoration:none;transition:all 0.15s;flex-shrink:0;}
+.wnav-back:hover{background:rgba(255,255,255,0.06);color:var(--y);}
+.wnav-logo{font-family:var(--fh);font-size:16px;letter-spacing:2px;flex-shrink:0;}
+.wnav-logo a{color:var(--muted);text-decoration:none;}
+.wnav-logo a span{color:var(--y);}
+.wnav-sep{width:1px;height:16px;background:var(--border2);flex-shrink:0;}
+.wnav-title{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);flex:1;}
+
+.shell{display:flex;flex-direction:column;height:100dvh;max-width:600px;margin:0 auto;}
+.tabs{display:flex;padding:0 16px;gap:2px;border-bottom:1px solid var(--border2);flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:9px 14px;font-size:11px;font-family:var(--fm);border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;white-space:nowrap;}
+.tab.active{color:var(--y);border-bottom-color:var(--y);}
+.content{flex:1;overflow-y:auto;padding:0 16px 80px;scrollbar-width:none;}
+.content::-webkit-scrollbar{display:none;}
+.section{display:none;padding-top:16px;}
+.section.active{display:block;}
+
+/* HERO */
+.hero-card{border-radius:14px;padding:20px;margin-bottom:14px;text-align:center;}
+.hero-card.positive{background:rgba(48,216,128,0.08);border:1px solid rgba(48,216,128,0.2);}
+.hero-card.negative{background:rgba(240,64,48,0.08);border:1px solid rgba(240,64,48,0.2);}
+.hero-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-family:var(--fm);margin-bottom:8px;}
+.hero-amount{font-family:var(--fh);font-size:clamp(36px,10vw,56px);letter-spacing:-1px;line-height:1;}
+.hero-sub{font-size:12px;color:var(--muted);font-family:var(--fm);margin-top:6px;}
+
+/* SUMMARY */
+.summary-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+@media(min-width:400px){.summary-row{grid-template-columns:repeat(3,1fr);}}
+.scard{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:14px;}
+.scard-label{font-size:9px;color:var(--muted);font-family:var(--fm);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:5px;}
+.scard-val{font-family:var(--fh);font-size:24px;line-height:1;}
+.scard-sub{font-size:10px;color:var(--muted);font-family:var(--fm);margin-top:3px;}
+
+/* CONNECTED BADGE */
+.conn-badge{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-family:var(--fm);padding:3px 8px;border-radius:99px;background:rgba(48,168,240,0.1);color:var(--b);border:0.5px solid rgba(48,168,240,0.25);letter-spacing:0.5px;}
+.conn-dot{width:5px;height:5px;border-radius:50%;background:var(--b);animation:pulse 2s ease infinite;}
+.conn-badge.warn{background:rgba(240,144,48,0.1);color:var(--o);border-color:rgba(240,144,48,0.25);}
+.conn-badge.warn .conn-dot{background:var(--o);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* BLOCKS */
+.block{background:var(--bg2);border:0.5px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:10px;}
+.block-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:6px;}
+.block-title{font-family:var(--fh);font-size:16px;letter-spacing:0.5px;}
+.block-total{font-family:var(--fh);font-size:18px;}
+.block-total.income{color:var(--g);}
+.block-total.expense{color:var(--r);}
+
+/* ITEMS */
+.item-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border);flex-wrap:wrap;}
+.item-row:last-child{border-bottom:none;}
+.item-name{flex:1;font-size:13px;min-width:100px;}
+.item-freq{font-size:10px;color:var(--muted);font-family:var(--fm);flex-shrink:0;}
+.item-amount{font-family:var(--fm);font-size:13px;font-weight:500;flex-shrink:0;}
+.item-source{font-size:9px;font-family:var(--fm);padding:2px 6px;border-radius:4px;background:rgba(48,168,240,0.1);color:var(--b);flex-shrink:0;}
+.item-del{background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;opacity:0.3;flex-shrink:0;}
+.item-del:hover{opacity:1;color:var(--r);}
+
+/* VARIABLE SECTION */
+.var-block{background:var(--bg2);border:0.5px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:10px;}
+.var-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:13px;}
+.var-row:last-child{border-bottom:none;}
+.var-label{color:var(--muted);display:flex;align-items:center;gap:6px;}
+.var-amount{font-family:var(--fm);font-weight:500;}
+
+/* ADD FORM */
+.add-row{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.add-row input,.add-row select{background:var(--bg3);border:0.5px solid var(--border2);border-radius:7px;color:var(--text);font-family:var(--fm);font-size:12px;padding:8px 10px;outline:none;min-width:0;}
+.add-row input:focus,.add-row select:focus{border-color:var(--y);}
+.add-row select option{background:var(--bg2);}
+.add-btn{background:var(--y);color:#0a0a09;border:none;border-radius:7px;padding:8px 14px;font-family:var(--fh);font-size:14px;cursor:pointer;flex-shrink:0;}
+
+/* BARS */
+.bar-section{margin-bottom:14px;}
+.bar-item{margin-bottom:8px;}
+.bar-item-header{display:flex;justify-content:space-between;font-size:12px;font-family:var(--fm);margin-bottom:4px;}
+.bar-item-label{color:var(--muted);}
+.bar-item-val{color:var(--text);font-weight:500;}
+.bar-bg{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;transition:width 0.4s ease;}
+
+/* ANNUAL */
+.annual-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;}
+@media(min-width:400px){.annual-grid{grid-template-columns:repeat(3,1fr);}}
+.an-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px;text-align:center;}
+.an-label{font-size:9px;color:var(--muted);font-family:var(--fm);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:4px;}
+.an-val{font-family:var(--fh);font-size:20px;line-height:1;}
+
+/* DATOS */
+.data-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:14px;margin-bottom:10px;}
+.fb{font-size:11px;margin-top:8px;display:none;font-family:var(--fm);}
+.section-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:16px 0 8px;font-family:var(--fm);}
+.btn{padding:8px 14px;font-size:12px;font-family:var(--fm);border:0.5px solid var(--border2);border-radius:8px;background:transparent;color:var(--text);cursor:pointer;transition:all 0.15s;}
+.btn:hover{background:var(--bg3);}
+.btn-y{background:var(--y);color:#0a0a09;border-color:var(--y);font-weight:500;}
+.btn-sm{padding:5px 11px;font-size:11px;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="wnav">
+    <a class="wnav-back" href="index.html"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
+    <div class="wnav-sep"></div>
+    <div class="wnav-title">FINANZAS</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('resumen',this)">Resumen</button>
+    <button class="tab" onclick="showTab('ingresos',this)">Ingresos</button>
+    <button class="tab" onclick="showTab('fijos',this)">Gastos fijos</button>
+    <button class="tab" onclick="showTab('variables',this)">Variables</button>
+    <button class="tab" onclick="showTab('anual',this)">Anual</button>
+    <button class="tab" onclick="showTab('datos',this)">Datos</button>
+  </div>
+
+  <div class="content">
+    <div id="resumen" class="section active"><div id="resumen-body"></div></div>
+    <div id="ingresos" class="section"><div id="ingresos-body"></div></div>
+    <div id="fijos" class="section"><div id="fijos-body"></div></div>
+    <div id="variables" class="section"><div id="variables-body"></div></div>
+    <div id="anual" class="section"><div id="anual-body"></div></div>
+    <div id="datos" class="section"><div id="datos-body"></div></div>
+  </div>
+</div>
+
+<script>
+const FREQ={mensual:'Mensual',bimestral:'Bimestral',trimestral:'Trimestral',semestral:'Semestral',anual:'Anual'};
+const FREQ_M={mensual:1,bimestral:2,trimestral:3,semestral:6,anual:12};
+const GASTO_CATS={vivienda:'🏠 Vivienda',suministros:'💡 Suministros',transporte:'🚗 Transporte',seguros:'🛡️ Seguros',suscripciones:'📱 Suscripciones',alimentacion:'🛒 Alimentación',otros:'📦 Otros'};
+
+let state=loadState(),currentTab='resumen';
+
+function loadState(){
+  try{const r=localStorage.getItem('finanzas_v1');if(r)return JSON.parse(r);}catch(e){}
+  return{ingresos:[{id:1,nombre:'Nómina',importe:0,freq:'mensual'}],gastos:[
+    {id:2,nombre:'Alquiler / Hipoteca',importe:0,cat:'vivienda',freq:'mensual'},
+    {id:3,nombre:'Internet',importe:0,cat:'suministros',freq:'mensual'},
+    {id:4,nombre:'Móvil',importe:0,cat:'suscripciones',freq:'mensual'},
+  ],nextId:10};}
+function save(){try{localStorage.setItem('finanzas_v1',JSON.stringify(state));}catch(e){}}
+function nxtId(){return++state.nextId;}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fmt(n,d=2){return Number(n||0).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d});}
+function toMonthly(item){return item.importe/(FREQ_M[item.freq]||1);}
+
+// ── READ FROM OTHER APPS ──
+function readSuministros(){
+  /* Reads suministros_v1 localStorage, returns avg monthly per tipo */
+  try{
+    const raw=localStorage.getItem('suministros_v1');
+    if(!raw)return null;
+    const data=JSON.parse(raw);
+    if(!data.facturas||!data.facturas.length)return null;
+    const result={};
+    ['luz','gas','agua'].forEach(tipo=>{
+      const facts=data.facturas.filter(f=>f.tipo===tipo).sort((a,b)=>b.inicio.localeCompare(a.inicio));
+      if(!facts.length)return;
+      const last3=facts.slice(0,3);
+      // Convert each to monthly equivalent
+      const monthly=last3.map(f=>{
+        if(f.inicio&&f.fin){
+          const days=Math.max(1,Math.round((new Date(f.fin)-new Date(f.inicio))/(1000*60*60*24)));
+          return f.importe/(days/30);
+        }
+        return f.importe; // assume monthly
+      });
+      result[tipo]=monthly.reduce((s,v)=>s+v,0)/monthly.length;
+    });
+    return Object.keys(result).length?result:null;
+  }catch(e){return null;}
+}
+
+function readGastosDiarios(){
+  /* Returns current month total from gastos_v1 */
+  try{
+    const raw=localStorage.getItem('gastos_v1');
+    if(!raw)return null;
+    const data=JSON.parse(raw);
+    if(!data.gastos||!data.gastos.length)return null;
+    const now=new Date();
+    const prefix=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    const thisMonth=data.gastos.filter(g=>g.fecha&&g.fecha.startsWith(prefix));
+    if(!thisMonth.length)return null;
+    return thisMonth.reduce((s,g)=>s+g.importe,0);
+  }catch(e){return null;}
+}
+
+function readObra(){
+  /* Returns total spent from miobra_v2 */
+  try{
+    const raw=localStorage.getItem('miobra_v2');
+    if(!raw)return null;
+    const data=JSON.parse(raw);
+    if(!data.gastos||!data.gastos.length)return null;
+    return data.gastos.reduce((s,g)=>s+g.importe,0);
+  }catch(e){return null;}
+}
+
+function totalIngresos(){return state.ingresos.reduce((s,i)=>s+toMonthly(i),0);}
+function totalGastosFijos(){
+  const manual=state.gastos.reduce((s,g)=>s+toMonthly(g),0);
+  const sum=readSuministros();
+  const suministrosTotal=sum?Object.values(sum).reduce((s,v)=>s+v,0):0;
+  return manual+suministrosTotal;
+}
+function totalVariables(){
+  const gd=readGastosDiarios()||0;
+  const obra=readObra()||0;
+  return gd+obra;
+}
+function disponible(){return totalIngresos()-totalGastosFijos()-totalVariables();}
+
+function showTab(name,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(name).classList.add('active');el.classList.add('active');
+  currentTab=name;render();
+}
+
+function render(){
+  if(currentTab==='resumen')renderResumen();
+  if(currentTab==='ingresos')renderIngresos();
+  if(currentTab==='fijos')renderFijos();
+  if(currentTab==='variables')renderVariables();
+  if(currentTab==='anual')renderAnual();
+  if(currentTab==='datos')renderDatos();
+}
+
+function renderResumen(){
+  const ing=totalIngresos(),fijos=totalGastosFijos(),vars=totalVariables(),disp=disponible();
+  const totalGastos=fijos+vars;
+  const pos=disp>=0;
+  const pctFijos=ing>0?Math.min(100,fijos/ing*100):0;
+  const pctVars=ing>0?Math.min(100,vars/ing*100):0;
+  const sumini=readSuministros();
+  const gd=readGastosDiarios();
+  const obra=readObra();
+
+  let html=`
+    <div class="hero-card ${pos?'positive':'negative'}">
+      <div class="hero-label">Disponible este mes</div>
+      <div class="hero-amount" style="color:${pos?'var(--g)':'var(--r)'}">${fmt(disp)} €</div>
+      <div class="hero-sub">${fmt(ing)} € ingresos − ${fmt(totalGastos)} € gastos</div>
+    </div>
+
+    <!-- Conexiones activas -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+      <span class="conn-badge ${sumini?'':'warn'}">
+        <span class="conn-dot"></span>
+        ${sumini?'Suministros conectado':'Suministros sin datos'}
+      </span>
+      <span class="conn-badge ${gd!==null?'':'warn'}">
+        <span class="conn-dot"></span>
+        ${gd!==null?'Gastos diarios conectado':'Gastos diarios sin datos'}
+      </span>
+      <span class="conn-badge ${obra!==null?'':'warn'}">
+        <span class="conn-dot"></span>
+        ${obra!==null?'Obra conectada':'Obra sin datos'}
+      </span>
+    </div>
+
+    <div class="summary-row">
+      <div class="scard"><div class="scard-label">Ingresos</div><div class="scard-val" style="color:var(--g)">${fmt(ing,0)} €</div><div class="scard-sub">al mes</div></div>
+      <div class="scard"><div class="scard-label">Gastos fijos</div><div class="scard-val" style="color:var(--r)">${fmt(fijos,0)} €</div><div class="scard-sub">${fmt(pctFijos,1)}% del ingreso</div></div>
+      <div class="scard"><div class="scard-label">Gastos variables</div><div class="scard-val" style="color:var(--o)">${fmt(vars,0)} €</div><div class="scard-sub">${fmt(pctVars,1)}% del ingreso</div></div>
+    </div>
+
+    <div class="section-label">Desglose de gastos fijos</div>
+    <div class="bar-section">`;
+
+  const byCat={};
+  state.gastos.forEach(g=>{const m=toMonthly(g);byCat[g.cat]=(byCat[g.cat]||0)+m;});
+  if(sumini){byCat['suministros']=(byCat['suministros']||0)+Object.values(sumini).reduce((s,v)=>s+v,0);}
+  const sorted=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const maxVal=sorted[0]?sorted[0][1]:1;
+  sorted.forEach(([cat,val])=>{
+    html+=`<div class="bar-item"><div class="bar-item-header"><span class="bar-item-label">${GASTO_CATS[cat]?.replace(/^\S+\s/,'')||cat}</span><span class="bar-item-val">${fmt(val)} €/mes</span></div><div class="bar-bg"><div class="bar-fill" style="width:${val/maxVal*100}%;background:var(--r)"></div></div></div>`;
+  });
+  html+='</div>';
+  document.getElementById('resumen-body').innerHTML=html;
+}
+
+function renderIngresos(){
+  const total=totalIngresos();
+  let html=`<div class="block"><div class="block-header"><span class="block-title">Ingresos</span><span class="block-total income">${fmt(total)} €/mes</span></div>`;
+  state.ingresos.forEach(i=>{
+    html+=`<div class="item-row"><span class="item-name">${esc(i.nombre)}</span><span class="item-freq">${FREQ[i.freq]}</span><span class="item-amount" style="color:var(--g)">${fmt(i.importe)} €</span><button class="item-del" onclick="delIngreso(${i.id})">×</button></div>`;
+  });
+  html+=`<div class="add-row">
+    <input type="text" id="ai-n" placeholder="Concepto" style="flex:2;min-width:80px;">
+    <input type="number" id="ai-i" placeholder="€" step="0.01" style="width:80px;">
+    <select id="ai-f" style="min-width:80px;">${Object.entries(FREQ).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select>
+    <button class="add-btn" onclick="addIngreso()">+</button>
+  </div></div>`;
+  document.getElementById('ingresos-body').innerHTML=html;
+}
+
+function renderFijos(){
+  const total=totalGastosFijos();
+  const sumini=readSuministros();
+  let html=`<div class="block"><div class="block-header"><span class="block-title">Gastos fijos manuales</span><span class="block-total expense">${fmt(state.gastos.reduce((s,g)=>s+toMonthly(g),0))} €/mes</span></div>`;
+
+  const groups={};
+  state.gastos.forEach(g=>{if(!groups[g.cat])groups[g.cat]=[];groups[g.cat].push(g);});
+  Object.entries(groups).forEach(([cat,arr])=>{
+    const catTotal=arr.reduce((s,g)=>s+toMonthly(g),0);
+    html+=`<div style="font-size:10px;color:var(--muted);font-family:var(--fm);letter-spacing:1px;text-transform:uppercase;padding:8px 0 4px;border-top:0.5px solid var(--border);margin-top:4px;">${GASTO_CATS[cat]||cat} · ${fmt(catTotal)} €/mes</div>`;
+    arr.forEach(g=>{
+      html+=`<div class="item-row"><span class="item-name">${esc(g.nombre)}</span><span class="item-freq">${FREQ[g.freq]}</span><span class="item-amount" style="color:var(--r)">${fmt(g.importe)} €</span><button class="item-del" onclick="delGasto(${g.id})">×</button></div>`;
+    });
+  });
+
+  html+=`<div class="add-row">
+    <input type="text" id="ag-n" placeholder="Concepto" style="flex:2;min-width:80px;">
+    <input type="number" id="ag-i" placeholder="€" step="0.01" style="width:70px;">
+    <select id="ag-c" style="min-width:80px;">${Object.entries(GASTO_CATS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select>
+    <select id="ag-f" style="min-width:80px;">${Object.entries(FREQ).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select>
+    <button class="add-btn" onclick="addGasto()">+</button>
+  </div></div>`;
+
+  // Suministros connected block
+  if(sumini){
+    const sumTotal=Object.values(sumini).reduce((s,v)=>s+v,0);
+    html+=`<div class="block" style="border-color:rgba(48,168,240,0.25);">
+      <div class="block-header">
+        <span class="block-title">Suministros</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="conn-badge"><span class="conn-dot"></span>Auto</span>
+          <span class="block-total expense">${fmt(sumTotal)} €/mes</span>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-bottom:10px;">Media de las últimas 3 facturas de cada tipo</div>
+      ${['luz','gas','agua'].filter(t=>sumini[t]).map(t=>`
+        <div class="item-row">
+          <span class="item-name">${{luz:'⚡ Luz',gas:'🔥 Gas',agua:'💧 Agua'}[t]}</span>
+          <span class="item-source">suministros.html</span>
+          <span class="item-amount" style="color:var(--r)">${fmt(sumini[t])} €/mes</span>
+        </div>`).join('')}
+      <div style="font-size:10px;color:var(--muted);font-family:var(--fm);margin-top:8px;">Para modificar estos valores ve a <a href="suministros.html" style="color:var(--b)">Suministros →</a></div>
+    </div>`;
+  } else {
+    html+=`<div class="block" style="border-color:rgba(240,144,48,0.2);opacity:0.6;">
+      <div class="block-header"><span class="block-title">Suministros</span><span class="conn-badge warn"><span class="conn-dot"></span>Sin datos</span></div>
+      <div style="font-size:12px;color:var(--muted);font-family:var(--fm);">Añade facturas en <a href="suministros.html" style="color:var(--b)">Suministros →</a> para importarlas automáticamente.</div>
+    </div>`;
+  }
+
+  document.getElementById('fijos-body').innerHTML=html;
+}
+
+function renderVariables(){
+  const gd=readGastosDiarios();
+  const obra=readObra();
+  const now=new Date();
+  const mesLabel=new Intl.DateTimeFormat('es-ES',{month:'long',year:'numeric'}).format(now);
+
+  let html=`<div style="font-size:12px;color:var(--muted);font-family:var(--fm);margin-bottom:14px;line-height:1.6;">Gastos variables leídos automáticamente desde otras apps. Son estimaciones del mes actual.</div>`;
+
+  // Gastos Diarios
+  html+=`<div class="var-block" style="border-color:${gd!==null?'rgba(48,168,240,0.25)':'var(--border2)'};">
+    <div class="block-header">
+      <span class="block-title">Gastos Diarios</span>
+      <span class="conn-badge ${gd!==null?'':'warn'}"><span class="conn-dot"></span>${gd!==null?'Conectado':'Sin datos'}</span>
+    </div>
+    ${gd!==null?`
+      <div class="var-row"><span class="var-label">Total ${mesLabel}<span class="item-source" style="margin-left:6px;">gastos-diarios.html</span></span><span class="var-amount" style="color:var(--o)">${fmt(gd)} €</span></div>
+      <div style="font-size:10px;color:var(--muted);font-family:var(--fm);margin-top:8px;">Para ver el detalle ve a <a href="gastos-diarios.html" style="color:var(--b)">Gastos Diarios →</a></div>
+    `:`<div style="font-size:12px;color:var(--muted);font-family:var(--fm);">Añade gastos en <a href="gastos-diarios.html" style="color:var(--b)">Gastos Diarios →</a> para verlos aquí.</div>`}
+  </div>`;
+
+  // Obra
+  html+=`<div class="var-block" style="border-color:${obra!==null?'rgba(48,168,240,0.25)':'var(--border2)'};">
+    <div class="block-header">
+      <span class="block-title">Obra</span>
+      <span class="conn-badge ${obra!==null?'':'warn'}"><span class="conn-dot"></span>${obra!==null?'Conectado':'Sin datos'}</span>
+    </div>
+    ${obra!==null?`
+      <div class="var-row"><span class="var-label">Total gastado en obra<span class="item-source" style="margin-left:6px;">obra.html</span></span><span class="var-amount" style="color:var(--o)">${fmt(obra)} €</span></div>
+      <div style="font-size:10px;color:var(--muted);font-family:var(--fm);margin-top:8px;">Para ver el detalle ve a <a href="obra.html" style="color:var(--b)">Obra →</a></div>
+    `:`<div style="font-size:12px;color:var(--muted);font-family:var(--fm);">Registra gastos en <a href="obra.html" style="color:var(--b)">Obra →</a> para verlos aquí.</div>`}
+  </div>`;
+
+  document.getElementById('variables-body').innerHTML=html;
+}
+
+function renderAnual(){
+  const ing=totalIngresos(),fijos=totalGastosFijos(),vars=totalVariables(),disp=disponible();
+  document.getElementById('anual-body').innerHTML=`
+    <div class="annual-grid">
+      <div class="an-card"><div class="an-label">Ingresos año</div><div class="an-val" style="color:var(--g)">${fmt(ing*12,0)} €</div></div>
+      <div class="an-card"><div class="an-label">Gastos fijos año</div><div class="an-val" style="color:var(--r)">${fmt(fijos*12,0)} €</div></div>
+      <div class="an-card"><div class="an-label">Disponible año</div><div class="an-val" style="color:${disp>=0?'var(--g)':'var(--r)'}">${fmt(disp*12,0)} €</div></div>
+      <div class="an-card"><div class="an-label">Ahorro/mes</div><div class="an-val" style="color:${disp>=0?'var(--g)':'var(--r)'};font-size:16px">${fmt(disp)} €</div></div>
+      <div class="an-card"><div class="an-label">% ahorrado</div><div class="an-val" style="font-size:16px">${ing>0?fmt(disp/ing*100,1):0}%</div></div>
+      <div class="an-card"><div class="an-label">Regla 50/30/20</div><div class="an-val" style="font-size:12px;color:${fijos/ing<=0.5?'var(--g)':'var(--r)'}">${ing>0?fmt(fijos/ing*100,1):0}% fijos</div></div>
+    </div>
+    <div class="section-label">Proyección de ahorro</div>
+    <div style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;overflow:hidden;">
+      ${[3,6,12,24,36].map(m=>`<div style="display:flex;justify-content:space-between;padding:10px 14px;border-bottom:0.5px solid var(--border);font-size:13px;font-family:var(--fm);">
+        <span style="color:var(--muted)">${m} meses</span>
+        <span style="color:${disp*m>=0?'var(--g)':'var(--r)'}">${fmt(disp*m)} €</span>
+      </div>`).join('')}
+    </div>`;
+}
+
+function renderDatos(){
+  const size=(new Blob([JSON.stringify(state)]).size/1024).toFixed(1);
+  document.getElementById('datos-body').innerHTML=`
+    <div class="data-card">
+      <div style="font-family:var(--fh);font-size:16px;margin-bottom:6px;">Exportar / Importar</div>
+      <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-bottom:10px;">${state.ingresos.length} ingresos · ${state.gastos.length} gastos fijos · ${size} KB</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-y btn-sm" style="flex:1" onclick="exportJSON()">↓ Exportar JSON</button>
+        <button class="btn btn-sm" style="flex:1" onclick="document.getElementById('fi').click()">↑ Importar JSON</button>
+        <input type="file" id="fi" accept=".json" style="display:none" onchange="importFile(event)">
+      </div>
+      <div id="datos-fb" class="fb"></div>
+    </div>
+    <div class="data-card">
+      <div style="font-family:var(--fh);font-size:16px;margin-bottom:6px;">Apps conectadas</div>
+      <div style="font-size:11px;color:var(--muted);font-family:var(--fm);line-height:1.8;">
+        Los datos de Suministros, Gastos Diarios y Obra se leen directamente del almacenamiento local del navegador.<br>
+        No se copian ni duplican — siempre reflejan el estado actual de cada app.<br><br>
+        <strong style="color:var(--text);">⚠ Importante:</strong> deben estar en el mismo dominio (misma URL de GitHub Pages) para que funcione la conexión.
+      </div>
+    </div>`;
+}
+
+// Actions
+function addIngreso(){
+  const n=document.getElementById('ai-n').value.trim(),i=parseFloat(document.getElementById('ai-i').value);
+  if(!n||isNaN(i))return;
+  state.ingresos.push({id:nxtId(),nombre:n,importe:i,freq:document.getElementById('ai-f').value});
+  document.getElementById('ai-n').value='';document.getElementById('ai-i').value='';
+  save();render();
+}
+function addGasto(){
+  const n=document.getElementById('ag-n').value.trim(),i=parseFloat(document.getElementById('ag-i').value);
+  if(!n||isNaN(i))return;
+  state.gastos.push({id:nxtId(),nombre:n,importe:i,cat:document.getElementById('ag-c').value,freq:document.getElementById('ag-f').value});
+  document.getElementById('ag-n').value='';document.getElementById('ag-i').value='';
+  save();render();
+}
+function delIngreso(id){state.ingresos=state.ingresos.filter(x=>x.id!==id);save();render();}
+function delGasto(id){state.gastos=state.gastos.filter(x=>x.id!==id);save();render();}
+
+function exportJSON(){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));
+  a.download=`finanzas-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();showFB('Descargado ✓','var(--g)');
+}
+function importFile(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const p=JSON.parse(ev.target.result);
+      if(!p.ingresos||!p.gastos)throw new Error('Formato inválido');
+      if(!confirm('¿Importar? Se reemplazarán los datos actuales.'))return;
+      state=p;save();render();
+      showFB('Importado ✓','var(--g)');
+    }catch(err){showFB('Error: '+err.message,'var(--r)');}
+  };
+  r.readAsText(f);
+}
+function showFB(msg,color){
+  const el=document.getElementById('datos-fb');if(!el)return;
+  el.textContent=msg;el.style.color=color;el.style.display='block';
+  setTimeout(()=>el.style.display='none',2500);
+}
+
+render();
+</script>
+</body>
+</html>
