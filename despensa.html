@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <!-- ★ Bus compartido -->
 <script src="wapps-store.js"></script>
+<script src="wapps-onboarding.js"></script>
 <style>
 :root{
 --bg:#0a0a09; --bg2:#141412; --bg3:#1e1e1b;
@@ -101,9 +102,22 @@ select option{background:var(--bg2);}
 .fab{pointer-events:all;width:100%;padding:13px;font-family:var(--fh);font-size:14px;background:var(--y);color:#0a0a09;border:none;border-radius:12px;cursor:pointer;transition:transform 0.12s,opacity 0.12s;}
 .fab:active{transform:scale(0.97);opacity:0.85;}
 .empty{color:var(--muted);font-size:13px;text-align:center;padding:2rem 1rem;line-height:1.7;}
+
+/* ── GLOBAL SPINNER ── */
+.wapp-loading{position:fixed;inset:0;background:rgba(10,10,9,0.85);backdrop-filter:blur(4px);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:1;transition:opacity 0.3s;}
+.wapp-loading.fade{opacity:0;pointer-events:none;}
+.wapp-spinner{width:28px;height:28px;border:2px solid rgba(232,240,64,0.2);border-top-color:#e8f040;border-radius:50%;animation:wapp-spin 0.65s linear infinite;}
+@keyframes wapp-spin{to{transform:rotate(360deg)}}
+.wapp-loading-text{font-family:'DM Mono',monospace;font-size:11px;color:#5a5850;letter-spacing:1px;}
 </style>
 </head>
 <body>
+
+<!-- Global loading spinner -->
+<div class="wapp-loading" id="wapp-loading">
+  <div class="wapp-spinner"></div>
+  <div class="wapp-loading-text">CARGANDO…</div>
+</div>
 <div class="shell">
 
 <div class="wnav">
@@ -130,6 +144,10 @@ select option{background:var(--bg2);}
       <div class="field-row">
         <div class="field"><div class="field-label">Nombre</div><input type="text" id="f-nombre" placeholder="ej: Leche, Tomates…"></div>
         <div class="field"><div class="field-label">Cantidad</div><input type="text" id="f-qty" placeholder="ej: 2L"></div>
+      </div>
+      <div class="field-row" style="margin-top:8px;">
+        <div class="field"><div class="field-label">Cantidad</div><input type="number" id="f-stock" placeholder="1" min="0" step="1" value="1"></div>
+        <div class="field"><div class="field-label">Stock mínimo</div><input type="number" id="f-stockmin" placeholder="0" min="0" step="1" value="0"></div>
       </div>
       <div class="field-row" style="margin-top:8px;">
         <div class="field">
@@ -176,6 +194,11 @@ select option{background:var(--bg2);}
         <input type="file" id="fi" accept=".json" style="display:none" onchange="importFile(event)">
       </div>
       <div id="data-fb" style="font-size:11px;margin-top:8px;display:none;font-family:var(--fm);"></div>
+    </div>
+    <div class="config-card" style="margin-top:10px;">
+      <div class="config-title" style="font-size:13px;">Guía de uso</div>
+      <div class="config-desc">Vuelve a ver la introducción de la app.</div>
+      <button class="btn" style="width:100%;margin-top:4px;" onclick="if(typeof WOnboarding!=='undefined'){WOnboarding.reset('despensa');WOnboarding.show('despensa',OB_STEPS)}">👋 Ver guía de nuevo</button>
     </div>
   </div>
 </div>
@@ -247,7 +270,9 @@ function toggleAdd(){ document.getElementById('add-panel').classList.toggle('ope
 function closeAdd(){ document.getElementById('add-panel').classList.remove('open'); }
 function addAlimento(){
   const nombre=document.getElementById('f-nombre').value.trim(); if(!nombre)return;
-  state.alimentos.push({ id:++nid, nombre, qty:document.getElementById('f-qty').value.trim(), cat:document.getElementById('f-cat').value, fecha:document.getElementById('f-fecha').value });
+  const stockActual = parseInt(document.getElementById('f-stock')?.value)||1;
+  const stockMin = parseInt(document.getElementById('f-stockmin')?.value)||0;
+  state.alimentos.push({ id:++nid, nombre, qty:document.getElementById('f-qty').value.trim(), cat:document.getElementById('f-cat').value, fecha:document.getElementById('f-fecha').value, stock:stockActual, stockMin });
   document.getElementById('f-nombre').value=''; document.getElementById('f-qty').value=''; document.getElementById('f-fecha').value='';
   closeAdd(); saveState(); renderDespensa();
 }
@@ -255,18 +280,51 @@ function addAlimento(){
 // ── ★ MOVER A LISTA COMPRA ──
 function moverACompra(id) {
   const a = state.alimentos.find(x=>x.id===id); if(!a) return;
-  const compra = WStore.get('compra','data') || { listas:[], nextId:1 };
-  // Buscar lista activa o crear una
-  let lista = compra.listas?.find(l=>l.activa);
-  if(!lista) {
-    if(!compra.listas) compra.listas=[];
-    lista = { id: Date.now(), nombre:'Pendiente comprar', activa:true, items:[] };
-    compra.listas.push(lista);
+
+  // Extraer número y unidad de a.qty si existe (ej: "2 kg" → num=2, unit="kg")
+  const qtyStr = a.qty || '';
+  const qtyMatch = qtyStr.match(/^([\d.,]+)\s*(.*)$/);
+  const qtyNum = qtyMatch ? qtyMatch[1] : (a.stock > 1 ? String(a.stock) : '');
+  const qtyUnit = qtyMatch && qtyMatch[2] ? qtyMatch[2].trim() : 'uds';
+
+  // Intentar usar el bridge de compra.html si está abierto en la misma ventana
+  if(typeof window.addItemFromDespensa === 'function'){
+    window.addItemFromDespensa({text:a.nombre, cat:mapCat(a.cat), qty:qtyNum, unit:qtyUnit});
+    showDataFb(`"${a.nombre}" añadido a Lista Compra ✓`, 'var(--b)');
+    return;
   }
-  lista.items = lista.items||[];
-  lista.items.push({ id:Date.now()+Math.random(), nombre:a.nombre, cat:a.cat, qty:a.qty||'', done:false });
+
+  // Fallback: escribir directamente en WStore con el schema de compra_v2
+  const compra = WStore.get('compra','data') ||
+    (() => { try{const r=localStorage.getItem('compra_v2');if(r)return JSON.parse(r);}catch(e){} return null; })() ||
+    { lists:[{id:1,name:'Supermercado'}], items:[], cats:[], stores:[], nextId:10, history:[] };
+
+  const listId = compra.lists?.[0]?.id || 1;
+  compra.items = compra.items || [];
+  compra.nextId = (compra.nextId||10) + 1;
+  compra.items.push({
+    id: compra.nextId,
+    listId,
+    text: a.nombre,
+    cat: mapCat(a.cat),
+    qty: qtyNum ? `${qtyNum} ${qtyUnit}` : '',
+    unit: qtyUnit,
+    done: false,
+    store: ''
+  });
   WStore.set('compra','data', compra);
-  showDataFb(`"${a.nombre}" añadido a Lista Compra ✓`,'var(--b)');
+  try { localStorage.setItem('compra_v2', JSON.stringify(compra)); } catch(e) {}
+  showDataFb(`"${a.nombre}" añadido a Lista Compra ✓`, 'var(--b)');
+}
+
+// Mapear categorías de despensa a las de compra
+function mapCat(despensaCat){
+  const map = {
+    lacteos:'lacteos', verdura:'fruta', carne:'carne',
+    conservas:'otros', cereales:'otros', congelados:'congelados',
+    bebidas:'bebidas', salsas:'otros', otros:'otros'
+  };
+  return map[despensaCat] || 'otros';
 }
 
 // ── RENDER DESPENSA ──
@@ -330,11 +388,17 @@ function aliRow(a){
         <span class="ali-name">${esc(a.nombre)}</span>
         ${expBadge(a.fecha)}
       </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+        <button onclick="event.stopPropagation();changeStock(${a.id},-1)" style="width:22px;height:22px;border-radius:50%;background:var(--bg3);border:0.5px solid var(--border2);color:var(--text);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+        <span style="font-family:var(--fh);font-size:18px;min-width:24px;text-align:center;color:${(a.stock||1)<=(a.stockMin||0)?'var(--r)':'var(--text)'}">${a.stock||1}</span>
+        <button onclick="event.stopPropagation();changeStock(${a.id},1)" style="width:22px;height:22px;border-radius:50%;background:var(--bg3);border:0.5px solid var(--border2);color:var(--text);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+        ${(a.stock||1)<=(a.stockMin||0)?'<span style="font-size:9px;color:var(--r);font-family:var(--fm);border:0.5px solid rgba(240,64,48,0.3);padding:2px 6px;border-radius:99px;">STOCK BAJO</span>':''}
+      </div>
       <div class="ali-meta">
         <span class="ali-cat">${CAT_EMOJI[a.cat]||''} ${CATS[a.cat]||a.cat}</span>
         ${a.qty?`<span class="ali-qty">· ${esc(a.qty)}</span>`:''}
       </div>
-      <button class="move-compra" onclick="event.stopPropagation();moverACompra(${a.id})">→ Añadir a Lista Compra</button>
+      <button class="move-compra" onclick="event.stopPropagation();moverACompra(${a.id})">→ Añadir a Compra${a.qty ? ` (${esc(a.qty)})` : ''}</button>
       <div class="edit-form ${isEd?'open':''}" id="ef-${a.id}" onclick="event.stopPropagation()">
         <div style="display:flex;gap:6px;margin-bottom:7px;">
           <input type="text" id="ei-n-${a.id}" value="${esc(a.nombre)}" placeholder="Nombre" style="flex:2">
@@ -410,10 +474,55 @@ function showDataFb(msg,color){
   setTimeout(()=>el.style.display='none',2500);
 }
 
+// ── STOCK COUNTER ──
+function changeStock(id, delta) {
+  const a = state.alimentos.find(x=>x.id===id); if(!a) return;
+  a.stock = Math.max(0, (a.stock||1) + delta);
+  saveState();
+  // If stock hits 0 or below min, offer to add to compra
+  if(a.stock === 0 || a.stock <= (a.stockMin||0)) {
+    const msg = a.stock===0 ? `"${a.nombre}" está a 0. ¿Añadir a la lista de la compra?` : `"${a.nombre}" tiene stock bajo (${a.stock}). ¿Añadir a la lista de la compra?`;
+    if(confirm(msg)) moverACompra(id);
+  }
+  renderDespensa();
+}
+
 // ── INIT ──
 renderDespensa();
 // ★ Lanzar check de notificaciones al abrir (WNotify lo throttlea a 2h)
 if(typeof WNotify !== 'undefined') WNotify.check();
+
+// Hide spinner when app is ready
+window.addEventListener('DOMContentLoaded', () => {
+  const el = document.getElementById('wapp-loading');
+  if(el){ el.classList.add('fade'); setTimeout(()=>el.remove(), 350); }
+});
+
+// ── ONBOARDING ──
+const OB_STEPS = [
+  {
+    icon: '🥛',
+    title: 'Bienvenido a Despensa',
+    body: 'Controla lo que tienes en casa. Registra alimentos con su fecha de caducidad y recibe alertas antes de que se echen a perder.'
+  },
+  {
+    icon: '⚠️',
+    title: 'Alertas de caducidad',
+    body: 'Los alimentos que caducan <strong>hoy</strong> aparecen en rojo arriba. En <strong>naranja</strong> si caducan en menos de 3 días. Nunca más tiras comida sin darte cuenta.'
+  },
+  {
+    icon: '＋ −',
+    title: 'Contador de stock',
+    body: 'Cada alimento tiene botones <strong>+</strong> y <strong>−</strong> para llevar la cuenta de cuánto queda. Al llegar al mínimo te ofrece añadirlo automáticamente a la Lista de la Compra.'
+  },
+  {
+    icon: '🛒',
+    title: 'Conectado con Compra',
+    body: 'Pulsa <strong>"→ Añadir a Compra"</strong> en cualquier alimento para mandarlo a tu lista con la cantidad y unidad ya rellenas.'
+  }
+];
+if(typeof WOnboarding!=='undefined')WOnboarding.show('despensa', OB_STEPS);
+
 </script>
 </body>
 </html>

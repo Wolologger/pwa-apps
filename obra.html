@@ -7,31 +7,74 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Mi Obra">
 <meta name="theme-color" content="#1a1a18">
-<title>Mi Obra</title>
+<title>Mi Obra — W//APPS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="wapps-store.js"></script>
 <style>
 :root{--bg:#1a1a18;--bg2:#222220;--bg3:#2c2c29;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);--text:#f0ede6;--muted:#8a8880;--accent:#d4f060;--accent2:#60c0f0;--warn:#f0b060;--danger:#f06060;--ok:#60d490;--radius:12px;--font-head:'Syne',sans-serif;--font-mono:'DM Mono',monospace;}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-mono);overflow:hidden;}
 .shell{display:flex;flex-direction:column;height:100dvh;max-width:480px;margin:0 auto;}
-.shell{display:flex;flex-direction:column;height:100dvh;max-width:480px;margin:0 auto;}
-.header{padding:16px 20px 12px;border-bottom:0.5px solid var(--border);flex-shrink:0;}
-.header-top{display:flex;justify-content:space-between;align-items:center;}
-.logo{font-family:var(--font-head);font-size:20px;font-weight:700;letter-spacing:-0.5px;}
+
+/* SPINNER */
+.wapp-loading{position:fixed;inset:0;background:rgba(26,26,24,0.92);backdrop-filter:blur(6px);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;transition:opacity 0.3s;}
+.wapp-loading.fade{opacity:0;pointer-events:none;}
+.wapp-spinner{width:28px;height:28px;border:2px solid rgba(212,240,96,0.2);border-top-color:#d4f060;border-radius:50%;animation:wspin 0.65s linear infinite;}
+@keyframes wspin{to{transform:rotate(360deg)}}
+.wapp-loading-text{font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:1px;}
+
+/* NAV */
+.wnav{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg);border-bottom:1px solid rgba(255,255,255,0.1);flex-shrink:0;position:sticky;top:0;z-index:100;}
+.wnav-back{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid rgba(255,255,255,0.13);background:transparent;color:#5a5850;text-decoration:none;transition:all 0.15s;flex-shrink:0;}
+.wnav-back:hover{background:rgba(255,255,255,0.06);color:#e8f040;}
+.wnav-logo{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;line-height:1;flex-shrink:0;}
+.wnav-logo a{color:#5a5850;text-decoration:none;}
+.wnav-logo a span{color:#e8f040;}
+.wnav-sep{width:1px;height:16px;background:rgba(255,255,255,0.1);flex-shrink:0;}
+.wnav-title{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#5a5850;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.wnav-version{font-size:9px;color:#2a2a26;font-family:var(--font-mono);border:1px solid #2a2a26;padding:2px 6px;border-radius:3px;flex-shrink:0;}
+
+/* PROJECT SELECTOR BAR */
+.proj-bar{display:flex;align-items:center;gap:0;border-bottom:1px solid var(--border2);flex-shrink:0;background:var(--bg);overflow:hidden;}
+.proj-chips{display:flex;gap:6px;padding:8px 14px;overflow-x:auto;scrollbar-width:none;flex:1;}
+.proj-chips::-webkit-scrollbar{display:none;}
+.proj-chip{flex-shrink:0;padding:5px 12px;font-size:11px;font-family:var(--font-mono);border:0.5px solid var(--border2);border-radius:99px;background:transparent;color:var(--muted);cursor:pointer;transition:all 0.15s;white-space:nowrap;display:flex;align-items:center;gap:5px;}
+.proj-chip.active{background:var(--accent);color:#1a1a18;border-color:var(--accent);font-weight:500;}
+.proj-chip.archived{opacity:0.5;border-style:dashed;}
+.proj-chip .chip-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.proj-new-btn{flex-shrink:0;padding:8px 14px;background:transparent;border:none;border-left:0.5px solid var(--border2);color:var(--muted);font-size:18px;cursor:pointer;transition:color 0.15s;height:100%;display:flex;align-items:center;}
+.proj-new-btn:hover{color:var(--accent);}
+
+/* HEADER */
+.header{padding:14px 20px 10px;border-bottom:0.5px solid var(--border);flex-shrink:0;}
+.header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.logo{font-family:var(--font-head);font-size:18px;font-weight:700;letter-spacing:-0.5px;}
 .logo span{color:var(--accent);}
-.header-stats{display:flex;gap:12px;margin-top:10px;flex-wrap:wrap;}
+.header-actions{display:flex;gap:6px;align-items:center;}
+.header-action-btn{background:transparent;border:0.5px solid var(--border2);border-radius:6px;color:var(--muted);font-family:var(--font-mono);font-size:10px;padding:4px 9px;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+.header-action-btn:hover{border-color:var(--accent2);color:var(--accent2);}
+.header-action-btn.danger:hover{border-color:var(--danger);color:var(--danger);}
+.header-stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:6px;}
 .hstat{font-size:11px;color:var(--muted);}
 .hstat strong{color:var(--text);font-weight:500;}
-.pct-bar{height:3px;background:var(--bg3);border-radius:2px;margin-top:8px;overflow:hidden;}
+.pct-bar{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;}
 .pct-fill{height:100%;background:var(--accent);border-radius:2px;transition:width 0.4s ease;}
-.tabs{display:flex;padding:10px 20px;gap:6px;flex-shrink:0;}
-.tab{flex-shrink:0;padding:6px 16px;font-size:12px;font-family:var(--font-mono);border:0.5px solid var(--border2);border-radius:99px;background:transparent;color:var(--muted);cursor:pointer;transition:all 0.15s;}
+.archived-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--warn);font-family:var(--font-mono);border:0.5px solid rgba(240,176,96,0.3);padding:2px 8px;border-radius:99px;margin-bottom:4px;}
+
+/* TABS */
+.tabs{display:flex;padding:10px 20px;gap:6px;flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:6px 16px;font-size:12px;font-family:var(--font-mono);border:0.5px solid var(--border2);border-radius:99px;background:transparent;color:var(--muted);cursor:pointer;transition:all 0.15s;white-space:nowrap;}
 .tab.active{background:var(--accent);color:#1a1a18;border-color:var(--accent);font-weight:500;}
+
+/* CONTENT */
 .content{flex:1;overflow-y:auto;padding:0 20px 100px;scrollbar-width:none;}
 .content::-webkit-scrollbar{display:none;}
 .section{display:none;padding-top:16px;}
 .section.active{display:block;}
+
+/* CARDS */
 .card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;}
 .card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
 .card-title{font-family:var(--font-head);font-size:13px;font-weight:600;}
@@ -53,7 +96,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .prio-low{background:rgba(138,136,128,0.12);color:var(--muted);}
 .icon-btn{background:none;border:none;cursor:pointer;font-size:15px;padding:3px 5px;opacity:0.3;transition:opacity 0.15s;color:var(--text);flex-shrink:0;margin-top:1px;}
 .icon-btn:hover{opacity:1;}
-.icon-btn:hover.edit{color:var(--accent2);}
 .edit-form{background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;padding:10px;margin-top:8px;display:none;}
 .edit-form.open{display:block;}
 .edit-form input,.edit-form select{width:100%;margin-bottom:7px;background:var(--bg2);border:0.5px solid var(--border2);border-radius:6px;color:var(--text);font-family:var(--font-mono);font-size:13px;padding:8px 10px;outline:none;}
@@ -64,13 +106,15 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .cat-prog-head{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;}
 .mini-bar{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;}
 .mini-fill{height:100%;border-radius:2px;transition:width 0.3s;}
-input[type=text],input[type=number],select{background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--font-mono);font-size:13px;padding:9px 12px;outline:none;transition:border-color 0.15s;min-width:0;}
-input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--accent2);}
+input[type=text],input[type=number],select,textarea{background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--font-mono);font-size:13px;padding:9px 12px;outline:none;transition:border-color 0.15s;min-width:0;}
+input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{border-color:var(--accent2);}
 select option{background:var(--bg2);}
 .btn{padding:8px 14px;font-size:12px;font-family:var(--font-mono);border:0.5px solid var(--border2);border-radius:8px;background:transparent;color:var(--text);cursor:pointer;transition:all 0.15s;flex-shrink:0;}
 .btn:hover{background:var(--bg3);}
 .btn-accent{background:var(--accent);color:#1a1a18;border-color:var(--accent);font-weight:500;}
+.btn-accent:hover{opacity:0.9;}
 .btn-danger{color:var(--danger);border-color:rgba(240,96,96,0.3);}
+.btn-warn{color:var(--warn);border-color:rgba(240,176,96,0.3);}
 .gasto-row{padding:9px 0;border-bottom:0.5px solid var(--border);}
 .gasto-row:last-child{border-bottom:none;}
 .gasto-top{display:flex;align-items:center;gap:8px;}
@@ -92,12 +136,7 @@ select option{background:var(--bg2);}
 .json-viewer{background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;padding:12px;font-size:11px;line-height:1.7;overflow-x:auto;white-space:pre;color:var(--text);max-height:340px;overflow-y:auto;}
 .json-editor{width:100%;background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;padding:12px;font-size:11px;line-height:1.7;color:var(--text);font-family:var(--font-mono);resize:vertical;min-height:220px;outline:none;}
 .json-editor:focus{border-color:var(--accent2);}
-.json-key{color:var(--accent2);}
-.json-str{color:var(--ok);}
-.json-num{color:var(--warn);}
-.json-bool-t{color:var(--accent);}
-.json-bool-f{color:var(--danger);}
-.json-null{color:var(--muted);}
+.json-key{color:var(--accent2);}.json-str{color:var(--ok);}.json-num{color:var(--warn);}.json-bool-t{color:var(--accent);}.json-bool-f{color:var(--danger);}.json-null{color:var(--muted);}
 .action-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
 .section-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;margin-top:18px;}
 .section-label:first-child{margin-top:0;}
@@ -105,50 +144,92 @@ select option{background:var(--bg2);}
 .import-ok{background:rgba(96,212,144,0.12);color:var(--ok);border:0.5px solid rgba(96,212,144,0.25);}
 .import-err{background:rgba(240,96,96,0.12);color:var(--danger);border:0.5px solid rgba(240,96,96,0.25);}
 
-/* ═══ W//NAV SYSTEM ═══ */
-.wnav{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg);border-bottom:1px solid rgba(255,255,255,0.1);flex-shrink:0;position:sticky;top:0;z-index:100;}
-.wnav-back{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid rgba(255,255,255,0.13);background:transparent;color:#5a5850;text-decoration:none;transition:all 0.15s;flex-shrink:0;}
-.wnav-back:hover{background:rgba(255,255,255,0.06);color:#e8f040;}
-.wnav-back:active{transform:scale(0.94);}
-.wnav-logo{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;line-height:1;flex-shrink:0;}
-.wnav-logo a{color:#5a5850;text-decoration:none;transition:color 0.15s;}
-.wnav-logo a span{color:#e8f040;}
-.wnav-logo a:hover{color:#f0ebe0;}
-.wnav-sep{width:1px;height:16px;background:rgba(255,255,255,0.1);flex-shrink:0;}
-.wnav-title{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#5a5850;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg2);border:0.5px solid var(--border2);border-radius:16px 16px 0 0;width:100%;max-width:480px;padding:18px 18px 40px;animation:slideUp 0.22s ease;}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-grip{width:36px;height:3px;background:var(--border2);border-radius:99px;margin:0 auto 18px;}
+.modal-title{font-family:var(--font-head);font-size:20px;font-weight:700;margin-bottom:14px;letter-spacing:-0.3px;}
+.modal-field{margin-bottom:10px;}
+.modal-label{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.modal-input{width:100%;background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--font-mono);font-size:13px;padding:9px 12px;outline:none;}
+.modal-input:focus{border-color:var(--accent2);}
+.color-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
+.color-dot{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all 0.12s;flex-shrink:0;}
+.color-dot.sel{border-color:#fff;transform:scale(1.18);}
+.modal-btns{display:flex;gap:8px;margin-top:16px;}
+
+/* SUMMARY (todos los proyectos) */
+.proj-summary-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:border-color 0.15s;}
+.proj-summary-card:hover{border-color:var(--accent2);}
+.proj-summary-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.proj-summary-name{font-family:var(--font-head);font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.proj-summary-meta{font-size:10px;color:var(--muted);font-family:var(--font-mono);}
+.proj-summary-stats{display:flex;gap:10px;flex-wrap:wrap;}
+.proj-stat{font-size:11px;color:var(--muted);}
+.proj-stat strong{color:var(--text);}
 </style>
 </head>
 <body>
+
+<div class="wapp-loading" id="wapp-loading">
+  <div class="wapp-spinner"></div>
+  <div class="wapp-loading-text">CARGANDO…</div>
+</div>
+
 <div class="shell">
-<!-- ═══ W//NAV ═══ -->
+
+<!-- NAV -->
 <div class="wnav">
-  <a class="wnav-back" href="index.html" title="Inicio">
+  <a class="wnav-back" href="index.html">
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </a>
   <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
   <div class="wnav-sep"></div>
-  <div class="wnav-title">MI OBRA</div>
+  <div class="wnav-title" id="wnav-title">MIS OBRAS</div>
+  <div class="wnav-version">v1.6</div>
 </div>
 
-  <div class="header">
-    <div class="header-top">
-      <div class="logo">mi<span>obra</span></div>
-      <div style="font-size:11px;color:var(--muted)" id="save-indicator"></div>
+<!-- PROJECT SELECTOR -->
+<div class="proj-bar">
+  <div class="proj-chips" id="proj-chips"></div>
+  <button class="proj-new-btn" onclick="openNewProj()" title="Nueva obra">＋</button>
+</div>
+
+<!-- HEADER (single project) -->
+<div class="header" id="proj-header" style="display:none;">
+  <div class="header-top">
+    <div class="logo" id="proj-logo">mi<span>obra</span></div>
+    <div class="header-actions">
+      <button class="header-action-btn" onclick="openEditProj()" title="Editar proyecto">✎ Editar</button>
+      <button class="header-action-btn" id="archive-btn" onclick="toggleArchive()">📦 Archivar</button>
+      <span style="font-size:11px;color:var(--muted)" id="save-indicator"></span>
     </div>
-    <div class="header-stats" id="header-stats"></div>
-    <div class="pct-bar"><div class="pct-fill" id="main-pct-fill" style="width:0%"></div></div>
+  </div>
+  <div id="archived-badge" style="display:none;" class="archived-badge">📦 Obra archivada</div>
+  <div class="header-stats" id="header-stats"></div>
+  <div class="pct-bar"><div class="pct-fill" id="main-pct-fill" style="width:0%"></div></div>
+</div>
+
+<!-- TABS (single project) -->
+<div class="tabs" id="proj-tabs" style="display:none;">
+  <button class="tab active" onclick="showTab('resumen',this)">Resumen</button>
+  <button class="tab" onclick="showTab('tareas',this)">Tareas</button>
+  <button class="tab" onclick="showTab('gastos',this)">Gastos</button>
+  <button class="tab" onclick="showTab('datos',this)">Datos</button>
+</div>
+
+<div class="content">
+
+  <!-- VISTA GLOBAL (todos los proyectos) -->
+  <div id="global-view" style="padding-top:16px;">
+    <div id="global-body"></div>
   </div>
 
-  <div class="tabs">
-    <button class="tab active" onclick="showTab('resumen',this)">Resumen</button>
-    <button class="tab" onclick="showTab('tareas',this)">Tareas</button>
-    <button class="tab" onclick="showTab('gastos',this)">Gastos</button>
-    <button class="tab" onclick="showTab('datos',this)">Datos</button>
-  </div>
-
-  <div class="content">
+  <!-- VISTAS DE PROYECTO INDIVIDUAL -->
+  <div id="project-view" style="display:none;">
     <div id="resumen" class="section active"><div id="resumen-body"></div></div>
-
     <div id="tareas" class="section">
       <div class="add-panel" id="add-task-panel">
         <input type="text" id="t-text" placeholder="Descripción de la tarea...">
@@ -165,7 +246,6 @@ select option{background:var(--bg2);}
       </div>
       <div id="tasks-body"></div>
     </div>
-
     <div id="gastos" class="section">
       <div class="add-panel" id="add-gasto-panel">
         <input type="text" id="g-concepto" placeholder="Concepto...">
@@ -178,189 +258,363 @@ select option{background:var(--bg2);}
       </div>
       <div id="gastos-body"></div>
     </div>
-    <div id="datos" class="section">
-      <div id="datos-body"></div>
-    </div>
+    <div id="datos" class="section"><div id="datos-body"></div></div>
   </div>
-    <button class="fab" id="fab-btn" onclick="fabAction()">+ Añadir tarea</button>
+
+</div>
+
+<div class="fab-area" id="fab-area" style="display:none;">
+  <button class="fab" id="fab-btn" onclick="fabAction()">+ Añadir tarea</button>
+</div>
+
+</div><!-- /shell -->
+
+<!-- MODAL nueva/editar obra -->
+<div class="modal-overlay" id="modal-proj" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-grip"></div>
+    <div class="modal-title" id="modal-proj-title">Nueva obra</div>
+    <div class="modal-field">
+      <div class="modal-label">Nombre</div>
+      <input class="modal-input" id="mp-name" placeholder="Ej: Casa Reinosa">
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">Descripción (opcional)</div>
+      <input class="modal-input" id="mp-desc" placeholder="Breve descripción…">
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">Presupuesto (€)</div>
+      <input class="modal-input" type="number" id="mp-budget" placeholder="0">
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">Color</div>
+      <div class="color-row" id="mp-colors"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-danger" id="mp-del-btn" onclick="deleteCurrentProj()" style="display:none;">Eliminar</button>
+      <button class="btn btn-accent" style="flex:1" onclick="saveModal()">Guardar</button>
+    </div>
   </div>
 </div>
 
 <script>
-const CATS=['Calefacción/Gas','Cocina','Fontanería','Electricidad','Acabados','Decoración','Exterior','Contratos/Servicios','Mudanza','Otros'];
-const CAT_COLORS={'Calefacción/Gas':'#f06060','Cocina':'#d4f060','Fontanería':'#60c0f0','Electricidad':'#f0b060','Acabados':'#c060f0','Decoración':'#f060c0','Exterior':'#60d490','Contratos/Servicios':'#8a8880','Mudanza':'#f09060','Otros':'#8a8880'};
+// ── CONSTANTS ──
+const CATS = ['Calefacción/Gas','Cocina','Fontanería','Electricidad','Acabados','Decoración','Exterior','Contratos/Servicios','Mudanza','Otros'];
+const CAT_COLORS = {'Calefacción/Gas':'#f06060','Cocina':'#d4f060','Fontanería':'#60c0f0','Electricidad':'#f0b060','Acabados':'#c060f0','Decoración':'#f060c0','Exterior':'#60d490','Contratos/Servicios':'#8a8880','Mudanza':'#f09060','Otros':'#8a8880'};
+const PROJ_COLORS = ['#d4f060','#60c0f0','#f0b060','#f06060','#c060f0','#60d490','#f060c0','#f09060','#8a8880','#60d4d4'];
 
-const DEFAULT_STATE={
-  tasks:[
-    {id:1,cat:'Electricidad',text:'Revisión completa instalación',done:true,prio:'high'},
-    {id:2,cat:'Electricidad',text:'Mecanismos instalados (enchufes, interruptores, RJ45)',done:true,prio:'high'},
-    {id:3,cat:'Electricidad',text:'Funcionamiento comprobado en toda la vivienda',done:true,prio:'high'},
-    {id:4,cat:'Electricidad',text:'Acabar de mover cables y tubo campana extractora',done:false,prio:'med'},
-    {id:5,cat:'Electricidad',text:'Punto eléctrico campana extractora cocina',done:false,prio:'high'},
-    {id:6,cat:'Electricidad',text:'Colgar lámparas, TV y similares',done:false,prio:'med'},
-    {id:7,cat:'Electricidad',text:'Poner cables caja de comunicaciones ordenados',done:false,prio:'low'},
-    {id:8,cat:'Acabados',text:'Pintura blanca en toda la vivienda',done:true,prio:'high'},
-    {id:9,cat:'Acabados',text:'Pared de acento por habitación',done:true,prio:'high'},
-    {id:10,cat:'Acabados',text:'Pintar zona de la escalera',done:false,prio:'med'},
-    {id:11,cat:'Acabados',text:'Pegar vinilo en la ventana',done:false,prio:'low'},
-    {id:12,cat:'Acabados',text:'Hacer muebles a medida',done:false,prio:'med'},
-    {id:13,cat:'Acabados',text:'Limpieza final de obra',done:false,prio:'high'},
-    {id:14,cat:'Calefacción/Gas',text:'Instalar 43 radiadores',done:false,prio:'high'},
-    {id:15,cat:'Calefacción/Gas',text:'Obtener certificado de instalación de gas (IRG)',done:false,prio:'high'},
-    {id:16,cat:'Calefacción/Gas',text:'Alta gas propano canalizado con Nortegas',done:false,prio:'high'},
-    {id:17,cat:'Calefacción/Gas',text:'Puesta en marcha de la caldera',done:false,prio:'high'},
-    {id:18,cat:'Calefacción/Gas',text:'Llamar a reparar / revisar estufa de pellets',done:false,prio:'med'},
-    {id:19,cat:'Fontanería',text:'Pegar sanitarios del baño',done:false,prio:'high'},
-    {id:20,cat:'Fontanería',text:'Mover tubos de desagüe',done:false,prio:'high'},
-    {id:21,cat:'Fontanería',text:'Poner grifo en la calle (exterior)',done:false,prio:'med'},
-    {id:22,cat:'Fontanería',text:'Toallero instalado',done:true,prio:'low'},
-    {id:23,cat:'Cocina',text:'Pedir la cocina (presupuesto cerrado)',done:true,prio:'high'},
-    {id:24,cat:'Cocina',text:'Montar la cocina',done:false,prio:'high'},
-    {id:25,cat:'Cocina',text:'Ajuste campana extractora',done:false,prio:'high'},
-    {id:26,cat:'Decoración',text:'Armarios adquiridos (financiados 3 meses)',done:true,prio:'med'},
-    {id:27,cat:'Decoración',text:'Colgar espejo del baño',done:false,prio:'low'},
-    {id:28,cat:'Decoración',text:'Poner cortinas',done:false,prio:'low'},
-    {id:29,cat:'Exterior',text:'Limpieza del jardín',done:false,prio:'low'},
-    {id:30,cat:'Exterior',text:'Poner césped',done:false,prio:'low'},
-    {id:31,cat:'Contratos/Servicios',text:'Contratar WiFi',done:false,prio:'high'},
-    {id:32,cat:'Contratos/Servicios',text:'Contratar gas (Nortegas)',done:false,prio:'high'},
-    {id:33,cat:'Mudanza',text:'Subir mesa de trabajo, instrumentos y demás',done:false,prio:'med'},
-  ],
-  gastos:[
-    {id:101,concepto:'Cocina (ajustada)',importe:4256.57,cat:'Cocina'},
-    {id:102,concepto:'Fontanero',importe:850,cat:'Fontanería'},
-    {id:103,concepto:'Electricista',importe:300,cat:'Electricidad'},
-    {id:104,concepto:'Alta gas',importe:250,cat:'Calefacción/Gas'},
-    {id:105,concepto:'Armarios (financiados 3 meses)',importe:919.64,cat:'Decoración'},
-  ],
-  presupuesto:7500,
-  nextId:200
-};
-
-let state=loadState();
-let currentTab='resumen';
-let nid=state.nextId||200;
-let editingTask=null;
-let editingGasto=null;
-
-function loadState(){
-  try{const r=localStorage.getItem('miobra_v2');if(r)return JSON.parse(r);}catch(e){}
-  return JSON.parse(JSON.stringify(DEFAULT_STATE));
-}
-function saveState(){
-  state.nextId=nid;
-  try{
-    localStorage.setItem('miobra_v2',JSON.stringify(state));
-    const el=document.getElementById('save-indicator');
-    if(el){el.textContent='guardado ✓';el.style.color='#60d490';setTimeout(()=>{el.textContent='';},1800);}
-  }catch(e){}
-}
-function nextId(){return ++nid;}
-
-function populateSelects(){
-  ['t-cat','g-cat'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el)el.innerHTML=CATS.map(c=>`<option value="${c}">${c}</option>`).join('');
-  });
+// ── STATE ──
+// state = { proyectos: [{id, name, desc, color, presupuesto, tasks:[], gastos:[], archived, createdAt}], nextId }
+function loadState() {
+  // Try new multi-project format
+  const d = typeof WStore !== 'undefined' ? WStore.get('obra','data') : null;
+  if (d?.proyectos) return d;
+  try { const r = localStorage.getItem('obra_multiproj_v1'); if(r) { const p=JSON.parse(r); if(p.proyectos) return p; } } catch(e) {}
+  // Migrate legacy single-project
+  try {
+    const legacy = localStorage.getItem('miobra_v2');
+    if (legacy) {
+      const old = JSON.parse(legacy);
+      return {
+        proyectos: [{
+          id: 1, name: 'Mi Obra', desc: '', color: '#d4f060',
+          presupuesto: old.presupuesto || 7500,
+          tasks: old.tasks || [],
+          gastos: old.gastos || [],
+          archived: false,
+          createdAt: new Date().toISOString().slice(0,10)
+        }],
+        nextId: old.nextId || 200
+      };
+    }
+  } catch(e) {}
+  return { proyectos: [defaultProject()], nextId: 200 };
 }
 
-function showTab(name,el){
+function defaultProject() {
+  return {
+    id: 1, name: 'Mi Obra', desc: 'Obra principal', color: '#d4f060',
+    presupuesto: 7500,
+    tasks: [
+      {id:1,cat:'Electricidad',text:'Revisión completa instalación',done:true,prio:'high'},
+      {id:2,cat:'Electricidad',text:'Mecanismos instalados',done:true,prio:'high'},
+      {id:3,cat:'Acabados',text:'Pintura blanca en toda la vivienda',done:true,prio:'high'},
+      {id:4,cat:'Calefacción/Gas',text:'Instalar radiadores',done:false,prio:'high'},
+      {id:5,cat:'Calefacción/Gas',text:'Alta gas y puesta en marcha caldera',done:false,prio:'high'},
+      {id:6,cat:'Fontanería',text:'Pegar sanitarios del baño',done:false,prio:'high'},
+      {id:7,cat:'Cocina',text:'Montar la cocina',done:false,prio:'high'},
+      {id:8,cat:'Acabados',text:'Limpieza final de obra',done:false,prio:'high'},
+    ],
+    gastos: [
+      {id:101,concepto:'Cocina',importe:4256.57,cat:'Cocina'},
+      {id:102,concepto:'Fontanero',importe:850,cat:'Fontanería'},
+      {id:103,concepto:'Electricista',importe:300,cat:'Electricidad'},
+    ],
+    archived: false,
+    createdAt: new Date().toISOString().slice(0,10)
+  };
+}
+
+let state = loadState();
+let nid = state.nextId || 200;
+let activeProjectId = state.proyectos.find(p=>!p.archived)?.id || state.proyectos[0]?.id || null;
+let currentTab = 'resumen';
+let editingTask = null;
+let editingGasto = null;
+let modalEditId = null;
+let modalColor = PROJ_COLORS[0];
+let viewMode = 'project'; // 'global' | 'project'
+
+function activeProject() { return state.proyectos.find(p=>p.id===activeProjectId) || null; }
+function nextId() { return ++nid; }
+
+function saveState() {
+  state.nextId = nid;
+  try { localStorage.setItem('obra_multiproj_v1', JSON.stringify(state)); } catch(e) {}
+  // Also keep legacy key in sync for finanzas bridge
+  const proj = activeProject();
+  if (proj) {
+    try { localStorage.setItem('miobra_v2', JSON.stringify({tasks:proj.tasks,gastos:proj.gastos,presupuesto:proj.presupuesto,nextId:nid})); } catch(e) {}
+  }
+  if (typeof WStore !== 'undefined') WStore.set('obra','data', state);
+  const el = document.getElementById('save-indicator');
+  if (el) { el.textContent='guardado ✓'; el.style.color='#60d490'; setTimeout(()=>{el.textContent='';}, 1800); }
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt(n) { return Number(n||0).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+// ── NAVIGATION ──
+function selectProject(id) {
+  activeProjectId = id;
+  currentTab = 'resumen';
+  viewMode = 'project';
+  editingTask = null; editingGasto = null;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelector('.tab')?.classList.add('active');
+  render();
+}
+
+function showGlobalView() {
+  viewMode = 'global';
+  activeProjectId = null;
+  render();
+}
+
+function showTab(name, el) {
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById(name).classList.add('active');
   el.classList.add('active');
-  currentTab=name;
-  const fab=document.getElementById('fab-btn');
-  const fabArea=document.querySelector('.fab-area');
-  const labels={resumen:null,tareas:'+ Añadir tarea',gastos:'+ Añadir gasto',datos:null};
-  if(fabArea){
-    if(labels[name]){fab.textContent=labels[name];fabArea.style.display='block';}
-    else{fabArea.style.display='none';}
-  }
+  currentTab = name;
+  const fab = document.getElementById('fab-area');
+  const fabBtn = document.getElementById('fab-btn');
+  const labels = {resumen:null,tareas:'+ Añadir tarea',gastos:'+ Añadir gasto',datos:null};
+  if (fab) { fab.style.display = labels[name] ? 'block':'none'; if(labels[name])fabBtn.textContent=labels[name]; }
   render();
 }
-function fabAction(){
-  const panels={tareas:'add-task-panel',gastos:'add-gasto-panel'};
-  if(panels[currentTab])togglePanel(panels[currentTab]);
-}
-function togglePanel(id){document.getElementById(id).classList.toggle('open');}
-function closePanel(id){document.getElementById(id).classList.remove('open');}
 
-function render(){
-  renderHeader();
-  if(currentTab==='resumen')renderResumen();
-  if(currentTab==='tareas')renderTareas();
-  if(currentTab==='gastos')renderGastos();
-  if(currentTab==='datos')renderDatos();
+function fabAction() {
+  const panels = {tareas:'add-task-panel', gastos:'add-gasto-panel'};
+  if (panels[currentTab]) togglePanel(panels[currentTab]);
+}
+function togglePanel(id) { document.getElementById(id).classList.toggle('open'); }
+function closePanel(id) { document.getElementById(id).classList.remove('open'); }
+
+// ── RENDER ──
+function render() {
+  renderProjBar();
+  if (viewMode === 'global') {
+    document.getElementById('global-view').style.display='block';
+    document.getElementById('project-view').style.display='none';
+    document.getElementById('proj-header').style.display='none';
+    document.getElementById('proj-tabs').style.display='none';
+    document.getElementById('fab-area').style.display='none';
+    document.getElementById('wnav-title').textContent='MIS OBRAS';
+    renderGlobal();
+  } else {
+    document.getElementById('global-view').style.display='none';
+    document.getElementById('project-view').style.display='block';
+    document.getElementById('proj-header').style.display='block';
+    document.getElementById('proj-tabs').style.display='flex';
+    renderProjectHeader();
+    populateSelects();
+    if (currentTab==='resumen') renderResumen();
+    if (currentTab==='tareas') renderTareas();
+    if (currentTab==='gastos') renderGastos();
+    if (currentTab==='datos') renderDatos();
+  }
 }
 
-function renderHeader(){
-  const total=state.tasks.length;
-  const done=state.tasks.filter(t=>t.done).length;
-  const pct=total?Math.round(done/total*100):0;
-  const urg=state.tasks.filter(t=>!t.done&&t.prio==='high').length;
-  const gastado=state.gastos.reduce((s,g)=>s+g.importe,0);
-  document.getElementById('header-stats').innerHTML=
+function renderProjBar() {
+  const chips = state.proyectos.map(p => {
+    const isActive = !viewMode.includes('global') && p.id === activeProjectId;
+    const done = p.tasks.filter(t=>t.done).length;
+    const total = p.tasks.length;
+    const pct = total ? Math.round(done/total*100) : 0;
+    return `<button class="proj-chip ${isActive?'active':''} ${p.archived?'archived':''}"
+      onclick="selectProject(${p.id})"
+      style="${isActive?'':''}">
+      <span class="chip-dot" style="background:${isActive?'#1a1a18':p.color}"></span>
+      ${esc(p.name)}
+      <span style="font-size:9px;opacity:0.7">${pct}%</span>
+    </button>`;
+  }).join('');
+  const allBtn = `<button class="proj-chip ${viewMode==='global'?'active':''}" onclick="showGlobalView()" style="margin-right:4px;">
+    📋 Todas
+  </button>`;
+  document.getElementById('proj-chips').innerHTML = allBtn + chips;
+}
+
+function renderProjectHeader() {
+  const proj = activeProject(); if(!proj) return;
+  const total = proj.tasks.length;
+  const done = proj.tasks.filter(t=>t.done).length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  const urg = proj.tasks.filter(t=>!t.done&&t.prio==='high').length;
+  const gastado = proj.gastos.reduce((s,g)=>s+g.importe,0);
+  document.getElementById('proj-logo').innerHTML = `mi<span style="color:${proj.color}">${esc(proj.name)}</span>`;
+  document.getElementById('wnav-title').textContent = proj.name.toUpperCase();
+  document.getElementById('header-stats').innerHTML =
     `<span class="hstat"><strong>${pct}%</strong> hecho</span>
      <span class="hstat"><strong>${done}/${total}</strong> tareas</span>
      <span class="hstat" style="color:${urg>0?'var(--danger)':'var(--muted)'}"><strong>${urg}</strong> urgentes</span>
-     <span class="hstat"><strong>${gastado.toLocaleString('es-ES',{minimumFractionDigits:2})} €</strong></span>`;
-  document.getElementById('main-pct-fill').style.width=pct+'%';
+     <span class="hstat"><strong>${fmt(gastado)} €</strong></span>`;
+  document.getElementById('main-pct-fill').style.width = pct + '%';
+  const archBadge = document.getElementById('archived-badge');
+  const archBtn = document.getElementById('archive-btn');
+  if (proj.archived) {
+    archBadge.style.display='flex';
+    archBtn.textContent='📂 Restaurar';
+    archBtn.className='header-action-btn';
+  } else {
+    archBadge.style.display='none';
+    archBtn.textContent='📦 Archivar';
+    archBtn.className='header-action-btn';
+  }
 }
 
-function renderResumen(){
-  const gastado=state.gastos.reduce((s,g)=>s+g.importe,0);
-  const colchon=state.presupuesto-gastado;
-  let html=`<div class="card" style="margin-bottom:16px;border-color:rgba(212,240,96,0.2)">
+// ── GLOBAL VIEW ──
+function renderGlobal() {
+  const active = state.proyectos.filter(p=>!p.archived);
+  const archived = state.proyectos.filter(p=>p.archived);
+  let html = '';
+
+  // Summary totals
+  const totalGastado = state.proyectos.reduce((s,p)=>s+p.gastos.reduce((ss,g)=>ss+g.importe,0),0);
+  const totalPresup = state.proyectos.reduce((s,p)=>s+(p.presupuesto||0),0);
+  const totalTareas = state.proyectos.reduce((s,p)=>s+p.tasks.length,0);
+  const totalDone = state.proyectos.reduce((s,p)=>s+p.tasks.filter(t=>t.done).length,0);
+
+  html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+    <div class="card" style="padding:12px;"><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Proyectos activos</div><div style="font-size:22px;font-family:var(--font-head);">${active.length}</div></div>
+    <div class="card" style="padding:12px;"><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Gasto total</div><div style="font-size:18px;font-family:var(--font-head);color:var(--accent2);">${fmt(totalGastado)} €</div></div>
+    <div class="card" style="padding:12px;"><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Tareas</div><div style="font-size:18px;font-family:var(--font-head);">${totalDone}/${totalTareas}</div></div>
+    <div class="card" style="padding:12px;"><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Presupuesto total</div><div style="font-size:18px;font-family:var(--font-head);color:var(--ok);">${fmt(totalPresup)} €</div></div>
+  </div>`;
+
+  if (active.length) {
+    html += `<div class="section-label">Activas (${active.length})</div>`;
+    active.forEach(p => { html += projSummaryCard(p); });
+  }
+  if (archived.length) {
+    html += `<div class="section-label" style="margin-top:20px;">Archivadas (${archived.length})</div>`;
+    archived.forEach(p => { html += projSummaryCard(p, true); });
+  }
+  if (!state.proyectos.length) {
+    html = '<div class="empty">Sin obras. Pulsa ＋ para crear la primera.</div>';
+  }
+  document.getElementById('global-body').innerHTML = html;
+}
+
+function projSummaryCard(p, isArch=false) {
+  const done = p.tasks.filter(t=>t.done).length;
+  const total = p.tasks.length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  const gastado = p.gastos.reduce((s,g)=>s+g.importe,0);
+  const urg = p.tasks.filter(t=>!t.done&&t.prio==='high').length;
+  return `<div class="proj-summary-card" onclick="selectProject(${p.id})" style="${isArch?'opacity:0.6':''}">
+    <div class="proj-summary-top">
+      <div>
+        <div class="proj-summary-name">
+          <span style="width:10px;height:10px;border-radius:50%;background:${p.color};flex-shrink:0;display:inline-block;"></span>
+          ${esc(p.name)}
+          ${isArch?'<span class="badge" style="background:rgba(240,176,96,0.15);color:var(--warn);">archivada</span>':''}
+        </div>
+        ${p.desc?`<div class="proj-summary-meta">${esc(p.desc)}</div>`:''}
+        <div class="proj-summary-meta">Creada ${p.createdAt}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div style="font-family:var(--font-head);font-size:20px;color:${p.color}">${pct}%</div>
+        <div style="font-size:10px;color:var(--muted);">${done}/${total} tareas</div>
+      </div>
+    </div>
+    <div class="mini-bar" style="margin-bottom:8px;"><div class="mini-fill" style="width:${pct}%;background:${p.color}"></div></div>
+    <div class="proj-summary-stats">
+      <span class="proj-stat"><strong>${fmt(gastado)} €</strong> gastado</span>
+      ${p.presupuesto?`<span class="proj-stat"><strong>${fmt(p.presupuesto)} €</strong> presup.</span>`:''}
+      ${urg?`<span class="proj-stat" style="color:var(--danger)"><strong>${urg}</strong> urgentes</span>`:''}
+    </div>
+  </div>`;
+}
+
+// ── RESUMEN ──
+function renderResumen() {
+  const proj = activeProject(); if(!proj) return;
+  const gastado = proj.gastos.reduce((s,g)=>s+g.importe,0);
+  const colchon = (proj.presupuesto||0) - gastado;
+  let html = `<div class="card" style="margin-bottom:16px;border-color:rgba(212,240,96,0.2)">
     <div class="card-head"><span class="card-title">Situación financiera</span></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
       <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;">
-        <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Disponible</div>
-        <div style="font-size:18px;font-weight:500;color:var(--accent)">${state.presupuesto.toLocaleString('es-ES')} €</div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Presupuesto</div>
+        <div style="font-size:18px;font-weight:500;color:var(--accent)">${fmt(proj.presupuesto||0)} €</div>
       </div>
       <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;">
         <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Gastado</div>
-        <div style="font-size:18px;font-weight:500;color:var(--warn)">${gastado.toLocaleString('es-ES',{minimumFractionDigits:2})} €</div>
+        <div style="font-size:18px;font-weight:500;color:var(--warn)">${fmt(gastado)} €</div>
       </div>
       <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;grid-column:1/-1;">
         <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Colchón actual</div>
-        <div style="font-size:22px;font-weight:500;color:${colchon<1000?'var(--danger)':'var(--ok)'}">${colchon.toLocaleString('es-ES',{minimumFractionDigits:2})} €</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:4px;">Armarios: 3 × 306 € pendientes · Situación <span style="color:var(--ok)">controlada</span></div>
+        <div style="font-size:22px;font-weight:500;color:${colchon<1000?'var(--danger)':'var(--ok)'}">${fmt(colchon)} €</div>
       </div>
     </div>
   </div>`;
-  CATS.forEach(cat=>{
-    const tasks=state.tasks.filter(t=>t.cat===cat);
-    if(!tasks.length)return;
-    const done=tasks.filter(t=>t.done).length;
-    const pct=Math.round(done/tasks.length*100);
-    const color=CAT_COLORS[cat]||'#8a8880';
-    html+=`<div class="cat-prog"><div class="cat-prog-head"><span style="font-size:12px;color:var(--text)">${cat}</span><span style="font-size:11px;color:var(--muted)">${done}/${tasks.length} · ${pct}%</span></div><div class="mini-bar"><div class="mini-fill" style="width:${pct}%;background:${color}"></div></div></div>`;
+  CATS.forEach(cat => {
+    const tasks = proj.tasks.filter(t=>t.cat===cat);
+    if (!tasks.length) return;
+    const done = tasks.filter(t=>t.done).length;
+    const pct = Math.round(done/tasks.length*100);
+    const color = CAT_COLORS[cat]||'#8a8880';
+    html += `<div class="cat-prog"><div class="cat-prog-head"><span style="font-size:12px;">${cat}</span><span style="font-size:11px;color:var(--muted)">${done}/${tasks.length} · ${pct}%</span></div><div class="mini-bar"><div class="mini-fill" style="width:${pct}%;background:${color}"></div></div></div>`;
   });
-  const urg=state.tasks.filter(t=>!t.done&&t.prio==='high');
-  if(urg.length){
-    html+=`<div class="card" style="margin-top:16px;border-color:rgba(240,96,96,0.25)"><div class="card-head"><span class="card-title" style="color:var(--danger)">Urgentes ahora</span><span class="badge badge-warn">${urg.length}</span></div>`;
-    urg.forEach(t=>{
-      html+=`<div class="task-row"><div class="task-check ${t.done?'done':''}" onclick="toggleTask(${t.id})"></div><div class="task-body"><div class="task-text">${t.text}</div><div class="task-meta"><span style="font-size:10px;color:var(--muted)">${t.cat}</span></div></div></div>`;
+  const urg = proj.tasks.filter(t=>!t.done&&t.prio==='high');
+  if (urg.length) {
+    html += `<div class="card" style="margin-top:16px;border-color:rgba(240,96,96,0.25)"><div class="card-head"><span class="card-title" style="color:var(--danger)">Urgentes ahora</span><span class="badge badge-warn">${urg.length}</span></div>`;
+    urg.forEach(t => {
+      html += `<div class="task-row"><div class="task-check ${t.done?'done':''}" onclick="toggleTask(${t.id})"></div><div class="task-body"><div class="task-text">${esc(t.text)}</div><div class="task-meta"><span style="font-size:10px;color:var(--muted)">${t.cat}</span></div></div></div>`;
     });
-    html+='</div>';
+    html += '</div>';
   }
-  document.getElementById('resumen-body').innerHTML=html;
+  document.getElementById('resumen-body').innerHTML = html;
 }
 
-function renderTareas(){
-  let html='';
-  CATS.forEach(cat=>{
-    const tasks=state.tasks.filter(t=>t.cat===cat);
-    if(!tasks.length)return;
-    const done=tasks.filter(t=>t.done).length;
-    const color=CAT_COLORS[cat]||'#8a8880';
-    html+=`<div class="cat-group"><div class="cat-label" style="color:${color}">${cat} <span style="color:var(--muted);font-size:10px;letter-spacing:0;text-transform:none;font-weight:400">${done}/${tasks.length}</span></div>`;
-    tasks.forEach(t=>{
-      const pL={high:'urgente',med:'normal',low:'después'}[t.prio];
-      const pC={high:'prio-high',med:'prio-med',low:'prio-low'}[t.prio];
-      const isEd=(editingTask===t.id);
-      html+=`<div class="task-row">
+// ── TAREAS ──
+function renderTareas() {
+  const proj = activeProject(); if(!proj) return;
+  let html = '';
+  CATS.forEach(cat => {
+    const tasks = proj.tasks.filter(t=>t.cat===cat);
+    if (!tasks.length) return;
+    const done = tasks.filter(t=>t.done).length;
+    const color = CAT_COLORS[cat]||'#8a8880';
+    html += `<div class="cat-group"><div class="cat-label" style="color:${color}">${cat} <span style="color:var(--muted);font-size:10px;letter-spacing:0;text-transform:none;font-weight:400">${done}/${tasks.length}</span></div>`;
+    tasks.forEach(t => {
+      const pL = {high:'urgente',med:'normal',low:'después'}[t.prio];
+      const pC = {high:'prio-high',med:'prio-med',low:'prio-low'}[t.prio];
+      const isEd = editingTask===t.id;
+      html += `<div class="task-row">
         <div class="task-check ${t.done?'done':''}" onclick="toggleTask(${t.id})"></div>
         <div class="task-body">
           <div class="task-text ${t.done?'done':''}">${esc(t.text)}</div>
@@ -380,30 +634,32 @@ function renderTareas(){
             </div>
           </div>
         </div>
-        <button class="icon-btn" onclick="startEditTask(${t.id})" title="Editar">✎</button>
+        <button class="icon-btn" onclick="startEditTask(${t.id})">✎</button>
       </div>`;
     });
-    html+='</div>';
+    html += '</div>';
   });
-  document.getElementById('tasks-body').innerHTML=html||'<div class="empty">Sin tareas. Pulsa + para añadir.</div>';
+  document.getElementById('tasks-body').innerHTML = html || '<div class="empty">Sin tareas. Pulsa + para añadir.</div>';
 }
 
-function renderGastos(){
-  const total=state.gastos.reduce((s,g)=>s+g.importe,0);
-  let html='';
-  if(state.gastos.length){
-    [...state.gastos].reverse().forEach(g=>{
-      const isEd=(editingGasto===g.id);
-      html+=`<div class="gasto-row">
+// ── GASTOS ──
+function renderGastos() {
+  const proj = activeProject(); if(!proj) return;
+  const total = proj.gastos.reduce((s,g)=>s+g.importe,0);
+  let html = '';
+  if (proj.gastos.length) {
+    [...proj.gastos].reverse().forEach(g => {
+      const isEd = editingGasto===g.id;
+      html += `<div class="gasto-row">
         <div class="gasto-top">
           <div style="flex:1;min-width:0;">
             <div style="display:flex;align-items:center;gap:8px;">
               <span class="gasto-concepto">${esc(g.concepto)}</span>
-              <span class="gasto-importe">${g.importe.toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>
+              <span class="gasto-importe">${fmt(g.importe)} €</span>
             </div>
             <div class="gasto-cat">${g.cat}</div>
           </div>
-          <button class="icon-btn" onclick="startEditGasto(${g.id})" title="Editar">✎</button>
+          <button class="icon-btn" onclick="startEditGasto(${g.id})">✎</button>
         </div>
         <div class="edit-form ${isEd?'open':''}" id="eg-${g.id}">
           <input type="text" id="eg-c-${g.id}" value="${esc(g.concepto)}">
@@ -417,216 +673,276 @@ function renderGastos(){
         </div>
       </div>`;
     });
-    html+=`<div class="total-row"><span class="lbl">Total gastado</span><span class="val">${total.toLocaleString('es-ES',{minimumFractionDigits:2})} €</span></div>`;
-    if(state.presupuesto){
-      const rest=state.presupuesto-total;
-      html+=`<div class="total-row"><span class="lbl">Restante</span><span class="val" style="color:${rest<0?'var(--danger)':'var(--ok)'}">${rest.toLocaleString('es-ES',{minimumFractionDigits:2})} €</span></div>`;
+    html += `<div class="total-row"><span class="lbl">Total gastado</span><span class="val">${fmt(total)} €</span></div>`;
+    if (proj.presupuesto) {
+      const rest = proj.presupuesto - total;
+      html += `<div class="total-row"><span class="lbl">Restante</span><span class="val" style="color:${rest<0?'var(--danger)':'var(--ok)'}">${fmt(rest)} €</span></div>`;
     }
-  }else{
-    html='<div class="empty">Sin gastos registrados aún</div>';
+  } else {
+    html = '<div class="empty">Sin gastos registrados aún</div>';
   }
-  html+=`<div class="card" style="margin-top:16px;"><div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Presupuesto total disponible</div><div style="display:flex;gap:8px;"><input type="number" id="pres-input" placeholder="€" value="${state.presupuesto||''}" style="flex:1;min-width:0;"><button class="btn btn-accent" onclick="setPresupuesto()">Guardar</button></div></div>`;
-  document.getElementById('gastos-body').innerHTML=html;
+  html += `<div class="card" style="margin-top:16px;"><div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Presupuesto total disponible</div><div style="display:flex;gap:8px;"><input type="number" id="pres-input" placeholder="€" value="${proj.presupuesto||''}" style="flex:1;min-width:0;"><button class="btn btn-accent" onclick="setPresupuesto()">Guardar</button></div></div>`;
+  document.getElementById('gastos-body').innerHTML = html;
 }
 
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-
-// Task actions
-function toggleTask(id){const t=state.tasks.find(t=>t.id===id);if(t){t.done=!t.done;saveState();render();}}
-function startEditTask(id){editingTask=(editingTask===id?null:id);renderTareas();if(editingTask){const el=document.getElementById('et-text-'+id);if(el){el.focus();el.select();}}}
-function cancelEditTask(){editingTask=null;renderTareas();}
-function saveTask(id){
-  const t=state.tasks.find(t=>t.id===id);if(!t)return;
-  const txt=document.getElementById('et-text-'+id).value.trim();if(!txt)return;
-  t.text=txt;t.cat=document.getElementById('et-cat-'+id).value;t.prio=document.getElementById('et-prio-'+id).value;
-  editingTask=null;saveState();render();
-}
-function delTask(id){if(!confirm('¿Eliminar esta tarea?'))return;state.tasks=state.tasks.filter(t=>t.id!==id);editingTask=null;saveState();render();}
-function addTask(){
-  const text=document.getElementById('t-text').value.trim();
-  const cat=document.getElementById('t-cat').value;
-  const prio=document.getElementById('t-prio').value;
-  if(!text)return;
-  state.tasks.push({id:nextId(),cat,text,done:false,prio});
-  document.getElementById('t-text').value='';
-  closePanel('add-task-panel');saveState();render();
-}
-
-// Gasto actions
-function startEditGasto(id){editingGasto=(editingGasto===id?null:id);renderGastos();if(editingGasto){const el=document.getElementById('eg-c-'+id);if(el){el.focus();el.select();}}}
-function cancelEditGasto(){editingGasto=null;renderGastos();}
-function saveGasto(id){
-  const g=state.gastos.find(g=>g.id===id);if(!g)return;
-  const c=document.getElementById('eg-c-'+id).value.trim();
-  const i=parseFloat(document.getElementById('eg-i-'+id).value);
-  if(!c||isNaN(i))return;
-  g.concepto=c;g.importe=i;g.cat=document.getElementById('eg-cat-'+id).value;
-  editingGasto=null;saveState();render();
-}
-function delGasto(id){if(!confirm('¿Eliminar este gasto?'))return;state.gastos=state.gastos.filter(g=>g.id!==id);editingGasto=null;saveState();render();}
-function addGasto(){
-  const c=document.getElementById('g-concepto').value.trim();
-  const i=parseFloat(document.getElementById('g-importe').value);
-  const cat=document.getElementById('g-cat').value;
-  if(!c||isNaN(i))return;
-  state.gastos.push({id:nextId(),concepto:c,importe:i,cat});
-  document.getElementById('g-concepto').value='';document.getElementById('g-importe').value='';
-  closePanel('add-gasto-panel');saveState();render();
-}
-function setPresupuesto(){const v=parseFloat(document.getElementById('pres-input').value);if(!isNaN(v)){state.presupuesto=v;saveState();render();}}
-
-function syntaxHL(json){
-  const escaped=json.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  return escaped
-    .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, m=>{
-      if(/^"/.test(m)){return /:$/.test(m)?`<span class="json-key">${m}</span>`:`<span class="json-str">${m}</span>`;}
-      if(/true/.test(m))return`<span class="json-bool-t">${m}</span>`;
-      if(/false/.test(m))return`<span class="json-bool-f">${m}</span>`;
-      if(/null/.test(m))return`<span class="json-null">${m}</span>`;
-      return`<span class="json-num">${m}</span>`;
-    });
-}
-
-function renderDatos(){
-  const json=JSON.stringify(state,null,2);
-  const size=(new Blob([json]).size/1024).toFixed(1);
-  const tasks=state.tasks.length;
-  const gastos=state.gastos.length;
-  const html=`
-    <div class="section-label">Exportar</div>
+// ── DATOS ──
+function renderDatos() {
+  const proj = activeProject(); if(!proj) return;
+  const json = JSON.stringify(proj, null, 2);
+  const size = (new Blob([json]).size/1024).toFixed(1);
+  document.getElementById('datos-body').innerHTML = `
+    <div class="section-label">Exportar proyecto</div>
     <div class="card" style="padding:12px 14px;">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Estado actual: <span style="color:var(--text)">${tasks} tareas · ${gastos} gastos · ${size} KB</span></div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">${proj.tasks.length} tareas · ${proj.gastos.length} gastos · ${size} KB</div>
       <div class="action-row">
         <button class="btn btn-accent" style="flex:1" onclick="exportJSON()">↓ Descargar JSON</button>
-        <button class="btn" style="flex:1" onclick="copyJSON()">⎘ Copiar JSON</button>
+        <button class="btn" style="flex:1" onclick="copyJSON()">⎘ Copiar</button>
       </div>
       <div id="copy-feedback" class="import-feedback"></div>
     </div>
-    <div class="section-label">Importar</div>
+    <div class="section-label">Importar proyecto</div>
     <div class="card" style="padding:12px 14px;">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Pega un JSON exportado previamente o sube el archivo</div>
-      <div class="action-row">
+      <textarea class="json-editor" id="import-textarea" placeholder="Pega aquí el JSON de un proyecto exportado..."></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px;">
         <button class="btn" style="flex:1" onclick="document.getElementById('file-input').click()">↑ Cargar archivo</button>
         <input type="file" id="file-input" accept=".json" style="display:none" onchange="importFile(event)">
-      </div>
-      <textarea class="json-editor" id="import-textarea" placeholder="Pega aquí el JSON..."></textarea>
-      <div style="display:flex;gap:8px;margin-top:8px;">
-        <button class="btn btn-accent" style="flex:1" onclick="importFromTextarea()">Importar JSON</button>
-        <button class="btn" onclick="document.getElementById('import-textarea').value=''">Limpiar</button>
+        <button class="btn btn-accent" style="flex:1" onclick="importFromTextarea()">Importar</button>
       </div>
       <div id="import-feedback" class="import-feedback"></div>
-    </div>
-    <div class="section-label">Visor / editor JSON</div>
-    <div class="card" style="padding:12px 14px;">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Vista del estado con resaltado de sintaxis</div>
-      <div id="json-hl" class="json-viewer"></div>
-      <div style="margin-top:8px;">
-        <button class="btn" style="width:100%" onclick="openRawEdit()">✎ Editar raw</button>
-      </div>
-      <div id="raw-edit-area" style="display:none;margin-top:8px;">
-        <textarea class="json-editor" id="raw-json-editor" style="min-height:300px;"></textarea>
-        <div style="display:flex;gap:8px;margin-top:8px;">
-          <button class="btn btn-accent" style="flex:1" onclick="applyRawEdit()">Aplicar cambios</button>
-          <button class="btn btn-danger" onclick="closeRawEdit()">Cancelar</button>
-        </div>
-        <div id="raw-feedback" class="import-feedback"></div>
-      </div>
-    </div>
-  `;
-  document.getElementById('datos-body').innerHTML=html;
-  // Inject JSON safely via JS — never via template literal to avoid HTML parsing issues
-  document.getElementById('json-hl').innerHTML=syntaxHL(json);
-  document.getElementById('raw-json-editor').value=json;
+    </div>`;
+  // JSON viewer injected safely
+  const viewer = document.createElement('div');
+  viewer.innerHTML = `<div class="section-label">Visor JSON</div><div class="json-viewer" id="json-hl"></div>`;
+  document.getElementById('datos-body').appendChild(viewer);
+  document.getElementById('json-hl').innerHTML = syntaxHL(json);
 }
 
-function exportJSON(){
-  const json=JSON.stringify(state,null,2);
-  const blob=new Blob([json],{type:'application/json'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  const date=new Date().toISOString().slice(0,10);
-  a.href=url;a.download=`miobra-backup-${date}.json`;a.click();
-  URL.revokeObjectURL(url);
-  showFeedback('copy-feedback','Archivo descargado','ok');
+// ── TASK ACTIONS ──
+function toggleTask(id) {
+  const proj = activeProject(); if(!proj) return;
+  const t = proj.tasks.find(t=>t.id===id);
+  if (t) { t.done=!t.done; saveState(); render(); }
+}
+function startEditTask(id) {
+  editingTask = (editingTask===id?null:id);
+  renderTareas();
+  if (editingTask) { const el=document.getElementById('et-text-'+id); if(el){el.focus();el.select();} }
+}
+function cancelEditTask() { editingTask=null; renderTareas(); }
+function saveTask(id) {
+  const proj = activeProject(); if(!proj) return;
+  const t = proj.tasks.find(t=>t.id===id); if(!t) return;
+  const txt = document.getElementById('et-text-'+id).value.trim(); if(!txt) return;
+  t.text=txt; t.cat=document.getElementById('et-cat-'+id).value; t.prio=document.getElementById('et-prio-'+id).value;
+  editingTask=null; saveState(); render();
+}
+function delTask(id) {
+  if(!confirm('¿Eliminar esta tarea?')) return;
+  const proj = activeProject(); if(!proj) return;
+  proj.tasks = proj.tasks.filter(t=>t.id!==id);
+  editingTask=null; saveState(); render();
+}
+function addTask() {
+  const text = document.getElementById('t-text').value.trim();
+  const cat = document.getElementById('t-cat').value;
+  const prio = document.getElementById('t-prio').value;
+  if (!text) return;
+  const proj = activeProject(); if(!proj) return;
+  proj.tasks.push({id:nextId(),cat,text,done:false,prio});
+  document.getElementById('t-text').value='';
+  closePanel('add-task-panel'); saveState(); render();
 }
 
-function copyJSON(){
-  const json=JSON.stringify(state,null,2);
-  navigator.clipboard.writeText(json).then(()=>{
-    showFeedback('copy-feedback','JSON copiado al portapapeles ✓','ok');
-  }).catch(()=>{
-    showFeedback('copy-feedback','No se pudo copiar — usa "Descargar JSON"','err');
+// ── GASTO ACTIONS ──
+function startEditGasto(id) {
+  editingGasto=(editingGasto===id?null:id);
+  renderGastos();
+  if (editingGasto) { const el=document.getElementById('eg-c-'+id); if(el){el.focus();el.select();} }
+}
+function cancelEditGasto() { editingGasto=null; renderGastos(); }
+function saveGasto(id) {
+  const proj = activeProject(); if(!proj) return;
+  const g = proj.gastos.find(g=>g.id===id); if(!g) return;
+  const c = document.getElementById('eg-c-'+id).value.trim();
+  const i = parseFloat(document.getElementById('eg-i-'+id).value);
+  if(!c||isNaN(i)) return;
+  g.concepto=c; g.importe=i; g.cat=document.getElementById('eg-cat-'+id).value;
+  editingGasto=null; saveState(); render();
+}
+function delGasto(id) {
+  if(!confirm('¿Eliminar este gasto?')) return;
+  const proj = activeProject(); if(!proj) return;
+  proj.gastos = proj.gastos.filter(g=>g.id!==id);
+  editingGasto=null; saveState(); render();
+}
+function addGasto() {
+  const c = document.getElementById('g-concepto').value.trim();
+  const i = parseFloat(document.getElementById('g-importe').value);
+  const cat = document.getElementById('g-cat').value;
+  if(!c||isNaN(i)) return;
+  const proj = activeProject(); if(!proj) return;
+  proj.gastos.push({id:nextId(),concepto:c,importe:i,cat});
+  document.getElementById('g-concepto').value='';
+  document.getElementById('g-importe').value='';
+  closePanel('add-gasto-panel'); saveState(); render();
+}
+function setPresupuesto() {
+  const v = parseFloat(document.getElementById('pres-input').value);
+  const proj = activeProject(); if(!proj||isNaN(v)) return;
+  proj.presupuesto=v; saveState(); render();
+}
+
+// ── PROJECT ACTIONS ──
+function toggleArchive() {
+  const proj = activeProject(); if(!proj) return;
+  proj.archived = !proj.archived;
+  saveState();
+  if (proj.archived) {
+    // Switch to another active project if available
+    const other = state.proyectos.find(p=>!p.archived&&p.id!==proj.id);
+    if (other) { activeProjectId=other.id; } else { viewMode='global'; }
+  }
+  render();
+}
+
+function deleteCurrentProj() {
+  const proj = state.proyectos.find(p=>p.id===modalEditId); if(!proj) return;
+  if(!confirm(`¿Eliminar "${proj.name}" y todos sus datos permanentemente?`)) return;
+  state.proyectos = state.proyectos.filter(p=>p.id!==modalEditId);
+  closeModal();
+  const other = state.proyectos.find(p=>!p.archived);
+  if (other) { activeProjectId=other.id; viewMode='project'; }
+  else if (state.proyectos.length) { activeProjectId=state.proyectos[0].id; viewMode='project'; }
+  else { activeProjectId=null; viewMode='global'; }
+  saveState(); render();
+}
+
+// ── MODAL ──
+function buildColorPicker(sel) {
+  return PROJ_COLORS.map(c =>
+    `<div class="color-dot${c===sel?' sel':''}" style="background:${c}" onclick="pickColor('${c}')"></div>`
+  ).join('');
+}
+function pickColor(c) {
+  modalColor = c;
+  document.querySelectorAll('.color-dot').forEach(d => {
+    d.classList.toggle('sel', d.style.background===c);
   });
 }
 
-function importFromTextarea(){
-  const val=document.getElementById('import-textarea').value.trim();
-  applyImport(val,'import-feedback');
+function openNewProj() {
+  modalEditId = null;
+  modalColor = PROJ_COLORS[0];
+  document.getElementById('modal-proj-title').textContent = 'Nueva obra';
+  document.getElementById('mp-name').value = '';
+  document.getElementById('mp-desc').value = '';
+  document.getElementById('mp-budget').value = '';
+  document.getElementById('mp-del-btn').style.display = 'none';
+  document.getElementById('mp-colors').innerHTML = buildColorPicker(modalColor);
+  document.getElementById('modal-proj').classList.add('open');
 }
 
-function importFile(e){
-  const file=e.target.files[0];
-  if(!file)return;
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    document.getElementById('import-textarea').value=ev.target.result;
-    applyImport(ev.target.result,'import-feedback');
-  };
-  reader.readAsText(file);
+function openEditProj() {
+  const proj = activeProject(); if(!proj) return;
+  modalEditId = proj.id;
+  modalColor = proj.color;
+  document.getElementById('modal-proj-title').textContent = 'Editar obra';
+  document.getElementById('mp-name').value = proj.name;
+  document.getElementById('mp-desc').value = proj.desc||'';
+  document.getElementById('mp-budget').value = proj.presupuesto||'';
+  document.getElementById('mp-del-btn').style.display = 'block';
+  document.getElementById('mp-colors').innerHTML = buildColorPicker(modalColor);
+  document.getElementById('modal-proj').classList.add('open');
 }
 
-function applyImport(raw,feedbackId){
-  try{
-    const parsed=JSON.parse(raw);
-    if(!parsed.tasks||!parsed.gastos)throw new Error('Faltan campos tasks o gastos');
-    if(!confirm(`¿Importar? Esto reemplazará todos los datos actuales.\n\n${parsed.tasks.length} tareas · ${parsed.gastos.length} gastos`))return;
-    state=parsed;
-    nid=state.nextId||200;
-    saveState();
-    showFeedback(feedbackId,`Importado correctamente: ${parsed.tasks.length} tareas, ${parsed.gastos.length} gastos`,'ok');
-    document.getElementById('import-textarea').value='';
-    setTimeout(()=>renderDatos(),1200);
-  }catch(err){
-    showFeedback(feedbackId,'JSON inválido: '+err.message,'err');
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-proj')) return;
+  document.getElementById('modal-proj').classList.remove('open');
+}
+
+function saveModal() {
+  const name = document.getElementById('mp-name').value.trim(); if(!name) return;
+  const desc = document.getElementById('mp-desc').value.trim();
+  const budget = parseFloat(document.getElementById('mp-budget').value)||0;
+  if (modalEditId) {
+    const proj = state.proyectos.find(p=>p.id===modalEditId);
+    if (proj) { proj.name=name; proj.desc=desc; proj.color=modalColor; proj.presupuesto=budget; }
+  } else {
+    const id = nextId();
+    state.proyectos.push({id,name,desc,color:modalColor,presupuesto:budget,tasks:[],gastos:[],archived:false,createdAt:new Date().toISOString().slice(0,10)});
+    activeProjectId = id;
+    viewMode = 'project';
+    currentTab = 'tareas';
   }
+  closeModal();
+  saveState(); render();
 }
 
-function openRawEdit(){
-  const area=document.getElementById('raw-edit-area');
-  const editor=document.getElementById('raw-json-editor');
-  editor.value=JSON.stringify(state,null,2);
-  area.style.display='block';
-  editor.focus();
+// ── DATA ──
+function exportJSON() {
+  const proj = activeProject(); if(!proj) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(proj,null,2)],{type:'application/json'}));
+  a.download = `obra-${proj.name.replace(/\s+/g,'-')}-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  showFeedback('copy-feedback','Descargado ✓','ok');
 }
-function closeRawEdit(){
-  document.getElementById('raw-edit-area').style.display='none';
-  document.getElementById('raw-feedback').style.display='none';
+function copyJSON() {
+  const proj = activeProject(); if(!proj) return;
+  navigator.clipboard.writeText(JSON.stringify(proj,null,2))
+    .then(()=>showFeedback('copy-feedback','Copiado ✓','ok'))
+    .catch(()=>showFeedback('copy-feedback','Usa Descargar','err'));
 }
-function applyRawEdit(){
-  const raw=document.getElementById('raw-json-editor').value.trim();
-  try{
-    const parsed=JSON.parse(raw);
-    if(!parsed.tasks||!parsed.gastos)throw new Error('Faltan campos tasks o gastos');
-    state=parsed;nid=state.nextId||200;
-    saveState();
-    showFeedback('raw-feedback','Cambios aplicados correctamente ✓','ok');
-    setTimeout(()=>{closeRawEdit();renderDatos();},1000);
-  }catch(err){
-    showFeedback('raw-feedback','Error de sintaxis: '+err.message,'err');
-  }
+function importFromTextarea() {
+  applyImport(document.getElementById('import-textarea').value.trim(),'import-feedback');
+}
+function importFile(e) {
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => applyImport(ev.target.result, 'import-feedback');
+  r.readAsText(f);
+}
+function applyImport(raw, fbId) {
+  try {
+    const parsed = JSON.parse(raw);
+    if(!parsed.tasks||!parsed.gastos) throw new Error('Faltan campos tasks o gastos');
+    if(!confirm(`¿Importar proyecto "${parsed.name||'Sin nombre'}"?`)) return;
+    const id = nextId();
+    state.proyectos.push({...parsed, id, archived:false, createdAt:new Date().toISOString().slice(0,10)});
+    activeProjectId = id; viewMode='project';
+    saveState(); render();
+    showFeedback(fbId,'Proyecto importado ✓','ok');
+  } catch(err) { showFeedback(fbId,'JSON inválido: '+err.message,'err'); }
+}
+function showFeedback(id,msg,type) {
+  const el = document.getElementById(id); if(!el) return;
+  el.textContent=msg; el.className='import-feedback '+(type==='ok'?'import-ok':'import-err');
+  el.style.display='block'; if(type==='ok')setTimeout(()=>el.style.display='none',2500);
+}
+function syntaxHL(json) {
+  const e = json.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return e.replace(/(\"(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\\"])*\"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, m=>{
+    if(/^"/.test(m)) return /:$/.test(m)?`<span class="json-key">${m}</span>`:`<span class="json-str">${m}</span>`;
+    if(/true/.test(m)) return`<span class="json-bool-t">${m}</span>`;
+    if(/false/.test(m)) return`<span class="json-bool-f">${m}</span>`;
+    if(/null/.test(m)) return`<span class="json-null">${m}</span>`;
+    return`<span class="json-num">${m}</span>`;
+  });
+}
+function populateSelects() {
+  ['t-cat','g-cat'].forEach(id => {
+    const el=document.getElementById(id);
+    if(el) el.innerHTML=CATS.map(c=>`<option value="${c}">${c}</option>`).join('');
+  });
 }
 
-function showFeedback(id,msg,type){
-  const el=document.getElementById(id);
-  if(!el)return;
-  el.textContent=msg;
-  el.className='import-feedback '+(type==='ok'?'import-ok':'import-err');
-  el.style.display='block';
-  if(type==='ok')setTimeout(()=>{el.style.display='none';},3000);
-}
-
-populateSelects();
+// ── INIT ──
 render();
+// Hide spinner
+window.addEventListener('DOMContentLoaded', () => {
+  const el = document.getElementById('wapp-loading');
+  if(el){ el.classList.add('fade'); setTimeout(()=>el.remove(),350); }
+});
 </script>
 </body>
 </html>

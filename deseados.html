@@ -125,9 +125,22 @@ select option{background:var(--bg2);}
 .fab-area{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:600px;padding:12px 16px 24px;background:linear-gradient(to top,var(--bg) 60%,transparent);pointer-events:none;}
 .fab{pointer-events:all;width:100%;padding:13px;font-family:var(--fh);font-size:14px;background:var(--y);color:#0a0a09;border:none;border-radius:12px;cursor:pointer;letter-spacing:0.3px;}
 .fab:active{transform:scale(0.97);}
+
+/* ── GLOBAL SPINNER ── */
+.wapp-loading{position:fixed;inset:0;background:rgba(10,10,9,0.85);backdrop-filter:blur(4px);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:1;transition:opacity 0.3s;}
+.wapp-loading.fade{opacity:0;pointer-events:none;}
+.wapp-spinner{width:28px;height:28px;border:2px solid rgba(232,240,64,0.2);border-top-color:#e8f040;border-radius:50%;animation:wapp-spin 0.65s linear infinite;}
+@keyframes wapp-spin{to{transform:rotate(360deg)}}
+.wapp-loading-text{font-family:'DM Mono',monospace;font-size:11px;color:#5a5850;letter-spacing:1px;}
 </style>
 </head>
 <body>
+
+<!-- Global loading spinner -->
+<div class="wapp-loading" id="wapp-loading">
+  <div class="wapp-spinner"></div>
+  <div class="wapp-loading-text">CARGANDO…</div>
+</div>
 <div class="shell">
   <div class="wnav">
     <a class="wnav-back" href="index.html"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
@@ -262,7 +275,8 @@ function addWish(){
     url:document.getElementById('f-url').value.trim(),
     notas:document.getElementById('f-notas').value.trim(),
     comprado:false,
-    fechaAdd:new Date().toISOString().slice(0,10)
+    fechaAdd:new Date().toISOString().slice(0,10),
+    historialPrecios:[] // [{fecha, precio}]
   });
   ['f-nombre','f-precio','f-url','f-notas'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-prio').value='media';
@@ -362,6 +376,7 @@ function renderComprados(){
 function wishCard(i){
   const isEd=editId===i.id;
   const p=PRIOS[i.prio]||PRIOS.media;
+  const _phHTML = priceHistHTML;
   return`<div class="wish-card ${i.comprado?'comprado':''} prio-${i.prio}">
     <div class="wish-top">
       <div class="wish-check ${i.comprado?'done':''}" onclick="toggleComprado(${i.id})"></div>
@@ -456,7 +471,28 @@ function showFB(msg,color){
   setTimeout(()=>el.style.display='none',2500);
 }
 
+function addPriceRecord(id, e) {
+  e.stopPropagation();
+  const inp = document.getElementById('ph-price-'+id);
+  const precio = parseFloat(inp?.value);
+  if(isNaN(precio)||precio<=0) return;
+  const item = state.items.find(x=>x.id===id);
+  if(!item) return;
+  if(!item.historialPrecios) item.historialPrecios=[];
+  const fecha = new Date().toISOString().slice(0,10);
+  item.historialPrecios.push({fecha, precio});
+  item.precio = precio; // update current price too
+  if(inp) inp.value='';
+  save(); render();
+}
+
 render();
+
+// Hide spinner when app is ready
+window.addEventListener('DOMContentLoaded', () => {
+  const el = document.getElementById('wapp-loading');
+  if(el){ el.classList.add('fade'); setTimeout(()=>el.remove(), 350); }
+});
 </script>
 </body>
 </html>

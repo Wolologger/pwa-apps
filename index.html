@@ -161,7 +161,10 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
 
   <div class="footer">
     <div class="footer-left">Actualizado <span id="updated-at">—</span><br><a href="https://github.com/Wolologger/pwa-apps" target="_blank">github.com/Wolologger/pwa-apps</a></div>
-    <div class="footer-right" id="file-count"></div>
+    <div class="footer-right" style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+      <span id="file-count"></span>
+      <button onclick="clearCache()" style="background:transparent;border:0.5px solid rgba(240,64,48,0.35);border-radius:5px;color:var(--r);font-family:var(--fm);font-size:9px;padding:4px 9px;cursor:pointer;letter-spacing:0.5px;transition:all 0.15s;" onmouseover="this.style.background='rgba(240,64,48,0.1)'" onmouseout="this.style.background='transparent'" title="Borra Service Worker y caché del navegador">🗑 Limpiar caché</button>
+    </div>
   </div>
 
 </div>
@@ -254,6 +257,19 @@ async function loadApps(){
 
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{navigator.serviceWorker.register('/pwa-apps/sw.js').catch(()=>{});});
+}
+
+async function clearCache() {
+  if (!confirm('¿Limpiar caché y Service Worker?\nLa app se recargará.\n\n⚠ Los datos de las apps NO se borran.')) return;
+  if ('serviceWorker' in navigator) {
+    const regs = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(regs.map(r => r.unregister()));
+  }
+  if ('caches' in window) {
+    const keys = await caches.keys();
+    await Promise.all(keys.map(k => caches.delete(k)));
+  }
+  window.location.reload(true);
 }
 
 loadApps();

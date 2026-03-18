@@ -7,6 +7,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0a0a09">
 <title>Lista Compra — W//APPS</title>
+<script src="wapps-store.js"></script>
+<script src="wapps-onboarding.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;--y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;--o:#f09030;--fh:'Bebas Neue',sans-serif;--fm:'DM Mono',monospace;--fs:'DM Sans',sans-serif;}
@@ -57,11 +59,19 @@ select option{background:var(--bg2);}
 .store-label{font-size:10px;color:var(--muted);font-family:var(--fm);letter-spacing:0.5px;text-transform:uppercase;flex-shrink:0;}
 .store-chip{padding:4px 12px;background:var(--bg2);border:0.5px solid var(--border2);border-radius:99px;font-size:11px;font-family:var(--fm);color:var(--muted);cursor:pointer;white-space:nowrap;}
 .store-chip.active{background:rgba(48,168,240,0.12);color:var(--b);border-color:rgba(48,168,240,0.3);}
-.quick-add{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.quick-add{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+/* qty + unit inline group */
+.qty-group{display:flex;gap:0;flex-shrink:0;border-radius:8px;overflow:hidden;border:0.5px solid var(--border2);}
+.qty-num{width:52px;background:var(--bg2);border:none;color:var(--text);font-family:var(--fm);font-size:12px;padding:10px 6px;outline:none;text-align:right;-moz-appearance:textfield;}
+.qty-num::-webkit-outer-spin-button,.qty-num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.qty-num:focus{background:var(--bg3);}
+.qty-unit{background:var(--bg3);border:none;border-left:0.5px solid var(--border2);color:var(--muted);font-family:var(--fm);font-size:11px;padding:10px 6px;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;}
+.qty-unit:focus{color:var(--text);}
+.qty-unit option{background:var(--bg2);}
 .quick-input{flex:2;min-width:120px;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--fm);font-size:13px;padding:10px 12px;outline:none;}
 .quick-input:focus{border-color:var(--y);}
 .cat-select{background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--fm);font-size:12px;padding:10px 8px;outline:none;cursor:pointer;flex-shrink:0;}
-.qty-input{width:70px;flex-shrink:0;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--fm);font-size:12px;padding:10px 8px;outline:none;}
+.qty-input{display:none;}
 .add-quick-btn{background:var(--y);color:#0a0a09;border:none;border-radius:8px;padding:10px 16px;font-family:var(--fh);font-size:14px;cursor:pointer;flex-shrink:0;}
 .cat-group{margin-bottom:12px;}
 .cat-hd{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
@@ -75,7 +85,7 @@ select option{background:var(--bg2);}
 .item-check.done::after{content:'✓';font-size:11px;color:#0a0a09;font-weight:700;}
 .item-text{flex:1;font-size:14px;}
 .item-text.done{text-decoration:line-through;color:var(--muted);}
-.item-qty{font-size:11px;color:var(--muted);font-family:var(--fm);flex-shrink:0;}
+.item-qty{font-size:11px;color:var(--b);font-family:var(--fm);flex-shrink:0;background:rgba(48,168,240,0.08);border:0.5px solid rgba(48,168,240,0.2);padding:2px 7px;border-radius:99px;}
 .item-del{background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;opacity:0.3;flex-shrink:0;}
 .item-del:hover{opacity:1;color:var(--r);}
 .done-toggle{background:none;border:none;color:var(--muted);font-family:var(--fm);font-size:11px;cursor:pointer;padding:0;margin-top:8px;}
@@ -100,9 +110,46 @@ select option{background:var(--bg2);}
 .fab-area{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:600px;padding:12px 16px 24px;background:linear-gradient(to top,var(--bg) 60%,transparent);pointer-events:none;}
 .fab{pointer-events:all;width:100%;padding:13px;font-family:var(--fh);font-size:14px;background:var(--y);color:#0a0a09;border:none;border-radius:12px;cursor:pointer;letter-spacing:0.3px;}
 .fab:active{transform:scale(0.97);}
+
+/* ── MODAL PRECIOS ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(5px);z-index:500;display:none;align-items:flex-end;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-sheet{background:var(--bg2);border:0.5px solid var(--border2);border-radius:16px 16px 0 0;width:100%;max-width:600px;max-height:90dvh;display:flex;flex-direction:column;animation:sheetUp 0.22s ease;}
+@keyframes sheetUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-grip{width:36px;height:3px;background:var(--dim);border-radius:99px;margin:14px auto 0;flex-shrink:0;}
+.modal-head{padding:14px 18px 10px;flex-shrink:0;border-bottom:0.5px solid var(--border2);}
+.modal-title{font-family:var(--fh);font-size:20px;letter-spacing:0.5px;margin-bottom:2px;}
+.modal-sub{font-size:11px;color:var(--muted);font-family:var(--fm);}
+.modal-body{flex:1;overflow-y:auto;padding:0 18px 8px;scrollbar-width:none;}
+.modal-body::-webkit-scrollbar{display:none;}
+.price-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border);}
+.price-row:last-child{border-bottom:none;}
+.price-cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--muted);}
+.price-name{flex:1;font-size:13px;min-width:0;}
+.price-qty{font-size:11px;color:var(--muted);font-family:var(--fm);flex-shrink:0;}
+.price-input{width:88px;flex-shrink:0;background:var(--bg3);border:0.5px solid var(--border2);border-radius:7px;color:var(--text);font-family:var(--fm);font-size:13px;padding:7px 10px;outline:none;text-align:right;}
+.price-input:focus{border-color:var(--y);}
+.modal-footer{padding:14px 18px 32px;border-top:0.5px solid var(--border2);flex-shrink:0;}
+.modal-total-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;}
+.modal-total-label{font-size:11px;color:var(--muted);font-family:var(--fm);}
+.modal-total-value{font-family:var(--fh);font-size:28px;letter-spacing:0.5px;color:var(--y);}
+.modal-btns{display:flex;gap:8px;}
+
+/* ── GLOBAL SPINNER ── */
+.wapp-loading{position:fixed;inset:0;background:rgba(10,10,9,0.85);backdrop-filter:blur(4px);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:1;transition:opacity 0.3s;}
+.wapp-loading.fade{opacity:0;pointer-events:none;}
+.wapp-spinner{width:28px;height:28px;border:2px solid rgba(232,240,64,0.2);border-top-color:#e8f040;border-radius:50%;animation:wapp-spin 0.65s linear infinite;}
+@keyframes wapp-spin{to{transform:rotate(360deg)}}
+.wapp-loading-text{font-family:'DM Mono',monospace;font-size:11px;color:#5a5850;letter-spacing:1px;}
 </style>
 </head>
 <body>
+
+<!-- Global loading spinner -->
+<div class="wapp-loading" id="wapp-loading">
+  <div class="wapp-spinner"></div>
+  <div class="wapp-loading-text">CARGANDO…</div>
+</div>
 <div class="shell">
   <div class="wnav">
     <a class="wnav-back" href="index.html"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
@@ -114,7 +161,8 @@ select option{background:var(--bg2);}
   <div class="tabs">
     <button class="tab active" onclick="showTab('compra',this)">Lista</button>
     <button class="tab" onclick="showTab('config',this)">Config</button>
-    <button class="tab" onclick="showTab('datos',this)">Datos</button>
+    <button class="tab" onclick="showTab('historial',this)">Historial</button>
+  <button class="tab" onclick="showTab('datos',this)">Datos</button>
   </div>
   <div class="content">
     <div id="compra" class="section active">
@@ -128,7 +176,8 @@ select option{background:var(--bg2);}
       <div id="main-body"></div>
     </div>
     <div id="config" class="section"><div id="config-body"></div></div>
-    <div id="datos" class="section">
+    <div id="historial" class="section"><div id="historial-body"></div></div>
+  <div id="datos" class="section">
       <div class="data-card">
         <div style="font-family:var(--fh);font-size:16px;margin-bottom:6px;">Exportar / Importar</div>
         <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-bottom:10px;" id="datos-info"></div>
@@ -139,10 +188,37 @@ select option{background:var(--bg2);}
         </div>
         <div id="datos-fb" class="fb"></div>
       </div>
+      <div class="data-card">
+        <div style="font-family:var(--fh);font-size:14px;margin-bottom:4px;">Guía de uso</div>
+        <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-bottom:10px;">Vuelve a ver la introducción de la app.</div>
+        <button class="btn btn-sm" style="width:100%;" onclick="if(typeof WOnboarding!=='undefined'){WOnboarding.reset('compra');WOnboarding.show('compra',OB_STEPS)}">👋 Ver guía de nuevo</button>
+      </div>
     </div>
   </div>
   <div class="fab-area" id="fab-area" style="display:none;">
     <button class="fab" onclick="focusQuickAdd()">+ Añadir artículo</button>
+  </div>
+</div>
+
+<!-- ── MODAL PRECIOS AL TERMINAR ── -->
+<div class="modal-overlay" id="modal-precios" onclick="closeModalPrecios(event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-grip"></div>
+    <div class="modal-head">
+      <div class="modal-title">🛒 ¿Cuánto has gastado?</div>
+      <div class="modal-sub" id="modal-precios-sub">Añade el precio de cada artículo para registrarlo en Gastos</div>
+    </div>
+    <div class="modal-body" id="modal-precios-body"></div>
+    <div class="modal-footer">
+      <div class="modal-total-row">
+        <span class="modal-total-label">TOTAL COMPRA</span>
+        <span class="modal-total-value" id="modal-total">0,00 €</span>
+      </div>
+      <div class="modal-btns">
+        <button class="btn" style="flex:1" onclick="closeModalPrecios()">Saltar</button>
+        <button class="btn btn-y" style="flex:2" onclick="confirmarGastoCompra()">Registrar en Gastos →</button>
+      </div>
+    </div>
   </div>
 </div>
 <script>
@@ -167,10 +243,11 @@ function loadState(){
       {id:'otros',emoji:'📦',name:'Otros'},
     ],
     stores:['Mercadona','Lidl','Carrefour','Amazon'],
-    nextId:10
+    nextId:10,
+    history:[] // [{date, items:[]}] — completed lists
   };
 }
-function save(){state.nextId=nid;try{localStorage.setItem('compra_v2',JSON.stringify(state));}catch(e){}}
+function save(){state.nextId=nid;try{localStorage.setItem('compra_v2',JSON.stringify(state));}catch(e){}if(typeof WStore!=='undefined')WStore.set('compra','data',state);}
 function nxtId(){return++nid;}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function catById(id){return state.cats.find(c=>c.id===id)||{emoji:'📦',name:id};}
@@ -190,6 +267,7 @@ function render(){
   renderListBar();
   if(currentTab==='compra')renderCompra();
   if(currentTab==='config')renderConfig();
+  if(currentTab==='historial')renderHistorial();
   if(currentTab==='datos')renderDatos();
 }
 
@@ -211,15 +289,49 @@ function selectList(id){activeListId=id;showDone=false;activeStore='';render();}
 function addItem(){
   const txt=document.getElementById('qi-text').value.trim();if(!txt||!activeListId)return;
   const cat=document.getElementById('qi-cat').value;
-  const qty=document.getElementById('qi-qty').value.trim();
-  state.items.push({id:nxtId(),listId:activeListId,text:txt,cat,qty,done:false,store:activeStore});
+  const num=document.getElementById('qi-num').value.trim();
+  const unit=document.getElementById('qi-unit').value;
+  // Build qty string: "2 kg", "500 g", "3 uds", or empty if no number
+  const qty = num ? `${num} ${unit}` : '';
+  state.items.push({id:nxtId(),listId:activeListId,text:txt,cat,qty,unit:num?unit:'',done:false,store:activeStore});
   document.getElementById('qi-text').value='';
+  document.getElementById('qi-num').value='';
   save();render();
   document.getElementById('qi-text')?.focus();
 }
 function toggleItem(id){const i=state.items.find(x=>x.id===id);if(i){i.done=!i.done;save();render();}}
 function delItem(id){state.items=state.items.filter(x=>x.id!==id);save();render();}
-function clearDone(){state.items=state.items.filter(i=>!(i.listId===activeListId&&i.done));save();render();}
+function clearDone(){
+  const allItems = state.items.filter(i=>i.listId===activeListId);
+  const doneItems = state.items.filter(i=>i.listId===activeListId&&i.done);
+  if(!doneItems.length) return;
+
+  // Si TODA la lista está hecha → abrir modal de precios
+  const allDone = allItems.length > 0 && allItems.every(i=>i.done);
+  if(allDone){
+    openModalPrecios(doneItems);
+    return;
+  }
+
+  // Si solo algunos están hechos → archivar y limpiar directamente
+  _archivarYLimpiar(doneItems);
+}
+
+function _archivarYLimpiar(doneItems){
+  if(!doneItems.length) return;
+  if(!state.history) state.history=[];
+  const list = state.lists.find(l=>l.id===activeListId);
+  state.history.unshift({
+    id: Date.now(),
+    date: new Date().toISOString().slice(0,10),
+    listName: list?.name||'Lista',
+    items: doneItems.map(i=>({text:i.text, cat:i.cat, qty:i.qty, precio:i.precio||null}))
+  });
+  if(state.history.length>20) state.history=state.history.slice(0,20);
+  state.items = state.items.filter(i=>!(i.listId===activeListId&&i.done));
+  if(typeof WStore!=='undefined') WStore.set('compra','data',state);
+  save(); render();
+}
 function clearAll(){if(!confirm('¿Vaciar toda la lista?'))return;state.items=state.items.filter(i=>i.listId!==activeListId);save();render();}
 function focusQuickAdd(){document.getElementById('qi-text')?.focus();}
 
@@ -228,8 +340,10 @@ function renderCompra(){
   const list=state.lists.find(l=>l.id===activeListId);
   let items=state.items.filter(i=>i.listId===activeListId);
   if(activeStore)items=items.filter(i=>!i.store||i.store===activeStore||i.done);
+  const allItems=state.items.filter(i=>i.listId===activeListId); // all, unfiltered
   const pending=items.filter(i=>!i.done);
   const done=items.filter(i=>i.done);
+  const allDone=allItems.length>0&&allItems.every(i=>i.done);
   const pct=items.length?Math.round(done.length/items.length*100):0;
 
   // Cat select options
@@ -239,7 +353,9 @@ function renderCompra(){
     <div class="top-bar">
       <div class="list-name">${esc(list.name)}</div>
       <div class="top-actions">
-        ${done.length?`<button class="top-btn" onclick="clearDone()">✓ Limpiar hechos</button>`:''}
+        ${done.length?`<button class="top-btn" onclick="clearDone()" style="${allDone?'background:rgba(232,240,64,0.12);color:var(--y);border-color:rgba(232,240,64,0.3);':''}">
+          ${allDone?'🎉 ¡Lista completa!':'✓ Limpiar hechos'}
+        </button>`:''}
         <button class="top-btn btn-r" onclick="clearAll()">🗑 Vaciar</button>
       </div>
     </div>
@@ -260,7 +376,20 @@ function renderCompra(){
   html+=`<div class="quick-add">
     <input class="quick-input" id="qi-text" placeholder="Añadir artículo…" onkeydown="if(event.key==='Enter')addItem()">
     <select class="cat-select" id="qi-cat">${catOpts}</select>
-    <input class="qty-input" id="qi-qty" placeholder="Cant." type="text">
+    <div class="qty-group">
+      <input class="qty-num" id="qi-num" type="number" min="0" step="any" placeholder="—" title="Cantidad">
+      <select class="qty-unit" id="qi-unit" title="Unidad">
+        <option value="uds">uds</option>
+        <option value="kg">kg</option>
+        <option value="g">g</option>
+        <option value="L">L</option>
+        <option value="mL">mL</option>
+        <option value="paquete">paq.</option>
+        <option value="bote">bote</option>
+        <option value="lata">lata</option>
+        <option value="bolsa">bolsa</option>
+      </select>
+    </div>
     <button class="add-quick-btn" onclick="addItem()">+</button>
   </div>`;
 
@@ -275,12 +404,26 @@ function renderCompra(){
     const arr=groups[catId];const c=catById(catId);
     html+=`<div class="cat-group"><div class="cat-hd"><span class="cat-hd-label">${c.emoji} ${c.name}</span><div class="cat-hd-line"></div><span class="cat-hd-cnt">${arr.length}</span></div>`;
     arr.forEach(i=>{
+      const qtyBadge = i.qty ? `<span class="item-qty">${esc(i.qty)}</span>` : '';
       html+=`<div class="item-row">
         <div class="item-check" onclick="toggleItem(${i.id})"></div>
         <span class="item-text">${esc(i.text)}</span>
-        ${i.qty?`<span class="item-qty">${esc(i.qty)}</span>`:''}
+        ${qtyBadge}
         ${i.store?`<span style="font-size:9px;padding:2px 6px;border-radius:4px;background:rgba(48,168,240,0.1);color:var(--b);font-family:var(--fm);">${esc(i.store)}</span>`:''}
+        <button class="item-del" onclick="openQtyEdit(${i.id},event)" title="Editar cantidad" style="font-size:13px;opacity:0.22;">⚖</button>
         <button class="item-del" onclick="delItem(${i.id})">×</button>
+      </div>
+      <div id="qe-${i.id}" style="display:none;padding:5px 0 8px 30px;">
+        <div style="display:flex;gap:6px;align-items:center;">
+          <div class="qty-group">
+            <input class="qty-num" id="qe-num-${i.id}" type="number" min="0" step="any"
+              value="${extractNum(i.qty)}" placeholder="—"
+              onkeydown="if(event.key==='Enter')saveQtyEdit(${i.id})">
+            <select class="qty-unit" id="qe-unit-${i.id}">${UNITS.map(u=>`<option value="${u}"${extractUnit(i.qty)===u?' selected':''}>${u}</option>`).join('')}</select>
+          </div>
+          <button onclick="saveQtyEdit(${i.id})" style="padding:6px 10px;background:var(--y);color:#0a0a09;border:none;border-radius:6px;font-family:var(--fm);font-size:11px;cursor:pointer;">✓</button>
+          <button onclick="document.getElementById('qe-${i.id}').style.display='none'" style="padding:6px 10px;background:transparent;border:0.5px solid var(--border2);border-radius:6px;font-family:var(--fm);font-size:11px;color:var(--muted);cursor:pointer;">✕</button>
+        </div>
       </div>`;
     });
     html+='</div>';
@@ -363,6 +506,36 @@ function delList(id){
   save();render();
 }
 
+function renderHistorial(){
+  const hist=state.history||[];
+  if(!hist.length){document.getElementById('historial-body').innerHTML='<div class="empty">Sin historial aún.<br>Se guarda al marcar artículos como hechos y limpiarlos.</div>';return;}
+  let html='';
+  hist.forEach((entry,idx)=>{
+    html+=`<div style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div>
+          <div style="font-family:var(--fh);font-size:16px;letter-spacing:0.5px;">${esc(entry.listName)}</div>
+          <div style="font-size:10px;color:var(--muted);font-family:var(--fm);">${entry.date} · ${entry.items.length} artículos</div>
+        </div>
+        <button onclick="reutilizarLista(${idx})" style="padding:6px 12px;background:var(--y);color:#0a0a09;border:none;border-radius:6px;font-family:var(--fm);font-size:11px;cursor:pointer;white-space:nowrap;">↺ Reutilizar</button>
+      </div>
+      <div style="font-size:11px;color:var(--muted);font-family:var(--fm);line-height:1.7;">${entry.items.slice(0,6).map(i=>`${i.qty?i.qty+' ':''}${esc(i.text)}`).join(' · ')}${entry.items.length>6?` · +${entry.items.length-6} más`:''}</div>
+    </div>`;
+  });
+  document.getElementById('historial-body').innerHTML=html;
+}
+
+function reutilizarLista(histIdx){
+  const entry=(state.history||[])[histIdx];
+  if(!entry||!activeListId)return;
+  if(!confirm(`¿Añadir los ${entry.items.length} artículos de "${entry.listName}" a la lista actual?`))return;
+  entry.items.forEach(item=>{
+    state.items.push({id:nxtId(),listId:activeListId,text:item.text,cat:item.cat||'otros',qty:item.qty||'',done:false});
+  });
+  save();render();
+  showTab('compra',document.querySelectorAll('.tab')[0]);
+}
+
 function renderDatos(){
   document.getElementById('datos-info').textContent=`${state.items.length} artículos · ${state.lists.length} listas · ${state.cats.length} categorías · ${state.stores.length} establecimientos`;
 }
@@ -387,7 +560,187 @@ function importFile(e){
 }
 function showFB(msg,color){const el=document.getElementById('datos-fb');if(!el)return;el.textContent=msg;el.style.color=color;el.style.display='block';setTimeout(()=>el.style.display='none',2500);}
 
+// ── MODAL PRECIOS ──
+let _modalDoneItems = [];
+
+function openModalPrecios(doneItems){
+  _modalDoneItems = doneItems;
+  const list = state.lists.find(l=>l.id===activeListId);
+  document.getElementById('modal-precios-sub').textContent =
+    `Lista completa: ${list?.name||'Lista'} · ${doneItems.length} artículos`;
+  let html = '';
+  doneItems.forEach((item,idx) => {
+    html += `<div class="price-row">
+      <div class="price-cat-dot"></div>
+      <span class="price-name">${esc(item.text)}</span>
+      ${item.qty ? `<span class="price-qty">${esc(item.qty)}</span>` : ''}
+      <input class="price-input" type="number" step="0.01" min="0"
+        id="pi-${idx}" placeholder="0,00"
+        oninput="recalcTotal()"
+        onkeydown="if(event.key==='Enter'){var n=document.getElementById('pi-${idx+1}');if(n)n.focus();}">
+    </div>`;
+  });
+  document.getElementById('modal-precios-body').innerHTML = html;
+  document.getElementById('modal-total').textContent = '0,00 €';
+  document.getElementById('modal-precios').classList.add('open');
+  setTimeout(()=>document.getElementById('pi-0')?.focus(), 250);
+}
+
+function recalcTotal(){
+  let total = 0;
+  _modalDoneItems.forEach((_,idx) => {
+    const v = parseFloat(document.getElementById('pi-'+idx)?.value||0);
+    if(!isNaN(v)) total += v;
+  });
+  document.getElementById('modal-total').textContent =
+    total.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+}
+
+function closeModalPrecios(e){
+  if(e && e.target !== document.getElementById('modal-precios')) return;
+  document.getElementById('modal-precios').classList.remove('open');
+  _archivarYLimpiar(_modalDoneItems);
+  _modalDoneItems = [];
+}
+
+function confirmarGastoCompra(){
+  let total = 0;
+  const itemsConPrecio = _modalDoneItems.map((item,idx) => {
+    const precio = parseFloat(document.getElementById('pi-'+idx)?.value||0)||0;
+    total += precio;
+    return {...item, precio};
+  });
+
+  if(total > 0 && typeof WStore !== 'undefined'){
+    const gastosData = WStore.get('gastos','data') ||
+      (() => { try{const r=localStorage.getItem('gastos_v1');if(r)return JSON.parse(r);}catch(e){} return {gastos:[],budgets:{},nextId:1}; })();
+    const list = state.lists.find(l=>l.id===activeListId);
+    const today = new Date().toISOString().slice(0,10);
+    gastosData.gastos = gastosData.gastos || [];
+    let nidG = gastosData.nextId || 1;
+
+    const conPrecio = itemsConPrecio.filter(i=>i.precio>0);
+    if(conPrecio.length === 1){
+      gastosData.gastos.push({id:++nidG, importe:total,
+        concepto:`${list?.name||'Compra'} — ${conPrecio[0].text}`, fecha:today, cat:'super', nota:''});
+    } else {
+      conPrecio.forEach(item => {
+        gastosData.gastos.push({id:++nidG, importe:item.precio,
+          concepto:item.qty ? `${item.qty} ${item.text}` : item.text,
+          fecha:today, cat:'super', nota:list?.name||'Compra'});
+      });
+    }
+    gastosData.nextId = nidG;
+
+    WStore.set('gastos','data', gastosData);
+    try { localStorage.setItem('gastos_v1', JSON.stringify(gastosData)); } catch(e){}
+  }
+
+  _archivarYLimpiar(itemsConPrecio);
+  document.getElementById('modal-precios').classList.remove('open');
+  _modalDoneItems = [];
+  _showToast(total > 0
+    ? `✓ ${total.toLocaleString('es-ES',{minimumFractionDigits:2})} € registrados en Gastos`
+    : '✓ Lista completada y archivada');
+}
+
+function _showToast(msg){
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--bg2);border:0.5px solid var(--border2);color:var(--text);font-family:var(--fm);font-size:12px;padding:10px 18px;border-radius:99px;z-index:999;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,0.4);transition:opacity 0.3s;';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(),300); }, 2800);
+}
+
+// ── UNITS & QTY HELPERS ──
+const UNITS = ['uds','kg','g','L','mL','paq.','bote','lata','bolsa'];
+
+function extractNum(qty){
+  if(!qty) return '';
+  const m = String(qty).match(/^([\d.,]+)/);
+  return m ? m[1] : '';
+}
+function extractUnit(qty){
+  if(!qty) return 'uds';
+  const parts = String(qty).trim().split(/\s+/);
+  if(parts.length > 1) return parts[parts.length-1];
+  // If the whole string is a unit with no number, return it
+  return UNITS.includes(parts[0]) ? parts[0] : 'uds';
+}
+function buildQty(num, unit){
+  if(!num || num === '0') return '';
+  return `${num} ${unit}`;
+}
+
+function openQtyEdit(id, e){
+  e.stopPropagation();
+  document.querySelectorAll('[id^="qe-"]').forEach(el=>{
+    if(el.id !== 'qe-'+id) el.style.display='none';
+  });
+  const el = document.getElementById('qe-'+id);
+  if(!el) return;
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  if(!isOpen) setTimeout(()=>document.getElementById('qe-num-'+id)?.focus(), 50);
+}
+
+function saveQtyEdit(id){
+  const item = state.items.find(x=>x.id===id); if(!item) return;
+  const num = document.getElementById('qe-num-'+id)?.value.trim();
+  const unit = document.getElementById('qe-unit-'+id)?.value || 'uds';
+  item.qty = buildQty(num, unit);
+  item.unit = num ? unit : '';
+  const el = document.getElementById('qe-'+id);
+  if(el) el.style.display='none';
+  save(); render();
+}
+
+// ── BRIDGE: recibir ítem desde Despensa con qty+unit ──
+window.addItemFromDespensa = function(data){
+  if(!activeListId) return;
+  const qty = data.qty && data.unit ? `${data.qty} ${data.unit}` : (data.qty||'');
+  state.items.push({id:nxtId(), listId:activeListId,
+    text:data.text||'', cat:data.cat||'otros',
+    qty, unit:data.unit||'', done:false, store:''});
+  save(); render();
+  // Switch to compra tab
+  showTab('compra', document.querySelector('.tab'));
+};
+
+const OB_STEPS = [
+  {
+    icon:'🛒',
+    title:'Bienvenido a Lista Compra',
+    body:'Gestiona tus listas de la compra por tienda o categoría. Puedes tener varias listas activas a la vez: Supermercado, Amazon, Mercadona…'
+  },
+  {
+    icon:'⚖',
+    title:'Cantidad con unidades',
+    body:'Al añadir un artículo, escribe la cantidad y elige la unidad: <strong>kg, g, L, uds, paq…</strong> El pequeño icono ⚖ en cada ítem te permite editarla después.'
+  },
+  {
+    icon:'🎉',
+    title:'Al terminar la compra',
+    body:'Cuando marques todos los artículos, el botón cambia a <strong>"🎉 ¡Lista completa!"</strong>. Al pulsarlo puedes anotar el precio de cada cosa y registrarlo automáticamente en Gastos Diarios.'
+  },
+  {
+    icon:'↺',
+    title:'Historial y reutilizar',
+    body:'En la pestaña <strong>Historial</strong> tienes todas tus compras anteriores. Pulsa <strong>"↺ Reutilizar"</strong> para añadir esos mismos artículos a tu lista actual con un toque.'
+  }
+];
+
+// Show onboarding on first launch
+if(typeof WOnboarding!=='undefined')WOnboarding.show('compra', OB_STEPS);
+
+
 render();
+
+// Hide spinner when app is ready
+window.addEventListener('DOMContentLoaded', () => {
+  const el = document.getElementById('wapp-loading');
+  if(el){ el.classList.add('fade'); setTimeout(()=>el.remove(), 350); }
+});
 </script>
 </body>
 </html>

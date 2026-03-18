@@ -8,6 +8,7 @@
 <meta name="theme-color" content="#0a0a09">
 <title>Semana — W//APPS</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="wapps-onboarding.js"></script>
 <style>
 :root{--bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;--y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;--o:#f09030;--fh:'Bebas Neue',sans-serif;--fm:'DM Mono',monospace;--fs:'DM Sans',sans-serif;}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -121,9 +122,22 @@ select option{background:var(--bg2);}
 .fab:active{transform:scale(0.97);}
 .section-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:14px 0 8px;font-family:var(--fm);}
 .empty{color:var(--muted);font-size:13px;text-align:center;padding:2rem 1rem;line-height:1.7;}
+
+/* ── GLOBAL SPINNER ── */
+.wapp-loading{position:fixed;inset:0;background:rgba(10,10,9,0.85);backdrop-filter:blur(4px);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;opacity:1;transition:opacity 0.3s;}
+.wapp-loading.fade{opacity:0;pointer-events:none;}
+.wapp-spinner{width:28px;height:28px;border:2px solid rgba(232,240,64,0.2);border-top-color:#e8f040;border-radius:50%;animation:wapp-spin 0.65s linear infinite;}
+@keyframes wapp-spin{to{transform:rotate(360deg)}}
+.wapp-loading-text{font-family:'DM Mono',monospace;font-size:11px;color:#5a5850;letter-spacing:1px;}
 </style>
 </head>
 <body>
+
+<!-- Global loading spinner -->
+<div class="wapp-loading" id="wapp-loading">
+  <div class="wapp-spinner"></div>
+  <div class="wapp-loading-text">CARGANDO…</div>
+</div>
 <div class="shell">
   <div class="wnav">
     <a class="wnav-back" href="index.html"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
@@ -167,7 +181,21 @@ select option{background:var(--bg2);}
           <button class="btn" onclick="closeEventPanel()">Cancelar</button>
         </div>
       </div>
-      <div id="eventos-body"></div>
+      <div style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:14px;margin:14px 0;">
+      <div style="font-family:var(--fh);font-size:16px;letter-spacing:0.5px;margin-bottom:10px;">↻ Tareas recurrentes</div>
+      <div id="recurring-list"></div>
+      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+        <input type="text" id="rec-text" placeholder="Tarea recurrente…" style="flex:2;min-width:100px;">
+        <select id="rec-freq" style="flex:1;min-width:80px;">
+          <option value="daily">Diaria</option>
+          <option value="weekdays">L–V</option>
+          <option value="weekends">Fin de semana</option>
+          <option value="weekly">Semanal (lunes)</option>
+        </select>
+        <button onclick="addRecurring()" style="padding:8px 12px;background:var(--y);color:#0a0a09;border:none;border-radius:8px;font-family:var(--fm);font-size:11px;cursor:pointer;white-space:nowrap;">+ Añadir</button>
+      </div>
+    </div>
+    <div id="eventos-body"></div>
     </div>
     <div id="datos" class="section">
       <div class="data-card">
@@ -179,6 +207,24 @@ select option{background:var(--bg2);}
           <input type="file" id="fi" accept=".json" style="display:none" onchange="importFile(event)">
         </div>
         <div id="datos-fb" class="fb"></div>
+      </div>
+      <div class="data-card">
+        <div style="font-family:var(--fh);font-size:16px;margin-bottom:4px;">📅 Importar calendario</div>
+        <div style="font-size:11px;color:var(--muted);font-family:var(--fm);line-height:1.6;margin-bottom:10px;">
+          Compatible con Google Calendar y Outlook.<br>
+          Exporta el .ics desde Google Calendar → Configuración → Exportar, o desde Outlook → Archivo → Exportar.
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-y btn-sm" style="flex:1" onclick="document.getElementById('fi-ics').click()">📂 Importar .ics</button>
+          <input type="file" id="fi-ics" accept=".ics,.ical" style="display:none" onchange="importICS(event)">
+        </div>
+        <div id="ics-preview" style="display:none;margin-top:12px;"></div>
+        <div id="ics-fb" class="fb"></div>
+      </div>
+      <div class="data-card">
+        <div style="font-family:var(--fh);font-size:14px;margin-bottom:4px;">Guía de uso</div>
+        <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-bottom:10px;">Vuelve a ver la introducción de la app.</div>
+        <button class="btn btn-sm" style="width:100%;" onclick="if(typeof WOnboarding!=='undefined'){WOnboarding.reset('semana');WOnboarding.show('semana',OB_STEPS)}">👋 Ver guía de nuevo</button>
       </div>
     </div>
   </div>
@@ -198,7 +244,7 @@ function loadState(){
   try{const r=localStorage.getItem('semana_v2');if(r)return JSON.parse(r);}catch(e){}
   // Migrate from v1
   try{const r=localStorage.getItem('semana_v1');if(r){const s=JSON.parse(r);return{tasks:s.tasks||{},events:[],nextId:100};}}catch(e){}
-  return{tasks:{},events:[],nextId:100};
+  return{tasks:{},events:[],recurring:[],nextId:100};
 }
 function save(){try{localStorage.setItem('semana_v2',JSON.stringify(state));}catch(e){}}
 function nxtId(){return++(state.nextId);}
@@ -318,11 +364,16 @@ function renderSemana(){
         <span class="day-done-count">${doneCnt}/${tasks.length}</span>
       </div>
       ${evs.length?`<div class="day-events">${evs.map(ev=>`<span class="day-event-pill" style="background:${ev.color}22;color:${ev.color};border:0.5px solid ${ev.color}44;">${EV_TIPOS[ev.tipo]?.emoji||'📅'} ${esc(ev.titulo)}</span>`).join('')}</div>`:''}
-      ${tasks.map(t=>`<div class="task-row">
-        <div class="task-check ${t.done?'done':''}" onclick="toggleTask('${k}',${t.id})"></div>
-        <span class="task-text ${t.done?'done':''}">${esc(t.text)}</span>
-        <button class="task-del" onclick="delTask('${k}',${t.id})">×</button>
-      </div>`).join('')}
+      ${tasks.map(t=>{
+        const isEd=editTaskKey===k&&editTaskId===t.id;
+        return `<div class="task-row" style="${t.recurring?'border-left:2px solid rgba(232,240,64,0.4);padding-left:6px;':''}">
+          <div class="task-check ${t.done?'done':''}" onclick="toggleTask('${k}',${t.id})"></div>
+          ${isEd
+            ? `<input id="et-${k}-${t.id}" class="add-task-input" value="${esc(t.text)}" style="flex:1" onkeydown="if(event.key==='Enter')saveEditTask('${k}',${t.id})"><button class="add-task-btn" onclick="saveEditTask('${k}',${t.id})">✓</button><button class="task-del" onclick="cancelEditTask()">✕</button>`
+            : `<span class="task-text ${t.done?'done':''}" ondblclick="startEditTask('${k}',${t.id},event)">${esc(t.text)}</span>${t.recurring?'<span style="font-size:9px;color:var(--muted);font-family:var(--fm)">↻</span>':''}<button class="task-del" onclick="startEditTask('${k}',${t.id},event)" style="opacity:0.4;font-size:11px;">✎</button><button class="task-del" onclick="delTask('${k}',${t.id})">×</button>`
+          }
+        </div>`;
+      }).join('')}
       ${canAdd?`<div class="add-task-row">
         <input class="add-task-input" id="inp-${k}" placeholder="Añadir tarea…" onkeydown="if(event.key==='Enter')addTask('${k}')">
         <button class="add-task-btn" onclick="addTask('${k}')">+</button>
@@ -358,6 +409,7 @@ function renderCalendario(){
     const k=dateKey(d);
     const isToday=d.getTime()===today.getTime();
     const evs=eventsOnDate(k);
+    applyRecurring(k);
     const tasks=state.tasks[k]||[];
     const hasTasks=tasks.length>0;
     html+=`<div class="cal-day ${isToday?'today':''} ${evs.length?'has-event':''}" onclick="jumpToDate('${k}')">
@@ -426,6 +478,18 @@ function renderEventos(){
     html+=`<div class="section-label" style="margin-top:20px;">Pasados (${past.length})</div>`;
     past.forEach(ev=>html+=eventCard(ev,null,true));
   }
+  // Render recurring
+  const recList=document.getElementById('recurring-list');
+  if(recList){
+    const recs=state.recurring||[];
+    recList.innerHTML=recs.length
+      ? recs.map(r=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);font-size:12px;font-family:var(--fm);">
+          <span style="opacity:${r.active?1:0.4};flex:1;">${r.active?'✓':'○'} ${esc(r.text)} <span style="color:var(--muted);font-size:10px;">[${r.freq}]</span></span>
+          <button onclick="toggleRecurring(${r.id})" style="font-size:10px;padding:2px 8px;background:transparent;border:0.5px solid var(--border2);border-radius:4px;color:var(--muted);cursor:pointer;">${r.active?'Pausar':'Activar'}</button>
+          <button onclick="delRecurring(${r.id})" style="font-size:12px;background:none;border:none;color:var(--muted);cursor:pointer;">×</button>
+        </div>`).join('')
+      : '<div style="font-size:11px;color:var(--dim);font-family:var(--fm);">Sin tareas recurrentes. Añade una arriba.</div>';
+  }
   document.getElementById('eventos-body').innerHTML=html;
 }
 
@@ -467,7 +531,231 @@ function importFile(e){
 }
 function showFB(msg,color){const el=document.getElementById('datos-fb');if(!el)return;el.textContent=msg;el.style.color=color;el.style.display='block';setTimeout(()=>el.style.display='none',2500);}
 
+// ── EDIT TASK ──
+let editTaskKey=null, editTaskId=null;
+function startEditTask(k,id,e){
+  e.stopPropagation();
+  editTaskKey=k; editTaskId=id;
+  renderSemana();
+}
+function saveEditTask(k,id){
+  const inp=document.getElementById('et-'+k+'-'+id);
+  if(!inp)return;
+  const t=state.tasks[k]?.find(x=>x.id===id);
+  if(!t)return;
+  t.text=inp.value.trim()||t.text;
+  editTaskKey=null; editTaskId=null;
+  save(); renderSemana();
+}
+function cancelEditTask(){ editTaskKey=null; editTaskId=null; renderSemana(); }
+
+// ── RECURRING TASKS ──
+function addRecurring(){
+  const text=document.getElementById('rec-text')?.value.trim();
+  const freq=document.getElementById('rec-freq')?.value||'daily';
+  const cat=document.getElementById('rec-cat')?.value||'tarea';
+  if(!text)return;
+  state.recurring.push({id:nxtId(),text,freq,cat,color:'#e8f040',active:true});
+  document.getElementById('rec-text').value='';
+  save(); renderEventos();
+}
+function delRecurring(id){
+  state.recurring=state.recurring.filter(r=>r.id!==id);
+  save(); renderEventos();
+}
+function toggleRecurring(id){
+  const r=state.recurring.find(x=>x.id===id);
+  if(r)r.active=!r.active;
+  save(); renderEventos();
+}
+// Apply recurring tasks to each day key
+function applyRecurring(k){
+  const d=parseDate(k);
+  const dow=d.getDay(); // 0=Sun,1=Mon...
+  const existing=state.tasks[k]||[];
+  const existingTexts=existing.map(t=>t.text);
+  (state.recurring||[]).filter(r=>r.active).forEach(r=>{
+    if(existingTexts.includes(r.text))return;
+    let applies=false;
+    if(r.freq==='daily')applies=true;
+    else if(r.freq==='weekdays'&&dow>=1&&dow<=5)applies=true;
+    else if(r.freq==='weekends'&&(dow===0||dow===6))applies=true;
+    else if(r.freq==='weekly'&&dow===1)applies=true; // Every Monday
+    if(applies){
+      if(!state.tasks[k])state.tasks[k]=[];
+      state.tasks[k].push({id:nxtId(),text:r.text,done:false,recurring:true});
+    }
+  });
+}
+
+// ══════════════════════════════════════════
+// ICS PARSER — Google Calendar + Outlook
+// ══════════════════════════════════════════
+
+function parseICS(text) {
+  const events = [];
+  // Unfold lines (RFC 5545 §3.1)
+  const unfolded = text.replace(/\r\n[ \t]/g,'').replace(/\n[ \t]/g,'');
+  const lines = unfolded.split(/\r?\n/);
+  let inEvent = false, current = {};
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (line === 'BEGIN:VEVENT') { inEvent=true; current={}; continue; }
+    if (line === 'END:VEVENT')   { if(inEvent&&current.SUMMARY) events.push({...current}); inEvent=false; current={}; continue; }
+    if (!inEvent) continue;
+    const ci = line.indexOf(':'); if(ci===-1) continue;
+    const keyFull = line.slice(0,ci);
+    const value   = line.slice(ci+1).trim();
+    const key     = keyFull.split(';')[0].toUpperCase();
+    if (key==='SUMMARY')     current.SUMMARY     = decodeICSText(value);
+    if (key==='DESCRIPTION') current.DESCRIPTION = decodeICSText(value);
+    if (key==='LOCATION')    current.LOCATION    = decodeICSText(value);
+    if (key==='DTSTART')     current.DTSTART     = parseICSDate(value, keyFull);
+    if (key==='DTEND')       current.DTEND       = parseICSDate(value, keyFull);
+    if (key==='RRULE')       current.RRULE       = value;
+    if (key==='UID')         current.UID         = value;
+  }
+  return events;
+}
+
+function parseICSDate(value, keyFull) {
+  if (keyFull.toUpperCase().includes('VALUE=DATE')) return icsDateToISO(value.slice(0,8));
+  if (value.includes('T')) return icsDateToISO(value.slice(0,8));
+  return icsDateToISO(value.slice(0,8));
+}
+function icsDateToISO(s) {
+  if (!s||s.length<8) return '';
+  return `${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}`;
+}
+function decodeICSText(s) {
+  return s.replace(/\\n/g,' ').replace(/\\,/g,',').replace(/\\;/g,';').replace(/\\\\/g,'\\').trim();
+}
+function guessEventTipo(summary, desc) {
+  const s=(summary+' '+(desc||'')).toLowerCase();
+  if(/vacac|holiday|verano|playa|viaje|travel/.test(s)) return 'vacaciones';
+  if(/festivo|festiv|national/.test(s)) return 'festivo';
+  if(/bolo|concierto|ensayo|gig|band|música|musica|rehearsal/.test(s)) return 'musica';
+  if(/trabajo|work|reunión|reunion|meeting|call/.test(s)) return 'trabajo';
+  return 'otro';
+}
+function guessColor(tipo) {
+  return {vacaciones:'#30a8f0',festivo:'#f09030',musica:'#f04030',personal:'#30d880',trabajo:'#b060f0',otro:'#e8f040'}[tipo]||'#e8f040';
+}
+
+function importICS(e) {
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try {
+      const parsed=parseICS(ev.target.result);
+      if(!parsed.length){ showICSFb('No se encontraron eventos en el archivo.','var(--r)'); return; }
+      showICSPreview(parsed, file.name);
+    } catch(err){ showICSFb('Error: '+err.message,'var(--r)'); }
+  };
+  reader.readAsText(file,'UTF-8');
+  e.target.value='';
+}
+
+let _icsParsed=[];
+function showICSPreview(events, filename) {
+  _icsParsed=events;
+  const preview=document.getElementById('ics-preview'); if(!preview) return;
+  const shown=events.slice(0,8); const more=events.length-shown.length;
+  let html=`<div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-bottom:8px;">
+    📄 ${esc(filename)} — <strong style="color:var(--text)">${events.length} eventos</strong> encontrados
+  </div><div style="background:var(--bg3);border-radius:8px;overflow:hidden;margin-bottom:10px;">`;
+  shown.forEach((ev,i)=>{
+    const tipo=guessEventTipo(ev.SUMMARY,ev.DESCRIPTION);
+    const color=guessColor(tipo);
+    const end=ev.DTEND&&ev.DTEND!==ev.DTSTART?` → ${ev.DTEND}`:'';
+    html+=`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:${i===shown.length-1?'none':'0.5px solid var(--border)'}">
+      <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(ev.SUMMARY)}</div>
+        <div style="font-size:10px;color:var(--muted);font-family:var(--fm);">${ev.DTSTART||'?'}${end}</div>
+      </div>
+      <div style="font-size:10px;color:${color};">${EV_TIPOS[tipo]?.emoji||'📅'}</div>
+    </div>`;
+  });
+  html+=`</div>${more>0?`<div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-bottom:8px;">… y ${more} eventos más</div>`:''}
+  <div style="display:flex;gap:8px;">
+    <button class="btn btn-sm" style="flex:1" onclick="cancelICSImport()">Cancelar</button>
+    <button class="btn btn-y btn-sm" style="flex:2" onclick="confirmICSImport()">Importar ${events.length} →</button>
+  </div>`;
+  preview.innerHTML=html;
+  preview.style.display='block';
+}
+
+function confirmICSImport() {
+  if(!_icsParsed.length) return;
+  const existingUids=new Set(state.events.map(e=>e.uid).filter(Boolean));
+  let added=0, skipped=0;
+  _icsParsed.forEach(ev=>{
+    if(ev.UID&&existingUids.has(ev.UID)){skipped++;return;}
+    if(!ev.DTSTART){skipped++;return;}
+    const tipo=guessEventTipo(ev.SUMMARY,ev.DESCRIPTION);
+    const color=guessColor(tipo);
+    // Correct Google's exclusive DTEND for all-day events
+    let fin=ev.DTEND||ev.DTSTART;
+    if(fin>ev.DTSTART&&ev.DTSTART.length===10){
+      const d=new Date(fin+'T00:00:00'); d.setDate(d.getDate()-1);
+      fin=dateKey(d); if(fin<ev.DTSTART)fin=ev.DTSTART;
+    }
+    const notes=[ev.DESCRIPTION,ev.LOCATION].filter(Boolean).join(' · ').slice(0,120);
+    state.events.push({id:nxtId(),titulo:ev.SUMMARY,inicio:ev.DTSTART,fin,tipo,color,notas:notes,uid:ev.UID||null,fromICS:true});
+    added++;
+  });
+  save(); _icsParsed=[];
+  document.getElementById('ics-preview').style.display='none';
+  showICSFb(`✓ ${added} eventos importados${skipped?` · ${skipped} omitidos`:''}`, 'var(--g)');
+  render();
+}
+
+function cancelICSImport() {
+  _icsParsed=[];
+  const el=document.getElementById('ics-preview'); if(el) el.style.display='none';
+}
+
+function showICSFb(msg,color) {
+  const el=document.getElementById('ics-fb'); if(!el) return;
+  el.textContent=msg; el.style.color=color; el.style.display='block';
+  if(color==='var(--g)') setTimeout(()=>el.style.display='none',4000);
+}
+
+const OB_STEPS = [
+  {
+    icon:'📅',
+    title:'Bienvenido a Semana',
+    body:'Organiza tu semana con tareas diarias y eventos. Navega entre semanas con las flechas y ve el progreso de cada día de un vistazo.'
+  },
+  {
+    icon:'✎',
+    title:'Tareas editables',
+    body:'Haz <strong>doble tap</strong> en cualquier tarea para editarla. También puedes pulsar el icono <strong>✎</strong> a la derecha. Pulsa ✓ o Enter para guardar.'
+  },
+  {
+    icon:'↻',
+    title:'Tareas recurrentes',
+    body:'En la pestaña <strong>Eventos</strong> puedes crear tareas que se repiten: diarias, de lunes a viernes, fines de semana o cada lunes. Se aplican automáticamente cada semana.'
+  },
+  {
+    icon:'📂',
+    title:'Importar Google Calendar / Outlook',
+    body:'En la pestaña <strong>Datos</strong> puedes importar un archivo <strong>.ics</strong> exportado desde Google Calendar o Outlook. Los eventos se añaden con tipo y color detectados automáticamente.'
+  }
+];
+
+// Show onboarding on first launch
+if(typeof WOnboarding!=='undefined')WOnboarding.show('semana', OB_STEPS);
+
+
 render();
+
+// Hide spinner when app is ready
+window.addEventListener('DOMContentLoaded', () => {
+  const el = document.getElementById('wapp-loading');
+  if(el){ el.classList.add('fade'); setTimeout(()=>el.remove(), 350); }
+});
 </script>
 </body>
 </html>
