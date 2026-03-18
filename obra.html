@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mi Obra">
+<meta name="theme-color" content="#1a1a18">
+<title>Mi Obra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1a1a18;--bg2:#222220;--bg3:#2c2c29;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);--text:#f0ede6;--muted:#8a8880;--accent:#d4f060;--accent2:#60c0f0;--warn:#f0b060;--danger:#f06060;--ok:#60d490;--radius:12px;--font-head:'Syne',sans-serif;--font-mono:'DM Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-mono);overflow:hidden;}
+.shell{display:flex;flex-direction:column;height:100dvh;max-width:480px;margin:0 auto;}
+.header{padding:16px 20px 12px;border-bottom:0.5px solid var(--border);flex-shrink:0;}
+.header-top{display:flex;justify-content:space-between;align-items:center;}
+.logo{font-family:var(--font-head);font-size:20px;font-weight:700;letter-spacing:-0.5px;}
+.logo span{color:var(--accent);}
+.header-stats{display:flex;gap:12px;margin-top:10px;flex-wrap:wrap;}
+.hstat{font-size:11px;color:var(--muted);}
+.hstat strong{color:var(--text);font-weight:500;}
+.pct-bar{height:3px;background:var(--bg3);border-radius:2px;margin-top:8px;overflow:hidden;}
+.pct-fill{height:100%;background:var(--accent);border-radius:2px;transition:width 0.4s ease;}
+.tabs{display:flex;padding:10px 20px;gap:6px;flex-shrink:0;}
+.tab{flex-shrink:0;padding:6px 16px;font-size:12px;font-family:var(--font-mono);border:0.5px solid var(--border2);border-radius:99px;background:transparent;color:var(--muted);cursor:pointer;transition:all 0.15s;}
+.tab.active{background:var(--accent);color:#1a1a18;border-color:var(--accent);font-weight:500;}
+.content{flex:1;overflow-y:auto;padding:0 20px 100px;scrollbar-width:none;}
+.content::-webkit-scrollbar{display:none;}
+.section{display:none;padding-top:16px;}
+.section.active{display:block;}
+.card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.card-title{font-family:var(--font-head);font-size:13px;font-weight:600;}
+.cat-group{margin-bottom:18px;}
+.cat-label{font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.cat-label::after{content:'';flex:1;height:0.5px;background:var(--border);}
+.task-row{display:flex;align-items:flex-start;gap:8px;padding:9px 0;border-bottom:0.5px solid var(--border);}
+.task-row:last-child{border-bottom:none;}
+.task-check{width:18px;height:18px;flex-shrink:0;border:1.5px solid var(--border2);border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;margin-top:2px;}
+.task-check.done{background:var(--ok);border-color:var(--ok);}
+.task-check.done::after{content:'✓';font-size:11px;color:#1a1a18;font-weight:700;}
+.task-body{flex:1;min-width:0;}
+.task-text{font-size:13px;line-height:1.4;word-break:break-word;}
+.task-text.done{text-decoration:line-through;color:var(--muted);}
+.task-meta{display:flex;gap:6px;margin-top:4px;align-items:center;}
+.prio{font-size:9px;padding:2px 7px;border-radius:99px;flex-shrink:0;font-weight:500;letter-spacing:0.5px;}
+.prio-high{background:rgba(240,96,96,0.15);color:var(--danger);}
+.prio-med{background:rgba(240,176,96,0.15);color:var(--warn);}
+.prio-low{background:rgba(138,136,128,0.12);color:var(--muted);}
+.icon-btn{background:none;border:none;cursor:pointer;font-size:15px;padding:3px 5px;opacity:0.3;transition:opacity 0.15s;color:var(--text);flex-shrink:0;margin-top:1px;}
+.icon-btn:hover{opacity:1;}
+.icon-btn:hover.edit{color:var(--accent2);}
+.edit-form{background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;padding:10px;margin-top:8px;display:none;}
+.edit-form.open{display:block;}
+.edit-form input,.edit-form select{width:100%;margin-bottom:7px;background:var(--bg2);border:0.5px solid var(--border2);border-radius:6px;color:var(--text);font-family:var(--font-mono);font-size:13px;padding:8px 10px;outline:none;}
+.edit-form input:focus,.edit-form select:focus{border-color:var(--accent2);}
+.edit-form select option{background:var(--bg2);}
+.ef-btns{display:flex;gap:6px;margin-top:2px;}
+.cat-prog{margin-bottom:8px;}
+.cat-prog-head{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;}
+.mini-bar{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+.mini-fill{height:100%;border-radius:2px;transition:width 0.3s;}
+input[type=text],input[type=number],select{background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--font-mono);font-size:13px;padding:9px 12px;outline:none;transition:border-color 0.15s;min-width:0;}
+input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--accent2);}
+select option{background:var(--bg2);}
+.btn{padding:8px 14px;font-size:12px;font-family:var(--font-mono);border:0.5px solid var(--border2);border-radius:8px;background:transparent;color:var(--text);cursor:pointer;transition:all 0.15s;flex-shrink:0;}
+.btn:hover{background:var(--bg3);}
+.btn-accent{background:var(--accent);color:#1a1a18;border-color:var(--accent);font-weight:500;}
+.btn-danger{color:var(--danger);border-color:rgba(240,96,96,0.3);}
+.gasto-row{padding:9px 0;border-bottom:0.5px solid var(--border);}
+.gasto-row:last-child{border-bottom:none;}
+.gasto-top{display:flex;align-items:center;gap:8px;}
+.gasto-concepto{flex:1;font-size:13px;min-width:0;}
+.gasto-importe{font-size:13px;font-weight:500;color:var(--accent2);flex-shrink:0;}
+.gasto-cat{font-size:10px;color:var(--muted);margin-top:2px;}
+.badge{font-size:10px;padding:2px 8px;border-radius:99px;}
+.badge-warn{background:rgba(240,176,96,0.15);color:var(--warn);}
+.add-panel{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius);padding:16px;margin-bottom:16px;display:none;}
+.add-panel.open{display:block;}
+.add-panel input,.add-panel select{width:100%;margin-bottom:8px;}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:2.5rem 1rem;}
+.total-row{display:flex;justify-content:space-between;padding-top:10px;margin-top:4px;font-size:13px;border-top:0.5px solid var(--border2);}
+.total-row .lbl{color:var(--muted);}
+.total-row .val{font-weight:500;color:var(--accent);}
+.fab-area{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;padding:12px 20px 24px;background:linear-gradient(to top,var(--bg) 60%,transparent);pointer-events:none;}
+.fab{pointer-events:all;width:100%;padding:13px;font-family:var(--font-head);font-size:14px;font-weight:600;background:var(--accent);color:#1a1a18;border:none;border-radius:12px;cursor:pointer;transition:transform 0.12s,opacity 0.12s;}
+.fab:active{transform:scale(0.97);opacity:0.85;}
+.json-viewer{background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;padding:12px;font-size:11px;line-height:1.7;overflow-x:auto;white-space:pre;color:var(--text);max-height:340px;overflow-y:auto;}
+.json-editor{width:100%;background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;padding:12px;font-size:11px;line-height:1.7;color:var(--text);font-family:var(--font-mono);resize:vertical;min-height:220px;outline:none;}
+.json-editor:focus{border-color:var(--accent2);}
+.json-key{color:var(--accent2);}
+.json-str{color:var(--ok);}
+.json-num{color:var(--warn);}
+.json-bool-t{color:var(--accent);}
+.json-bool-f{color:var(--danger);}
+.json-null{color:var(--muted);}
+.action-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.section-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;margin-top:18px;}
+.section-label:first-child{margin-top:0;}
+.import-feedback{font-size:12px;padding:8px 12px;border-radius:8px;margin-top:8px;display:none;}
+.import-ok{background:rgba(96,212,144,0.12);color:var(--ok);border:0.5px solid rgba(96,212,144,0.25);}
+.import-err{background:rgba(240,96,96,0.12);color:var(--danger);border:0.5px solid rgba(240,96,96,0.25);}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="header">
+    <div class="header-top">
+      <div class="logo">mi<span>obra</span></div>
+      <div style="font-size:11px;color:var(--muted)" id="save-indicator"></div>
+    </div>
+    <div class="header-stats" id="header-stats"></div>
+    <div class="pct-bar"><div class="pct-fill" id="main-pct-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('resumen',this)">Resumen</button>
+    <button class="tab" onclick="showTab('tareas',this)">Tareas</button>
+    <button class="tab" onclick="showTab('gastos',this)">Gastos</button>
+    <button class="tab" onclick="showTab('datos',this)">Datos</button>
+  </div>
+
+  <div class="content">
+    <div id="resumen" class="section active"><div id="resumen-body"></div></div>
+
+    <div id="tareas" class="section">
+      <div class="add-panel" id="add-task-panel">
+        <input type="text" id="t-text" placeholder="Descripción de la tarea...">
+        <select id="t-cat"></select>
+        <select id="t-prio">
+          <option value="high">🔴 Urgente</option>
+          <option value="med" selected>🟡 Normal</option>
+          <option value="low">⚪ Cuando pueda</option>
+        </select>
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <button class="btn btn-accent" style="flex:1" onclick="addTask()">Añadir</button>
+          <button class="btn" onclick="closePanel('add-task-panel')">Cancelar</button>
+        </div>
+      </div>
+      <div id="tasks-body"></div>
+    </div>
+
+    <div id="gastos" class="section">
+      <div class="add-panel" id="add-gasto-panel">
+        <input type="text" id="g-concepto" placeholder="Concepto...">
+        <input type="number" id="g-importe" placeholder="Importe €" step="0.01">
+        <select id="g-cat"></select>
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <button class="btn btn-accent" style="flex:1" onclick="addGasto()">Añadir</button>
+          <button class="btn" onclick="closePanel('add-gasto-panel')">Cancelar</button>
+        </div>
+      </div>
+      <div id="gastos-body"></div>
+    </div>
+    <div id="datos" class="section">
+      <div id="datos-body"></div>
+    </div>
+  </div>
+    <button class="fab" id="fab-btn" onclick="fabAction()">+ Añadir tarea</button>
+  </div>
+</div>
+
+<script>
+const CATS=['Calefacción/Gas','Cocina','Fontanería','Electricidad','Acabados','Decoración','Exterior','Contratos/Servicios','Mudanza','Otros'];
+const CAT_COLORS={'Calefacción/Gas':'#f06060','Cocina':'#d4f060','Fontanería':'#60c0f0','Electricidad':'#f0b060','Acabados':'#c060f0','Decoración':'#f060c0','Exterior':'#60d490','Contratos/Servicios':'#8a8880','Mudanza':'#f09060','Otros':'#8a8880'};
+
+const DEFAULT_STATE={
+  tasks:[
+    {id:1,cat:'Electricidad',text:'Revisión completa instalación',done:true,prio:'high'},
+    {id:2,cat:'Electricidad',text:'Mecanismos instalados (enchufes, interruptores, RJ45)',done:true,prio:'high'},
+    {id:3,cat:'Electricidad',text:'Funcionamiento comprobado en toda la vivienda',done:true,prio:'high'},
+    {id:4,cat:'Electricidad',text:'Acabar de mover cables y tubo campana extractora',done:false,prio:'med'},
+    {id:5,cat:'Electricidad',text:'Punto eléctrico campana extractora cocina',done:false,prio:'high'},
+    {id:6,cat:'Electricidad',text:'Colgar lámparas, TV y similares',done:false,prio:'med'},
+    {id:7,cat:'Electricidad',text:'Poner cables caja de comunicaciones ordenados',done:false,prio:'low'},
+    {id:8,cat:'Acabados',text:'Pintura blanca en toda la vivienda',done:true,prio:'high'},
+    {id:9,cat:'Acabados',text:'Pared de acento por habitación',done:true,prio:'high'},
+    {id:10,cat:'Acabados',text:'Pintar zona de la escalera',done:false,prio:'med'},
+    {id:11,cat:'Acabados',text:'Pegar vinilo en la ventana',done:false,prio:'low'},
+    {id:12,cat:'Acabados',text:'Hacer muebles a medida',done:false,prio:'med'},
+    {id:13,cat:'Acabados',text:'Limpieza final de obra',done:false,prio:'high'},
+    {id:14,cat:'Calefacción/Gas',text:'Instalar 43 radiadores',done:false,prio:'high'},
+    {id:15,cat:'Calefacción/Gas',text:'Obtener certificado de instalación de gas (IRG)',done:false,prio:'high'},
+    {id:16,cat:'Calefacción/Gas',text:'Alta gas propano canalizado con Nortegas',done:false,prio:'high'},
+    {id:17,cat:'Calefacción/Gas',text:'Puesta en marcha de la caldera',done:false,prio:'high'},
+    {id:18,cat:'Calefacción/Gas',text:'Llamar a reparar / revisar estufa de pellets',done:false,prio:'med'},
+    {id:19,cat:'Fontanería',text:'Pegar sanitarios del baño',done:false,prio:'high'},
+    {id:20,cat:'Fontanería',text:'Mover tubos de desagüe',done:false,prio:'high'},
+    {id:21,cat:'Fontanería',text:'Poner grifo en la calle (exterior)',done:false,prio:'med'},
+    {id:22,cat:'Fontanería',text:'Toallero instalado',done:true,prio:'low'},
+    {id:23,cat:'Cocina',text:'Pedir la cocina (presupuesto cerrado)',done:true,prio:'high'},
+    {id:24,cat:'Cocina',text:'Montar la cocina',done:false,prio:'high'},
+    {id:25,cat:'Cocina',text:'Ajuste campana extractora',done:false,prio:'high'},
+    {id:26,cat:'Decoración',text:'Armarios adquiridos (financiados 3 meses)',done:true,prio:'med'},
+    {id:27,cat:'Decoración',text:'Colgar espejo del baño',done:false,prio:'low'},
+    {id:28,cat:'Decoración',text:'Poner cortinas',done:false,prio:'low'},
+    {id:29,cat:'Exterior',text:'Limpieza del jardín',done:false,prio:'low'},
+    {id:30,cat:'Exterior',text:'Poner césped',done:false,prio:'low'},
+    {id:31,cat:'Contratos/Servicios',text:'Contratar WiFi',done:false,prio:'high'},
+    {id:32,cat:'Contratos/Servicios',text:'Contratar gas (Nortegas)',done:false,prio:'high'},
+    {id:33,cat:'Mudanza',text:'Subir mesa de trabajo, instrumentos y demás',done:false,prio:'med'},
+  ],
+  gastos:[
+    {id:101,concepto:'Cocina (ajustada)',importe:4256.57,cat:'Cocina'},
+    {id:102,concepto:'Fontanero',importe:850,cat:'Fontanería'},
+    {id:103,concepto:'Electricista',importe:300,cat:'Electricidad'},
+    {id:104,concepto:'Alta gas',importe:250,cat:'Calefacción/Gas'},
+    {id:105,concepto:'Armarios (financiados 3 meses)',importe:919.64,cat:'Decoración'},
+  ],
+  presupuesto:7500,
+  nextId:200
+};
+
+let state=loadState();
+let currentTab='resumen';
+let nid=state.nextId||200;
+let editingTask=null;
+let editingGasto=null;
+
+function loadState(){
+  try{const r=localStorage.getItem('miobra_v2');if(r)return JSON.parse(r);}catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_STATE));
+}
+function saveState(){
+  state.nextId=nid;
+  try{
+    localStorage.setItem('miobra_v2',JSON.stringify(state));
+    const el=document.getElementById('save-indicator');
+    if(el){el.textContent='guardado ✓';el.style.color='#60d490';setTimeout(()=>{el.textContent='';},1800);}
+  }catch(e){}
+}
+function nextId(){return ++nid;}
+
+function populateSelects(){
+  ['t-cat','g-cat'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.innerHTML=CATS.map(c=>`<option value="${c}">${c}</option>`).join('');
+  });
+}
+
+function showTab(name,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  el.classList.add('active');
+  currentTab=name;
+  const fab=document.getElementById('fab-btn');
+  const fabArea=document.querySelector('.fab-area');
+  const labels={resumen:null,tareas:'+ Añadir tarea',gastos:'+ Añadir gasto',datos:null};
+  if(fabArea){
+    if(labels[name]){fab.textContent=labels[name];fabArea.style.display='block';}
+    else{fabArea.style.display='none';}
+  }
+  render();
+}
+function fabAction(){
+  const panels={tareas:'add-task-panel',gastos:'add-gasto-panel'};
+  if(panels[currentTab])togglePanel(panels[currentTab]);
+}
+function togglePanel(id){document.getElementById(id).classList.toggle('open');}
+function closePanel(id){document.getElementById(id).classList.remove('open');}
+
+function render(){
+  renderHeader();
+  if(currentTab==='resumen')renderResumen();
+  if(currentTab==='tareas')renderTareas();
+  if(currentTab==='gastos')renderGastos();
+  if(currentTab==='datos')renderDatos();
+}
+
+function renderHeader(){
+  const total=state.tasks.length;
+  const done=state.tasks.filter(t=>t.done).length;
+  const pct=total?Math.round(done/total*100):0;
+  const urg=state.tasks.filter(t=>!t.done&&t.prio==='high').length;
+  const gastado=state.gastos.reduce((s,g)=>s+g.importe,0);
+  document.getElementById('header-stats').innerHTML=
+    `<span class="hstat"><strong>${pct}%</strong> hecho</span>
+     <span class="hstat"><strong>${done}/${total}</strong> tareas</span>
+     <span class="hstat" style="color:${urg>0?'var(--danger)':'var(--muted)'}"><strong>${urg}</strong> urgentes</span>
+     <span class="hstat"><strong>${gastado.toLocaleString('es-ES',{minimumFractionDigits:2})} €</strong></span>`;
+  document.getElementById('main-pct-fill').style.width=pct+'%';
+}
+
+function renderResumen(){
+  const gastado=state.gastos.reduce((s,g)=>s+g.importe,0);
+  const colchon=state.presupuesto-gastado;
+  let html=`<div class="card" style="margin-bottom:16px;border-color:rgba(212,240,96,0.2)">
+    <div class="card-head"><span class="card-title">Situación financiera</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Disponible</div>
+        <div style="font-size:18px;font-weight:500;color:var(--accent)">${state.presupuesto.toLocaleString('es-ES')} €</div>
+      </div>
+      <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Gastado</div>
+        <div style="font-size:18px;font-weight:500;color:var(--warn)">${gastado.toLocaleString('es-ES',{minimumFractionDigits:2})} €</div>
+      </div>
+      <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;grid-column:1/-1;">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Colchón actual</div>
+        <div style="font-size:22px;font-weight:500;color:${colchon<1000?'var(--danger)':'var(--ok)'}">${colchon.toLocaleString('es-ES',{minimumFractionDigits:2})} €</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px;">Armarios: 3 × 306 € pendientes · Situación <span style="color:var(--ok)">controlada</span></div>
+      </div>
+    </div>
+  </div>`;
+  CATS.forEach(cat=>{
+    const tasks=state.tasks.filter(t=>t.cat===cat);
+    if(!tasks.length)return;
+    const done=tasks.filter(t=>t.done).length;
+    const pct=Math.round(done/tasks.length*100);
+    const color=CAT_COLORS[cat]||'#8a8880';
+    html+=`<div class="cat-prog"><div class="cat-prog-head"><span style="font-size:12px;color:var(--text)">${cat}</span><span style="font-size:11px;color:var(--muted)">${done}/${tasks.length} · ${pct}%</span></div><div class="mini-bar"><div class="mini-fill" style="width:${pct}%;background:${color}"></div></div></div>`;
+  });
+  const urg=state.tasks.filter(t=>!t.done&&t.prio==='high');
+  if(urg.length){
+    html+=`<div class="card" style="margin-top:16px;border-color:rgba(240,96,96,0.25)"><div class="card-head"><span class="card-title" style="color:var(--danger)">Urgentes ahora</span><span class="badge badge-warn">${urg.length}</span></div>`;
+    urg.forEach(t=>{
+      html+=`<div class="task-row"><div class="task-check ${t.done?'done':''}" onclick="toggleTask(${t.id})"></div><div class="task-body"><div class="task-text">${t.text}</div><div class="task-meta"><span style="font-size:10px;color:var(--muted)">${t.cat}</span></div></div></div>`;
+    });
+    html+='</div>';
+  }
+  document.getElementById('resumen-body').innerHTML=html;
+}
+
+function renderTareas(){
+  let html='';
+  CATS.forEach(cat=>{
+    const tasks=state.tasks.filter(t=>t.cat===cat);
+    if(!tasks.length)return;
+    const done=tasks.filter(t=>t.done).length;
+    const color=CAT_COLORS[cat]||'#8a8880';
+    html+=`<div class="cat-group"><div class="cat-label" style="color:${color}">${cat} <span style="color:var(--muted);font-size:10px;letter-spacing:0;text-transform:none;font-weight:400">${done}/${tasks.length}</span></div>`;
+    tasks.forEach(t=>{
+      const pL={high:'urgente',med:'normal',low:'después'}[t.prio];
+      const pC={high:'prio-high',med:'prio-med',low:'prio-low'}[t.prio];
+      const isEd=(editingTask===t.id);
+      html+=`<div class="task-row">
+        <div class="task-check ${t.done?'done':''}" onclick="toggleTask(${t.id})"></div>
+        <div class="task-body">
+          <div class="task-text ${t.done?'done':''}">${esc(t.text)}</div>
+          <div class="task-meta"><span class="prio ${pC}">${pL}</span></div>
+          <div class="edit-form ${isEd?'open':''}" id="ef-${t.id}">
+            <input type="text" id="et-text-${t.id}" value="${esc(t.text)}">
+            <select id="et-cat-${t.id}">${CATS.map(c=>`<option value="${c}"${c===t.cat?' selected':''}>${c}</option>`).join('')}</select>
+            <select id="et-prio-${t.id}">
+              <option value="high"${t.prio==='high'?' selected':''}>🔴 Urgente</option>
+              <option value="med"${t.prio==='med'?' selected':''}>🟡 Normal</option>
+              <option value="low"${t.prio==='low'?' selected':''}>⚪ Cuando pueda</option>
+            </select>
+            <div class="ef-btns">
+              <button class="btn btn-accent" style="flex:1" onclick="saveTask(${t.id})">Guardar</button>
+              <button class="btn" onclick="cancelEditTask()">Cancelar</button>
+              <button class="btn btn-danger" onclick="delTask(${t.id})">Eliminar</button>
+            </div>
+          </div>
+        </div>
+        <button class="icon-btn" onclick="startEditTask(${t.id})" title="Editar">✎</button>
+      </div>`;
+    });
+    html+='</div>';
+  });
+  document.getElementById('tasks-body').innerHTML=html||'<div class="empty">Sin tareas. Pulsa + para añadir.</div>';
+}
+
+function renderGastos(){
+  const total=state.gastos.reduce((s,g)=>s+g.importe,0);
+  let html='';
+  if(state.gastos.length){
+    [...state.gastos].reverse().forEach(g=>{
+      const isEd=(editingGasto===g.id);
+      html+=`<div class="gasto-row">
+        <div class="gasto-top">
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="gasto-concepto">${esc(g.concepto)}</span>
+              <span class="gasto-importe">${g.importe.toLocaleString('es-ES',{minimumFractionDigits:2})} €</span>
+            </div>
+            <div class="gasto-cat">${g.cat}</div>
+          </div>
+          <button class="icon-btn" onclick="startEditGasto(${g.id})" title="Editar">✎</button>
+        </div>
+        <div class="edit-form ${isEd?'open':''}" id="eg-${g.id}">
+          <input type="text" id="eg-c-${g.id}" value="${esc(g.concepto)}">
+          <input type="number" id="eg-i-${g.id}" value="${g.importe}" step="0.01">
+          <select id="eg-cat-${g.id}">${CATS.map(c=>`<option value="${c}"${c===g.cat?' selected':''}>${c}</option>`).join('')}</select>
+          <div class="ef-btns">
+            <button class="btn btn-accent" style="flex:1" onclick="saveGasto(${g.id})">Guardar</button>
+            <button class="btn" onclick="cancelEditGasto()">Cancelar</button>
+            <button class="btn btn-danger" onclick="delGasto(${g.id})">Eliminar</button>
+          </div>
+        </div>
+      </div>`;
+    });
+    html+=`<div class="total-row"><span class="lbl">Total gastado</span><span class="val">${total.toLocaleString('es-ES',{minimumFractionDigits:2})} €</span></div>`;
+    if(state.presupuesto){
+      const rest=state.presupuesto-total;
+      html+=`<div class="total-row"><span class="lbl">Restante</span><span class="val" style="color:${rest<0?'var(--danger)':'var(--ok)'}">${rest.toLocaleString('es-ES',{minimumFractionDigits:2})} €</span></div>`;
+    }
+  }else{
+    html='<div class="empty">Sin gastos registrados aún</div>';
+  }
+  html+=`<div class="card" style="margin-top:16px;"><div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Presupuesto total disponible</div><div style="display:flex;gap:8px;"><input type="number" id="pres-input" placeholder="€" value="${state.presupuesto||''}" style="flex:1;min-width:0;"><button class="btn btn-accent" onclick="setPresupuesto()">Guardar</button></div></div>`;
+  document.getElementById('gastos-body').innerHTML=html;
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// Task actions
+function toggleTask(id){const t=state.tasks.find(t=>t.id===id);if(t){t.done=!t.done;saveState();render();}}
+function startEditTask(id){editingTask=(editingTask===id?null:id);renderTareas();if(editingTask){const el=document.getElementById('et-text-'+id);if(el){el.focus();el.select();}}}
+function cancelEditTask(){editingTask=null;renderTareas();}
+function saveTask(id){
+  const t=state.tasks.find(t=>t.id===id);if(!t)return;
+  const txt=document.getElementById('et-text-'+id).value.trim();if(!txt)return;
+  t.text=txt;t.cat=document.getElementById('et-cat-'+id).value;t.prio=document.getElementById('et-prio-'+id).value;
+  editingTask=null;saveState();render();
+}
+function delTask(id){if(!confirm('¿Eliminar esta tarea?'))return;state.tasks=state.tasks.filter(t=>t.id!==id);editingTask=null;saveState();render();}
+function addTask(){
+  const text=document.getElementById('t-text').value.trim();
+  const cat=document.getElementById('t-cat').value;
+  const prio=document.getElementById('t-prio').value;
+  if(!text)return;
+  state.tasks.push({id:nextId(),cat,text,done:false,prio});
+  document.getElementById('t-text').value='';
+  closePanel('add-task-panel');saveState();render();
+}
+
+// Gasto actions
+function startEditGasto(id){editingGasto=(editingGasto===id?null:id);renderGastos();if(editingGasto){const el=document.getElementById('eg-c-'+id);if(el){el.focus();el.select();}}}
+function cancelEditGasto(){editingGasto=null;renderGastos();}
+function saveGasto(id){
+  const g=state.gastos.find(g=>g.id===id);if(!g)return;
+  const c=document.getElementById('eg-c-'+id).value.trim();
+  const i=parseFloat(document.getElementById('eg-i-'+id).value);
+  if(!c||isNaN(i))return;
+  g.concepto=c;g.importe=i;g.cat=document.getElementById('eg-cat-'+id).value;
+  editingGasto=null;saveState();render();
+}
+function delGasto(id){if(!confirm('¿Eliminar este gasto?'))return;state.gastos=state.gastos.filter(g=>g.id!==id);editingGasto=null;saveState();render();}
+function addGasto(){
+  const c=document.getElementById('g-concepto').value.trim();
+  const i=parseFloat(document.getElementById('g-importe').value);
+  const cat=document.getElementById('g-cat').value;
+  if(!c||isNaN(i))return;
+  state.gastos.push({id:nextId(),concepto:c,importe:i,cat});
+  document.getElementById('g-concepto').value='';document.getElementById('g-importe').value='';
+  closePanel('add-gasto-panel');saveState();render();
+}
+function setPresupuesto(){const v=parseFloat(document.getElementById('pres-input').value);if(!isNaN(v)){state.presupuesto=v;saveState();render();}}
+
+function syntaxHL(json){
+  const escaped=json.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return escaped
+    .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, m=>{
+      if(/^"/.test(m)){return /:$/.test(m)?`<span class="json-key">${m}</span>`:`<span class="json-str">${m}</span>`;}
+      if(/true/.test(m))return`<span class="json-bool-t">${m}</span>`;
+      if(/false/.test(m))return`<span class="json-bool-f">${m}</span>`;
+      if(/null/.test(m))return`<span class="json-null">${m}</span>`;
+      return`<span class="json-num">${m}</span>`;
+    });
+}
+
+function renderDatos(){
+  const json=JSON.stringify(state,null,2);
+  const size=(new Blob([json]).size/1024).toFixed(1);
+  const tasks=state.tasks.length;
+  const gastos=state.gastos.length;
+  const html=`
+    <div class="section-label">Exportar</div>
+    <div class="card" style="padding:12px 14px;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Estado actual: <span style="color:var(--text)">${tasks} tareas · ${gastos} gastos · ${size} KB</span></div>
+      <div class="action-row">
+        <button class="btn btn-accent" style="flex:1" onclick="exportJSON()">↓ Descargar JSON</button>
+        <button class="btn" style="flex:1" onclick="copyJSON()">⎘ Copiar JSON</button>
+      </div>
+      <div id="copy-feedback" class="import-feedback"></div>
+    </div>
+    <div class="section-label">Importar</div>
+    <div class="card" style="padding:12px 14px;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Pega un JSON exportado previamente o sube el archivo</div>
+      <div class="action-row">
+        <button class="btn" style="flex:1" onclick="document.getElementById('file-input').click()">↑ Cargar archivo</button>
+        <input type="file" id="file-input" accept=".json" style="display:none" onchange="importFile(event)">
+      </div>
+      <textarea class="json-editor" id="import-textarea" placeholder="Pega aquí el JSON..."></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button class="btn btn-accent" style="flex:1" onclick="importFromTextarea()">Importar JSON</button>
+        <button class="btn" onclick="document.getElementById('import-textarea').value=''">Limpiar</button>
+      </div>
+      <div id="import-feedback" class="import-feedback"></div>
+    </div>
+    <div class="section-label">Visor / editor JSON</div>
+    <div class="card" style="padding:12px 14px;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Vista del estado con resaltado de sintaxis</div>
+      <div id="json-hl" class="json-viewer"></div>
+      <div style="margin-top:8px;">
+        <button class="btn" style="width:100%" onclick="openRawEdit()">✎ Editar raw</button>
+      </div>
+      <div id="raw-edit-area" style="display:none;margin-top:8px;">
+        <textarea class="json-editor" id="raw-json-editor" style="min-height:300px;"></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="btn btn-accent" style="flex:1" onclick="applyRawEdit()">Aplicar cambios</button>
+          <button class="btn btn-danger" onclick="closeRawEdit()">Cancelar</button>
+        </div>
+        <div id="raw-feedback" class="import-feedback"></div>
+      </div>
+    </div>
+  `;
+  document.getElementById('datos-body').innerHTML=html;
+  // Inject JSON safely via JS — never via template literal to avoid HTML parsing issues
+  document.getElementById('json-hl').innerHTML=syntaxHL(json);
+  document.getElementById('raw-json-editor').value=json;
+}
+
+function exportJSON(){
+  const json=JSON.stringify(state,null,2);
+  const blob=new Blob([json],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const date=new Date().toISOString().slice(0,10);
+  a.href=url;a.download=`miobra-backup-${date}.json`;a.click();
+  URL.revokeObjectURL(url);
+  showFeedback('copy-feedback','Archivo descargado','ok');
+}
+
+function copyJSON(){
+  const json=JSON.stringify(state,null,2);
+  navigator.clipboard.writeText(json).then(()=>{
+    showFeedback('copy-feedback','JSON copiado al portapapeles ✓','ok');
+  }).catch(()=>{
+    showFeedback('copy-feedback','No se pudo copiar — usa "Descargar JSON"','err');
+  });
+}
+
+function importFromTextarea(){
+  const val=document.getElementById('import-textarea').value.trim();
+  applyImport(val,'import-feedback');
+}
+
+function importFile(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    document.getElementById('import-textarea').value=ev.target.result;
+    applyImport(ev.target.result,'import-feedback');
+  };
+  reader.readAsText(file);
+}
+
+function applyImport(raw,feedbackId){
+  try{
+    const parsed=JSON.parse(raw);
+    if(!parsed.tasks||!parsed.gastos)throw new Error('Faltan campos tasks o gastos');
+    if(!confirm(`¿Importar? Esto reemplazará todos los datos actuales.\n\n${parsed.tasks.length} tareas · ${parsed.gastos.length} gastos`))return;
+    state=parsed;
+    nid=state.nextId||200;
+    saveState();
+    showFeedback(feedbackId,`Importado correctamente: ${parsed.tasks.length} tareas, ${parsed.gastos.length} gastos`,'ok');
+    document.getElementById('import-textarea').value='';
+    setTimeout(()=>renderDatos(),1200);
+  }catch(err){
+    showFeedback(feedbackId,'JSON inválido: '+err.message,'err');
+  }
+}
+
+function openRawEdit(){
+  const area=document.getElementById('raw-edit-area');
+  const editor=document.getElementById('raw-json-editor');
+  editor.value=JSON.stringify(state,null,2);
+  area.style.display='block';
+  editor.focus();
+}
+function closeRawEdit(){
+  document.getElementById('raw-edit-area').style.display='none';
+  document.getElementById('raw-feedback').style.display='none';
+}
+function applyRawEdit(){
+  const raw=document.getElementById('raw-json-editor').value.trim();
+  try{
+    const parsed=JSON.parse(raw);
+    if(!parsed.tasks||!parsed.gastos)throw new Error('Faltan campos tasks o gastos');
+    state=parsed;nid=state.nextId||200;
+    saveState();
+    showFeedback('raw-feedback','Cambios aplicados correctamente ✓','ok');
+    setTimeout(()=>{closeRawEdit();renderDatos();},1000);
+  }catch(err){
+    showFeedback('raw-feedback','Error de sintaxis: '+err.message,'err');
+  }
+}
+
+function showFeedback(id,msg,type){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.textContent=msg;
+  el.className='import-feedback '+(type==='ok'?'import-ok':'import-err');
+  el.style.display='block';
+  if(type==='ok')setTimeout(()=>{el.style.display='none';},3000);
+}
+
+populateSelects();
+render();
+</script>
+</body>
+</html>
