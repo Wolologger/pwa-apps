@@ -9,7 +9,13 @@
 <meta name="theme-color" content="#0a0a09">
 <link rel="manifest" href="manifest.json">
 <title>W // APPS</title>
-<!-- version: 2.2.0 -->
+<!-- version: 2.4.0 -->
+<!-- Firebase SDK v9 compat -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="wapps-store.js"></script>
+<script src="wapps-firebase.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;--line:rgba(255,255,255,0.06);--line2:rgba(255,255,255,0.12);--text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;--y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;--fh:'Bebas Neue',sans-serif;--fm:'DM Mono',monospace;}
@@ -103,6 +109,55 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
 @keyframes spin{to{transform:rotate(360deg)}}
 .err-msg{color:var(--r);font-size:11px;line-height:1.7;padding:20px;}
 
+/* AUTH BTN */
+.auth-btn{display:flex;align-items:center;gap:6px;background:transparent;border:0.5px solid var(--dim);color:var(--muted);font-family:var(--fm);font-size:9px;letter-spacing:1px;padding:4px 9px;cursor:pointer;transition:all 0.15s;height:28px;flex-shrink:0;}
+.auth-btn:hover{border-color:var(--y);color:var(--y);}
+.auth-avatar{width:18px;height:18px;border-radius:50%;object-fit:cover;}
+
+/* SYNC BAR */
+.sync-bar{display:flex;align-items:center;justify-content:space-between;padding:7px 20px;border-bottom:1px solid var(--line2);background:var(--bg2);min-height:34px;}
+.sync-status{display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:1px;}
+.sync-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.sync-dot.online{background:var(--g);}
+.sync-dot.offline{background:var(--r);}
+.sync-dot.syncing{background:var(--y);animation:pulse 0.8s ease-in-out infinite;}
+.sync-label{color:var(--muted);}
+.sync-label.online{color:var(--g);}
+.sync-label.offline{color:var(--r);}
+.sync-label.syncing{color:var(--y);}
+.sync-pending{font-size:9px;color:var(--y);letter-spacing:0.5px;}
+.sync-btn{background:transparent;border:0.5px solid var(--dim);color:var(--muted);font-family:var(--fm);font-size:9px;letter-spacing:1px;padding:3px 9px;cursor:pointer;transition:all 0.15s;}
+.sync-btn:hover:not(:disabled){border-color:var(--y);color:var(--y);}
+.sync-btn:disabled{opacity:0.35;cursor:default;}
+
+/* LOGIN SCREEN */
+.login-screen{
+  position:fixed;inset:0;z-index:100;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:40px 24px;
+  transition:opacity 0.3s;
+}
+.login-screen.hidden{opacity:0;pointer-events:none;}
+.login-logo{font-family:var(--fh);font-size:52px;letter-spacing:3px;color:var(--text);line-height:1;margin-bottom:6px;}
+.login-logo span{color:var(--y);}
+.login-sub{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:48px;}
+.login-card{width:100%;max-width:320px;background:var(--bg2);border:1px solid var(--line2);padding:28px 24px;display:flex;flex-direction:column;align-items:center;gap:20px;}
+.login-title{font-family:var(--fh);font-size:22px;letter-spacing:1px;color:var(--text);}
+.login-desc{font-size:11px;color:var(--muted);text-align:center;line-height:1.6;}
+.login-google-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:12px 20px;
+  background:var(--y);color:#0a0a09;
+  border:none;font-family:var(--fh);font-size:16px;letter-spacing:1px;
+  cursor:pointer;transition:opacity 0.15s;
+}
+.login-google-btn:hover{opacity:0.88;}
+.login-google-btn:disabled{opacity:0.4;cursor:default;}
+.login-google-icon{width:18px;height:18px;flex-shrink:0;}
+.login-spinner{width:16px;height:16px;border:2px solid rgba(10,10,9,0.3);border-top-color:#0a0a09;border-radius:50%;animation:spin 0.6s linear infinite;}
+.login-error{font-size:10px;color:var(--r);text-align:center;letter-spacing:0.5px;}
+
 /* FOOTER */
 .footer{margin-top:auto;padding:20px 20px 0;border-top:1px solid var(--line2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
 .footer-left{font-size:10px;color:var(--muted);line-height:1.6;}
@@ -112,7 +167,29 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
 </head>
 <body>
 <div class="grid-bg"></div>
-<div class="shell">
+
+<!-- LOGIN SCREEN — visible hasta que Firebase confirme sesión -->
+<div class="login-screen" id="login-screen">
+  <div class="login-logo">W<span>//</span>APPS</div>
+  <div class="login-sub">Panel personal</div>
+  <div class="login-card">
+    <div class="login-title">ACCESO</div>
+    <div class="login-desc">Inicia sesión con tu cuenta de Google para acceder a tus herramientas.</div>
+    <button class="login-google-btn" id="login-btn" onclick="doLogin()">
+      <svg class="login-google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      <span id="login-btn-text">ENTRAR CON GOOGLE</span>
+    </button>
+    <div class="login-error" id="login-error" style="display:none"></div>
+  </div>
+</div>
+
+<!-- APP — oculto hasta login confirmado -->
+<div class="shell" id="app-shell" style="display:none">
 
   <div class="topbar">
     <div>
@@ -121,6 +198,9 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
     <div class="topbar-right">
       <div class="build-tag">PERSONAL</div>
       <div class="clock" id="clock">--:--</div>
+      <button class="auth-btn" id="auth-btn" onclick="handleAuth()" title="Login con Google">
+        ENTRAR
+      </button>
       <a class="settings-btn" href="editor-categorias.html" title="Editor de categorías">
         <svg viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="3"/>
@@ -128,6 +208,15 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
         </svg>
       </a>
     </div>
+  </div>
+
+  <div class="sync-bar" id="sync-bar">
+    <div class="sync-status">
+      <div class="sync-dot offline" id="sync-dot"></div>
+      <span class="sync-label offline" id="sync-label">OFFLINE</span>
+      <span class="sync-pending" id="sync-pending"></span>
+    </div>
+    <button class="sync-btn" id="sync-btn" onclick="manualSync()" disabled>↑ SYNC</button>
   </div>
 
   <div class="hero">
@@ -167,7 +256,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
     </div>
   </div>
 
-</div>
+</div><!-- /app-shell -->
 
 <script>
 const GITHUB_USER='Wolologger';
@@ -272,7 +361,158 @@ async function clearCache() {
   window.location.reload(true);
 }
 
-loadApps();
+// loadApps() se llama desde showApp() cuando hay sesión activa
+</script>
+<script>
+// ── Login gate ───────────────────────────────────────────────────
+async function doLogin() {
+  const btn     = document.getElementById('login-btn');
+  const btnText = document.getElementById('login-btn-text');
+  const errEl   = document.getElementById('login-error');
+  btn.disabled  = true;
+  btnText.innerHTML = '<div class="login-spinner"></div>';
+  errEl.style.display = 'none';
+  try {
+    const user = await WFirebase.login();
+    if (!user) throw new Error('Login cancelado');
+  } catch(e) {
+    btn.disabled  = false;
+    btnText.textContent = 'ENTRAR CON GOOGLE';
+    errEl.textContent   = e.code === 'auth/popup-closed-by-user'
+      ? 'Ventana cerrada. Inténtalo de nuevo.'
+      : 'Error al iniciar sesión. Inténtalo de nuevo.';
+    errEl.style.display = 'block';
+  }
+}
+
+function showApp(user) {
+  document.getElementById('login-screen').style.display  = 'none';
+  document.getElementById('app-shell').style.display     = '';
+  updateAuthBtn(user);
+  if (!allFiles.length) loadApps();
+}
+
+function showLogin() {
+  document.getElementById('login-screen').style.display  = '';
+  document.getElementById('app-shell').style.display     = 'none';
+  // Reset login btn
+  const btn = document.getElementById('login-btn');
+  const btnText = document.getElementById('login-btn-text');
+  if (btn) btn.disabled = false;
+  if (btnText) btnText.textContent = 'ENTRAR CON GOOGLE';
+}
+
+// ── Auth UI (topbar) ──────────────────────────────────────────────
+async function handleAuth() {
+  const user = WFirebase.getUser();
+  if (user) {
+    if (confirm(`¿Cerrar sesión de ${user.displayName}?`)) {
+      await WFirebase.logout();
+    }
+  }
+}
+
+function updateAuthBtn(user) {
+  const btn = document.getElementById('auth-btn');
+  if (!btn) return;
+  if (user) {
+    btn.innerHTML = user.photoURL
+      ? `<img class="auth-avatar" src="${user.photoURL}" alt="${user.displayName}">`
+      : `<span>${user.displayName?.split(' ')[0] || 'USER'}</span>`;
+    btn.title = `${user.displayName} · Click para cerrar sesión`;
+    btn.style.borderColor = 'rgba(48,216,128,0.4)';
+  } else {
+    btn.innerHTML = 'ENTRAR';
+    btn.title = 'Login con Google';
+    btn.style.borderColor = '';
+  }
+}
+
+// ── Sync UI ───────────────────────────────────────────────────────
+function updateSyncUI(state, pendingCount) {
+  const dot   = document.getElementById('sync-dot');
+  const label = document.getElementById('sync-label');
+  const btn   = document.getElementById('sync-btn');
+  const pend  = document.getElementById('sync-pending');
+  if (!dot) return;
+
+  dot.className   = `sync-dot ${state}`;
+  label.className = `sync-label ${state}`;
+
+  const labels = { online: 'ONLINE', offline: 'OFFLINE', syncing: 'SINCRONIZANDO...' };
+  label.textContent = labels[state] || state.toUpperCase();
+
+  if (pendingCount > 0) {
+    pend.textContent = `· ${pendingCount} PENDIENTE${pendingCount > 1 ? 'S' : ''}`;
+  } else {
+    pend.textContent = '';
+  }
+
+  const canSync = state === 'online' && WFirebase.getUser() && pendingCount > 0;
+  btn.disabled = !canSync;
+}
+
+async function manualSync() {
+  const user = WFirebase.getUser();
+  if (!user || !WFirebase.isOnline()) return;
+
+  updateSyncUI('syncing', WSync.getPending().length);
+  document.getElementById('sync-btn').disabled = true;
+
+  const { pushed, failed } = await WSync.syncAll(user.uid);
+
+  const pending = WSync.getPending().length;
+  updateSyncUI(WFirebase.isOnline() ? 'online' : 'offline', pending);
+
+  if (failed > 0) {
+    console.warn(`[Sync] ${failed} errores al sincronizar`);
+  }
+}
+
+// ── Eventos Firebase ──────────────────────────────────────────────
+window.addEventListener('wapps:auth-change', async e => {
+  const user = e.detail.user;
+
+  if (user) {
+    showApp(user);
+    // Pull remoto primero, luego push pendientes
+    updateSyncUI('syncing', WSync.getPending().length);
+    await WStore.syncAllOnLoad();
+    await WSync.syncAll(user.uid);
+    updateSyncUI(WFirebase.isOnline() ? 'online' : 'offline', WSync.getPending().length);
+  } else {
+    showLogin();
+    updateSyncUI(WFirebase.isOnline() ? 'online' : 'offline', 0);
+  }
+});
+
+window.addEventListener('wapps:online', () => {
+  updateSyncUI('online', WSync.getPending().length);
+});
+
+window.addEventListener('wapps:offline', () => {
+  updateSyncUI('offline', WSync.getPending().length);
+});
+
+window.addEventListener('wapps:sync-start', () => {
+  updateSyncUI('syncing', WSync.getPending().length);
+});
+
+window.addEventListener('wapps:sync-done', () => {
+  updateSyncUI(WFirebase.isOnline() ? 'online' : 'offline', WSync.getPending().length);
+});
+
+window.addEventListener('wapps:pending-change', e => {
+  const state = document.getElementById('sync-label')?.className?.includes('syncing')
+    ? 'syncing'
+    : WFirebase.isOnline() ? 'online' : 'offline';
+  updateSyncUI(state, e.detail.pending.length);
+});
+
+// Init estado inicial — mostrar login hasta que Firebase resuelva
+// Si el usuario ya estaba logado, wapps:auth-change se disparará automáticamente
+updateSyncUI(navigator.onLine ? 'online' : 'offline', WSync.getPending().length);
+// No llamamos loadApps() aquí — se llama en showApp() cuando hay usuario
 </script>
 </body>
 </html>

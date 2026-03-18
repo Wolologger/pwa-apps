@@ -109,6 +109,33 @@ select option{background:var(--bg2);}
 .wapp-spinner{width:28px;height:28px;border:2px solid rgba(232,240,64,0.2);border-top-color:#e8f040;border-radius:50%;animation:wapp-spin 0.65s linear infinite;}
 @keyframes wapp-spin{to{transform:rotate(360deg)}}
 .wapp-loading-text{font-family:'DM Mono',monospace;font-size:11px;color:#5a5850;letter-spacing:1px;}
+
+/* RECETAS */
+.receta-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:12px;margin-bottom:12px;overflow:hidden;}
+.receta-img{width:100%;height:160px;object-fit:cover;display:block;background:var(--bg3);}
+.receta-img-placeholder{width:100%;height:80px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:28px;}
+.receta-body{padding:12px 14px;}
+.receta-title{font-family:var(--fh);font-size:20px;letter-spacing:0.3px;line-height:1.1;margin-bottom:6px;}
+.receta-meta{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+.receta-badge{font-size:10px;font-family:var(--fm);color:var(--muted);display:flex;align-items:center;gap:3px;}
+.receta-badge.match-hi{color:var(--g);}
+.receta-badge.match-md{color:var(--y);}
+.receta-badge.match-lo{color:var(--o);}
+.receta-ing-section{margin-bottom:10px;}
+.receta-ing-title{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--fm);margin-bottom:6px;}
+.receta-ing-list{display:flex;flex-wrap:wrap;gap:4px;}
+.receta-ing{font-size:10px;font-family:var(--fm);padding:3px 8px;border-radius:99px;border:0.5px solid;}
+.receta-ing.tiene{border-color:rgba(48,216,128,0.4);color:var(--g);background:rgba(48,216,128,0.06);}
+.receta-ing.falta{border-color:rgba(240,100,48,0.4);color:var(--o);background:rgba(240,100,48,0.06);}
+.receta-compra-btn{width:100%;padding:9px;background:transparent;border:0.5px solid rgba(240,160,48,0.4);border-radius:8px;color:var(--o);font-family:var(--fm);font-size:11px;cursor:pointer;transition:all 0.15s;margin-top:4px;}
+.receta-compra-btn:hover{background:rgba(240,160,48,0.08);}
+.receta-compra-btn.added{border-color:rgba(48,216,128,0.4);color:var(--g);}
+.receta-ver-btn{display:block;width:100%;padding:9px;background:var(--y);border:none;border-radius:8px;color:#0a0a09;font-family:var(--fh);font-size:15px;cursor:pointer;text-align:center;text-decoration:none;letter-spacing:0.5px;margin-top:8px;}
+.ing-chip{font-size:10px;font-family:var(--fm);padding:3px 10px;border-radius:99px;border:0.5px solid var(--border2);color:var(--muted);background:var(--bg2);}
+.ing-chip.selected{border-color:var(--y);color:var(--y);background:rgba(232,240,64,0.07);}
+.recetas-empty{text-align:center;padding:32px 20px;font-size:12px;color:var(--muted);font-family:var(--fm);line-height:1.8;}
+.recetas-spinner{display:flex;align-items:center;justify-content:center;gap:10px;padding:32px;font-size:11px;color:var(--muted);font-family:var(--fm);}
+
 </style>
 </head>
 <body>
@@ -132,6 +159,7 @@ select option{background:var(--bg2);}
 
 <div class="tabs">
   <button class="tab active" onclick="showTab('despensa',this)">Despensa</button>
+  <button class="tab" onclick="showTab('recetas',this)">🍳 Recetas</button>
   <button class="tab" onclick="showTab('config',this)">Config</button>
 </div>
 
@@ -173,6 +201,19 @@ select option{background:var(--bg2);}
     </div>
     <div id="summary-bar"></div>
     <div id="alimentos-body"></div>
+  </div>
+
+  <div id="recetas" class="section">
+    <div style="padding:14px 16px 8px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+      <div style="font-size:11px;color:var(--muted);font-family:var(--fm);line-height:1.5;" id="recetas-desc">
+        Recetas sugeridas con lo que tienes en la despensa.
+      </div>
+      <button class="btn btn-y" style="flex-shrink:0;font-size:11px;padding:8px 14px;" onclick="buscarRecetas()" id="recetas-btn">
+        🔍 Buscar
+      </button>
+    </div>
+    <div style="padding:0 16px 8px;display:flex;gap:6px;flex-wrap:wrap;" id="recetas-ingredientes"></div>
+    <div id="recetas-body" style="padding:0 16px 16px;"></div>
   </div>
 
   <div id="config" class="section">
@@ -485,6 +526,181 @@ function changeStock(id, delta) {
     if(confirm(msg)) moverACompra(id);
   }
   renderDespensa();
+}
+
+// ── RECETAS (Spoonacular) ──────────────────────────────────────
+const SPOONACULAR_KEY = 'e901cbe291914cd9853080e418b61391';
+let recetasCache = null;
+let selectedIngredientes = new Set();
+
+function getIngredientesDisponibles() {
+  return state.alimentos.map(a => a.nombre.toLowerCase().trim()).filter(Boolean);
+}
+
+function renderIngredientesChips() {
+  const el = document.getElementById('recetas-ingredientes');
+  if (!el) return;
+  const todos = getIngredientesDisponibles();
+  if (!todos.length) {
+    el.innerHTML = '<span style="font-size:10px;color:var(--muted);font-family:var(--fm);">Añade alimentos a la despensa para buscar recetas.</span>';
+    return;
+  }
+  // Init selection con todos
+  if (selectedIngredientes.size === 0) todos.forEach(i => selectedIngredientes.add(i));
+  el.innerHTML = todos.map(ing => `
+    <span class="ing-chip ${selectedIngredientes.has(ing) ? 'selected' : ''}"
+      onclick="toggleIngrediente('${ing.replace(/'/g,"\'")}', this)" style="cursor:pointer;">${ing}</span>
+  `).join('');
+}
+
+function toggleIngrediente(ing, el) {
+  if (selectedIngredientes.has(ing)) {
+    selectedIngredientes.delete(ing);
+    el.classList.remove('selected');
+  } else {
+    selectedIngredientes.add(ing);
+    el.classList.add('selected');
+  }
+}
+
+async function buscarRecetas() {
+  const body = document.getElementById('recetas-body');
+  const btn  = document.getElementById('recetas-btn');
+  const ingredientes = [...selectedIngredientes];
+
+  if (!ingredientes.length) {
+    body.innerHTML = '<div class="recetas-empty">Selecciona al menos un ingrediente.</div>';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Buscando…';
+  body.innerHTML = '<div class="recetas-spinner"><div class="spinner"></div>Buscando recetas…</div>';
+
+  try {
+    const ingsParam = ingredientes.join(',+');
+    const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${encodeURIComponent(ingsParam)}&number=8&ranking=2&ignorePantry=true&apiKey=${SPOONACULAR_KEY}`;
+    const res  = await fetch(url);
+    if (!res.ok) throw new Error(`API ${res.status}`);
+    const data = await res.json();
+
+    if (!data.length) {
+      body.innerHTML = '<div class="recetas-empty">No se encontraron recetas con esos ingredientes.<br>Prueba con menos filtros.</div>';
+      return;
+    }
+
+    recetasCache = data;
+    renderRecetas(data, ingredientes);
+  } catch(e) {
+    body.innerHTML = `<div class="recetas-empty" style="color:var(--r);">Error al buscar recetas.<br>${e.message}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔍 Buscar';
+  }
+}
+
+function renderRecetas(recetas, ingredientesDisponibles) {
+  const body = document.getElementById('recetas-body');
+  const disponibles = new Set(ingredientesDisponibles.map(i => i.toLowerCase()));
+
+  body.innerHTML = recetas.map(r => {
+    const usados   = r.usedIngredients  || [];
+    const faltantes = r.missedIngredients || [];
+    const total    = usados.length + faltantes.length;
+    const matchPct = total > 0 ? Math.round((usados.length / total) * 100) : 0;
+    const matchClass = matchPct >= 80 ? 'match-hi' : matchPct >= 50 ? 'match-md' : 'match-lo';
+
+    const usadosHtml = usados.map(i =>
+      `<span class="receta-ing tiene" title="${i.original || i.name}">${i.name}</span>`
+    ).join('');
+
+    const faltantesHtml = faltantes.map(i =>
+      `<span class="receta-ing falta" title="${i.original || i.name}">${i.name}</span>`
+    ).join('');
+
+    const faltantesNombres = faltantes.map(i => i.name);
+    const faltantesJSON = JSON.stringify(faltantesNombres).replace(/"/g, '&quot;');
+
+    return `<div class="receta-card">
+      ${r.image ? `<img class="receta-img" src="${r.image}" alt="${r.title}" loading="lazy" onerror="this.parentElement.querySelector('.receta-img-placeholder').style.display='flex';this.remove();">` : ''}
+      <div class="receta-img-placeholder" style="${r.image ? 'display:none' : 'display:flex'}">🍳</div>
+      <div class="receta-body">
+        <div class="receta-title">${r.title}</div>
+        <div class="receta-meta">
+          <span class="receta-badge ${matchClass}">✓ ${matchPct}% ingredientes</span>
+          <span class="receta-badge">✅ ${usados.length} tienes</span>
+          ${faltantes.length ? `<span class="receta-badge" style="color:var(--o)">⚠ ${faltantes.length} te faltan</span>` : ''}
+        </div>
+        ${usados.length ? `<div class="receta-ing-section">
+          <div class="receta-ing-title">Tienes</div>
+          <div class="receta-ing-list">${usadosHtml}</div>
+        </div>` : ''}
+        ${faltantes.length ? `<div class="receta-ing-section">
+          <div class="receta-ing-title">Te falta</div>
+          <div class="receta-ing-list">${faltantesHtml}</div>
+          <button class="receta-compra-btn" id="compra-btn-${r.id}"
+            onclick="añadirFaltantesACompra(${r.id}, '${r.title.replace(/'/g,"\'")}', ${faltantesJSON})">
+            🛒 Añadir ingredientes que faltan a la compra
+          </button>
+        </div>` : `<div style="font-size:10px;color:var(--g);font-family:var(--fm);margin-bottom:8px;">✓ ¡Tienes todos los ingredientes!</div>`}
+        <a class="receta-ver-btn" href="https://spoonacular.com/recipes/${r.title.replace(/\s+/g,'-').toLowerCase()}-${r.id}" target="_blank">Ver receta completa →</a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function añadirFaltantesACompra(recetaId, recetaTitulo, faltantes) {
+  if (!faltantes.length) return;
+
+  const compra = WStore.get('compra', 'data') ||
+    { lists:[{id:1,name:'Supermercado'}], items:[], cats:[], stores:[], nextId:10, history:[] };
+
+  let nid = compra.nextId || 10;
+  const listaId = compra.lists?.[0]?.id || 1;
+  let añadidos = 0;
+
+  faltantes.forEach(nombre => {
+    // Evitar duplicados
+    const yaExiste = compra.items.some(i => i.text?.toLowerCase() === nombre.toLowerCase() && !i.done);
+    if (!yaExiste) {
+      compra.items.push({
+        id: ++nid,
+        text: nombre,
+        done: false,
+        listId: listaId,
+        cat: 'otros',
+        nota: `Para: ${recetaTitulo}`
+      });
+      añadidos++;
+    }
+  });
+
+  compra.nextId = nid;
+  WStore.set('compra', 'data', compra);
+  try { localStorage.setItem('compra_v2', JSON.stringify(compra)); } catch(e) {}
+
+  // Feedback visual
+  const btn = document.getElementById(`compra-btn-${recetaId}`);
+  if (btn) {
+    btn.classList.add('added');
+    btn.textContent = añadidos > 0
+      ? `✓ ${añadidos} ingrediente${añadidos > 1 ? 's' : ''} añadido${añadidos > 1 ? 's' : ''} a la compra`
+      : '✓ Ya estaban en la lista';
+    btn.disabled = true;
+  }
+}
+
+// Inicializar chips al mostrar tab de recetas
+const _origShowTab = showTab;
+function showTab(name, el) {
+  _origShowTab(name, el);
+  if (name === 'recetas') {
+    renderIngredientesChips();
+    if (!recetasCache) {
+      document.getElementById('recetas-body').innerHTML =
+        '<div class="recetas-empty">Selecciona los ingredientes que quieres usar<br>y pulsa 🔍 Buscar.</div>';
+    }
+  }
 }
 
 // ── INIT ──

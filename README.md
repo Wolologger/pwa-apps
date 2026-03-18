@@ -1,8 +1,9 @@
 # W//APPS · Personal PWA Suite
 
-**Versión:** `v1.6.0` · Build `2026.03`
+**Versión:** `v2.0.0` · Build `2026.03`
 **Autor:** [@Wolologger](https://github.com/Wolologger)
-**Stack:** HTML · CSS · Vanilla JS · localStorage · Chart.js · wapps-store.js
+**URL:** `https://wolologger.github.io/pwa-apps/`
+**Stack:** HTML · CSS · Vanilla JS · localStorage · Firebase · Chart.js · Spoonacular API
 
 ---
 
@@ -10,25 +11,36 @@
 
 ```
 pwa-apps/
-├── index.html              # Panel principal · categorías editables · búsqueda · notificaciones
-├── wapps-store.js          # ★ Bus de datos compartido + WNotify
-├── manifest.json / sw.js   # PWA
+├── index.html                # Panel principal · login Google · sync status · ajustes
+├── editor-categorias.html    # Panel de ajustes · visibilidad · reset por app
+├── wapps-store.js            # Bus de datos (WStore) · notificaciones (WNotify) · sync Firebase
+├── wapps-firebase.js         # Auth Google · Firestore sync (WFirebase + WSync)
+├── wapps-onboarding.js       # Onboarding por app (muestra una vez)
+├── manifest.json / sw.js     # PWA · network-first para HTML · wapps-v2
 ├── icons/
 │
-├── suministros.html        # Facturas luz/gas/agua + guías interactivas completas
-├── despensa.html           # Inventario · contador stock · alertas · → Compra automático
-├── compra.html             # Listas · historial · reutilizar · WStore
-├── obra.html               # ★ Múltiples proyectos · archivar · resumen global
+├── — HOGAR —
+├── despensa.html             # Inventario · stock · alertas · recetas IA · → Compra
+├── compra.html               # Listas · historial · reutilizar · WStore
+├── suministros.html          # Facturas luz/gas/agua · guías · alertas
+├── mascotas.html             # Perfil · medicación · vet · peso · → Calendario y Compra
 │
-├── finanzas.html           # Hub central (lee Suministros, Gastos, Obra)
-├── gastos-diarios.html     # Gastos cotidianos
-├── deseados.html           # Lista deseos · historial de precios por fecha
+├── — DINERO —
+├── obra.html                 # Múltiples proyectos · archivar · resumen global
+├── finanzas.html             # Hub central (lee Suministros, Gastos, Obra)
+├── gastos-diarios.html       # Gastos cotidianos
+├── deseados.html             # Lista deseos · historial de precios
 │
-├── setlist.html            # Setlists por grupo
-├── instrumentos.html       # Inventario instrumentos
+├── — MÚSICA —
+├── setlist.html              # Setlists por grupo · drag & drop · modo actuación
+├── instrumentos.html         # Inventario instrumentos
 │
-├── semana.html             # Planificador · tareas editables · tareas recurrentes
-└── decisor.html            # Decisor aleatorio
+├── — PRODUCTIVIDAD —
+├── semana.html               # Planificador · tareas editables · recurrentes
+│
+├── — UTILIDAD —
+├── decisor.html              # Decisor aleatorio · presets editables
+└── backup.html               # Backup/restauración · reset por app · Firestore delete
 ```
 
 ---
@@ -37,35 +49,64 @@ pwa-apps/
 
 ### 🏠 Hogar
 
-| App | Novedades v1.5–1.6 |
-|-----|---------------------|
-| **Suministros** | Guías Luz/Gas/Agua con test · alertas subida >20% |
-| **Despensa** | ★ Contador +/− stock · alerta stock mínimo · botón → Lista Compra · WStore |
-| **Lista Compra** | ★ Historial de compras anteriores · reutilizar lista · WStore |
-| **Mi Obra** | ★★ **Múltiples proyectos** · crear/editar/archivar · vista resumen global · migración automática desde formato antiguo · WStore |
+| App | Descripción | Novedades |
+|-----|-------------|-----------|
+| **Despensa** | Inventario de alimentos y caducidades | ★ Stock +/− · stockMin · recetas con Spoonacular · ingredientes faltantes → Compra |
+| **Lista Compra** | Listas de la compra reutilizables | Historial · reutilizar lista · WStore |
+| **Suministros** | Facturas de luz, gas y agua | Guías Luz/Gas/Agua con test · alertas subida >20% |
+| **Mascotas** | Gestión de mascotas | Perfil · medicación · visitas vet · registro de peso |
 
 ### 💰 Dinero
 
-| App | Novedades |
-|-----|-----------|
-| **Finanzas** | Hub · lee Suministros, Gastos, Obra automáticamente |
-| **Gastos Diarios** | Sin cambios esta iteración |
-| **Deseados** | ★ Historial de precios por fecha · mín/máx/tendencia |
+| App | Descripción | Novedades |
+|-----|-------------|-----------|
+| **Mi Obra** | Gestión de obras y reformas | Múltiples proyectos · archivar · vista global · migración legacy |
+| **Finanzas** | Hub financiero central | Lee Suministros, Gastos y Obra automáticamente |
+| **Gastos Diarios** | Control de gastos cotidianos | — |
+| **Deseados** | Lista de deseos con seguimiento | Historial de precios · mín/máx/tendencia |
 
-### 🎸 Música / 📅 Productividad / ⚙️ Utilidad
+### 🎸 Música
 
-| App | Novedades |
-|-----|-----------|
-| **Semana** | ★ Tareas editables (inline) · tareas recurrentes (diaria/L–V/finde/semanal) |
-| **Setlist / Instrumentos / Decisor** | Sin cambios esta iteración |
+| App | Descripción |
+|-----|-------------|
+| **Setlist** | Canciones por grupo · drag & drop · modo actuación · exportar |
+| **Instrumentos** | Inventario de guitarras, bajos, amplis y pedales |
+
+### 📅 Productividad
+
+| App | Descripción |
+|-----|-------------|
+| **Semana** | Tareas editables inline · recurrentes (diaria/L–V/finde/semanal) |
+
+### ⚙️ Utilidad
+
+| App | Descripción |
+|-----|-------------|
+| **Decisor** | Elige por ti · presets editables · historial |
+| **Backup** | Export/import JSON · reset por app (localStorage + Firestore) |
 
 ---
 
-## ★ Nuevas funcionalidades detalladas
+## ★ Funcionalidades detalladas
 
-### obra.html — Múltiples proyectos (v1.6.0)
+### despensa.html — Recetas con Spoonacular
+- Pestaña **🍳 Recetas** con chips de ingredientes seleccionables
+- Llama a `findByIngredients` de Spoonacular con los ingredientes de la despensa
+- Cada receta muestra % de match, ingredientes que tienes (verde) y que te faltan (naranja)
+- Botón **🛒 Añadir ingredientes que faltan a la compra** → escribe directamente en `compra.html` con nota de la receta
+- API key: Spoonacular · 150 llamadas/día en plan gratuito
 
-**Arquitectura del state:**
+### despensa.html — Stock counter
+- Botones **+/−** junto a cada alimento
+- Campo `stockMin` → alerta automática al bajar del umbral
+- `stock = 0` → confirm para mover a Lista Compra
+
+### compra.html — Historial
+- Al limpiar hechos → archiva en `state.history[]`
+- Pestaña **Historial** con las últimas 20 compras
+- Botón **↺ Reutilizar** → recupera ítems de una sesión anterior
+
+### obra.html — Múltiples proyectos
 ```js
 state = {
   proyectos: [{
@@ -78,41 +119,86 @@ state = {
   nextId: 200
 }
 ```
+- Selector de proyectos con % de progreso · Vista global agregada
+- Modal crear/editar · Archivar/eliminar con confirmación
+- Migración automática desde `miobra_v2`
 
-**Funcionalidades:**
-- Selector de proyectos en barra superior (chips con % de progreso)
-- Botón **Todas** → vista resumen global con totales agregados
-- **＋** → modal para crear nueva obra (nombre, descripción, presupuesto, color)
-- **✎ Editar** → modificar nombre/color/presupuesto del proyecto activo
-- **📦 Archivar** → oculta el proyecto de la vista activa (recuperable)
-- **Eliminar** → borrado definitivo con confirmación
-- Migración automática desde formato legacy `miobra_v2`
-- Sync con WStore + mantiene clave legacy para compatibilidad con Finanzas
+### semana.html — Recurrentes y edición
+- Doble tap o ✎ → edición inline
+- Frecuencias: Diaria · L–V · Fin de semana · Semanal
 
-### despensa.html — Stock counter (v1.5.0)
-- Botones **+/−** junto a cada alimento
-- Campo `stockMin` al añadir → alerta automática y oferta de añadir a Compra al bajar del umbral
-- `stock=0` → confirm automático para mover a Lista Compra
+### deseados.html — Historial de precios
+- `historialPrecios: [{fecha, precio}]` por ítem
+- Panel con últimas 5 entradas + mín/máx/tendencia
 
-### compra.html — Historial (v1.5.0)
-- Al limpiar hechos → se archiva la lista en `state.history[]`
-- Pestaña **Historial** con las últimas 20 compras completadas
-- Botón **↺ Reutilizar** → añade todos los ítems de esa sesión a la lista activa
+### backup.html — Reset por app
+- Botón **Borrar** por app en zona de peligro → borra localStorage **y** el documento de Firestore
+- Botón **Borrar TODOS** → batch delete completo en Firestore
+- Requiere sesión activa para borrar en Firestore; si no hay sesión, solo borra local
 
-### semana.html — Recurrentes y edición (v1.5.0)
-- Doble tap o botón ✎ → edición inline de cualquier tarea
-- Sección **↻ Tareas recurrentes** en la pestaña Eventos
-- Frecuencias: Diaria · L–V · Fin de semana · Semanal (lunes)
-- Las recurrentes se aplican automáticamente cada semana · indicador ↻ visual
+---
 
-### deseados.html — Historial de precios (v1.5.0)
-- Cada ítem tiene `historialPrecios: [{fecha, precio}]`
-- Panel desplegable por ítem con últimas 5 entradas + mín/máx/tendencia
-- Botón **+ Anotar** → registra el precio del día y actualiza el precio actual
+## 🔐 Firebase — Auth y Sync
+
+**Proyecto:** `pwa-apps-b3857` · Región: `europe-west3`
+
+### Autenticación
+- Login obligatorio con Google para acceder a la app
+- Sin sesión → pantalla de login a pantalla completa
+- Token persistente → al reabrir la app no pide login de nuevo
+
+### Sincronización (WFirebase + WSync)
+- **Offline-first**: localStorage es siempre la fuente de datos principal
+- Cada `WStore.set()` marca el dato como `pending` y sube a Firestore si hay red
+- Sin red → queda en cola `wapps.pending`, se sube al recuperar conexión
+- Al hacer login → pull de Firestore primero (gana el timestamp más reciente), luego push pendientes
+- Sync manual con botón `↑ SYNC` en el topbar del index
+
+### Estructura Firestore
+```
+users/
+  {uid}/
+    data/
+      despensa_items   → { alimentos: [...], _updatedAt }
+      compra_data      → { lists: [...], items: [...], _updatedAt }
+      semana_data      → { tareas: [...], _updatedAt }
+      ...
+```
+
+### Reglas Firestore
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+```
+
+### Indicador de estado (topbar index)
+| Estado | Color | Significado |
+|--------|-------|-------------|
+| `● ONLINE` | Verde | Conectado, todo sincronizado |
+| `● OFFLINE` | Rojo | Sin red, trabajando en local |
+| `● SINCRONIZANDO...` | Amarillo parpadeante | Subiendo datos |
+| `· N PENDIENTES` | Amarillo | Hay datos sin subir |
+
+---
+
+## 🍳 Integración Spoonacular
+
+- **API:** `findByIngredients` — recetas por ingredientes disponibles
+- **Plan:** Gratuito · 150 llamadas/día
+- **Ranking 2:** maximiza el uso de ingredientes disponibles
+- Los ingredientes faltantes se añaden a `compra.html` con `WStore.set('compra','data',...)`
 
 ---
 
 ## 🔔 Sistema de notificaciones (WNotify)
+
+Panel 🔔 en index · configuración por toggle · throttle 2h
 
 | Alerta | Condición |
 |--------|-----------|
@@ -123,62 +209,105 @@ state = {
 | 📝 Sin registrar gastos | ≥ 2 días sin anotar gasto |
 | 📅 Tareas de hoy | Tareas pendientes con fecha = hoy |
 
-Panel 🔔 en index · configuración por toggle · throttle 2h
+---
+
+## 🎓 Onboarding (WOnboarding)
+
+- Se muestra una vez por app al primer uso
+- `WOnboarding.reset('app')` → fuerza a mostrar de nuevo
+- `WOnboarding.resetAll()` → resetea todas las apps
+
+---
+
+## ⚙️ Panel de ajustes (`editor-categorias.html`)
+
+Acceso desde botón ⚙ en el topbar del index.
+
+- Toggle on/off por herramienta → oculta o muestra en el panel principal
+- Botón **↺ RESET** por herramienta → borra datos de localStorage y Firestore
+- Config de visibilidad en `pwa_hidden`
 
 ---
 
 ## 💾 Claves localStorage
 
-| App | Legacy | Bus WStore |
-|-----|--------|------------|
+| App | Clave legacy | Bus WStore |
+|-----|-------------|------------|
 | Despensa | `despensa_v1` | `wapps.despensa.items` |
-| Finanzas | `finanzas_v1` | `wapps.finanzas.data` |
-| Suministros | `suministros_v1` | `wapps.suministros.data` |
-| Gastos Diarios | `gastos_v1` | `wapps.gastos.data` |
 | Compra | `compra_v2` | `wapps.compra.data` |
-| Semana | `semana_v1` | `wapps.semana.data` |
+| Suministros | `suministros_v1` | `wapps.suministros.data` |
+| Finanzas | `finanzas_v1` | `wapps.finanzas.data` |
+| Gastos Diarios | `gastos_v1` | `wapps.gastos.data` |
+| Semana | `semana_v1` / `semana_v2` | `wapps.semana.data` |
 | Deseados | `deseados_v2` | `wapps.deseados.data` |
-| **Obra (nuevo)** | `obra_multiproj_v1` | `wapps.obra.data` |
-| Categorías index | — | `wapps_cats_v1` |
+| Obra | `obra_multiproj_v1` | `wapps.obra.data` |
+| Mascotas | `mascotas_v1` | — |
+| Backup | — | `wapps.backup.history` |
 | Config notificaciones | — | `notify.config` |
+| Onboarding | — | `wapps.onboarding.<app>` |
+| Herramientas ocultas | — | `pwa_hidden` |
+| Sync pendientes | — | `wapps.pending` |
 
 ---
 
-## 🚀 Roadmap (próximas sesiones)
+## 🔧 Service Worker
+
+- Estrategia **network-first para HTML** → cambios visibles sin Ctrl+F5
+- Cache-first para assets estáticos (manifest, iconos)
+- Offline fallback → sirve desde caché si no hay red
+- Versión de caché: `wapps-v2`
+- Para forzar actualización en todos los dispositivos: subir versión en `sw.js`
+
+---
+
+## 🚀 Roadmap
 
 | Prioridad | Mejora |
 |-----------|--------|
 | Alta | Compra → Gastos Diarios al completar (modal precios) |
 | Alta | Compra: artículos con unidad (kg, L, uds) |
 | Media | Semana: importar .ics (Google Calendar / Outlook) |
-| Media | Guías de uso con popups de onboarding |
+| Media | `WStore.syncOnLoad` en cada herramienta individual |
 | Media | Gastos Diarios integración WStore completa |
+| Baja | Modo oscuro/claro configurable |
 
 ---
 
 ## 📋 Changelog
 
-### v1.6.0 (2026-03)
-- `obra.html` — múltiples proyectos con selector, archivar, vista global, modal crear/editar, migración automática legacy, WStore
+### v2.0.0 (2026-03)
+- `wapps-firebase.js` — nuevo módulo: auth Google + Firestore sync (WFirebase + WSync)
+- `wapps-store.js` — `set()` marca pending y sube a Firestore si hay sesión · `_updatedAt` en todos los datos · `syncOnLoad()` y `syncAllOnLoad()`
+- `index.html` — login obligatorio con Google · pantalla de bienvenida · indicador ONLINE/OFFLINE/SINCRONIZANDO · botón sync manual · Firebase SDK
+- `backup.html` — reset por app borra localStorage **y** Firestore · Firebase SDK
+- `editor-categorias.html` — botón ↺ RESET por herramienta · borra local y Firestore
+- `despensa.html` — pestaña 🍳 Recetas con Spoonacular · ingredientes faltantes → Compra automático
 
 ### v1.5.0 (2026-03)
 - `despensa.html` — contador stock +/−, stockMin, botón automático → Compra
 - `compra.html` — historial de compras, reutilizar listas, WStore
 - `semana.html` — tareas editables inline, tareas recurrentes
 - `deseados.html` — historial de precios por fecha
-- `index.html` — categorías con glow/sombra/hover, spinner
-- Todas las apps — spinners de carga
+- `backup.html` — nueva app: backup y restauración completa
+- `mascotas.html` — nueva app: perfil, medicación, vet, peso
+- `editor-categorias.html` — panel de ajustes con visibilidad on/off
+- `index.html` — botón ⚙ ajustes en topbar · herramientas ocultas desde localStorage
+- `sw.js` — network-first para HTML (wapps-v2)
+- `wapps-onboarding.js` — sistema de onboarding por app
 
 ### v1.4.0
-- `wapps-store.js` — bus datos + WNotify
-- `index.html` — categorías editables, panel notificaciones, botón limpiar caché
+- `wapps-store.js` — WStore + WNotify
+- `index.html` — panel notificaciones, botón limpiar caché
 
 ### v1.3.0
-- `index.html` — menú por categorías, búsqueda
+- `index.html` — categorías, búsqueda
 - `suministros.html` — guías Luz/Gas/Agua
 
-### v1.2.0 — v1.0.0
-- Diseño base, todas las apps, sistema de diseño unificado
+### v1.2.0
+- `obra.html` — múltiples proyectos, migración legacy
+
+### v1.0.0 — v1.1.0
+- Diseño base, todas las apps iniciales, sistema de diseño unificado
 
 ---
 

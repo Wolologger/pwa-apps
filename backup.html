@@ -7,8 +7,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0a0a09">
 <title>Backup — W//APPS</title>
-<!-- version: 1.0.0 -->
+<!-- version: 1.1.0 -->
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="wapps-store.js"></script>
+<script src="wapps-firebase.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -445,26 +450,65 @@ function doRestore(all) {
 }
 
 // ── WIPE ──
-function confirmWipeAll() {
-  if (!confirm('⚠ ESTO BORRARÁ TODOS LOS DATOS DE TODAS LAS APPS.\n\n¿Seguro que quieres continuar?')) return;
+async function confirmWipeAll() {
+  if (!confirm('⚠ ESTO BORRARÁ TODOS LOS DATOS DE TODAS LAS APPS.\n\nSe borrará también de Firestore si hay sesión activa.\n\n¿Seguro que quieres continuar?')) return;
   if (!confirm('Última confirmación: ¿borrar TODO?')) return;
+
+  // 1. Borrar localStorage
   APPS.forEach(app => {
     try { localStorage.removeItem(app.key); } catch(e) {}
     if (app.wkey) {
       try { localStorage.removeItem(`wapps.${app.wkey[0]}.${app.wkey[1]}`); } catch(e) {}
     }
   });
+  if (typeof WSync !== 'undefined') WSync.clearAllPending();
+
+  // 2. Borrar todos los docs de Firestore si hay sesión
+  if (typeof WFirebase !== 'undefined') {
+    const user = WFirebase.getUser();
+    if (user && WFirebase.isOnline()) {
+      try {
+        const db   = firebase.firestore();
+        const snap = await db.collection('users').doc(user.uid).collection('data').get();
+        const batch = db.batch();
+        snap.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+      } catch(e) { console.warn('[backup] Firestore wipeAll error:', e); }
+    }
+  }
+
   showToast('Todos los datos eliminados');
   render();
 }
 
-function wipeSingleApp(appId) {
+async function wipeSingleApp(appId) {
   const app = APPS.find(a => a.id === appId); if (!app) return;
-  if (!confirm(`¿Borrar todos los datos de "${app.name}"?`)) return;
+  if (!confirm(`¿Borrar todos los datos de "${app.name}"?\n\nSe borrará también de Firestore si hay sesión activa.`)) return;
+
+  // 1. Borrar localStorage
   try { localStorage.removeItem(app.key); } catch(e) {}
   if (app.wkey) {
     try { localStorage.removeItem(`wapps.${app.wkey[0]}.${app.wkey[1]}`); } catch(e) {}
   }
+  // Limpiar pending de WSync
+  if (typeof WSync !== 'undefined' && app.wkey) {
+    WSync.clearPending(`${app.wkey[0]}.${app.wkey[1]}`);
+  }
+
+  // 2. Borrar de Firestore si hay sesión
+  if (typeof WFirebase !== 'undefined' && app.wkey) {
+    const user = WFirebase.getUser();
+    if (user && WFirebase.isOnline()) {
+      try {
+        const fsKey = `${app.wkey[0]}_${app.wkey[1]}`;
+        await firebase.firestore()
+          .collection('users').doc(user.uid)
+          .collection('data').doc(fsKey)
+          .delete();
+      } catch(e) { console.warn('[backup] Firestore delete error:', e); }
+    }
+  }
+
   showToast(`Datos de ${app.name} eliminados`);
   render();
 }

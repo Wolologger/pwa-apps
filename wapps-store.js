@@ -1,12 +1,13 @@
 /**
- * W//APPS — Shared Data Bus v1.0
+ * W//APPS — Shared Data Bus v1.1
  * ─────────────────────────────────────────────────────────────────
  * Módulo central de datos y notificaciones para todas las apps.
  * Cárgalo con <script src="wapps-store.js"> antes de tu código.
+ * Requiere wapps-firebase.js cargado previamente para sync.
  *
  * APIs disponibles:
  *   WStore.get(app, key)           → valor o null
- *   WStore.set(app, key, value)    → void (guarda y emite evento)
+ *   WStore.set(app, key, value)    → void (guarda, marca pending, emite evento)
  *   WStore.on(app, key, callback)  → unsubscribe fn
  *   WStore.bridge.despensa()       → datos de despensa
  *   WStore.bridge.finanzas()       → datos de finanzas
@@ -65,14 +66,41 @@ const WStore = (() => {
   function set(app, key, value) {
     const sk = storageKey(app, key);
     try {
-      localStorage.setItem(sk, JSON.stringify(value));
+      // Añadir timestamp para merge offline/online
+      const payload = (value && typeof value === 'object' && !Array.isArray(value))
+        ? { ...value, _updatedAt: new Date().toISOString() }
+        : value;
+
+      localStorage.setItem(sk, JSON.stringify(payload));
+
       // Mantener clave legacy en sync para compatibilidad hacia atrás
       const lk = LEGACY_KEYS[`${app}.${key}`];
-      if (lk) localStorage.setItem(lk, JSON.stringify(value));
+      if (lk) localStorage.setItem(lk, JSON.stringify(payload));
+
       // Emitir evento personalizado para listeners en la misma pestaña
       window.dispatchEvent(new CustomEvent('wapps:change', {
-        detail: { app, key, value }
+        detail: { app, key, value: payload }
       }));
+
+      // ── Firebase sync ─────────────────────────────────────────
+      const storeKey = `${app}.${key}`;
+
+      // Marcar como pendiente siempre (por si no hay red o usuario)
+      if (typeof WSync !== 'undefined') {
+        WSync.markPending(storeKey);
+
+        // Si hay usuario y red, intentar subir inmediatamente
+        if (typeof WFirebase !== 'undefined') {
+          const user = WFirebase.getUser();
+          if (user && WFirebase.isOnline()) {
+            const fsKey = storeKey.replace('.', '_');
+            WFirebase.pushToFirestore(user.uid, fsKey, payload)
+              .then(ok => { if (ok) WSync.clearPending(storeKey); })
+              .catch(() => {}); // silencioso, queda en pending
+          }
+        }
+      }
+
     } catch(e) { console.warn('WStore.set error:', e); }
   }
 
@@ -166,7 +194,68 @@ const WStore = (() => {
     }
   };
 
-  return { get, set, on, bridge };
+  // ── syncOnLoad: pull puntual de un dato desde Firestore ──────────
+  // Llámalo al inicio de cada app para aplicar datos remotos si son más recientes.
+  // No bloquea el render: la app ya carga con localStorage, esto actualiza en background.
+  //
+  // Uso:  WStore.syncOnLoad('despensa', 'items', data => render(data));
+  //
+  async function syncOnLoad(app, key, onUpdate) {
+    try {
+      // Necesita WFirebase disponible y usuario autenticado
+      if (typeof WFirebase === 'undefined') return;
+      const user = WFirebase.getUser();
+      if (!user || !WFirebase.isOnline()) return;
+
+      const fsKey  = `${app}_${key}`;
+      const remote = await WFirebase.pullFromFirestore(user.uid, fsKey);
+      if (!remote) return;
+
+      // Comparar timestamps
+      const localRaw  = localStorage.getItem(storageKey(app, key));
+      const local     = localRaw ? JSON.parse(localRaw) : null;
+      const remoteTs  = new Date(remote._updatedAt || 0).getTime();
+      const localTs   = new Date(local?._updatedAt  || 0).getTime();
+
+      if (remoteTs > localTs) {
+        // Firestore es más reciente — aplicar y notificar
+        const clean = { ...remote };
+        delete clean._updatedAt;
+
+        const sk = storageKey(app, key);
+        localStorage.setItem(sk, JSON.stringify(clean));
+
+        // Sync clave legacy si existe
+        const lk = LEGACY_KEYS[`${app}.${key}`];
+        if (lk) localStorage.setItem(lk, JSON.stringify(clean));
+
+        // Notificar a la app
+        if (typeof onUpdate === 'function') onUpdate(clean);
+
+        // Emitir evento global
+        window.dispatchEvent(new CustomEvent('wapps:change', {
+          detail: { app, key, value: clean }
+        }));
+      }
+    } catch(e) {
+      console.warn(`[WStore.syncOnLoad] ${app}.${key}:`, e);
+    }
+  }
+
+  // ── syncAllOnLoad: pull de todas las claves del usuario ─────────
+  // Útil en index.html al hacer login para traer todo de golpe.
+  async function syncAllOnLoad() {
+    try {
+      if (typeof WSync === 'undefined' || typeof WFirebase === 'undefined') return;
+      const user = WFirebase.getUser();
+      if (!user || !WFirebase.isOnline()) return;
+      await WSync.pullAll(user.uid);
+    } catch(e) {
+      console.warn('[WStore.syncAllOnLoad]', e);
+    }
+  }
+
+  return { get, set, on, bridge, syncOnLoad, syncAllOnLoad };
 })();
 
 

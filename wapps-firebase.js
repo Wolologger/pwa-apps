@@ -1,0 +1,288 @@
+/**
+ * W//APPS — Firebase Module v1.0
+ * ─────────────────────────────────────────────────────────────────
+ * Gestiona autenticación con Google y sincronización con Firestore.
+ * Cárgalo DESPUÉS de los scripts de Firebase SDK v10 compat por CDN.
+ *
+ * APIs disponibles:
+ *   WFirebase.login()                         → abre popup login Google
+ *   WFirebase.logout()                        → cierra sesión
+ *   WFirebase.onAuthChange(callback)          → observer auth → callback(user|null)
+ *   WFirebase.getUser()                       → usuario actual o null
+ *   WFirebase.pushToFirestore(uid, key, data) → guarda en users/{uid}/data/{key}
+ *   WFirebase.pullFromFirestore(uid, key)     → lee users/{uid}/data/{key}
+ *   WFirebase.pullAll(uid)                    → lee todos los docs de users/{uid}/data
+ *   WFirebase.isOnline()                      → boolean
+ *
+ * Eventos emitidos en window:
+ *   wapps:auth-change    → detail: { user }
+ *   wapps:online         → conexión recuperada
+ *   wapps:offline        → conexión perdida
+ *   wapps:sync-start     → detail: { total }
+ *   wapps:sync-done      → detail: { pushed, failed }
+ *   wapps:pending-change → detail: { pending: [] }
+ * ─────────────────────────────────────────────────────────────────
+ */
+
+const WFirebase = (() => {
+
+  const FIREBASE_CONFIG = {
+    apiKey:            "AIzaSyAk60T2WIV_oh-egSt0f0837heKc5XvKG4",
+    authDomain:        "pwa-apps-b3857.firebaseapp.com",
+    projectId:         "pwa-apps-b3857",
+    storageBucket:     "pwa-apps-b3857.firebasestorage.app",
+    messagingSenderId: "867420086486",
+    appId:             "1:867420086486:web:1044d13359f2c8f6266977"
+  };
+
+  let _auth  = null;
+  let _db    = null;
+  let _user  = null;
+  let _ready = false;
+  let _online = navigator.onLine;
+
+  // ── Init ─────────────────────────────────────────────────────────
+  function _init() {
+    try {
+      firebase.initializeApp(FIREBASE_CONFIG);
+      _auth  = firebase.auth();
+      _db    = firebase.firestore();
+      _ready = true;
+
+      // Observer de auth persistente
+      _auth.onAuthStateChanged(user => {
+        _user = user;
+        window.dispatchEvent(new CustomEvent('wapps:auth-change', { detail: { user } }));
+      });
+    } catch(e) {
+      console.error('[WFirebase] Error init:', e);
+    }
+  }
+
+  function _waitForSDK(retries = 30) {
+    if (typeof firebase !== 'undefined' && firebase.app) {
+      _init();
+    } else if (retries > 0) {
+      setTimeout(() => _waitForSDK(retries - 1), 200);
+    } else {
+      console.error('[WFirebase] Firebase SDK no disponible.');
+    }
+  }
+
+  // Online/Offline
+  window.addEventListener('online',  () => { _online = true;  window.dispatchEvent(new CustomEvent('wapps:online')); });
+  window.addEventListener('offline', () => { _online = false; window.dispatchEvent(new CustomEvent('wapps:offline')); });
+
+  // ── Auth ─────────────────────────────────────────────────────────
+  async function login() {
+    if (!_ready) return null;
+    try {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      const result   = await _auth.signInWithPopup(provider);
+      return result.user;
+    } catch(e) {
+      console.error('[WFirebase] login error:', e);
+      return null;
+    }
+  }
+
+  async function logout() {
+    if (!_ready) return;
+    try { await _auth.signOut(); } catch(e) { console.error('[WFirebase] logout error:', e); }
+  }
+
+  function onAuthChange(cb) {
+    if (!_ready) {
+      // Si todavía no está listo, escucha el evento global
+      const handler = e => cb(e.detail.user);
+      window.addEventListener('wapps:auth-change', handler);
+      return () => window.removeEventListener('wapps:auth-change', handler);
+    }
+    return _auth.onAuthStateChanged(cb);
+  }
+
+  function getUser()   { return _user; }
+  function isOnline()  { return _online; }
+  function isReady()   { return _ready; }
+
+  // ── Firestore push ────────────────────────────────────────────────
+  async function pushToFirestore(uid, key, data) {
+    if (!_ready || !uid) return false;
+    try {
+      const payload = { ...data, _updatedAt: new Date().toISOString() };
+      await _db.collection('users').doc(uid).collection('data').doc(key).set(payload);
+      return true;
+    } catch(e) {
+      console.error(`[WFirebase] push error ${key}:`, e);
+      return false;
+    }
+  }
+
+  // ── Firestore pull ────────────────────────────────────────────────
+  async function pullFromFirestore(uid, key) {
+    if (!_ready || !uid) return null;
+    try {
+      const snap = await _db.collection('users').doc(uid).collection('data').doc(key).get();
+      if (!snap.exists) return null;
+      const data = snap.data();
+      delete data._updatedAt;
+      return data;
+    } catch(e) {
+      console.error(`[WFirebase] pull error ${key}:`, e);
+      return null;
+    }
+  }
+
+  // ── Firestore pull ALL ────────────────────────────────────────────
+  async function pullAll(uid) {
+    if (!_ready || !uid) return {};
+    try {
+      const snap   = await _db.collection('users').doc(uid).collection('data').get();
+      const result = {};
+      snap.forEach(doc => {
+        const data = doc.data();
+        // Guardamos _updatedAt para comparar timestamps en WSync
+        result[doc.id] = data;
+      });
+      return result;
+    } catch(e) {
+      console.error('[WFirebase] pullAll error:', e);
+      return {};
+    }
+  }
+
+  // Init
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => _waitForSDK());
+  } else {
+    _waitForSDK();
+  }
+
+  return { login, logout, onAuthChange, getUser, isOnline, isReady, pushToFirestore, pullFromFirestore, pullAll };
+
+})();
+
+
+// ═══════════════════════════════════════════════════════════════
+// WSYNC — cola de pendientes + sync manual y automático
+// ═══════════════════════════════════════════════════════════════
+const WSync = (() => {
+
+  const PENDING_KEY = 'wapps.pending';
+
+  // Todas las claves que WStore gestiona
+  const WSTORE_KEYS = [
+    'despensa.items',
+    'compra.data',
+    'suministros.data',
+    'finanzas.data',
+    'gastos.data',
+    'semana.data',
+    'deseados.data',
+    'obra.data',
+    'instrumentos.data',
+    'setlist.data',
+    'mascotas.data',
+  ];
+
+  // ── Pendientes ────────────────────────────────────────────────────
+  function getPending() {
+    try { return JSON.parse(localStorage.getItem(PENDING_KEY) || '[]'); } catch(e) { return []; }
+  }
+
+  function markPending(key) {
+    const p = getPending();
+    if (!p.includes(key)) {
+      p.push(key);
+      localStorage.setItem(PENDING_KEY, JSON.stringify(p));
+    }
+    _emit();
+  }
+
+  function clearPending(key) {
+    localStorage.setItem(PENDING_KEY, JSON.stringify(getPending().filter(k => k !== key)));
+    _emit();
+  }
+
+  function clearAllPending() {
+    localStorage.setItem(PENDING_KEY, '[]');
+    _emit();
+  }
+
+  function _emit() {
+    window.dispatchEvent(new CustomEvent('wapps:pending-change', { detail: { pending: getPending() } }));
+  }
+
+  // ── Push: sube pendientes a Firestore ────────────────────────────
+  async function syncAll(uid) {
+    if (!uid || !WFirebase.isOnline()) return { pushed: 0, failed: 0 };
+    const pending = getPending();
+    if (!pending.length) return { pushed: 0, failed: 0 };
+
+    window.dispatchEvent(new CustomEvent('wapps:sync-start', { detail: { total: pending.length } }));
+
+    let pushed = 0, failed = 0;
+
+    for (const key of [...pending]) {
+      try {
+        const raw = localStorage.getItem('wapps.' + key);
+        if (!raw) { clearPending(key); continue; }
+        const data = JSON.parse(raw);
+        // key para Firestore: reemplaza . por _ (Firestore no permite . en doc IDs)
+        const fsKey = key.replace('.', '_');
+        const ok = await WFirebase.pushToFirestore(uid, fsKey, data);
+        if (ok) { pushed++; clearPending(key); }
+        else    { failed++; }
+      } catch(e) {
+        console.error(`[WSync] error ${key}:`, e);
+        failed++;
+      }
+    }
+
+    window.dispatchEvent(new CustomEvent('wapps:sync-done', { detail: { pushed, failed } }));
+    return { pushed, failed };
+  }
+
+  // ── Pull: baja todo desde Firestore y mezcla con local ───────────
+  async function pullAll(uid) {
+    if (!uid || !WFirebase.isOnline()) return false;
+    try {
+      const remote = await WFirebase.pullAll(uid);
+      for (const [fsKey, data] of Object.entries(remote)) {
+        const storeKey = fsKey.replace('_', '.');
+        const localKey = 'wapps.' + storeKey;
+        const localRaw = localStorage.getItem(localKey);
+        const local    = localRaw ? JSON.parse(localRaw) : null;
+
+        // Gana el más reciente
+        const remoteTs = new Date(data._updatedAt || 0).getTime();
+        const localTs  = new Date(local?._updatedAt || 0).getTime();
+
+        if (!local || remoteTs >= localTs) {
+          const clean = { ...data };
+          delete clean._updatedAt;
+          localStorage.setItem(localKey, JSON.stringify(clean));
+          const [app, key] = storeKey.split('.');
+          if (app && key) {
+            window.dispatchEvent(new CustomEvent('wapps:change', { detail: { app, key, value: clean } }));
+          }
+        }
+      }
+      return true;
+    } catch(e) {
+      console.error('[WSync] pullAll error:', e);
+      return false;
+    }
+  }
+
+  // ── Auto-sync al recuperar conexión ─────────────────────────────
+  window.addEventListener('wapps:online', async () => {
+    const user = WFirebase.getUser();
+    if (user && getPending().length > 0) {
+      await syncAll(user.uid);
+    }
+  });
+
+  return { markPending, clearPending, clearAllPending, getPending, syncAll, pullAll, WSTORE_KEYS };
+
+})();

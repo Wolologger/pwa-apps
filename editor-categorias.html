@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="theme-color" content="#0a0a09">
 <title>W // AJUSTES</title>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="wapps-firebase.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -66,6 +71,10 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
 .toggle-thumb{position:absolute;top:3px;left:3px;width:14px;height:14px;background:var(--muted);border-radius:50%;transition:transform 0.2s,background 0.2s;}
 .toggle input:checked ~ .toggle-thumb{transform:translateX(16px);background:#0a0a09;}
 
+/* RESET BTN */
+.reset-btn{background:none;border:0.5px solid rgba(240,64,48,0.3);color:var(--r);font-family:var(--fm);font-size:9px;letter-spacing:0.5px;padding:3px 8px;cursor:pointer;transition:all 0.15s;flex-shrink:0;}
+.reset-btn:hover{background:rgba(240,64,48,0.08);border-color:var(--r);}
+
 /* HIDDEN BADGE */
 .hidden-badge{font-size:9px;color:var(--r);letter-spacing:1px;margin-left:6px;}
 
@@ -104,8 +113,8 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
   </div>
 
   <div class="footer-note">
-    <strong>localStorage</strong> — la configuración se guarda en este dispositivo.<br>
-    En v2.0 se sincronizará con Firebase.
+    <strong>↺ RESET</strong> — borra los datos de la app del dispositivo y de Firestore.<br>
+    <strong>Toggle</strong> — oculta o muestra la herramienta en el panel principal.
   </div>
 
 </div>
@@ -113,6 +122,22 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
 const GITHUB_USER = 'Wolologger';
 const GITHUB_REPO = 'pwa-apps';
 const STORAGE_KEY = 'pwa_hidden';
+
+// Mapa de claves WStore por archivo (para borrar de Firestore)
+const WKEYS = {
+  'obra.html':           ['obra','data'],
+  'gastos-diarios.html': ['gastos','data'],
+  'suministros.html':    ['suministros','data'],
+  'finanzas.html':       ['finanzas','data'],
+  'despensa.html':       ['despensa','items'],
+  'compra.html':         ['compra','data'],
+  'setlist.html':        ['setlist','data'],
+  'instrumentos.html':   ['instrumentos','data'],
+  'semana.html':         ['semana','data'],
+  'deseados.html':       ['deseados','data'],
+  'decisor.html':        ['decisor','data'],
+  'mascotas.html':       null,
+};
 
 const META = {
   'obra.html':             { name:'Mi Obra',       tags:['obra','finanzas'] },
@@ -187,7 +212,8 @@ function renderApps() {
             <div class="app-file">${f.name}</div>
             ${tagsHtml ? `<div class="app-tags-row">${tagsHtml}</div>` : ''}
           </div>
-          <div class="toggle-wrap">
+          <div class="toggle-wrap" style="gap:8px;">
+            <button class="reset-btn" onclick="resetApp('${f.name}')" title="Borrar datos de esta app">↺ RESET</button>
             <label class="toggle">
               <input type="checkbox" ${isHidden ? '' : 'checked'}
                 onchange="toggleVisibility('${f.name}', this.checked)">
@@ -201,6 +227,55 @@ function renderApps() {
   }).join('');
 
   updateCount();
+}
+
+async function resetApp(filename) {
+  const m = META[filename] || { name: filename };
+  const wkey = WKEYS[filename];
+
+  if (!confirm(`¿Resetear todos los datos de "${m.name}"?\n\nSe borrará del dispositivo y de Firestore si hay sesión activa.`)) return;
+
+  // 1. Borrar localStorage
+  if (wkey) {
+    try { localStorage.removeItem(`wapps.${wkey[0]}.${wkey[1]}`); } catch(e) {}
+  }
+  // Limpiar de WSync pending
+  if (typeof WSync !== 'undefined' && wkey) {
+    WSync.clearPending(`${wkey[0]}.${wkey[1]}`);
+  }
+
+  // 2. Borrar de Firestore
+  let firestoreOk = false;
+  if (wkey && typeof WFirebase !== 'undefined') {
+    const user = WFirebase.getUser();
+    if (user && WFirebase.isOnline()) {
+      try {
+        const fsKey = `${wkey[0]}_${wkey[1]}`;
+        await firebase.firestore()
+          .collection('users').doc(user.uid)
+          .collection('data').doc(fsKey)
+          .delete();
+        firestoreOk = true;
+      } catch(e) { console.warn('[editor] Firestore delete error:', e); }
+    }
+  }
+
+  // Feedback visual en la fila
+  const id = filename.replace('.', '_');
+  const row = document.getElementById('row-' + id);
+  if (row) {
+    const resetBtn = row.querySelector('.reset-btn');
+    if (resetBtn) {
+      resetBtn.textContent = firestoreOk ? '✓ RESETEADO' : '✓ LOCAL';
+      resetBtn.style.color = 'var(--g)';
+      resetBtn.style.borderColor = 'rgba(48,216,128,0.3)';
+      setTimeout(() => {
+        resetBtn.textContent = '↺ RESET';
+        resetBtn.style.color = '';
+        resetBtn.style.borderColor = '';
+      }, 2000);
+    }
+  }
 }
 
 async function loadApps() {
