@@ -10,6 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <title>W // APPS</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="wapps-store.js"></script>
 <style>
 :root{
   --bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;
@@ -77,11 +78,12 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
 /* CAT TILE */
 .cat-tile{position:relative;border-radius:10px;padding:14px 12px 12px;cursor:pointer;transition:transform 0.15s,border-color 0.15s;border:1px solid transparent;overflow:hidden;user-select:none;}
 .cat-tile:active{transform:scale(0.97);}
-.cat-tile-bar{position:absolute;top:0;left:0;right:0;height:3px;border-radius:10px 10px 0 0;}
-.cat-tile-emoji{font-size:24px;margin-bottom:7px;display:block;line-height:1;}
-.cat-tile-name{font-family:var(--fh);font-size:17px;letter-spacing:0.5px;line-height:1;margin-bottom:3px;}
+.cat-tile-bar{position:absolute;top:0;left:0;right:0;height:2px;border-radius:10px 10px 0 0;}
+.cat-tile-top{display:flex;align-items:center;gap:7px;margin-bottom:5px;}
+.cat-tile-emoji{font-size:13px;line-height:1;flex-shrink:0;}
+.cat-tile-name{font-family:var(--fh);font-size:15px;letter-spacing:0.5px;line-height:1;}
 .cat-tile-count{font-size:10px;color:var(--muted);font-family:var(--fm);}
-.cat-tile-desc{font-size:9px;color:var(--muted);margin-top:5px;line-height:1.5;letter-spacing:0.2px;}
+.cat-tile-desc{font-size:9px;color:var(--muted);margin-top:4px;line-height:1.5;letter-spacing:0.2px;}
 
 /* edit buttons on tile */
 .cat-tile-edit{position:absolute;top:7px;right:7px;display:none;gap:4px;}
@@ -161,6 +163,12 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
 .footer-right{font-size:9px;color:var(--dim);text-align:right;line-height:1.7;flex-shrink:0;}
 .footer a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--dim);}
 .fv{color:var(--y);}
+/* NOTIF */
+.notif-btn{background:transparent;border:0.5px solid var(--dim);border-radius:6px;padding:4px 7px;font-size:12px;cursor:pointer;transition:all 0.15s;color:var(--muted);line-height:1;}
+.notif-btn:hover,.notif-btn.active{border-color:var(--y);color:var(--y);}
+.notif-panel{display:none;border-bottom:1px solid var(--line2);padding:14px 18px;background:var(--bg2);}
+.notif-panel.open{display:block;}
+.notif-panel-title{font-family:var(--fh);font-size:15px;letter-spacing:0.5px;margin-bottom:12px;color:var(--text);}
 </style>
 </head>
 <body>
@@ -171,6 +179,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
   <div class="topbar">
     <div class="logo">W<span class="logo-slash">//</span>APPS</div>
     <div class="topbar-right">
+      <button class="notif-btn" id="notif-btn" onclick="toggleNotifPanel()" title="Notificaciones">🔔</button>
       <div class="vbadge" id="vbadge">v1.4</div>
       <div class="clock" id="clock">--:--</div>
     </div>
@@ -200,6 +209,12 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
   <div class="search-wrap">
     <span class="search-icon">⌕</span>
     <input class="search-input" type="search" id="search-input" placeholder="Buscar app…" oninput="handleSearch(this.value)" autocomplete="off">
+  </div>
+
+  <!-- NOTIFICATION PANEL -->
+  <div class="notif-panel" id="notif-panel">
+    <div class="notif-panel-title">🔔 Notificaciones</div>
+    <div id="notif-config-container"></div>
   </div>
 
   <!-- CATEGORIES -->
@@ -375,8 +390,10 @@ function renderGrid(){
       style="background:${bg};border-color:${border};${ring}"
       onclick="${editMode?`openEdit('${cat.id}')`:`selectCat('${cat.id}')`}">
       <div class="cat-tile-bar" style="background:${cat.color}"></div>
-      <span class="cat-tile-emoji">${cat.icon}</span>
-      <div class="cat-tile-name" style="color:${cat.color}">${cat.label}</div>
+      <div class="cat-tile-top">
+        <span class="cat-tile-emoji">${cat.icon}</span>
+        <div class="cat-tile-name" style="color:${cat.color}">${cat.label}</div>
+      </div>
       <div class="cat-tile-count">${count} app${count!==1?'s':''}</div>
       ${cat.desc?`<div class="cat-tile-desc">${cat.desc}</div>`:''}
       <div class="cat-tile-edit">
@@ -579,6 +596,14 @@ async function loadApps(){
 
 if('serviceWorker' in navigator)
   window.addEventListener('load',()=>navigator.serviceWorker.register('/pwa-apps/sw.js').catch(()=>{}));
+
+function toggleNotifPanel(){
+  const panel=document.getElementById('notif-panel');
+  const btn=document.getElementById('notif-btn');
+  const isOpen=panel.classList.toggle('open');
+  btn.classList.toggle('active',isOpen);
+  if(isOpen) WNotify.renderConfigPanel('notif-config-container');
+}
 
 loadApps();
 </script>

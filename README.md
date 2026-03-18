@@ -1,85 +1,30 @@
 # W//APPS · Personal PWA Suite
 
-> Colección de mini-apps web progresivas (PWA) para uso personal. Sin backend, sin dependencias externas, todo en HTML + localStorage.
+> Colección de mini-apps web progresivas (PWA) para uso personal. Sin backend, sin dependencias externas críticas, todo en HTML + localStorage + módulo compartido.
 
-**Versión actual:** `v1.3.0` · Build `2026.03`  
+**Versión:** `v1.4.0` · Build `2026.03`  
 **Autor:** [@Wolologger](https://github.com/Wolologger)  
-**Tecnología:** HTML · CSS · Vanilla JS · localStorage · Chart.js  
-**Instalable como:** PWA (iOS Safari, Android Chrome, escritorio)
+**Stack:** HTML · CSS · Vanilla JS · localStorage · Chart.js  
+**Instalable como PWA** en iOS Safari, Android Chrome y escritorio
 
 ---
 
-## 📱 Apps disponibles
-
-### 🏠 Hogar
-
-| App | Archivo | Descripción |
-|-----|---------|-------------|
-| **Suministros** | `suministros.html` | Registro de facturas de luz, gas y agua. Gráficas de evolución, alertas de subidas, resumen anual/trimestral y **Guías interactivas** para entender cada factura. |
-| **Despensa** | `despensa.html` | Inventario de alimentos con caducidades y stock mínimo. |
-| **Lista Compra** | `compra.html` | Listas reutilizables, categorías custom y gestión por establecimientos. |
-| **Mi Obra** | `obra.html` | Seguimiento de reforma o construcción: presupuesto, tareas por fases, progreso. |
-
-### 💰 Dinero
-
-| App | Archivo | Descripción |
-|-----|---------|-------------|
-| **Finanzas** | `finanzas.html` | Ingresos vs gastos, proyección anual, conectado con otras apps. |
-| **Gastos Diarios** | `gastos-diarios.html` | Registro de gastos cotidianos con presupuesto mensual. |
-| **Deseados** | `deseados.html` | Lista de deseos con prioridad, categorías y seguimiento de estado de compra. |
-
-### 🎸 Música
-
-| App | Archivo | Descripción |
-|-----|---------|-------------|
-| **Setlist** | `setlist.html` | Gestión de setlists por grupo o proyecto. Drag & drop, modo actuación, exportación. |
-| **Instrumentos** | `instrumentos.html` | Inventario de guitarras, bajos, amplificadores, pedales y configuraciones. |
-
-### 📅 Productividad
-
-| App | Archivo | Descripción |
-|-----|---------|-------------|
-| **Semana** | `semana.html` | Planificador semanal con calendario, vacaciones y eventos recurrentes. |
-
-### ⚙️ Utilidad
-
-| App | Archivo | Descripción |
-|-----|---------|-------------|
-| **Decisor** | `decisor.html` | Elige por ti: presets editables e historial de decisiones. |
-
----
-
-## 📖 Guías de facturas (dentro de Suministros)
-
-La sección **Guías** en `suministros.html` incluye una biblioteca de guías interactivas para entender tus facturas de suministros:
-
-### ⚡ Guía Factura de la Luz (disponible)
-- **Resumen:** desglose completo con importes y gráficas de barras proporcionales
-- **Conceptos:** término de potencia, energía consumida, IE, IVA, alquiler de contador
-- **P1/P2/P3:** explicación de periodos horarios, lecturas del contador, estrategias de ahorro
-- **Actores:** quién es la comercializadora, distribuidora, CNMC y cómo te afecta
-- **Test interactivo:** 5 preguntas para comprobar que has entendido tu factura
-
-### 🔥 Guía Factura del Gas _(próximamente)_
-### 💧 Guía Factura del Agua _(próximamente)_
-
----
-
-## 🏗️ Estructura del proyecto
+## 📁 Estructura del proyecto
 
 ```
 pwa-apps/
-├── index.html              # Panel principal — menú por categorías + búsqueda
-├── manifest.json           # Manifest PWA (nombre, iconos, colores)
-├── sw.js                   # Service Worker para uso offline
-├── icons/                  # Iconos PWA (192x192, 512x512)
+├── index.html              # Panel principal — categorías editables, búsqueda, notificaciones
+├── wapps-store.js          # ★ Bus de datos compartido + sistema de notificaciones
+├── manifest.json           # Manifest PWA
+├── sw.js                   # Service Worker (offline)
+├── icons/                  # Iconos PWA
 │
-├── suministros.html        # 🏠 Suministros (luz, gas, agua) + guías de facturas
-├── despensa.html           # 🏠 Inventario de despensa
+├── suministros.html        # 🏠 Facturas luz/gas/agua + guías interactivas
+├── despensa.html           # 🏠 Inventario con caducidades
 ├── compra.html             # 🏠 Lista de la compra
-├── obra.html               # 🏠 Seguimiento de obra/reforma
+├── obra.html               # 🏠 Seguimiento de reforma
 │
-├── finanzas.html           # 💰 Finanzas personales
+├── finanzas.html           # 💰 Hub central (lee otras apps automáticamente)
 ├── gastos-diarios.html     # 💰 Gastos diarios
 ├── deseados.html           # 💰 Lista de deseos
 │
@@ -88,155 +33,221 @@ pwa-apps/
 │
 ├── semana.html             # 📅 Planificador semanal
 │
-├── decisor.html            # ⚙️ Decisor aleatorio
-│
-└── guia_factura_luz.html   # (archivo legacy — contenido integrado en suministros)
+└── decisor.html            # ⚙️ Decisor aleatorio
 ```
 
 ---
 
-## ✨ Mejoras realizadas (v1.3.0)
+## 📱 Apps disponibles
 
-### index.html
-- ✅ Menú agrupado por categorías (Hogar / Dinero / Música / Productividad / Utilidad)
-- ✅ Categorías colapsables con contador de apps
-- ✅ Barra de búsqueda en tiempo real
-- ✅ Código de color por categoría (acento lateral en cada card)
-- ✅ Versión visible en header y footer (`v1.3.0 · build 2026.03`)
-- ✅ Versión elimina la guia_factura_luz del listado principal (ahora vive en Suministros)
+### 🏠 Hogar
 
-### suministros.html
-- ✅ Nueva pestaña **📖 Guías** integrada
-- ✅ Guía completa de factura de luz: Resumen, Conceptos, P1/P2/P3, Actores, Test
-- ✅ Placeholders para guías de Gas y Agua (próximamente)
-- ✅ Version badge `v1.2` visible en la nav
-- ✅ La barra de tipo se oculta automáticamente al entrar en Guías
+| App | Descripción |
+|-----|-------------|
+| **Suministros** | Facturas de luz/gas/agua · Gráficas · Alertas de subida · Guías interactivas completas (Luz, Gas/Propano, Agua) con test |
+| **Despensa** | Inventario de alimentos · Caducidades por colores · Stock mínimo |
+| **Lista Compra** | Listas reutilizables · Categorías custom · Establecimientos |
+| **Mi Obra** | Reforma/construcción · Presupuesto · Tareas por fases |
 
----
+### 💰 Dinero
 
-## 🚀 Ideas de mejora y APIs a integrar
+| App | Descripción |
+|-----|-------------|
+| **Finanzas** | Hub central · Lee Suministros, Gastos Diarios y Obra automáticamente · Proyección anual · Regla 50/30/20 |
+| **Gastos Diarios** | Registro cotidiano · Presupuesto mensual · Categorías |
+| **Deseados** | Lista de deseos · Prioridad · Seguimiento |
 
-### Unificación de apps
+### 🎸 Música
 
-Las apps actualmente viven en silos independientes. Se pueden conectar:
+| App | Descripción |
+|-----|-------------|
+| **Setlist** | Canciones por grupo · Drag & drop · Modo actuación · Exportar |
+| **Instrumentos** | Guitarras · Bajos · Amplis · Pedales · Setups |
 
-- **Finanzas ↔ Gastos Diarios** — sincronizar gastos diarios como líneas en Finanzas
-- **Finanzas ↔ Suministros** — importar total de facturas del mes automáticamente
-- **Finanzas ↔ Obra** — importar gastos de obra como categoría en Finanzas
-- **Finanzas ↔ Deseados** — cuando se marca un deseo como "comprado", añadir a Finanzas
-- **Compra ↔ Despensa** — al marcar un artículo en compra como comprado, se añade a despensa
-- Compartir `localStorage` mediante un módulo de **bus de eventos** centralizado
+### 📅 Productividad / ⚙️ Utilidad
 
-### APIs útiles a integrar
-
-#### 💡 Energía y suministros
-| API | Uso | Enlace |
-|-----|-----|--------|
-| **OMIE** (Operador del Mercado Ibérico de Energía) | Precio horario del mercado eléctrico en tiempo real (PVPC) | [omie.es](https://www.omie.es/es/file-access-list) |
-| **REE (Red Eléctrica)** | Datos de la red: producción, mix energético, emisiones CO2 en tiempo real | [api.esios.ree.es](https://api.esios.ree.es) |
-| **CNMC Comparador** | Consulta tarifas reguladas y datos de comercializadoras | [cnmc.gob.es](https://comparador.cnmc.gob.es) |
-
-**Caso de uso:** en Suministros, mostrar el precio actual del kWh y compararlo con lo que paga el usuario → "Hoy es día barato, pon la lavadora".
-
-#### 🛒 Lista de compra / despensa
-| API | Uso |
-|-----|-----|
-| **Open Food Facts** | Escáner de código de barras → nombre, calorías, alérgenos del producto. Gratis. |
-| **Mercadona / Lidl scraping o APIs no oficiales** | Precio actual del producto para estimar el gasto de la compra antes de ir. |
-
-#### 💰 Finanzas y gastos
-| API | Uso |
-|-----|-----|
-| **Fixer.io / ExchangeRate-API** | Cambio de divisas en tiempo real para gastos en otros países. |
-| **Banco de España** | IPC e inflación → ajustar el presupuesto mensual a la inflación real. |
-
-#### 🎸 Música
-| API | Uso |
-|-----|-----|
-| **Spotify Web API** | Buscar canciones para el setlist, previsualizar audio, obtener BPM y duración. |
-| **MusicBrainz** | Base de datos abierta de artistas, álbumes y canciones. |
-| **Chordify / Ultimate Guitar** | Integración de acordes y tonalidades por canción. |
-
-#### 🌦️ Contexto / Utilidad
-| API | Uso |
-|-----|-----|
-| **Open-Meteo** | Previsión meteorológica gratuita y sin API key → útil en Semana para planificar la semana |
-| **Feriados (Nager.Date)** | Festivos nacionales y autonómicos para la app Semana |
-| **Geolocation API (browser)** | Detectar ubicación para servicios contextuales sin backend |
+| App | Descripción |
+|-----|-------------|
+| **Semana** | Tareas semanales · Calendario · Vacaciones |
+| **Decisor** | Elige por ti · Presets editables · Historial |
 
 ---
 
-## 💾 Persistencia de datos
+## ★ wapps-store.js — Bus de datos compartido
 
-Todas las apps usan `localStorage` con claves prefijadas:
+Módulo JS central que unifica el acceso a datos entre todas las apps y gestiona las notificaciones. Cárgalo con `<script src="wapps-store.js">` antes de tu código.
 
-```
-suministros_v1    → facturas de luz/gas/agua
-gastos_v1         → gastos diarios
-finanzas_v1       → registros de finanzas
-despensa_v1       → inventario de despensa
-compra_v1         → listas de compra
-obra_v1           → fases y tareas de obra
-deseados_v1       → lista de deseos
-setlist_v1        → setlists por grupo
-instrumentos_v1   → inventario de instrumentos
-semana_v1         → tareas semanales
+### Store API
+
+```js
+// Leer datos de cualquier app
+WStore.get('despensa', 'items')       // → objeto o null
+
+// Escribir (guarda en localStorage y emite evento cross-tab)
+WStore.set('despensa', 'items', state)
+
+// Escuchar cambios en tiempo real
+const unsub = WStore.on('despensa', 'items', (val) => render(val));
+unsub(); // desuscribirse
 ```
 
-Cada app expone **Exportar / Importar JSON** para backup manual o migración entre dispositivos.
+### Bridges tipados
+
+```js
+WStore.bridge.despensa()                      // → array de alimentos
+WStore.bridge.suministros()                   // → array de facturas
+WStore.bridge.finanzas()                      // → { ingresos, gastos }
+WStore.bridge.gastosDiarios()                 // → array de gastos
+WStore.bridge.caducidadesProximas(3)          // → items que caducan en ≤3 días
+WStore.bridge.suministrosMediaMensual('luz')  // → €/mes promedio últimas 3 facturas
+WStore.bridge.gastosEsteMes()                 // → € gastados en el mes actual
+```
+
+El bus mantiene las claves `localStorage` originales en sync automático — las apps existentes no necesitan cambios.
 
 ---
 
-## 🎨 Sistema de diseño
+## 🔔 Sistema de notificaciones (WNotify)
 
-Paleta y tipografía compartida en todas las apps:
+### Uso básico
+
+```js
+await WNotify.request();   // pide permiso (una sola vez)
+WNotify.check();           // revisa y lanza todas las alertas pendientes
+WNotify.send('Título', 'Cuerpo', { tag: 'mi-alerta', url: 'app.html' });
+```
+
+### Alertas automáticas incluidas
+
+| Alerta | Condición | Destino |
+|--------|-----------|---------|
+| 🔴 Caducados hoy | Items despensa con fecha ≤ hoy | despensa.html |
+| 🟠 Caducan pronto | Caducidad en ≤ 3 días | despensa.html |
+| 💡 Factura sin registrar | >35 días sin nueva factura de luz/gas/agua | suministros.html |
+| 💰 Presupuesto al límite | Gastos del mes ≥ 80% de ingresos | finanzas.html |
+| 📝 Sin registrar gastos | ≥ 2 días sin apuntar gasto | gastos-diarios.html |
+| 📅 Tareas de hoy | Tareas pendientes con fecha = hoy | semana.html |
+
+Cada tipo se puede activar/desactivar individualmente desde el panel 🔔 del index.
+
+### Cuándo se comprueban
+
+Las alertas se revisan automáticamente al abrir cualquier página que cargue `wapps-store.js`, con un throttle de 2 horas para no saturar. El panel 🔔 también permite lanzarlas manualmente.
+
+### Limitaciones sin servidor
+
+| Escenario | Funciona |
+|-----------|----------|
+| Al abrir la app | ✅ Siempre |
+| Background Android PWA instalada | ✅ Periodic Background Sync |
+| Background iOS | ❌ No soportado por Safari |
+| Sin abrir la app varios días | ❌ Requiere Firebase o backend |
+
+---
+
+## 🔗 Conexiones entre apps
+
+```
+Finanzas (hub)
+  ← Suministros: media mensual por tipo (luz/gas/agua)
+  ← Gastos Diarios: total del mes actual
+  ← Obra: total gastado en reforma
+
+Despensa → Lista Compra
+  → botón "Mover a Compra" al agotar stock
+
+Deseados → Gastos Diarios
+  → al marcar como comprado registra el gasto automáticamente
+```
+
+---
+
+## 📖 Guías de facturas (dentro de Suministros)
+
+| Guía | Secciones |
+|------|-----------|
+| ⚡ Factura de la Luz | Resumen · Conceptos · P1/P2/P3 · Actores · Test 5 preguntas |
+| 🔥 Factura del Gas/Propano | Resumen · Conceptos · Propano vs Red (€/kWh) · Actores · Test |
+| 💧 Factura del Agua | Resumen · Conceptos · Bloques progresivos · Actores · Test |
+
+---
+
+## 🎨 Sistema de diseño compartido
 
 ```css
---bg: #0a0a09          /* fondo principal */
---bg2: #141412         /* cards */
---bg3: #1e1e1b         /* elevación 3 */
---text: #f0ebe0        /* texto principal */
---muted: #5a5850       /* texto secundario */
---y: #e8f040           /* amarillo — acento principal */
---r: #f04030           /* rojo — alertas */
---g: #30d880           /* verde — positivo */
---b: #30a8f0           /* azul — info */
---o: #f09030           /* naranja — aviso */
+--bg:#0a0a09   --text:#f0ebe0   --muted:#5a5850
+--y:#e8f040    --r:#f04030      --g:#30d880    --b:#30a8f0    --o:#f09030
 
-/* Tipografía */
---fh: 'Bebas Neue'     /* headings display */
---fm: 'DM Mono'        /* monospace, UI */
---fs: 'DM Sans'        /* texto corrido */
+--fh: 'Bebas Neue'   /* headings display */
+--fm: 'DM Mono'      /* UI monospace */
+--fs: 'DM Sans'      /* texto corrido */
 ```
 
 ---
 
-## 📦 PWA — instalación
+## 💾 Claves localStorage
 
-El proyecto incluye `manifest.json` y `sw.js` para instalación como PWA:
+| App | Clave legacy | Clave bus |
+|-----|-------------|-----------|
+| Despensa | `despensa_v1` | `wapps.despensa.items` |
+| Finanzas | `finanzas_v1` | `wapps.finanzas.data` |
+| Suministros | `suministros_v1` | `wapps.suministros.data` |
+| Gastos Diarios | `gastos_v1` | `wapps.gastos.data` |
+| Compra | `compra_v1` | `wapps.compra.data` |
+| Semana | `semana_v1` | `wapps.semana.data` |
+| Deseados | `deseados_v1` | `wapps.deseados.data` |
+| Obra | `miobra_v2` | `wapps.obra.data` |
+| Categorías index | — | `wapps_cats_v1` |
+| Config notificaciones | — | `notify.config` |
+
+---
+
+## 🚀 APIs a integrar (roadmap)
+
+| API | App | Valor |
+|-----|-----|-------|
+| **OMIE / REE esios** | Suministros | Precio kWh en tiempo real |
+| **Open Food Facts** | Despensa | Escáner código de barras |
+| **Nager.Date** | Semana | Festivos nacionales automáticos |
+| **Open-Meteo** | Semana | Tiempo por día de la semana |
+| **Spotify Web API** | Setlist | BPM, duración, tonalidad |
+| **INE / Banco de España** | Finanzas | IPC para ajustar presupuesto |
+| **Firebase** | Todas | Sync dispositivos + push real sin app abierta |
+
+---
+
+## 📦 Instalación PWA
 
 - **iOS:** Safari → Compartir → "Añadir a pantalla de inicio"
-- **Android:** Chrome → menú ⋮ → "Instalar app" / "Añadir a inicio"
-- **Escritorio:** Chrome/Edge → icono de instalación en la barra de dirección
+- **Android:** Chrome → ⋮ → "Instalar app"
+- **Escritorio:** icono en barra de dirección de Chrome/Edge
 
 ---
 
 ## 📋 Changelog
 
-### v1.3.0 (2026-03)
-- `index.html` — menú por categorías, búsqueda, versioning
-- `suministros.html` — integración guía factura luz en pestaña Guías
+### v1.4.0 (2026-03)
+- `wapps-store.js` — bus de datos compartido con bridges tipados, compatibilidad legacy total
+- `wapps-store.js` — `WNotify`: 6 tipos de alertas, panel de configuración por toggle, throttle de 2h
+- `index.html` — iconos de categoría compactos (emoji pequeño + nombre en línea)
+- `index.html` — panel 🔔 de notificaciones con configuración individual por tipo
+- `index.html` — categorías 100% editables (nombre, emoji, color, descripción, borrar) persistidas
+
+### v1.3.0
+- `index.html` — menú por categorías colapsables, búsqueda en tiempo real
+- Versión visible en header y footer
 
 ### v1.2.0
-- `suministros.html` — añadidas gráficas Chart.js, resumen anual/trimestral, alertas de subida
+- `suministros.html` — 3 guías completas de facturas (Luz, Gas/Propano, Agua) con test
+- `suministros.html` — Chart.js, resumen anual/trimestral, alertas de subida
 
 ### v1.1.0
-- `guia_factura_luz.html` — guía interactiva con test (ahora integrada en suministros)
 - Rediseño general con sistema de diseño unificado
+- Finanzas conectado a Suministros, Gastos Diarios y Obra
 
 ### v1.0.0
-- Primera versión con todas las apps básicas
+- Primera versión con las 11 apps básicas
 
 ---
 
-_Proyecto personal · No destinado a producción comercial_
+_Proyecto personal · Uso doméstico_
