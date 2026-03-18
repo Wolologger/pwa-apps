@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a09">
+<title>Suministros — W//APPS</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;
+  --y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;--o:#f09030;
+  --luz:#f0c030;--gas:#f07030;--agua:#30b8f0;
+  --fh:'Bebas Neue',sans-serif;--fm:'DM Mono',monospace;--fs:'DM Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--fs);overflow-x:hidden;}
+
+/* NAV */
+.wnav{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:100;flex-shrink:0;}
+.wnav-back{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--muted);text-decoration:none;transition:all 0.15s;flex-shrink:0;}
+.wnav-back:hover{background:rgba(255,255,255,0.06);color:var(--y);}
+.wnav-back:active{transform:scale(0.94);}
+.wnav-logo{font-family:var(--fh);font-size:16px;letter-spacing:2px;line-height:1;flex-shrink:0;}
+.wnav-logo a{color:var(--muted);text-decoration:none;}
+.wnav-logo a span{color:var(--y);}
+.wnav-sep{width:1px;height:16px;background:var(--border2);flex-shrink:0;}
+.wnav-title{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);flex:1;}
+
+/* SHELL */
+.shell{display:flex;flex-direction:column;height:100dvh;max-width:520px;margin:0 auto;}
+
+/* TIPO SELECTOR */
+.tipo-bar{display:flex;padding:10px 16px;gap:6px;border-bottom:1px solid var(--border2);flex-shrink:0;background:var(--bg);}
+.tipo-btn{flex:1;padding:8px 0;font-family:var(--fh);font-size:15px;letter-spacing:1px;border:1px solid var(--border2);border-radius:8px;background:transparent;color:var(--muted);cursor:pointer;transition:all 0.15s;text-align:center;}
+.tipo-btn.active-luz{background:rgba(240,192,48,0.15);color:var(--luz);border-color:rgba(240,192,48,0.35);}
+.tipo-btn.active-gas{background:rgba(240,112,48,0.15);color:var(--gas);border-color:rgba(240,112,48,0.35);}
+.tipo-btn.active-agua{background:rgba(48,184,240,0.15);color:var(--agua);border-color:rgba(48,184,240,0.35);}
+.tipo-btn:hover{background:var(--bg3);}
+
+/* TABS */
+.tabs{display:flex;padding:0 16px;gap:2px;border-bottom:1px solid var(--border2);flex-shrink:0;overflow-x:auto;scrollbar-width:none;background:var(--bg);}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:9px 14px;font-size:11px;font-family:var(--fm);border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;white-space:nowrap;}
+.tab.active{color:var(--y);border-bottom-color:var(--y);}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:0 16px 100px;scrollbar-width:none;}
+.content::-webkit-scrollbar{display:none;}
+.section{display:none;padding-top:14px;}
+.section.active{display:block;}
+
+/* SUMMARY CARDS */
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.scard{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px 10px;}
+.scard-label{font-size:9px;color:var(--muted);font-family:var(--fm);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:4px;}
+.scard-val{font-family:var(--fh);font-size:24px;line-height:1;color:var(--text);}
+.scard-sub{font-size:10px;color:var(--muted);margin-top:3px;font-family:var(--fm);}
+
+/* ALERT BANNER */
+.alert-banner{background:rgba(240,64,48,0.1);border:0.5px solid rgba(240,64,48,0.3);border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;font-size:12px;font-family:var(--fm);color:var(--r);line-height:1.5;}
+.alert-dot{width:7px;height:7px;border-radius:50%;background:var(--r);flex-shrink:0;animation:pulse 1.5s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* FILTERS */
+.filters{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.filter-select{background:var(--bg2);border:0.5px solid var(--border2);border-radius:6px;color:var(--text);font-family:var(--fm);font-size:11px;padding:6px 10px;outline:none;cursor:pointer;}
+.filter-select:focus{border-color:var(--y);}
+.filter-select option{background:var(--bg2);}
+.filter-clear{background:transparent;border:0.5px solid var(--border2);border-radius:6px;color:var(--muted);font-family:var(--fm);font-size:11px;padding:6px 10px;cursor:pointer;}
+.filter-clear:hover{color:var(--text);}
+
+/* FACTURA ROWS */
+.factura-row{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color 0.15s;}
+.factura-row:hover{border-color:var(--border2);}
+.factura-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.factura-left{flex:1;min-width:0;}
+.factura-num{font-size:10px;color:var(--muted);font-family:var(--fm);margin-bottom:3px;}
+.factura-empresa{font-size:14px;font-weight:500;}
+.factura-periodo{font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:2px;}
+.factura-right{text-align:right;flex-shrink:0;}
+.factura-importe{font-family:var(--fh);font-size:22px;letter-spacing:0.5px;}
+.factura-consumo{font-size:10px;color:var(--muted);font-family:var(--fm);margin-top:2px;}
+.tipo-pill{display:inline-block;font-size:9px;padding:2px 8px;border-radius:99px;font-family:var(--fm);letter-spacing:0.5px;margin-top:6px;}
+.pill-luz{background:rgba(240,192,48,0.12);color:var(--luz);border:0.5px solid rgba(240,192,48,0.25);}
+.pill-gas{background:rgba(240,112,48,0.12);color:var(--gas);border:0.5px solid rgba(240,112,48,0.25);}
+.pill-agua{background:rgba(48,184,240,0.12);color:var(--agua);border:0.5px solid rgba(48,184,240,0.25);}
+.var-badge{font-size:10px;font-family:var(--fm);padding:2px 7px;border-radius:99px;margin-top:4px;display:inline-block;}
+.var-up{background:rgba(240,64,48,0.12);color:var(--r);}
+.var-down{background:rgba(48,216,128,0.12);color:var(--g);}
+.var-eq{background:rgba(90,88,80,0.12);color:var(--muted);}
+
+/* EDIT FORM */
+.edit-form{background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;padding:12px;margin-top:10px;display:none;}
+.edit-form.open{display:block;}
+.ef-row{display:flex;gap:8px;margin-bottom:8px;}
+.ef-row>*{flex:1;min-width:0;}
+input,select,textarea{width:100%;background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--fm);font-size:13px;padding:9px 12px;outline:none;transition:border-color 0.15s;}
+input:focus,select:focus{border-color:var(--y);}
+select option{background:var(--bg2);}
+.ef-btns{display:flex;gap:6px;margin-top:4px;}
+
+/* BUTTONS */
+.btn{padding:9px 16px;font-size:12px;font-family:var(--fm);border:0.5px solid var(--border2);border-radius:8px;background:transparent;color:var(--text);cursor:pointer;transition:all 0.15s;flex-shrink:0;}
+.btn:hover{background:var(--bg3);}
+.btn-y{background:var(--y);color:#0a0a09;border-color:var(--y);font-weight:500;}
+.btn-y:hover{opacity:0.9;background:var(--y);}
+.btn-r{color:var(--r);border-color:rgba(240,64,48,0.3);}
+.btn-sm{padding:5px 11px;font-size:11px;}
+
+/* ADD PANEL */
+.add-panel{background:var(--bg2);border:0.5px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:14px;display:none;}
+.add-panel.open{display:block;}
+.ap-title{font-family:var(--fh);font-size:18px;letter-spacing:0.5px;margin-bottom:14px;}
+.field-label{font-size:9px;color:var(--muted);font-family:var(--fm);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.field{margin-bottom:8px;}
+.field-row{display:flex;gap:8px;}
+.field-row>*{flex:1;min-width:0;}
+
+/* CHART */
+.chart-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:14px;margin-bottom:12px;}
+.chart-title{font-family:var(--fh);font-size:15px;letter-spacing:0.3px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
+.chart-sub{font-size:10px;color:var(--muted);font-family:var(--fm);font-weight:400;}
+.chart-wrap{position:relative;height:180px;}
+
+/* STATS TABLE */
+.stats-table{width:100%;font-size:12px;font-family:var(--fm);}
+.stats-table th{text-align:left;color:var(--muted);font-weight:400;padding:6px 0;border-bottom:0.5px solid var(--border2);font-size:10px;letter-spacing:0.5px;text-transform:uppercase;}
+.stats-table td{padding:8px 0;border-bottom:0.5px solid var(--border);color:var(--text);}
+.stats-table tr:last-child td{border-bottom:none;}
+.stats-table .num{text-align:right;font-weight:500;}
+.stats-table .tipo-col{display:flex;align-items:center;gap:6px;}
+.tipo-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+
+/* FAB */
+.fab-area{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;padding:12px 16px 24px;background:linear-gradient(to top,var(--bg) 60%,transparent);pointer-events:none;}
+.fab{pointer-events:all;width:100%;padding:13px;font-family:var(--fh);font-size:14px;font-weight:600;background:var(--y);color:#0a0a09;border:none;border-radius:12px;cursor:pointer;transition:transform 0.12s,opacity 0.12s;letter-spacing:0.3px;}
+.fab:active{transform:scale(0.97);opacity:0.85;}
+
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:2.5rem 1rem;line-height:1.7;}
+.divider{height:0.5px;background:var(--border2);margin:12px 0;}
+.section-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:16px 0 8px;font-family:var(--fm);}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- NAV -->
+  <div class="wnav">
+    <a class="wnav-back" href="index.html">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
+    <div class="wnav-sep"></div>
+    <div class="wnav-title">SUMINISTROS</div>
+  </div>
+
+  <!-- TIPO SELECTOR -->
+  <div class="tipo-bar">
+    <button class="tipo-btn" id="btn-todos" onclick="setTipo('todos')">TODOS</button>
+    <button class="tipo-btn" id="btn-luz" onclick="setTipo('luz')">⚡ LUZ</button>
+    <button class="tipo-btn" id="btn-gas" onclick="setTipo('gas')">🔥 GAS</button>
+    <button class="tipo-btn" id="btn-agua" onclick="setTipo('agua')">💧 AGUA</button>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('facturas',this)">Facturas</button>
+    <button class="tab" onclick="showTab('graficas',this)">Gráficas</button>
+    <button class="tab" onclick="showTab('resumen',this)">Resumen</button>
+    <button class="tab" onclick="showTab('datos',this)">Datos</button>
+  </div>
+
+  <div class="content">
+
+    <!-- ── FACTURAS ── -->
+    <div id="facturas" class="section active">
+      <div class="add-panel" id="add-panel">
+        <div class="ap-title" id="ap-title">Nueva factura</div>
+        <div class="field-row">
+          <div class="field">
+            <div class="field-label">Tipo</div>
+            <select id="f-tipo">
+              <option value="luz">⚡ Luz</option>
+              <option value="gas">🔥 Gas</option>
+              <option value="agua">💧 Agua</option>
+            </select>
+          </div>
+          <div class="field">
+            <div class="field-label">Nº Factura</div>
+            <input type="text" id="f-num" placeholder="FAC-2024-001">
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">Empresa / Comercializadora</div>
+          <input type="text" id="f-empresa" placeholder="ej: Plenitude, Endesa, Canal…">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <div class="field-label">Importe total €</div>
+            <input type="number" id="f-importe" placeholder="0.00" step="0.01" min="0">
+          </div>
+          <div class="field">
+            <div class="field-label">Consumo</div>
+            <input type="number" id="f-consumo" placeholder="kWh / m³" step="0.01" min="0">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <div class="field-label">Periodo inicio</div>
+            <input type="date" id="f-inicio">
+          </div>
+          <div class="field">
+            <div class="field-label">Periodo fin</div>
+            <input type="date" id="f-fin">
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">Notas (opcional)</div>
+          <input type="text" id="f-notas" placeholder="Observaciones…">
+        </div>
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <button class="btn btn-y" style="flex:1" onclick="addFactura()">Guardar factura</button>
+          <button class="btn" onclick="closeAdd()">Cancelar</button>
+        </div>
+      </div>
+
+      <div id="alert-area"></div>
+      <div id="summary-bar"></div>
+      <div class="filters" id="filters-area"></div>
+      <div id="facturas-body"></div>
+    </div>
+
+    <!-- ── GRÁFICAS ── -->
+    <div id="graficas" class="section">
+      <div class="chart-card">
+        <div class="chart-title">Evolución de importe <span class="chart-sub" id="chart1-sub"></span></div>
+        <div class="chart-wrap"><canvas id="chart-importe"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Evolución de consumo <span class="chart-sub" id="chart2-sub"></span></div>
+        <div class="chart-wrap"><canvas id="chart-consumo"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Coste por unidad <span class="chart-sub">(€/kWh o €/m³)</span></div>
+        <div class="chart-wrap"><canvas id="chart-ratio"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ── RESUMEN ── -->
+    <div id="resumen" class="section">
+      <div id="resumen-body"></div>
+    </div>
+
+    <!-- ── DATOS ── -->
+    <div id="datos" class="section">
+      <div class="section-label">Exportar / Importar</div>
+      <div style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:14px;margin-bottom:10px;">
+        <div style="font-size:12px;color:var(--muted);font-family:var(--fm);margin-bottom:10px;" id="datos-info"></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-y" style="flex:1" onclick="exportJSON()">↓ Exportar JSON</button>
+          <button class="btn" style="flex:1" onclick="document.getElementById('fi').click()">↑ Importar JSON</button>
+          <input type="file" id="fi" accept=".json" style="display:none" onchange="importFile(event)">
+        </div>
+        <div id="datos-fb" style="font-size:11px;margin-top:8px;display:none;font-family:var(--fm);"></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <div class="fab-area" id="fab-area">
+    <button class="fab" onclick="toggleAdd()">+ Nueva factura</button>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+let state = loadState();
+let nid = state.nextId || 1;
+let tipoActivo = 'todos';
+let currentTab = 'facturas';
+let editId = null;
+let charts = {};
+
+// Filters
+let filterAnio = '';
+let filterTrimestre = '';
+let filterTipo = '';
+
+const TIPO_COLOR = { luz: '#f0c030', gas: '#f07030', agua: '#30b8f0' };
+const TIPO_UNIT  = { luz: 'kWh', gas: 'm³', agua: 'm³' };
+const TIPO_EMOJI = { luz: '⚡', gas: '🔥', agua: '💧' };
+const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+function loadState() {
+  try { const r = localStorage.getItem('suministros_v1'); if (r) return JSON.parse(r); } catch(e) {}
+  return { facturas: [], nextId: 1 };
+}
+function save() {
+  state.nextId = nid;
+  try { localStorage.setItem('suministros_v1', JSON.stringify(state)); } catch(e) {}
+}
+function nxtId() { return ++nid; }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt(n, dec=2) { return Number(n).toLocaleString('es-ES', {minimumFractionDigits:dec, maximumFractionDigits:dec}); }
+
+// ── TIPO ──
+function setTipo(t) {
+  tipoActivo = t;
+  document.querySelectorAll('.tipo-btn').forEach(b => b.className = 'tipo-btn');
+  const btn = document.getElementById('btn-'+t);
+  if (t === 'todos') btn.style.background = 'var(--bg3)', btn.style.color = 'var(--text)', btn.style.borderColor = 'var(--border2)';
+  else { btn.classList.add('active-'+t); }
+  // Reset filter tipo
+  filterTipo = t === 'todos' ? '' : t;
+  render();
+}
+
+// ── TABS ──
+function showTab(name, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  el.classList.add('active');
+  currentTab = name;
+  document.getElementById('fab-area').style.display = name === 'facturas' ? 'block' : 'none';
+  render();
+}
+
+// ── ADD ──
+function toggleAdd() {
+  const p = document.getElementById('add-panel');
+  p.classList.toggle('open');
+  if (p.classList.contains('open') && tipoActivo !== 'todos') {
+    document.getElementById('f-tipo').value = tipoActivo;
+  }
+}
+function closeAdd() { document.getElementById('add-panel').classList.remove('open'); }
+
+function addFactura() {
+  const tipo    = document.getElementById('f-tipo').value;
+  const num     = document.getElementById('f-num').value.trim();
+  const empresa = document.getElementById('f-empresa').value.trim();
+  const importe = parseFloat(document.getElementById('f-importe').value);
+  const consumo = parseFloat(document.getElementById('f-consumo').value) || null;
+  const inicio  = document.getElementById('f-inicio').value;
+  const fin     = document.getElementById('f-fin').value;
+  const notas   = document.getElementById('f-notas').value.trim();
+  if (!empresa || isNaN(importe) || !inicio) return;
+  state.facturas.push({ id: nxtId(), tipo, num, empresa, importe, consumo, inicio, fin, notas });
+  document.getElementById('f-empresa').value = '';
+  document.getElementById('f-num').value = '';
+  document.getElementById('f-importe').value = '';
+  document.getElementById('f-consumo').value = '';
+  document.getElementById('f-inicio').value = '';
+  document.getElementById('f-fin').value = '';
+  document.getElementById('f-notas').value = '';
+  closeAdd();
+  save();
+  render();
+}
+
+// ── FILTER HELPERS ──
+function getAnio(f) { return f.inicio ? f.inicio.slice(0,4) : ''; }
+function getTrimestre(f) {
+  if (!f.inicio) return '';
+  const m = parseInt(f.inicio.slice(5,7));
+  return 'Q' + Math.ceil(m/3);
+}
+function filteredFacturas() {
+  return state.facturas.filter(f => {
+    if (filterTipo && f.tipo !== filterTipo) return false;
+    if (filterAnio && getAnio(f) !== filterAnio) return false;
+    if (filterTrimestre && getTrimestre(f) !== filterTrimestre) return false;
+    return true;
+  }).sort((a,b) => b.inicio.localeCompare(a.inicio));
+}
+function allAnios() {
+  return [...new Set(state.facturas.map(f => getAnio(f)).filter(Boolean))].sort().reverse();
+}
+
+// ── ALERTS ──
+function checkAlerts(facts) {
+  const alerts = [];
+  ['luz','gas','agua'].forEach(tipo => {
+    const tf = facts.filter(f => f.tipo === tipo).sort((a,b) => a.inicio.localeCompare(b.inicio));
+    if (tf.length >= 2) {
+      const last = tf[tf.length-1];
+      const prev = tf[tf.length-2];
+      const pct = ((last.importe - prev.importe) / prev.importe) * 100;
+      if (pct > 20) alerts.push(`${TIPO_EMOJI[tipo]} ${tipo.toUpperCase()}: última factura un <strong>+${fmt(pct,1)}%</strong> más cara que la anterior (${fmt(prev.importe)} → ${fmt(last.importe)} €)`);
+    }
+  });
+  return alerts;
+}
+
+// ── VARIATION BADGE ──
+function varBadge(current, prev) {
+  if (!prev) return '';
+  const pct = ((current - prev) / prev) * 100;
+  if (Math.abs(pct) < 1) return `<span class="var-badge var-eq">= igual</span>`;
+  if (pct > 0) return `<span class="var-badge var-up">▲ +${fmt(pct,1)}%</span>`;
+  return `<span class="var-badge var-down">▼ ${fmt(pct,1)}%</span>`;
+}
+
+// ── RENDER ──
+function render() {
+  if (currentTab === 'facturas') renderFacturas();
+  if (currentTab === 'graficas') renderGraficas();
+  if (currentTab === 'resumen')  renderResumen();
+  if (currentTab === 'datos')    renderDatos();
+  // Always sync tipo buttons style
+  syncTipoButtons();
+}
+
+function syncTipoButtons() {
+  ['todos','luz','gas','agua'].forEach(t => {
+    const btn = document.getElementById('btn-'+t);
+    if (!btn) return;
+    btn.className = 'tipo-btn';
+    btn.style = '';
+  });
+  const active = document.getElementById('btn-'+tipoActivo);
+  if (tipoActivo === 'todos') {
+    active.style.background = 'var(--bg3)';
+    active.style.color = 'var(--text)';
+    active.style.borderColor = 'var(--border2)';
+  } else {
+    active.classList.add('active-'+tipoActivo);
+  }
+}
+
+function renderFacturas() {
+  const facts = filteredFacturas();
+
+  // Summary
+  const total = facts.reduce((s,f) => s+f.importe, 0);
+  const count = facts.length;
+  const avg = count ? total/count : 0;
+  document.getElementById('summary-bar').innerHTML = `
+    <div class="summary">
+      <div class="scard"><div class="scard-label">Total</div><div class="scard-val">${fmt(total,0)} €</div><div class="scard-sub">${count} factura${count!==1?'s':''}</div></div>
+      <div class="scard"><div class="scard-label">Media</div><div class="scard-val">${fmt(avg,0)} €</div><div class="scard-sub">por factura</div></div>
+      <div class="scard"><div class="scard-label">Última</div><div class="scard-val" style="font-size:18px">${facts.length?fmt(facts[0].importe,0)+' €':'—'}</div><div class="scard-sub">${facts.length?facts[0].tipo:''}</div></div>
+    </div>`;
+
+  // Alerts
+  const alerts = checkAlerts(state.facturas);
+  document.getElementById('alert-area').innerHTML = alerts.length
+    ? alerts.map(a => `<div class="alert-banner"><div class="alert-dot"></div><div>${a}</div></div>`).join('')
+    : '';
+
+  // Filters
+  const anios = allAnios();
+  document.getElementById('filters-area').innerHTML = `
+    <select class="filter-select" onchange="filterAnio=this.value;render()">
+      <option value="">Todos los años</option>
+      ${anios.map(a => `<option value="${a}" ${filterAnio===a?'selected':''}>${a}</option>`).join('')}
+    </select>
+    <select class="filter-select" onchange="filterTrimestre=this.value;render()">
+      <option value="">Todos los trimestres</option>
+      <option value="Q1" ${filterTrimestre==='Q1'?'selected':''}>Q1 (Ene–Mar)</option>
+      <option value="Q2" ${filterTrimestre==='Q2'?'selected':''}>Q2 (Abr–Jun)</option>
+      <option value="Q3" ${filterTrimestre==='Q3'?'selected':''}>Q3 (Jul–Sep)</option>
+      <option value="Q4" ${filterTrimestre==='Q4'?'selected':''}>Q4 (Oct–Dic)</option>
+    </select>
+    ${(filterAnio||filterTrimestre)?`<button class="filter-clear" onclick="filterAnio='';filterTrimestre='';render()">✕ Limpiar</button>`:''}`;
+
+  if (!facts.length) {
+    document.getElementById('facturas-body').innerHTML = '<div class="empty">Sin facturas registradas.<br>Pulsa + para añadir la primera.</div>';
+    return;
+  }
+
+  // Build prev map for variation
+  const prevMap = {};
+  ['luz','gas','agua'].forEach(tipo => {
+    const tf = state.facturas.filter(f => f.tipo===tipo).sort((a,b) => a.inicio.localeCompare(b.inicio));
+    tf.forEach((f,i) => { prevMap[f.id] = i > 0 ? tf[i-1].importe : null; });
+  });
+
+  let html = '';
+  facts.forEach(f => {
+    const color = TIPO_COLOR[f.tipo] || 'var(--muted)';
+    const unit = TIPO_UNIT[f.tipo];
+    const isEd = editId === f.id;
+    const periodoStr = f.inicio ? (f.fin ? `${f.inicio} → ${f.fin}` : `desde ${f.inicio}`) : '';
+    html += `<div class="factura-row">
+      <div class="factura-top">
+        <div class="factura-left">
+          ${f.num ? `<div class="factura-num">${esc(f.num)}</div>` : ''}
+          <div class="factura-empresa">${esc(f.empresa)}</div>
+          <div class="factura-periodo">${periodoStr}</div>
+          <span class="tipo-pill pill-${f.tipo}">${TIPO_EMOJI[f.tipo]} ${f.tipo.toUpperCase()}</span>
+          ${varBadge(f.importe, prevMap[f.id])}
+          ${f.notas ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;font-family:var(--fm)">${esc(f.notas)}</div>` : ''}
+        </div>
+        <div class="factura-right">
+          <div class="factura-importe" style="color:${color}">${fmt(f.importe)} €</div>
+          ${f.consumo ? `<div class="factura-consumo">${fmt(f.consumo,1)} ${unit}</div>` : ''}
+          ${f.consumo ? `<div class="factura-consumo">${fmt(f.importe/f.consumo,3)} €/${unit}</div>` : ''}
+        </div>
+      </div>
+      <div class="edit-form ${isEd?'open':''}" id="ef-${f.id}" onclick="event.stopPropagation()">
+        <div class="ef-row">
+          <div><div class="field-label">Tipo</div><select id="ei-tipo-${f.id}">${['luz','gas','agua'].map(t=>`<option value="${t}"${t===f.tipo?' selected':''}>${TIPO_EMOJI[t]} ${t}</option>`).join('')}</select></div>
+          <div><div class="field-label">Nº Factura</div><input type="text" id="ei-num-${f.id}" value="${esc(f.num||'')}"></div>
+        </div>
+        <div><div class="field-label">Empresa</div><input type="text" id="ei-emp-${f.id}" value="${esc(f.empresa)}" style="margin-bottom:7px;"></div>
+        <div class="ef-row">
+          <div><div class="field-label">Importe €</div><input type="number" id="ei-imp-${f.id}" value="${f.importe}" step="0.01"></div>
+          <div><div class="field-label">Consumo</div><input type="number" id="ei-con-${f.id}" value="${f.consumo||''}" step="0.01"></div>
+        </div>
+        <div class="ef-row">
+          <div><div class="field-label">Inicio</div><input type="date" id="ei-ini-${f.id}" value="${f.inicio||''}"></div>
+          <div><div class="field-label">Fin</div><input type="date" id="ei-fin-${f.id}" value="${f.fin||''}"></div>
+        </div>
+        <div><div class="field-label">Notas</div><input type="text" id="ei-not-${f.id}" value="${esc(f.notas||'')}" style="margin-bottom:8px;"></div>
+        <div class="ef-btns">
+          <button class="btn btn-y btn-sm" style="flex:1" onclick="saveEdit(${f.id})">Guardar</button>
+          <button class="btn btn-sm" onclick="cancelEdit()">Cancelar</button>
+          <button class="btn btn-sm btn-r" onclick="delFactura(${f.id})">Eliminar</button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:6px;">
+        <button class="btn btn-sm" style="opacity:0.35;border:none;padding:2px 8px;" onclick="startEdit(${f.id})">✎ editar</button>
+      </div>
+    </div>`;
+  });
+  document.getElementById('facturas-body').innerHTML = html;
+}
+
+// ── EDIT ──
+function startEdit(id) { editId = (editId===id?null:id); renderFacturas(); }
+function cancelEdit() { editId = null; renderFacturas(); }
+function saveEdit(id) {
+  const f = state.facturas.find(x => x.id===id); if (!f) return;
+  f.tipo    = document.getElementById('ei-tipo-'+id).value;
+  f.num     = document.getElementById('ei-num-'+id).value.trim();
+  f.empresa = document.getElementById('ei-emp-'+id).value.trim();
+  f.importe = parseFloat(document.getElementById('ei-imp-'+id).value);
+  f.consumo = parseFloat(document.getElementById('ei-con-'+id).value) || null;
+  f.inicio  = document.getElementById('ei-ini-'+id).value;
+  f.fin     = document.getElementById('ei-fin-'+id).value;
+  f.notas   = document.getElementById('ei-not-'+id).value.trim();
+  editId = null; save(); render();
+}
+function delFactura(id) {
+  if (!confirm('¿Eliminar esta factura?')) return;
+  state.facturas = state.facturas.filter(x => x.id!==id);
+  editId = null; save(); render();
+}
+
+// ── CHARTS ──
+function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+function renderGraficas() {
+  const tipos = tipoActivo === 'todos' ? ['luz','gas','agua'] : [tipoActivo];
+  document.getElementById('chart1-sub').textContent = tipoActivo === 'todos' ? '(todos los suministros)' : tipoActivo;
+
+  // Chart 1: Importe por fecha
+  destroyChart('importe');
+  const ctx1 = document.getElementById('chart-importe').getContext('2d');
+  const datasets1 = tipos.map(tipo => {
+    const tf = state.facturas.filter(f=>f.tipo===tipo).sort((a,b)=>a.inicio.localeCompare(b.inicio));
+    return {
+      label: tipo.charAt(0).toUpperCase()+tipo.slice(1),
+      data: tf.map(f=>({x: f.inicio, y: f.importe})),
+      borderColor: TIPO_COLOR[tipo],
+      backgroundColor: TIPO_COLOR[tipo]+'22',
+      tension: 0.3, pointRadius: 4, pointHoverRadius: 6, fill: false, borderWidth: 2
+    };
+  }).filter(d => d.data.length);
+  charts['importe'] = new Chart(ctx1, {
+    type: 'line',
+    data: { datasets: datasets1 },
+    options: chartOpts('€')
+  });
+
+  // Chart 2: Consumo
+  destroyChart('consumo');
+  const ctx2 = document.getElementById('chart-consumo').getContext('2d');
+  const datasets2 = tipos.map(tipo => {
+    const tf = state.facturas.filter(f=>f.tipo===tipo&&f.consumo).sort((a,b)=>a.inicio.localeCompare(b.inicio));
+    return {
+      label: `${tipo} (${TIPO_UNIT[tipo]})`,
+      data: tf.map(f=>({x: f.inicio, y: f.consumo})),
+      borderColor: TIPO_COLOR[tipo],
+      backgroundColor: TIPO_COLOR[tipo]+'22',
+      tension: 0.3, pointRadius: 4, fill: false, borderWidth: 2
+    };
+  }).filter(d => d.data.length);
+  charts['consumo'] = new Chart(ctx2, {
+    type: 'line',
+    data: { datasets: datasets2 },
+    options: chartOpts('')
+  });
+
+  // Chart 3: €/unidad ratio
+  destroyChart('ratio');
+  const ctx3 = document.getElementById('chart-ratio').getContext('2d');
+  const datasets3 = tipos.map(tipo => {
+    const tf = state.facturas.filter(f=>f.tipo===tipo&&f.consumo&&f.consumo>0).sort((a,b)=>a.inicio.localeCompare(b.inicio));
+    return {
+      label: `${tipo} (€/${TIPO_UNIT[tipo]})`,
+      data: tf.map(f=>({x: f.inicio, y: +(f.importe/f.consumo).toFixed(4)})),
+      borderColor: TIPO_COLOR[tipo],
+      backgroundColor: TIPO_COLOR[tipo]+'22',
+      tension: 0.3, pointRadius: 4, fill: false, borderWidth: 2
+    };
+  }).filter(d => d.data.length);
+  charts['ratio'] = new Chart(ctx3, {
+    type: 'line',
+    data: { datasets: datasets3 },
+    options: chartOpts('€/u')
+  });
+}
+
+function chartOpts(unit) {
+  return {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { labels: { color: '#5a5850', font: { family: 'DM Mono', size: 10 }, boxWidth: 12, padding: 12 } },
+      tooltip: {
+        backgroundColor: '#1e1e1b', borderColor: 'rgba(255,255,255,0.13)', borderWidth: 1,
+        titleColor: '#f0ebe0', bodyColor: '#5a5850',
+        titleFont: { family: 'DM Mono', size: 11 }, bodyFont: { family: 'DM Mono', size: 11 },
+        callbacks: { label: ctx => ` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)} ${unit}` }
+      }
+    },
+    scales: {
+      x: { type: 'category', ticks: { color: '#5a5850', font: { family: 'DM Mono', size: 9 }, maxTicksLimit: 8 }, grid: { color: 'rgba(255,255,255,0.04)' } },
+      y: { ticks: { color: '#5a5850', font: { family: 'DM Mono', size: 9 } }, grid: { color: 'rgba(255,255,255,0.04)' } }
+    }
+  };
+}
+
+// ── RESUMEN ──
+function renderResumen() {
+  const anios = allAnios();
+  let html = '';
+
+  // Per-tipo stats
+  html += '<div class="section-label">Por suministro</div>';
+  html += '<div style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;overflow:hidden;margin-bottom:14px;">';
+  html += '<table class="stats-table" style="padding:0 14px;"><thead><tr><th style="padding:10px 14px 6px;">Tipo</th><th class="num" style="padding:10px 14px 6px;">Facturas</th><th class="num" style="padding:10px 14px 6px;">Total</th><th class="num" style="padding:10px 14px 6px;">Media</th></tr></thead><tbody>';
+  ['luz','gas','agua'].forEach(tipo => {
+    const tf = state.facturas.filter(f=>f.tipo===tipo);
+    if (!tf.length) return;
+    const total = tf.reduce((s,f)=>s+f.importe,0);
+    const avg = total/tf.length;
+    html += `<tr>
+      <td style="padding:8px 14px;"><div class="tipo-col"><div class="tipo-dot" style="background:${TIPO_COLOR[tipo]}"></div>${TIPO_EMOJI[tipo]} ${tipo}</div></td>
+      <td class="num" style="padding:8px 14px;">${tf.length}</td>
+      <td class="num" style="padding:8px 14px;">${fmt(total)} €</td>
+      <td class="num" style="padding:8px 14px;">${fmt(avg)} €</td>
+    </tr>`;
+  });
+  html += '</tbody></table></div>';
+
+  // Per-year stats
+  if (anios.length) {
+    html += '<div class="section-label">Por año</div>';
+    anios.forEach(anio => {
+      const yf = state.facturas.filter(f=>getAnio(f)===anio);
+      const total = yf.reduce((s,f)=>s+f.importe,0);
+      html += `<div style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-family:var(--fh);font-size:18px;letter-spacing:0.5px;">${anio}</span>
+          <span style="font-family:var(--fh);font-size:18px;color:var(--y)">${fmt(total)} €</span>
+        </div>`;
+      ['luz','gas','agua'].forEach(tipo => {
+        const tf = yf.filter(f=>f.tipo===tipo);
+        if (!tf.length) return;
+        const t = tf.reduce((s,f)=>s+f.importe,0);
+        const pct = total > 0 ? t/total*100 : 0;
+        html += `<div style="margin-bottom:6px;">
+          <div style="display:flex;justify-content:space-between;font-size:11px;font-family:var(--fm);margin-bottom:3px;">
+            <span style="color:var(--muted)">${TIPO_EMOJI[tipo]} ${tipo}</span>
+            <span>${fmt(t)} € · ${fmt(pct,1)}%</span>
+          </div>
+          <div style="height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:${TIPO_COLOR[tipo]};border-radius:2px;"></div>
+          </div>
+        </div>`;
+      });
+      html += '</div>';
+    });
+  }
+
+  // Quarterly breakdown
+  html += '<div class="section-label">Por trimestre (año actual)</div>';
+  const anioActual = new Date().getFullYear().toString();
+  ['Q1','Q2','Q3','Q4'].forEach(q => {
+    const qf = state.facturas.filter(f=>getAnio(f)===anioActual&&getTrimestre(f)===q);
+    if (!qf.length) return;
+    const t = qf.reduce((s,f)=>s+f.importe,0);
+    html += `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:13px;font-family:var(--fm);">
+      <span style="color:var(--muted)">${q} ${anioActual}</span>
+      <span style="font-weight:500;">${fmt(t)} €</span>
+    </div>`;
+  });
+
+  if (!state.facturas.length) html = '<div class="empty">Sin datos aún.<br>Añade facturas en la pestaña Facturas.</div>';
+  document.getElementById('resumen-body').innerHTML = html;
+}
+
+// ── DATOS ──
+function renderDatos() {
+  const total = state.facturas.length;
+  const size = (new Blob([JSON.stringify(state)]).size / 1024).toFixed(1);
+  document.getElementById('datos-info').textContent = `${total} factura${total!==1?'s':''} · ${size} KB`;
+}
+function exportJSON() {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));
+  a.download = `suministros-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+function importFile(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const p = JSON.parse(ev.target.result);
+      if (!p.facturas) throw new Error('Formato inválido');
+      if (!confirm(`¿Importar ${p.facturas.length} facturas? Se reemplazarán los datos actuales.`)) return;
+      state = p; nid = state.nextId || 1;
+      save(); render();
+      const fb = document.getElementById('datos-fb');
+      fb.textContent = `${p.facturas.length} facturas importadas ✓`;
+      fb.style.color = 'var(--g)'; fb.style.display = 'block';
+      setTimeout(() => fb.style.display='none', 2500);
+    } catch(err) {
+      const fb = document.getElementById('datos-fb');
+      fb.textContent = 'Error: '+err.message;
+      fb.style.color = 'var(--r)'; fb.style.display = 'block';
+    }
+  };
+  r.readAsText(f);
+}
+
+// ── INIT ──
+setTipo('todos');
+render();
+</script>
+</body>
+</html>
