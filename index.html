@@ -9,6 +9,7 @@
 <meta name="theme-color" content="#0a0a09">
 <link rel="manifest" href="manifest.json">
 <title>W // APPS</title>
+<!-- version: 2.2.0 -->
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;--line:rgba(255,255,255,0.06);--line2:rgba(255,255,255,0.12);--text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;--y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;--fh:'Bebas Neue',sans-serif;--fm:'DM Mono',monospace;}
@@ -142,8 +143,8 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
 
   <div class="ticker">
     <div class="ticker-inner">
-      <span class="ticker-item">OBRA <span>●</span></span><span class="ticker-item">GASTOS <span>●</span></span><span class="ticker-item">DESPENSA <span>●</span></span><span class="ticker-item">SETLIST <span>●</span></span><span class="ticker-item">FINANZAS <span>●</span></span><span class="ticker-item">SEMANA <span>●</span></span><span class="ticker-item">DESEADOS <span>●</span></span><span class="ticker-item">COMPRA <span>●</span></span><span class="ticker-item">INSTRUMENTOS <span>●</span></span><span class="ticker-item">WOLOLOGGER <span>●</span></span>
-      <span class="ticker-item">OBRA <span>●</span></span><span class="ticker-item">GASTOS <span>●</span></span><span class="ticker-item">DESPENSA <span>●</span></span><span class="ticker-item">SETLIST <span>●</span></span><span class="ticker-item">FINANZAS <span>●</span></span><span class="ticker-item">SEMANA <span>●</span></span><span class="ticker-item">DESEADOS <span>●</span></span><span class="ticker-item">COMPRA <span>●</span></span><span class="ticker-item">INSTRUMENTOS <span>●</span></span><span class="ticker-item">WOLOLOGGER <span>●</span></span>
+      <span class="ticker-item">OBRA <span>●</span></span><span class="ticker-item">GASTOS <span>●</span></span><span class="ticker-item">DESPENSA <span>●</span></span><span class="ticker-item">SETLIST <span>●</span></span><span class="ticker-item">FINANZAS <span>●</span></span><span class="ticker-item">SEMANA <span>●</span></span><span class="ticker-item">DESEADOS <span>●</span></span><span class="ticker-item">COMPRA <span>●</span></span><span class="ticker-item">INSTRUMENTOS <span>●</span></span><span class="ticker-item">MASCOTAS <span>●</span></span><span class="ticker-item">BACKUP <span>●</span></span><span class="ticker-item">WOLOLOGGER <span>●</span></span>
+      <span class="ticker-item">OBRA <span>●</span></span><span class="ticker-item">GASTOS <span>●</span></span><span class="ticker-item">DESPENSA <span>●</span></span><span class="ticker-item">SETLIST <span>●</span></span><span class="ticker-item">FINANZAS <span>●</span></span><span class="ticker-item">SEMANA <span>●</span></span><span class="ticker-item">DESEADOS <span>●</span></span><span class="ticker-item">COMPRA <span>●</span></span><span class="ticker-item">INSTRUMENTOS <span>●</span></span><span class="ticker-item">MASCOTAS <span>●</span></span><span class="ticker-item">BACKUP <span>●</span></span><span class="ticker-item">WOLOLOGGER <span>●</span></span>
     </div>
   </div>
 
@@ -180,7 +181,9 @@ const META={
 'instrumentos.html': {name:'Instrumentos', desc:'Inventario de guitarras · bajos · amplis · pedales · setups', tags:['música']},
 'semana.html': {name:'Semana', desc:'Tareas semanales · calendario · vacaciones y eventos', tags:['productividad']},
 'deseados.html': {name:'Deseados', desc:'Lista de deseos · prioridad · categorías · seguimiento de compras', tags:['dinero']},
-'decisor.html': {name:'Decisor', desc:'Elige por ti · presets editables · historial', tags:['utilidad']},
+'decisor.html':   {name:'Decisor',  desc:'Elige por ti · presets editables · historial',                          tags:['utilidad']},
+'mascotas.html':  {name:'Mascotas', desc:'Perfil · medicación · vet · peso · conectado con calendario y compra',   tags:['hogar']},
+'backup.html':    {name:'Backup',   desc:'Backup y restauración completa de todos los datos del sistema',          tags:['utilidad']},
 };
 
 const ALL_TAGS=[...new Set(Object.values(META).flatMap(m=>m.tags||[]))].sort();

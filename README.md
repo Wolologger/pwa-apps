@@ -1,90 +1,84 @@
-# W // APPS
+# W//APPS — Personal PWA Suite
 
-Panel personal de herramientas PWA. Accesible desde el navegador e instalable como app en móvil y escritorio.
+> Panel de herramientas personales desplegado en GitHub Pages.
+> HTML puro · sin frameworks · sin servidor · sin cuenta · todo en el navegador.
 
-**URL:** `https://wolologger.github.io/pwa-apps/`
+**URL:** https://wolologger.github.io/pwa-apps/
+**Repo:** https://github.com/Wolologger/pwa-apps
+**Versión actual:** 2.2.0
 
----
-
-## Herramientas
-
-| Archivo | Nombre | Categorías |
-|---|---|---|
-| `obra.html` | Mi Obra | obra, finanzas |
-| `gastos-diarios.html` | Gastos Diarios | dinero, diario |
-| `suministros.html` | Suministros | hogar, dinero |
-| `finanzas.html` | Finanzas | dinero |
-| `despensa.html` | Despensa | hogar, cocina |
-| `compra.html` | Lista Compra | hogar, cocina |
-| `setlist.html` | Setlist | música |
-| `instrumentos.html` | Instrumentos | música |
-| `semana.html` | Semana | productividad |
-| `deseados.html` | Deseados | dinero |
-| `decisor.html` | Decisor | utilidad |
-| `guia_factura_luz.html` | Factura Luz | hogar |
+> Las versiones están anotadas **dentro de cada archivo HTML** como comentario `<!-- version: X.Y.Z -->`.
+> No se usan sufijos en los nombres de archivo (sin `-v2`, sin `_new`, etc).
 
 ---
 
-## Estructura
+## Apps disponibles (14)
 
+| App | Archivo | Descripción |
+|-----|---------|-------------|
+| 🏗️ Mi Obra | `obra.html` | Gestión de reforma, presupuesto, tareas y fases |
+| 💸 Gastos Diarios | `gastos-diarios.html` | Control de gastos cotidianos con presupuesto mensual |
+| 💡 Suministros | `suministros.html` | Facturas de luz, gas y agua con gráficas y alertas |
+| 💰 Finanzas | `finanzas.html` | Ingresos vs gastos fijos, conectado con otras apps |
+| 🥫 Despensa | `despensa.html` | Inventario de alimentos y caducidades |
+| 🛒 Lista Compra | `compra.html` | Listas reutilizables, categorías custom, establecimientos |
+| 🎸 Setlist | `setlist.html` | Canciones por grupo, drag & drop, modo actuación |
+| 🎛️ Instrumentos | `instrumentos.html` | Inventario de guitarras, bajos, amplis y pedales |
+| 📅 Semana | `semana.html` | Tareas semanales, calendario, vacaciones y eventos |
+| ❤️ Deseados | `deseados.html` | Lista de deseos con prioridad y seguimiento |
+| 🎲 Decisor | `decisor.html` | Elige por ti con presets editables e historial |
+| 🐾 Mascotas | `mascotas.html` | Perfil, medicación, veterinario y peso |
+| 💾 Backup | `backup.html` | Backup y restauración completa de todos los datos |
+| ⚡ Factura Luz | `guia_factura_luz.html` | Guía interactiva para entender tu factura |
+
+---
+
+## Bus de datos compartido
+
+Todas las apps usan `wapps-store.js`:
+
+```js
+WStore.get('gastos', 'data')         // leer
+WStore.set('gastos', 'data', state)  // escribir
+WStore.bridge.gastosEsteMes()        // accesos tipados
+WNotify.check()                      // revisar alertas push
 ```
-pwa-apps/
-├── index.html              # Panel principal con listado y filtros por categoría
-├── editor-categorias.html  # Editor visual de categorías (admin)
-├── sw.js                   # Service Worker (PWA, offline)
-├── manifest.json           # Manifest de la app
-├── icons/                  # Iconos de la PWA
-└── *.html                  # Herramientas individuales
-```
+
+**Interconexiones activas:**
+- Suministros + Gastos Diarios + Obra → **Finanzas**
+- Mascotas → Gastos Diarios (coste vet) · Lista Compra (meds) · Semana (citas)
 
 ---
 
-## Editor de categorías
+## Backup & Restore
 
-Abre `editor-categorias.html` para gestionar las categorías de cada herramienta sin tocar código:
-
-1. Añade o elimina categorías globales
-2. Abre cada herramienta y marca/desmarca sus categorías
-3. Copia el bloque `const META` generado
-4. Pégalo en `index.html` sustituyendo el bloque existente
-
-Los cambios se guardan en `localStorage` mientras trabajas.
-
----
-
-## Añadir una nueva herramienta
-
-1. Crea el archivo `nueva-herramienta.html` en la raíz del repo
-2. Abre `editor-categorias.html` y asígnale categorías
-3. Copia el `const META` generado y actualiza `index.html`
-
-La herramienta aparecerá automáticamente en el panel (se carga desde la API de GitHub).
-
----
-
-## Service Worker y caché
-
-El SW usa estrategia **network-first para HTML** y **cache-first para assets estáticos**:
-
-- Las páginas `.html` siempre se sirven desde la red si hay conexión → los cambios se ven de inmediato sin Ctrl+F5
-- Si no hay red, se sirve desde caché (modo offline)
-- El manifest y los iconos se cachean tras la primera visita
-
-Para forzar que todos los usuarios reciban una versión nueva, sube la constante `CACHE` en `sw.js` (ej: `wapps-v2` → `wapps-v3`).
+La app `backup.html` permite:
+- Backup completo (todas las apps) o selectivo en un `.json`
+- Historial local de los últimos 5 backups
+- Restauración total o por app individual
+- Borrado seguro por app o total
 
 ---
 
 ## Changelog
 
-### v1.5.0 — 2026-03
-- **Nuevo:** Visibilidad por herramienta — activa o desactiva cada app desde el editor de ajustes. Config guardada en `localStorage`
-- **Nuevo:** `editor-categorias.html` reescrito como panel de ajustes: toggle on/off por herramienta, sin secciones de categorías globales ni output de código
-- **Nuevo:** Botón ⚙ en el topbar del index para acceder al editor. Ya no aparece como herramienta en el listado
-- **Fix:** Service Worker cambiado a network-first para HTML (`wapps-v2`). Los cambios se ven sin Ctrl+F5
-- **Fix:** Limpieza automática de caché antigua al actualizar el SW
-- **Pendiente v2.0:** Sincronización de visibilidad y categorías con Firebase Firestore
+### v2.2.0
+- ✅ Nueva app **Backup** — sistema completo de backup/restore
+- ✅ Nueva app **Mascotas** — conectada con Gastos, Compra y Calendario
+- ✅ Versiones internas en todos los archivos HTML
 
-### v1.0.0 — inicial
-- Panel principal con listado de herramientas y filtros por categoría
-- PWA instalable con soporte offline
-- 12 herramientas: obra, gastos, despensa, finanzas, compra, setlist, instrumentos, semana, deseados, decisor, suministros, factura luz
+### v2.1.0
+- ✅ Finanzas v2 — interconexión vía wapps-store con Suministros, Gastos y Obra
+- ✅ Deseados v2 — campo prioridad, agrupado, export/import JSON
+
+### v2.0.0
+- ✅ `wapps-store.js` — bus compartido con notificaciones push
+- ✅ Semana v2, Decisor v2, Lista Compra v2, Instrumentos v2
+- ✅ Export/import JSON en todas las apps, diseño responsive
+
+### v1.0.0
+- ✅ Suite inicial: 11 apps, PWA, Service Worker, APK con PWABuilder
+
+---
+
+*HTML puro · localStorage · GitHub Pages · PWABuilder*

@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a09">
+<title>Mascotas — W//APPS</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;
+  --y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;--o:#f09030;--p:#c060f0;
+  --fh:'Bebas Neue',sans-serif;--fm:'DM Mono',monospace;--fs:'DM Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--fs);overflow-x:hidden;}
+
+/* NAV */
+.wnav{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:100;flex-shrink:0;}
+.wnav-back{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--muted);text-decoration:none;transition:all 0.15s;flex-shrink:0;}
+.wnav-back:hover{background:rgba(255,255,255,0.06);color:var(--y);}
+.wnav-logo{font-family:var(--fh);font-size:16px;letter-spacing:2px;flex-shrink:0;}
+.wnav-logo a{color:var(--muted);text-decoration:none;}
+.wnav-logo a span{color:var(--y);}
+.wnav-sep{width:1px;height:16px;background:var(--border2);flex-shrink:0;}
+.wnav-title{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* SHELL */
+.shell{display:flex;flex-direction:column;height:100dvh;max-width:600px;margin:0 auto;}
+
+/* PET SELECTOR BAR */
+.pet-bar{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border2);flex-shrink:0;overflow-x:auto;scrollbar-width:none;background:var(--bg);}
+.pet-bar::-webkit-scrollbar{display:none;}
+.pet-chip{flex-shrink:0;display:flex;align-items:center;gap:6px;padding:6px 12px;border:0.5px solid var(--border2);border-radius:99px;background:transparent;color:var(--muted);cursor:pointer;transition:all 0.15s;font-family:var(--fm);font-size:12px;white-space:nowrap;}
+.pet-chip.active{border-color:var(--p);color:var(--p);background:rgba(192,96,240,0.08);}
+.pet-chip:hover{color:var(--text);}
+.pet-chip-emoji{font-size:14px;}
+.pet-add-btn{flex-shrink:0;width:30px;height:30px;border-radius:50%;border:0.5px solid var(--border2);background:transparent;color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.pet-add-btn:hover{color:var(--y);border-color:var(--y);}
+
+/* TABS */
+.tabs{display:flex;padding:0 16px;gap:2px;border-bottom:1px solid var(--border2);flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:9px 14px;font-size:11px;font-family:var(--fm);border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;white-space:nowrap;}
+.tab.active{color:var(--y);border-bottom-color:var(--y);}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:0 16px 100px;scrollbar-width:none;}
+.content::-webkit-scrollbar{display:none;}
+.section{display:none;padding-top:14px;}
+.section.active{display:block;}
+
+/* SPINNER */
+.spinner-overlay{display:none;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1rem;gap:12px;}
+.spinner-overlay.show{display:flex;}
+.spinner{width:20px;height:20px;border:2px solid var(--border2);border-top-color:var(--y);border-radius:50%;animation:spin 0.6s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner-label{font-size:12px;color:var(--muted);font-family:var(--fm);}
+
+/* PET PROFILE CARD */
+.pet-profile{background:var(--bg2);border:0.5px solid var(--border2);border-radius:14px;padding:18px;margin-bottom:14px;position:relative;}
+.pet-profile-top{display:flex;gap:14px;align-items:flex-start;}
+.pet-avatar{width:64px;height:64px;border-radius:14px;background:rgba(192,96,240,0.15);border:1px solid rgba(192,96,240,0.25);display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;}
+.pet-info{flex:1;min-width:0;}
+.pet-name-display{font-family:var(--fh);font-size:28px;letter-spacing:0.5px;line-height:1;}
+.pet-breed{font-size:13px;color:var(--muted);font-family:var(--fm);margin-top:2px;}
+.pet-age-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-family:var(--fm);padding:3px 10px;border-radius:99px;background:rgba(192,96,240,0.1);color:var(--p);border:0.5px solid rgba(192,96,240,0.25);margin-top:6px;}
+.pet-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;}
+.pet-stat{background:var(--bg3);border-radius:8px;padding:10px;text-align:center;}
+.pet-stat-label{font-size:9px;color:var(--muted);font-family:var(--fm);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:3px;}
+.pet-stat-val{font-family:var(--fh);font-size:20px;line-height:1;}
+.pet-edit-btn{position:absolute;top:14px;right:14px;background:none;border:0.5px solid var(--border2);border-radius:6px;color:var(--muted);font-size:13px;padding:4px 10px;cursor:pointer;font-family:var(--fm);}
+.pet-edit-btn:hover{color:var(--text);}
+
+/* ALERTS */
+.alert-card{background:rgba(240,64,48,0.08);border:0.5px solid rgba(240,64,48,0.25);border-radius:10px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:flex-start;gap:10px;}
+.alert-dot{width:7px;height:7px;border-radius:50%;background:var(--r);flex-shrink:0;margin-top:4px;animation:pulse 1.5s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.alert-text{font-size:12px;font-family:var(--fm);color:var(--r);line-height:1.6;flex:1;}
+.alert-card.warn{background:rgba(240,144,48,0.08);border-color:rgba(240,144,48,0.25);}
+.alert-card.warn .alert-dot{background:var(--o);}
+.alert-card.warn .alert-text{color:var(--o);}
+
+/* MED CARDS */
+.med-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:13px 14px;margin-bottom:8px;}
+.med-top{display:flex;align-items:flex-start;gap:10px;}
+.med-icon{font-size:20px;flex-shrink:0;width:36px;height:36px;background:var(--bg3);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.med-body{flex:1;min-width:0;}
+.med-name{font-size:14px;font-weight:500;}
+.med-meta{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;align-items:center;}
+.med-dose{font-size:11px;color:var(--muted);font-family:var(--fm);}
+.med-freq{font-size:9px;padding:2px 8px;border-radius:99px;font-family:var(--fm);}
+.med-freq-diario{background:rgba(48,216,128,0.1);color:var(--g);border:0.5px solid rgba(48,216,128,0.25);}
+.med-freq-semanal{background:rgba(48,168,240,0.1);color:var(--b);border:0.5px solid rgba(48,168,240,0.25);}
+.med-freq-mensual{background:rgba(240,144,48,0.1);color:var(--o);border:0.5px solid rgba(240,144,48,0.25);}
+.med-freq-otro{background:rgba(90,88,80,0.12);color:var(--muted);border:0.5px solid var(--border2);}
+.med-stock{font-size:11px;font-family:var(--fm);}
+.med-stock.low{color:var(--r);}
+.med-stock.ok{color:var(--g);}
+.med-actions{display:flex;gap:4px;flex-shrink:0;align-items:flex-start;}
+.icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:4px 6px;opacity:0.3;transition:opacity 0.15s;color:var(--text);flex-shrink:0;}
+.icon-btn:hover{opacity:1;}
+.icon-btn.buy:hover{color:var(--b);}
+.icon-btn.del:hover{color:var(--r);}
+
+/* VET VISITS */
+.visit-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:8px;}
+.visit-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.visit-body{flex:1;}
+.visit-date{font-family:var(--fh);font-size:18px;letter-spacing:0.3px;}
+.visit-motivo{font-size:13px;margin-top:2px;}
+.visit-meta{font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;}
+.visit-cost{font-family:var(--fh);font-size:18px;color:var(--y);flex-shrink:0;}
+.visit-upcoming{border-color:rgba(232,240,64,0.3);}
+
+/* WEIGHT LOG */
+.weight-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:13px;}
+.weight-row:last-child{border-bottom:none;}
+.weight-date{color:var(--muted);font-family:var(--fm);font-size:11px;}
+.weight-val{font-family:var(--fh);font-size:18px;}
+.weight-diff{font-size:10px;font-family:var(--fm);padding:2px 6px;border-radius:99px;}
+.weight-up{background:rgba(240,64,48,0.1);color:var(--r);}
+.weight-down{background:rgba(48,216,128,0.1);color:var(--g);}
+.weight-eq{background:rgba(90,88,80,0.1);color:var(--muted);}
+
+/* ADD PANELS */
+.add-panel{background:var(--bg2);border:0.5px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:14px;display:none;}
+.add-panel.open{display:block;animation:sd 0.15s ease;}
+@keyframes sd{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.ap-title{font-family:var(--fh);font-size:18px;letter-spacing:0.5px;margin-bottom:12px;}
+.field{margin-bottom:8px;}
+.field-label{font-size:9px;color:var(--muted);font-family:var(--fm);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.field-row{display:flex;gap:8px;flex-wrap:wrap;}
+.field-row>*{flex:1;min-width:100px;}
+input,select,textarea{width:100%;background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--fm);font-size:13px;padding:9px 12px;outline:none;transition:border-color 0.15s;}
+input:focus,select:focus,textarea:focus{border-color:var(--y);}
+select option{background:var(--bg2);}
+textarea{resize:vertical;min-height:60px;line-height:1.5;}
+
+/* BUTTONS */
+.btn{padding:9px 16px;font-size:12px;font-family:var(--fm);border:0.5px solid var(--border2);border-radius:8px;background:transparent;color:var(--text);cursor:pointer;transition:all 0.15s;flex-shrink:0;}
+.btn:hover{background:var(--bg3);}
+.btn-y{background:var(--y);color:#0a0a09;border-color:var(--y);font-weight:500;}
+.btn-b{background:rgba(48,168,240,0.1);color:var(--b);border-color:rgba(48,168,240,0.3);}
+.btn-r{color:var(--r);border-color:rgba(240,64,48,0.3);}
+.btn-sm{padding:5px 11px;font-size:11px;}
+
+/* EDIT FORM */
+.edit-form{background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;padding:12px;margin-top:10px;display:none;}
+.edit-form.open{display:block;}
+.ef-row{display:flex;gap:8px;margin-bottom:7px;flex-wrap:wrap;}
+.ef-row>*{flex:1;min-width:100px;}
+.ef-btns{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
+
+/* CONN BADGE */
+.conn-badge{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-family:var(--fm);padding:3px 8px;border-radius:99px;background:rgba(48,168,240,0.1);color:var(--b);border:0.5px solid rgba(48,168,240,0.25);}
+.conn-dot{width:5px;height:5px;border-radius:50%;background:var(--b);animation:pulse 2s ease infinite;}
+
+/* DATA */
+.data-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:14px;margin-bottom:10px;}
+.fb{font-size:11px;margin-top:8px;display:none;font-family:var(--fm);}
+
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:2.5rem 1rem;line-height:1.7;}
+.section-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:14px 0 8px;font-family:var(--fm);}
+.fab-area{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:600px;padding:12px 16px 24px;background:linear-gradient(to top,var(--bg) 60%,transparent);pointer-events:none;}
+.fab{pointer-events:all;width:100%;padding:13px;font-family:var(--fh);font-size:14px;background:var(--y);color:#0a0a09;border:none;border-radius:12px;cursor:pointer;letter-spacing:0.3px;}
+.fab:active{transform:scale(0.97);}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- NAV -->
+  <div class="wnav">
+    <a class="wnav-back" href="index.html"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
+    <div class="wnav-sep"></div>
+    <div class="wnav-title" id="wnav-title">MASCOTAS</div>
+  </div>
+
+  <!-- PET SELECTOR -->
+  <div class="pet-bar" id="pet-bar"></div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('perfil',this)">Perfil</button>
+    <button class="tab" onclick="showTab('medicacion',this)">Medicación</button>
+    <button class="tab" onclick="showTab('veterinario',this)">Veterinario</button>
+    <button class="tab" onclick="showTab('peso',this)">Peso</button>
+    <button class="tab" onclick="showTab('datos',this)">Datos</button>
+  </div>
+
+  <div class="content">
+
+    <!-- PERFIL -->
+    <div id="perfil" class="section active">
+      <div class="add-panel" id="add-pet-panel">
+        <div class="ap-title">Nueva mascota</div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Nombre</div><input type="text" id="fp-nombre" placeholder="Nombre de tu mascota"></div>
+          <div class="field"><div class="field-label">Emoji / icono</div><input type="text" id="fp-emoji" placeholder="🐶" maxlength="2" style="text-align:center;font-size:20px;"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Especie</div>
+            <select id="fp-especie">
+              <option value="perro">🐶 Perro</option>
+              <option value="gato">🐱 Gato</option>
+              <option value="conejo">🐰 Conejo</option>
+              <option value="pajaro">🐦 Pájaro</option>
+              <option value="otro">🐾 Otro</option>
+            </select>
+          </div>
+          <div class="field"><div class="field-label">Raza</div><input type="text" id="fp-raza" placeholder="ej: Golden Retriever"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Fecha de nacimiento</div><input type="date" id="fp-nacimiento"></div>
+          <div class="field"><div class="field-label">Peso actual (kg)</div><input type="number" id="fp-peso" placeholder="5.2" step="0.1" min="0"></div>
+        </div>
+        <div class="field"><div class="field-label">Microchip / nº identificación (opcional)</div><input type="text" id="fp-chip" placeholder="985..."></div>
+        <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;">
+          <button class="btn btn-y" style="flex:1" onclick="addPet()">Añadir mascota</button>
+          <button class="btn" onclick="closeAddPet()">Cancelar</button>
+        </div>
+      </div>
+      <div id="perfil-body"></div>
+    </div>
+
+    <!-- MEDICACIÓN -->
+    <div id="medicacion" class="section">
+      <div class="add-panel" id="add-med-panel">
+        <div class="ap-title">Nueva medicación</div>
+        <div class="field"><div class="field-label">Nombre del medicamento</div><input type="text" id="fm-nombre" placeholder="ej: Bravecto, Frontline, Simparica…"></div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Dosis</div><input type="text" id="fm-dosis" placeholder="ej: 1 pastilla, 0.5ml"></div>
+          <div class="field"><div class="field-label">Frecuencia</div>
+            <select id="fm-freq">
+              <option value="diario">Diario</option>
+              <option value="semanal">Semanal</option>
+              <option value="mensual">Mensual</option>
+              <option value="trimestral">Trimestral</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Próxima dosis</div><input type="date" id="fm-proxima"></div>
+          <div class="field"><div class="field-label">Stock (unidades)</div><input type="number" id="fm-stock" placeholder="0" min="0" step="1"></div>
+        </div>
+        <div class="field"><div class="field-label">Notas (veterinario, indicaciones…)</div><input type="text" id="fm-notas" placeholder="Observaciones…"></div>
+        <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;">
+          <button class="btn btn-y" style="flex:1" onclick="addMed()">Añadir medicación</button>
+          <button class="btn" onclick="document.getElementById('add-med-panel').classList.remove('open')">Cancelar</button>
+        </div>
+      </div>
+      <div id="medicacion-body"></div>
+    </div>
+
+    <!-- VETERINARIO -->
+    <div id="veterinario" class="section">
+      <div class="add-panel" id="add-visit-panel">
+        <div class="ap-title">Nueva visita al vet</div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Fecha</div><input type="date" id="fv-fecha"></div>
+          <div class="field"><div class="field-label">Veterinario / clínica</div><input type="text" id="fv-vet" placeholder="Clínica veterinaria…"></div>
+        </div>
+        <div class="field"><div class="field-label">Motivo</div><input type="text" id="fv-motivo" placeholder="ej: Revisión anual, vacuna, desparasitación…"></div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Coste €</div><input type="number" id="fv-coste" placeholder="0.00" step="0.01" min="0"></div>
+          <div class="field"><div class="field-label">Próxima visita (opcional)</div><input type="date" id="fv-proxima"></div>
+        </div>
+        <div class="field"><div class="field-label">Notas / diagnóstico</div><textarea id="fv-notas" placeholder="Observaciones del veterinario…"></textarea></div>
+        <div id="visit-add-expense-row" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;font-family:var(--fm);color:var(--muted);">
+          <input type="checkbox" id="fv-add-gasto" style="width:16px;height:16px;cursor:pointer;accent-color:var(--y);">
+          <label for="fv-add-gasto" style="cursor:pointer;color:var(--text);">Añadir coste a Gastos Diarios automáticamente</label>
+        </div>
+        <div id="visit-add-cal-row" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:12px;font-family:var(--fm);">
+          <input type="checkbox" id="fv-add-cal" style="width:16px;height:16px;cursor:pointer;accent-color:var(--y);">
+          <label for="fv-add-cal" style="cursor:pointer;color:var(--text);">Añadir próxima visita al Calendario</label>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-y" style="flex:1" onclick="addVisit()">Guardar visita</button>
+          <button class="btn" onclick="document.getElementById('add-visit-panel').classList.remove('open')">Cancelar</button>
+        </div>
+      </div>
+      <div id="veterinario-body"></div>
+    </div>
+
+    <!-- PESO -->
+    <div id="peso" class="section">
+      <div class="add-panel open" id="add-peso-panel" style="margin-bottom:14px;">
+        <div class="ap-title">Registrar peso</div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Peso (kg)</div><input type="number" id="fw-peso" placeholder="5.2" step="0.1" min="0"></div>
+          <div class="field"><div class="field-label">Fecha</div><input type="date" id="fw-fecha"></div>
+        </div>
+        <div class="field"><div class="field-label">Notas (opcional)</div><input type="text" id="fw-notas" placeholder="ej: Después de vacaciones"></div>
+        <button class="btn btn-y btn-sm" onclick="addWeight()" style="margin-top:4px;">Guardar</button>
+      </div>
+      <div id="peso-body"></div>
+    </div>
+
+    <!-- DATOS -->
+    <div id="datos" class="section">
+      <div class="data-card">
+        <div style="font-family:var(--fh);font-size:16px;margin-bottom:6px;">Conexiones activas</div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-family:var(--fm);color:var(--muted);margin-bottom:12px;line-height:1.7;">
+          <span><span class="conn-badge"><span class="conn-dot"></span>gastos_v1</span> Gastos Diarios — visitas al vet</span>
+          <span><span class="conn-badge"><span class="conn-dot"></span>compra_v2</span> Lista Compra — medicamentos con poco stock</span>
+          <span><span class="conn-badge"><span class="conn-dot"></span>semana_v2</span> Calendario — próximas visitas y medicaciones</span>
+        </div>
+        <div style="font-family:var(--fh);font-size:16px;margin-bottom:6px;">Exportar / Importar</div>
+        <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-bottom:10px;" id="datos-info"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-y btn-sm" style="flex:1" onclick="exportJSON()">↓ Exportar JSON</button>
+          <button class="btn btn-sm" style="flex:1" onclick="document.getElementById('fi').click()">↑ Importar JSON</button>
+          <input type="file" id="fi" accept=".json" style="display:none" onchange="importFile(event)">
+        </div>
+        <div id="datos-fb" class="fb"></div>
+      </div>
+      <div class="data-card">
+        <div style="font-family:var(--fh);font-size:16px;margin-bottom:8px;">Zona de peligro</div>
+        <div id="danger-zone"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="fab-area" id="fab-area">
+    <button class="fab" id="fab-btn" onclick="fabAction()">+ Añadir medicación</button>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+let state = loadState();
+let nid = state.nextId || 1;
+let activePetId = null;
+let currentTab = 'perfil';
+let editPetId = null;
+let editMedId = null;
+
+function loadState() {
+  try { const r = localStorage.getItem('mascotas_v1'); if (r) return JSON.parse(r); } catch(e) {}
+  return { pets: [], nextId: 1 };
+}
+function save() {
+  state.nextId = nid;
+  try { localStorage.setItem('mascotas_v1', JSON.stringify(state)); } catch(e) {}
+}
+function nxtId() { return ++nid; }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt(n,d=2) { return Number(n||0).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d}); }
+function today() { const d=new Date(); return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`; }
+function p2(n) { return String(n).padStart(2,'0'); }
+function daysUntil(dateStr) { if(!dateStr) return null; return Math.ceil((new Date(dateStr)-new Date())/(1000*60*60*24)); }
+function daysSince(dateStr) { if(!dateStr) return null; return Math.floor((new Date()-new Date(dateStr))/(1000*60*60*24)); }
+
+function calcAge(birthDate) {
+  if (!birthDate) return null;
+  const birth = new Date(birthDate);
+  const now = new Date();
+  let years = now.getFullYear() - birth.getFullYear();
+  let months = now.getMonth() - birth.getMonth();
+  if (months < 0) { years--; months += 12; }
+  if (years === 0) return `${months} mes${months !== 1 ? 'es' : ''}`;
+  if (years < 2) return `${years} año${years !== 1 ? 's' : ''} y ${months} mes${months !== 1 ? 'es' : ''}`;
+  return `${years} año${years !== 1 ? 's' : ''}`;
+}
+
+function activePet() { return state.pets.find(p => p.id === activePetId); }
+
+// ── INIT ──
+if (state.pets.length) activePetId = state.pets[0].id;
+document.getElementById('fw-fecha').value = today();
+document.getElementById('fv-fecha').value = today();
+document.getElementById('fv-add-gasto').checked = true;
+document.getElementById('fv-add-cal').checked = true;
+
+// ── TABS ──
+function showTab(name, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  el.classList.add('active');
+  currentTab = name;
+  const fab = document.getElementById('fab-area');
+  const fabBtn = document.getElementById('fab-btn');
+  const fabLabels = { perfil: null, medicacion: '+ Añadir medicación', veterinario: '+ Registrar visita', peso: null, datos: null };
+  if (fabLabels[name]) { fabBtn.textContent = fabLabels[name]; fab.style.display = 'block'; }
+  else fab.style.display = 'none';
+  render();
+}
+
+function fabAction() {
+  if (currentTab === 'medicacion') document.getElementById('add-med-panel').classList.toggle('open');
+  if (currentTab === 'veterinario') document.getElementById('add-visit-panel').classList.toggle('open');
+}
+
+// ── PET BAR ──
+function renderPetBar() {
+  const bar = document.getElementById('pet-bar');
+  bar.innerHTML = state.pets.map(p =>
+    `<button class="pet-chip ${p.id === activePetId ? 'active' : ''}" onclick="selectPet(${p.id})">
+      <span class="pet-chip-emoji">${p.emoji || '🐾'}</span>${esc(p.nombre)}
+    </button>`
+  ).join('') + `<button class="pet-add-btn" onclick="toggleAddPet()">+</button>`;
+  // Update nav title
+  const pet = activePet();
+  document.getElementById('wnav-title').textContent = pet ? pet.nombre.toUpperCase() : 'MASCOTAS';
+}
+
+function selectPet(id) { activePetId = id; render(); }
+function toggleAddPet() { document.getElementById('add-pet-panel').classList.toggle('open'); }
+function closeAddPet() { document.getElementById('add-pet-panel').classList.remove('open'); }
+
+// ── ADD PET ──
+function addPet() {
+  const nombre = document.getElementById('fp-nombre').value.trim();
+  if (!nombre) return;
+  const peso = parseFloat(document.getElementById('fp-peso').value) || null;
+  const pet = {
+    id: nxtId(), nombre,
+    emoji: document.getElementById('fp-emoji').value.trim() || '🐾',
+    especie: document.getElementById('fp-especie').value,
+    raza: document.getElementById('fp-raza').value.trim(),
+    nacimiento: document.getElementById('fp-nacimiento').value,
+    chip: document.getElementById('fp-chip').value.trim(),
+    meds: [], visits: [],
+    weights: peso ? [{ id: nxtId(), peso, fecha: today(), notas: 'Registro inicial' }] : [],
+    nextMedId: 1
+  };
+  state.pets.push(pet);
+  activePetId = pet.id;
+  ['fp-nombre','fp-emoji','fp-raza','fp-nacimiento','fp-chip','fp-peso'].forEach(id => document.getElementById(id).value = '');
+  closeAddPet(); save(); render();
+}
+
+function delPet(id) {
+  if (!confirm(`¿Eliminar esta mascota y todos sus datos?`)) return;
+  state.pets = state.pets.filter(p => p.id !== id);
+  activePetId = state.pets[0]?.id || null;
+  save(); render();
+}
+
+// ── RENDER ──
+function render() {
+  renderPetBar();
+  if (currentTab === 'perfil') renderPerfil();
+  if (currentTab === 'medicacion') renderMedicacion();
+  if (currentTab === 'veterinario') renderVeterinario();
+  if (currentTab === 'peso') renderPeso();
+  if (currentTab === 'datos') renderDatos();
+}
+
+// ── PERFIL ──
+function renderPerfil() {
+  const pet = activePet();
+  if (!state.pets.length) {
+    document.getElementById('perfil-body').innerHTML = '<div class="empty">No tienes mascotas registradas.<br>Pulsa el <strong>+</strong> de arriba para añadir la primera.</div>';
+    return;
+  }
+  if (!pet) return;
+
+  const age = calcAge(pet.nacimiento);
+  const lastWeight = pet.weights?.slice().sort((a,b) => b.fecha?.localeCompare(a.fecha))[0];
+  const upcomingMeds = (pet.meds || []).filter(m => { const d = daysUntil(m.proxima); return d !== null && d <= 7 && d >= 0; });
+  const upcomingVisits = (pet.visits || []).filter(v => { const d = daysUntil(v.fecha); return d !== null && d >= 0 && d <= 30; });
+  const lowStock = (pet.meds || []).filter(m => m.stock !== null && m.stock !== undefined && m.stock <= 2);
+
+  let html = '';
+
+  // Alerts
+  if (upcomingMeds.length) {
+    upcomingMeds.forEach(m => {
+      const d = daysUntil(m.proxima);
+      html += `<div class="alert-card warn"><div class="alert-dot"></div><div class="alert-text">💊 <strong>${esc(m.nombre)}</strong> — ${d === 0 ? 'toca hoy' : `en ${d} día${d !== 1 ? 's' : ''}`} (${m.proxima})</div></div>`;
+    });
+  }
+  if (lowStock.length) {
+    lowStock.forEach(m => {
+      html += `<div class="alert-card"><div class="alert-dot"></div><div class="alert-text">⚠ Stock bajo: <strong>${esc(m.nombre)}</strong> — quedan ${m.stock} unidades. <button class="btn btn-b btn-sm" style="margin-left:8px;" onclick="addMedToShoppingList(${activePetId},${m.id})">+ Añadir a la compra</button></div></div>`;
+    });
+  }
+  if (upcomingVisits.length) {
+    upcomingVisits.forEach(v => {
+      const d = daysUntil(v.fecha);
+      html += `<div class="alert-card warn"><div class="alert-dot"></div><div class="alert-text">🏥 Visita al vet en ${d === 0 ? 'hoy' : `${d} día${d !== 1 ? 's' : ''}`}: ${esc(v.motivo||'revisión')} (${v.fecha})</div></div>`;
+    });
+  }
+
+  html += `<div class="pet-profile">
+    <button class="pet-edit-btn" onclick="toggleEditPet(${pet.id})">✎ editar</button>
+    <div class="pet-profile-top">
+      <div class="pet-avatar">${pet.emoji || '🐾'}</div>
+      <div class="pet-info">
+        <div class="pet-name-display">${esc(pet.nombre)}</div>
+        <div class="pet-breed">${esc(pet.raza || pet.especie || '')}</div>
+        ${age ? `<div class="pet-age-badge">🎂 ${age}</div>` : ''}
+      </div>
+    </div>
+    <div class="pet-stats">
+      <div class="pet-stat"><div class="pet-stat-label">Peso</div><div class="pet-stat-val">${lastWeight ? lastWeight.peso + ' kg' : '—'}</div></div>
+      <div class="pet-stat"><div class="pet-stat-label">Medicaciones</div><div class="pet-stat-val">${(pet.meds||[]).length}</div></div>
+      <div class="pet-stat"><div class="pet-stat-label">Visitas vet</div><div class="pet-stat-val">${(pet.visits||[]).length}</div></div>
+    </div>
+    ${pet.chip ? `<div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:10px;">🔖 Microchip: ${esc(pet.chip)}</div>` : ''}
+    ${pet.nacimiento ? `<div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:4px;">🎂 Nacimiento: ${pet.nacimiento}</div>` : ''}
+  </div>
+
+  <!-- Edit pet form -->
+  <div class="edit-form ${editPetId === pet.id ? 'open' : ''}" id="epf-${pet.id}">
+    <div class="ef-row">
+      <div><div class="field-label">Nombre</div><input type="text" id="ep-n-${pet.id}" value="${esc(pet.nombre)}"></div>
+      <div><div class="field-label">Emoji</div><input type="text" id="ep-e-${pet.id}" value="${esc(pet.emoji||'🐾')}" style="text-align:center;font-size:18px;" maxlength="2"></div>
+    </div>
+    <div class="ef-row">
+      <div><div class="field-label">Raza</div><input type="text" id="ep-r-${pet.id}" value="${esc(pet.raza||'')}"></div>
+      <div><div class="field-label">Nacimiento</div><input type="date" id="ep-b-${pet.id}" value="${pet.nacimiento||''}"></div>
+    </div>
+    <div class="ef-row">
+      <div><div class="field-label">Microchip</div><input type="text" id="ep-c-${pet.id}" value="${esc(pet.chip||'')}"></div>
+    </div>
+    <div class="ef-btns">
+      <button class="btn btn-y btn-sm" style="flex:1" onclick="savePetEdit(${pet.id})">Guardar</button>
+      <button class="btn btn-sm" onclick="editPetId=null;renderPerfil()">Cancelar</button>
+      <button class="btn btn-sm btn-r" onclick="delPet(${pet.id})">Eliminar mascota</button>
+    </div>
+  </div>`;
+
+  document.getElementById('perfil-body').innerHTML = html;
+}
+
+function toggleEditPet(id) { editPetId = (editPetId === id ? null : id); renderPerfil(); }
+function savePetEdit(id) {
+  const p = state.pets.find(x => x.id === id); if (!p) return;
+  p.nombre = document.getElementById('ep-n-'+id).value.trim();
+  p.emoji = document.getElementById('ep-e-'+id).value.trim() || '🐾';
+  p.raza = document.getElementById('ep-r-'+id).value.trim();
+  p.nacimiento = document.getElementById('ep-b-'+id).value;
+  p.chip = document.getElementById('ep-c-'+id).value.trim();
+  editPetId = null; save(); render();
+}
+
+// ── MEDICACIÓN ──
+function addMed() {
+  const pet = activePet(); if (!pet) return;
+  const nombre = document.getElementById('fm-nombre').value.trim(); if (!nombre) return;
+  if (!pet.meds) pet.meds = [];
+  pet.meds.push({
+    id: nxtId(), nombre,
+    dosis: document.getElementById('fm-dosis').value.trim(),
+    freq: document.getElementById('fm-freq').value,
+    proxima: document.getElementById('fm-proxima').value,
+    stock: parseInt(document.getElementById('fm-stock').value) || 0,
+    notas: document.getElementById('fm-notas').value.trim()
+  });
+  ['fm-nombre','fm-dosis','fm-proxima','fm-notas'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fm-stock').value = '0';
+  document.getElementById('add-med-panel').classList.remove('open');
+
+  // Add to calendar if has proxima date
+  const proxima = pet.meds[pet.meds.length-1].proxima;
+  if (proxima) addToCalendar(`💊 ${nombre} (${pet.nombre})`, proxima, proxima, 'musica', '#c060f0', `Medicación: ${document.getElementById('fm-dosis')?.value||''}`);
+
+  save(); render();
+}
+
+function delMed(id) {
+  const pet = activePet(); if (!pet) return;
+  if (!confirm('¿Eliminar esta medicación?')) return;
+  pet.meds = (pet.meds||[]).filter(m => m.id !== id);
+  save(); render();
+}
+
+function administerMed(petId, medId) {
+  const pet = state.pets.find(p => p.id === petId); if (!pet) return;
+  const med = (pet.meds||[]).find(m => m.id === medId); if (!med) return;
+  if (med.stock > 0) med.stock--;
+  // Advance proxima date based on freq
+  if (med.proxima) {
+    const d = new Date(med.proxima);
+    const advances = { diario: 1, semanal: 7, mensual: 30, trimestral: 90 };
+    d.setDate(d.getDate() + (advances[med.freq] || 0));
+    med.proxima = `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;
+  }
+  if (med.stock <= 2) addMedToShoppingList(petId, medId);
+  save(); render();
+}
+
+function addMedToShoppingList(petId, medId) {
+  const pet = state.pets.find(p => p.id === petId); if (!pet) return;
+  const med = (pet.meds||[]).find(m => m.id === medId); if (!med) return;
+  try {
+    const raw = localStorage.getItem('compra_v2');
+    const compra = raw ? JSON.parse(raw) : { lists: [], items: [], cats: [], stores: [], nextId: 1 };
+    const listId = compra.lists[0]?.id || 1;
+    const exists = compra.items.some(i => i.text === med.nombre && !i.done);
+    if (!exists) {
+      compra.items.push({ id: (compra.nextId||1)+1, listId, text: med.nombre, cat: 'higiene', qty: '1', done: false, store: '', notes: `Mascota: ${pet.nombre}` });
+      compra.nextId = (compra.nextId||1)+2;
+      localStorage.setItem('compra_v2', JSON.stringify(compra));
+      showToast(`"${med.nombre}" añadido a la lista de la compra ✓`);
+    } else {
+      showToast(`"${med.nombre}" ya está en la lista de la compra`);
+    }
+  } catch(e) { showToast('No se pudo conectar con Lista de la Compra', true); }
+}
+
+function renderMedicacion() {
+  const pet = activePet();
+  if (!pet) { document.getElementById('medicacion-body').innerHTML = '<div class="empty">Selecciona una mascota primero.</div>'; return; }
+  const meds = pet.meds || [];
+  if (!meds.length) { document.getElementById('medicacion-body').innerHTML = '<div class="empty">Sin medicaciones registradas.<br>Pulsa + para añadir.</div>'; return; }
+
+  const sorted = [...meds].sort((a,b) => {
+    const da = daysUntil(a.proxima); const db = daysUntil(b.proxima);
+    if (da === null) return 1; if (db === null) return -1; return da - db;
+  });
+
+  let html = '';
+  sorted.forEach(m => {
+    const d = daysUntil(m.proxima);
+    const urgent = d !== null && d <= 3;
+    const freqClass = { diario:'med-freq-diario', semanal:'med-freq-semanal', mensual:'med-freq-mensual', trimestral:'med-freq-mensual', otro:'med-freq-otro' }[m.freq] || 'med-freq-otro';
+    const isEd = editMedId === m.id;
+    html += `<div class="med-card" style="${urgent?'border-color:rgba(240,144,48,0.4)':''}">
+      <div class="med-top">
+        <div class="med-icon">💊</div>
+        <div class="med-body">
+          <div class="med-name">${esc(m.nombre)}</div>
+          <div class="med-meta">
+            ${m.dosis ? `<span class="med-dose">${esc(m.dosis)}</span>` : ''}
+            <span class="med-freq ${freqClass}">${m.freq}</span>
+            ${m.stock !== undefined ? `<span class="med-stock ${m.stock <= 2 ? 'low' : 'ok'}">${m.stock <= 2 ? '⚠' : '✓'} ${m.stock} uds.</span>` : ''}
+          </div>
+          ${m.proxima ? `<div style="font-size:11px;color:${urgent?'var(--o)':'var(--muted)'};font-family:var(--fm);margin-top:4px;">
+            Próxima dosis: ${m.proxima} ${d !== null ? `(${d === 0 ? 'hoy' : d > 0 ? 'en '+d+'d' : 'hace '+Math.abs(d)+'d'})` : ''}
+          </div>` : ''}
+          ${m.notas ? `<div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:3px;">${esc(m.notas)}</div>` : ''}
+        </div>
+        <div class="med-actions">
+          <button class="icon-btn buy" title="Añadir a la compra" onclick="addMedToShoppingList(${pet.id},${m.id})">🛒</button>
+          <button class="icon-btn" title="Administrar dosis" onclick="administerMed(${pet.id},${m.id})" style="color:var(--g)">✓</button>
+          <button class="icon-btn" title="Editar" onclick="startEditMed(${m.id})">✎</button>
+          <button class="icon-btn del" title="Eliminar" onclick="delMed(${m.id})">×</button>
+        </div>
+      </div>
+      <div class="edit-form ${isEd?'open':''}" id="em-${m.id}">
+        <div class="ef-row">
+          <div><div class="field-label">Nombre</div><input type="text" id="em-n-${m.id}" value="${esc(m.nombre)}"></div>
+          <div><div class="field-label">Dosis</div><input type="text" id="em-d-${m.id}" value="${esc(m.dosis||'')}"></div>
+        </div>
+        <div class="ef-row">
+          <div><div class="field-label">Frecuencia</div><select id="em-f-${m.id}">
+            ${['diario','semanal','mensual','trimestral','otro'].map(v=>`<option value="${v}"${v===m.freq?' selected':''}>${v}</option>`).join('')}
+          </select></div>
+          <div><div class="field-label">Próxima dosis</div><input type="date" id="em-p-${m.id}" value="${m.proxima||''}"></div>
+        </div>
+        <div class="ef-row">
+          <div><div class="field-label">Stock (uds.)</div><input type="number" id="em-s-${m.id}" value="${m.stock||0}" min="0"></div>
+          <div><div class="field-label">Notas</div><input type="text" id="em-no-${m.id}" value="${esc(m.notas||'')}"></div>
+        </div>
+        <div class="ef-btns">
+          <button class="btn btn-y btn-sm" style="flex:1" onclick="saveMedEdit(${m.id})">Guardar</button>
+          <button class="btn btn-sm" onclick="editMedId=null;renderMedicacion()">Cancelar</button>
+        </div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('medicacion-body').innerHTML = html;
+}
+
+function startEditMed(id) { editMedId = (editMedId === id ? null : id); renderMedicacion(); }
+function saveMedEdit(id) {
+  const pet = activePet(); if (!pet) return;
+  const m = (pet.meds||[]).find(x => x.id === id); if (!m) return;
+  m.nombre = document.getElementById('em-n-'+id).value.trim();
+  m.dosis = document.getElementById('em-d-'+id).value.trim();
+  m.freq = document.getElementById('em-f-'+id).value;
+  m.proxima = document.getElementById('em-p-'+id).value;
+  m.stock = parseInt(document.getElementById('em-s-'+id).value) || 0;
+  m.notas = document.getElementById('em-no-'+id).value.trim();
+  editMedId = null; save(); render();
+}
+
+// ── VETERINARIO ──
+function addVisit() {
+  const pet = activePet(); if (!pet) return;
+  const fecha = document.getElementById('fv-fecha').value; if (!fecha) return;
+  const coste = parseFloat(document.getElementById('fv-coste').value) || 0;
+  const motivo = document.getElementById('fv-motivo').value.trim();
+  const vet = document.getElementById('fv-vet').value.trim();
+  const notas = document.getElementById('fv-notas').value.trim();
+  const proxima = document.getElementById('fv-proxima').value;
+  const addGasto = document.getElementById('fv-add-gasto').checked;
+  const addCal = document.getElementById('fv-add-cal').checked;
+
+  if (!pet.visits) pet.visits = [];
+  pet.visits.push({ id: nxtId(), fecha, motivo, vet, coste, notas, proxima });
+
+  // Add to Gastos Diarios
+  if (addGasto && coste > 0) {
+    try {
+      const raw = localStorage.getItem('gastos_v1');
+      const gastos = raw ? JSON.parse(raw) : { gastos: [], nextId: 1 };
+      gastos.gastos.push({ id: (gastos.nextId||1)+1, importe: coste, concepto: `Veterinario: ${motivo || pet.nombre}`, fecha, cat: 'salud', nota: vet });
+      gastos.nextId = (gastos.nextId||1)+2;
+      localStorage.setItem('gastos_v1', JSON.stringify(gastos));
+      showToast(`${fmt(coste)} € añadidos a Gastos Diarios ✓`);
+    } catch(e) {}
+  }
+
+  // Add to Calendar
+  if (addCal && proxima) {
+    addToCalendar(`🏥 Vet: ${motivo||'revisión'} (${pet.nombre})`, proxima, proxima, 'personal', '#f04030', vet);
+  }
+
+  ['fv-fecha','fv-vet','fv-motivo','fv-coste','fv-proxima','fv-notas'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fv-fecha').value = today();
+  document.getElementById('add-visit-panel').classList.remove('open');
+  save(); render();
+}
+
+function renderVeterinario() {
+  const pet = activePet();
+  if (!pet) { document.getElementById('veterinario-body').innerHTML = '<div class="empty">Selecciona una mascota primero.</div>'; return; }
+  const visits = (pet.visits || []).sort((a,b) => b.fecha.localeCompare(a.fecha));
+  if (!visits.length) { document.getElementById('veterinario-body').innerHTML = '<div class="empty">Sin visitas registradas.<br>Pulsa + para añadir.</div>'; return; }
+
+  const upcoming = visits.filter(v => v.fecha >= today());
+  const past = visits.filter(v => v.fecha < today());
+  let html = '';
+
+  if (upcoming.length) {
+    html += `<div class="section-label">Próximas (${upcoming.length})</div>`;
+    upcoming.forEach(v => html += visitCard(v, true));
+  }
+  if (past.length) {
+    html += `<div class="section-label">Pasadas (${past.length})</div>`;
+    past.forEach(v => html += visitCard(v, false));
+  }
+  document.getElementById('veterinario-body').innerHTML = html;
+}
+
+function visitCard(v, upcoming) {
+  return `<div class="visit-card ${upcoming ? 'visit-upcoming' : ''}">
+    <div class="visit-top">
+      <div class="visit-body">
+        <div class="visit-date">${v.fecha}</div>
+        <div class="visit-motivo">${esc(v.motivo||'Revisión')}</div>
+        <div class="visit-meta">
+          ${v.vet ? `<span>🏥 ${esc(v.vet)}</span>` : ''}
+          ${v.proxima ? `<span>Próxima: ${v.proxima}</span>` : ''}
+          ${v.notas ? `<span>${esc(v.notas)}</span>` : ''}
+        </div>
+      </div>
+      <div style="text-align:right;">
+        ${v.coste ? `<div class="visit-cost">${fmt(v.coste)} €</div>` : ''}
+        <button class="icon-btn del" onclick="delVisit(${v.id})" style="margin-top:4px;">×</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function delVisit(id) {
+  const pet = activePet(); if (!pet) return;
+  if (!confirm('¿Eliminar esta visita?')) return;
+  pet.visits = (pet.visits||[]).filter(v => v.id !== id);
+  save(); render();
+}
+
+// ── PESO ──
+function addWeight() {
+  const pet = activePet(); if (!pet) return;
+  const peso = parseFloat(document.getElementById('fw-peso').value); if (!peso) return;
+  const fecha = document.getElementById('fw-fecha').value || today();
+  if (!pet.weights) pet.weights = [];
+  pet.weights.push({ id: nxtId(), peso, fecha, notas: document.getElementById('fw-notas').value.trim() });
+  document.getElementById('fw-peso').value = '';
+  document.getElementById('fw-notas').value = '';
+  save(); render();
+}
+
+function renderPeso() {
+  const pet = activePet();
+  if (!pet) { document.getElementById('peso-body').innerHTML = '<div class="empty">Selecciona una mascota primero.</div>'; return; }
+  const weights = (pet.weights || []).sort((a,b) => b.fecha.localeCompare(a.fecha));
+  if (!weights.length) { document.getElementById('peso-body').innerHTML = '<div class="empty">Sin registros de peso todavía.</div>'; return; }
+
+  let html = `<div style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:10px;">
+    <div style="font-family:var(--fh);font-size:15px;margin-bottom:10px;">Historial de peso</div>`;
+  weights.forEach((w, i) => {
+    const prev = weights[i+1];
+    let diffHtml = '';
+    if (prev) {
+      const diff = +(w.peso - prev.peso).toFixed(2);
+      if (Math.abs(diff) >= 0.1) {
+        diffHtml = `<span class="weight-diff ${diff > 0 ? 'weight-up' : 'weight-down'}">${diff > 0 ? '+' : ''}${diff} kg</span>`;
+      }
+    }
+    html += `<div class="weight-row">
+      <div>
+        <div class="weight-val">${w.peso} kg ${diffHtml}</div>
+        ${w.notas ? `<div style="font-size:10px;color:var(--muted);font-family:var(--fm)">${esc(w.notas)}</div>` : ''}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="weight-date">${w.fecha}</div>
+        <button class="icon-btn del" onclick="delWeight(${w.id})">×</button>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  document.getElementById('peso-body').innerHTML = html;
+}
+
+function delWeight(id) {
+  const pet = activePet(); if (!pet) return;
+  pet.weights = (pet.weights||[]).filter(w => w.id !== id);
+  save(); render();
+}
+
+// ── DATOS ──
+function renderDatos() {
+  const total = state.pets.length;
+  const meds = state.pets.reduce((s,p) => s+(p.meds||[]).length, 0);
+  const visits = state.pets.reduce((s,p) => s+(p.visits||[]).length, 0);
+  document.getElementById('datos-info').textContent = `${total} mascota${total!==1?'s':''} · ${meds} medicaciones · ${visits} visitas`;
+  document.getElementById('danger-zone').innerHTML = state.pets.map(p =>
+    `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:13px;">
+      <span>${p.emoji||'🐾'} ${esc(p.nombre)}</span>
+      <button class="btn btn-sm btn-r" onclick="delPet(${p.id})">Eliminar</button>
+    </div>`
+  ).join('') || '<div style="font-size:12px;color:var(--muted);font-family:var(--fm);">Sin mascotas registradas.</div>';
+}
+
+function exportJSON() {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));
+  a.download = `mascotas-${today()}.json`; a.click();
+  showFB('Descargado ✓','var(--g)');
+}
+function importFile(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const p = JSON.parse(ev.target.result);
+      if (!p.pets) throw new Error('Formato inválido');
+      if (!confirm(`¿Importar ${p.pets.length} mascotas?`)) return;
+      state = p; nid = state.nextId||1;
+      activePetId = state.pets[0]?.id || null;
+      save(); render(); showFB('Importado ✓','var(--g)');
+    } catch(err) { showFB('Error: '+err.message,'var(--r)'); }
+  }; r.readAsText(f);
+}
+function showFB(msg,color) { const el=document.getElementById('datos-fb');if(!el)return;el.textContent=msg;el.style.color=color;el.style.display='block';setTimeout(()=>el.style.display='none',2500); }
+
+// ── CROSS-APP HELPERS ──
+function addToCalendar(titulo, inicio, fin, tipo, color, notas) {
+  try {
+    const raw = localStorage.getItem('semana_v2');
+    const cal = raw ? JSON.parse(raw) : { tasks:{}, events:[], nextId:100 };
+    if (!cal.events) cal.events = [];
+    cal.events.push({ id: (cal.nextId||100)+1, titulo, inicio, fin: fin||inicio, tipo: tipo||'personal', color: color||'#c060f0', notas: notas||'' });
+    cal.nextId = (cal.nextId||100)+2;
+    localStorage.setItem('semana_v2', JSON.stringify(cal));
+  } catch(e) {}
+}
+
+// ── TOAST ──
+function showToast(msg, isErr=false) {
+  let el = document.getElementById('toast-el');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'toast-el';
+    el.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;padding:10px 16px;font-size:12px;font-family:var(--fm);color:var(--text);z-index:999;max-width:320px;text-align:center;transition:opacity 0.3s;';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.color = isErr ? 'var(--r)' : 'var(--g)';
+  el.style.opacity = '1';
+  setTimeout(() => { el.style.opacity = '0'; }, 2500);
+}
+
+// ── INIT ──
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a09">
+<title>Backup — W//APPS</title>
+<!-- version: 1.0.0 -->
+<script src="wapps-store.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;
+  --y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;--o:#f09030;
+  --fh:'Bebas Neue',sans-serif;--fm:'DM Mono',monospace;--fs:'DM Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fs);}
+.wnav{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:100;}
+.wnav-back{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--muted);text-decoration:none;transition:all 0.15s;flex-shrink:0;}
+.wnav-back:hover{background:rgba(255,255,255,0.06);color:var(--y);}
+.wnav-logo{font-family:var(--fh);font-size:16px;letter-spacing:2px;flex-shrink:0;}
+.wnav-logo a{color:var(--muted);text-decoration:none;}
+.wnav-logo a span{color:var(--y);}
+.wnav-sep{width:1px;height:16px;background:var(--border2);flex-shrink:0;}
+.wnav-title{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);flex:1;}
+.wnav-version{font-size:9px;color:var(--dim);font-family:var(--fm);letter-spacing:0.5px;border:1px solid var(--dim);padding:2px 6px;border-radius:3px;flex-shrink:0;}
+
+.shell{max-width:600px;margin:0 auto;padding:20px 16px 60px;}
+
+/* HERO */
+.hero{background:var(--bg2);border:0.5px solid var(--border2);border-radius:14px;padding:20px;margin-bottom:20px;display:flex;align-items:flex-start;gap:16px;}
+.hero-icon{font-size:40px;flex-shrink:0;}
+.hero-text{}
+.hero-title{font-family:var(--fh);font-size:26px;letter-spacing:0.5px;line-height:1;margin-bottom:6px;}
+.hero-sub{font-size:12px;color:var(--muted);font-family:var(--fm);line-height:1.6;}
+
+/* STATUS GRID */
+.status-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:20px;}
+@media(min-width:400px){.status-grid{grid-template-columns:repeat(3,1fr);}}
+.stat-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px;}
+.stat-label{font-size:9px;color:var(--muted);font-family:var(--fm);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:4px;}
+.stat-val{font-family:var(--fh);font-size:22px;line-height:1;}
+.stat-sub{font-size:10px;color:var(--muted);font-family:var(--fm);margin-top:2px;}
+
+/* SECTION */
+.section-hd{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.section-title{font-family:var(--fh);font-size:18px;letter-spacing:0.3px;}
+.section-sub{font-size:11px;color:var(--muted);font-family:var(--fm);}
+.section-block{background:var(--bg2);border:0.5px solid var(--border2);border-radius:12px;padding:16px;margin-bottom:16px;}
+
+/* APP CHECKLIST */
+.app-check-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border);}
+.app-check-row:last-child{border-bottom:none;}
+.app-check{width:18px;height:18px;flex-shrink:0;accent-color:var(--y);cursor:pointer;}
+.app-check-label{flex:1;font-size:13px;}
+.app-check-size{font-size:10px;color:var(--muted);font-family:var(--fm);flex-shrink:0;}
+.app-check-status{font-size:10px;font-family:var(--fm);flex-shrink:0;}
+.has-data{color:var(--g);}
+.no-data{color:var(--dim);}
+
+/* BACKUP LIST */
+.backup-card{background:var(--bg3);border:0.5px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+.backup-icon{font-size:20px;flex-shrink:0;}
+.backup-body{flex:1;min-width:0;}
+.backup-name{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.backup-meta{font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:2px;}
+.backup-actions{display:flex;gap:6px;flex-shrink:0;}
+
+/* BUTTONS */
+.btn{padding:10px 16px;font-size:12px;font-family:var(--fm);border:0.5px solid var(--border2);border-radius:8px;background:transparent;color:var(--text);cursor:pointer;transition:all 0.15s;flex-shrink:0;}
+.btn:hover{background:var(--bg3);}
+.btn-y{background:var(--y);color:#0a0a09;border-color:var(--y);font-weight:500;}
+.btn-y:hover{opacity:0.9;background:var(--y);}
+.btn-r{color:var(--r);border-color:rgba(240,64,48,0.3);}
+.btn-b{color:var(--b);border-color:rgba(48,168,240,0.3);}
+.btn-g{color:var(--g);border-color:rgba(48,216,128,0.3);}
+.btn-sm{padding:5px 11px;font-size:11px;}
+.btn-full{width:100%;text-align:center;padding:13px;}
+
+/* PROGRESS */
+.progress-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin:10px 0;}
+.progress-fill{height:100%;border-radius:3px;background:var(--y);transition:width 0.4s ease;}
+
+/* DIFF */
+.diff-block{background:var(--bg3);border-radius:8px;padding:12px;margin-top:10px;font-size:11px;font-family:var(--fm);line-height:1.8;max-height:200px;overflow-y:auto;}
+.diff-added{color:var(--g);}
+.diff-removed{color:var(--r);}
+.diff-same{color:var(--muted);}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;padding:10px 18px;font-size:12px;font-family:var(--fm);color:var(--text);z-index:999;max-width:320px;text-align:center;opacity:0;transition:opacity 0.25s;pointer-events:none;}
+.toast.show{opacity:1;}
+
+.divider{height:0.5px;background:var(--border2);margin:16px 0;}
+.label{font-size:9px;color:var(--muted);font-family:var(--fm);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.danger-zone{border-color:rgba(240,64,48,0.25);}
+.danger-zone .section-title{color:var(--r);}
+input[type="file"]{display:none;}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--y);border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div class="wnav">
+  <a class="wnav-back" href="index.html">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </a>
+  <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
+  <div class="wnav-sep"></div>
+  <div class="wnav-title">BACKUP & RESTORE</div>
+  <div class="wnav-version">v1.0.0</div>
+</div>
+
+<div class="shell">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-icon">💾</div>
+    <div class="hero-text">
+      <div class="hero-title">Backup completo</div>
+      <div class="hero-sub">Exporta todos tus datos en un único archivo JSON.<br>Restáuralos en cualquier momento o en otro dispositivo.</div>
+    </div>
+  </div>
+
+  <!-- STATUS -->
+  <div class="status-grid" id="status-grid"></div>
+
+  <!-- BACKUP RÁPIDO -->
+  <div class="section-block">
+    <div class="section-hd">
+      <div>
+        <div class="section-title">Backup completo</div>
+        <div class="section-sub">Un archivo con todos los datos de todas las apps</div>
+      </div>
+    </div>
+    <div id="app-list-full"></div>
+    <div class="divider"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-y btn-full" onclick="exportAll()" id="export-btn">
+        ↓ Descargar backup completo
+      </button>
+    </div>
+    <div style="font-size:10px;color:var(--muted);font-family:var(--fm);margin-top:8px;line-height:1.6;" id="last-backup-info"></div>
+  </div>
+
+  <!-- BACKUP SELECTIVO -->
+  <div class="section-block">
+    <div class="section-hd">
+      <div>
+        <div class="section-title">Backup selectivo</div>
+        <div class="section-sub">Elige qué apps incluir</div>
+      </div>
+    </div>
+    <div id="app-checklist"></div>
+    <div class="divider"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-b" style="flex:1" onclick="selectAll()">Seleccionar todo</button>
+      <button class="btn" style="flex:1" onclick="deselectAll()">Deseleccionar</button>
+      <button class="btn btn-y" style="flex:1" onclick="exportSelected()">↓ Exportar selección</button>
+    </div>
+  </div>
+
+  <!-- HISTORIAL LOCAL -->
+  <div class="section-block">
+    <div class="section-hd">
+      <div>
+        <div class="section-title">Historial de backups</div>
+        <div class="section-sub">Últimos 5 backups guardados localmente en este dispositivo</div>
+      </div>
+    </div>
+    <div id="backup-history"></div>
+  </div>
+
+  <!-- RESTAURAR -->
+  <div class="section-block">
+    <div class="section-hd">
+      <div>
+        <div class="section-title">Restaurar</div>
+        <div class="section-sub">Importa un archivo de backup</div>
+      </div>
+    </div>
+    <div style="background:rgba(240,144,48,0.08);border:0.5px solid rgba(240,144,48,0.25);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;font-family:var(--fm);color:var(--o);line-height:1.6;">
+      ⚠ La restauración reemplazará los datos actuales de las apps seleccionadas. Haz un backup primero si no quieres perder nada.
+    </div>
+    <input type="file" id="restore-file" accept=".json" onchange="onRestoreFile(event)">
+    <button class="btn btn-full" onclick="document.getElementById('restore-file').click()" style="margin-bottom:10px;">
+      ↑ Seleccionar archivo de backup
+    </button>
+    <div id="restore-preview" style="display:none;"></div>
+  </div>
+
+  <!-- DANGER ZONE -->
+  <div class="section-block danger-zone">
+    <div class="section-hd">
+      <div>
+        <div class="section-title">Zona de peligro</div>
+        <div class="section-sub">Acciones irreversibles</div>
+      </div>
+    </div>
+    <div id="danger-app-list"></div>
+    <div class="divider"></div>
+    <button class="btn btn-r btn-full" onclick="confirmWipeAll()">
+      🗑 Borrar TODOS los datos
+    </button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── APP REGISTRY ──
+// Cada app tiene: key en localStorage, nombre, emoji, versión interna
+const APPS = [
+  { id:'gastos',       key:'gastos_v1',       wkey:['gastos','data'],       name:'Gastos Diarios',  emoji:'💸', file:'gastos-diarios.html', version:'1.x' },
+  { id:'suministros',  key:'suministros_v1',   wkey:['suministros','data'],  name:'Suministros',     emoji:'💡', file:'suministros.html',    version:'1.x' },
+  { id:'finanzas',     key:'finanzas_v1',      wkey:['finanzas','data'],     name:'Finanzas',        emoji:'💰', file:'finanzas.html',        version:'2.x' },
+  { id:'despensa',     key:'despensa_v1',      wkey:['despensa','items'],    name:'Despensa',        emoji:'🥫', file:'despensa.html',        version:'1.x' },
+  { id:'compra',       key:'compra_v2',        wkey:['compra','data'],       name:'Lista Compra',    emoji:'🛒', file:'compra.html',          version:'2.x' },
+  { id:'setlist',      key:'setlist_v1',       wkey:['setlist','data'],      name:'Setlist',         emoji:'🎸', file:'setlist.html',         version:'1.x' },
+  { id:'instrumentos', key:'instrumentos_v2',  wkey:['instrumentos','data'], name:'Instrumentos',   emoji:'🎛️', file:'instrumentos.html',    version:'2.x' },
+  { id:'semana',       key:'semana_v2',        wkey:['semana','data'],       name:'Semana',          emoji:'📅', file:'semana.html',          version:'2.x' },
+  { id:'deseados',     key:'deseados_v2',      wkey:['deseados','data'],     name:'Deseados',        emoji:'❤️', file:'deseados.html',        version:'2.x' },
+  { id:'decisor',      key:'decisor_v1',       wkey:['decisor','data'],      name:'Decisor',         emoji:'🎲', file:'decisor.html',         version:'1.x' },
+  { id:'obra',         key:'miobra_v2',        wkey:['obra','data'],         name:'Mi Obra',         emoji:'🏗️', file:'obra.html',            version:'2.x' },
+  { id:'mascotas',     key:'mascotas_v1',      wkey:null,                    name:'Mascotas',        emoji:'🐾', file:'mascotas.html',        version:'1.x' },
+  { id:'notify',       key:'notify.config',    wkey:null,                    name:'Notificaciones',  emoji:'🔔', file:null,                   version:'1.x' },
+];
+
+const BACKUP_HISTORY_KEY = 'wapps.backup.history';
+const LAST_BACKUP_KEY    = 'wapps.backup.lastDate';
+let selectedApps = new Set(APPS.map(a => a.id));
+let pendingRestore = null;
+
+// ── HELPERS ──
+function readApp(app) {
+  // Try WStore first, then direct localStorage
+  if (app.wkey && typeof WStore !== 'undefined') {
+    const v = WStore.get(app.wkey[0], app.wkey[1]);
+    if (v !== null) return v;
+  }
+  try {
+    const raw = localStorage.getItem(app.key);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+
+function writeApp(app, data) {
+  if (app.wkey && typeof WStore !== 'undefined') {
+    WStore.set(app.wkey[0], app.wkey[1], data);
+  } else {
+    try { localStorage.setItem(app.key, JSON.stringify(data)); } catch(e) {}
+  }
+}
+
+function byteSize(obj) {
+  try { return new Blob([JSON.stringify(obj)]).size; } catch(e) { return 0; }
+}
+function fmtSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/1024/1024).toFixed(2) + ' MB';
+}
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('es-ES', {day:'2-digit',month:'short',year:'numeric'}) + ' ' +
+         d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+}
+function today() { return new Date().toISOString().slice(0,10); }
+function nowISO() { return new Date().toISOString(); }
+
+// ── COLLECT DATA ──
+function collectAll(ids) {
+  const snapshot = {
+    _meta: {
+      version: '1.0.0',
+      created: nowISO(),
+      device: navigator.userAgent.slice(0,80),
+      apps: ids
+    }
+  };
+  APPS.filter(a => ids.includes(a.id)).forEach(app => {
+    const data = readApp(app);
+    if (data !== null) snapshot[app.id] = data;
+  });
+  return snapshot;
+}
+
+// ── EXPORT ──
+function exportAll() {
+  exportIds(APPS.map(a => a.id));
+}
+function exportSelected() {
+  const ids = [...selectedApps];
+  if (!ids.length) { showToast('Selecciona al menos una app', true); return; }
+  exportIds(ids);
+}
+function exportIds(ids) {
+  const btn = document.getElementById('export-btn');
+  btn.innerHTML = '<span class="spinner"></span>Preparando…';
+  btn.disabled = true;
+  setTimeout(() => {
+    const snapshot = collectAll(ids);
+    const blob = new Blob([JSON.stringify(snapshot, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `wapps-backup-${today()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    // Save to history
+    saveToHistory(snapshot, ids);
+    try { localStorage.setItem(LAST_BACKUP_KEY, nowISO()); } catch(e) {}
+
+    btn.innerHTML = '↓ Descargar backup completo';
+    btn.disabled = false;
+    showToast('Backup descargado ✓');
+    render();
+  }, 300);
+}
+
+function saveToHistory(snapshot, ids) {
+  try {
+    let history = JSON.parse(localStorage.getItem(BACKUP_HISTORY_KEY)||'[]');
+    history.unshift({
+      date: snapshot._meta.created,
+      apps: ids,
+      size: byteSize(snapshot),
+      meta: snapshot._meta
+    });
+    history = history.slice(0, 5); // keep last 5
+    localStorage.setItem(BACKUP_HISTORY_KEY, JSON.stringify(history));
+  } catch(e) {}
+}
+
+// ── RESTORE ──
+function onRestoreFile(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data._meta) throw new Error('Archivo no es un backup de W//APPS');
+      pendingRestore = data;
+      renderRestorePreview(data);
+    } catch(err) {
+      showToast('Error: ' + err.message, true);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function renderRestorePreview(data) {
+  const meta = data._meta;
+  const appsInBackup = APPS.filter(a => data[a.id] !== undefined);
+  const totalSize = byteSize(data);
+
+  let html = `
+    <div style="background:var(--bg3);border:0.5px solid var(--border2);border-radius:10px;padding:14px;margin-bottom:10px;">
+      <div style="font-family:var(--fh);font-size:16px;margin-bottom:8px;">Backup detectado</div>
+      <div style="font-size:11px;font-family:var(--fm);color:var(--muted);line-height:1.8;">
+        📅 Creado: <span style="color:var(--text)">${fmtDate(meta.created)}</span><br>
+        📦 Tamaño: <span style="color:var(--text)">${fmtSize(totalSize)}</span><br>
+        🔖 Versión backup: <span style="color:var(--text)">${meta.version}</span>
+      </div>
+      <div style="margin-top:10px;">
+        <div class="label">Apps incluidas (${appsInBackup.length})</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+          ${appsInBackup.map(a => `<span style="font-size:10px;padding:3px 9px;border-radius:99px;background:rgba(48,168,240,0.1);color:var(--b);border:0.5px solid rgba(48,168,240,0.25);font-family:var(--fm);">${a.emoji} ${a.name}</span>`).join('')}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-y" style="flex:1" onclick="doRestore(true)">↺ Restaurar todo</button>
+        <button class="btn btn-b" style="flex:1" onclick="showSelectiveRestore()">↺ Restaurar selección</button>
+        <button class="btn" onclick="cancelRestore()">Cancelar</button>
+      </div>
+      <div id="selective-restore" style="display:none;margin-top:12px;">
+        <div class="label">Selecciona qué restaurar</div>
+        ${appsInBackup.map(a => `
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);">
+            <input type="checkbox" id="rcheck-${a.id}" checked style="width:16px;height:16px;accent-color:var(--y);cursor:pointer;">
+            <label for="rcheck-${a.id}" style="flex:1;font-size:13px;cursor:pointer;">${a.emoji} ${a.name}</label>
+          </div>`).join('')}
+        <button class="btn btn-y btn-full" style="margin-top:10px;" onclick="doRestore(false)">↺ Restaurar selección</button>
+      </div>
+    </div>`;
+
+  const el = document.getElementById('restore-preview');
+  el.innerHTML = html;
+  el.style.display = 'block';
+}
+
+function showSelectiveRestore() {
+  document.getElementById('selective-restore').style.display = 'block';
+}
+
+function cancelRestore() {
+  pendingRestore = null;
+  document.getElementById('restore-preview').style.display = 'none';
+}
+
+function doRestore(all) {
+  if (!pendingRestore) return;
+  const data = pendingRestore;
+  const appsInBackup = APPS.filter(a => data[a.id] !== undefined);
+
+  let toRestore;
+  if (all) {
+    toRestore = appsInBackup;
+  } else {
+    toRestore = appsInBackup.filter(a => {
+      const el = document.getElementById('rcheck-'+a.id);
+      return el ? el.checked : false;
+    });
+  }
+
+  if (!toRestore.length) { showToast('Nada seleccionado', true); return; }
+
+  const appNames = toRestore.map(a => a.name).join(', ');
+  if (!confirm(`¿Restaurar ${toRestore.length} app${toRestore.length!==1?'s':''}?\n\n${appNames}\n\nEsto reemplazará los datos actuales.`)) return;
+
+  let ok = 0;
+  toRestore.forEach(app => {
+    try {
+      writeApp(app, data[app.id]);
+      ok++;
+    } catch(e) {
+      console.warn('Error restoring', app.id, e);
+    }
+  });
+
+  pendingRestore = null;
+  document.getElementById('restore-preview').style.display = 'none';
+  showToast(`${ok} app${ok!==1?'s':''} restauradas ✓`);
+  render();
+}
+
+// ── WIPE ──
+function confirmWipeAll() {
+  if (!confirm('⚠ ESTO BORRARÁ TODOS LOS DATOS DE TODAS LAS APPS.\n\n¿Seguro que quieres continuar?')) return;
+  if (!confirm('Última confirmación: ¿borrar TODO?')) return;
+  APPS.forEach(app => {
+    try { localStorage.removeItem(app.key); } catch(e) {}
+    if (app.wkey) {
+      try { localStorage.removeItem(`wapps.${app.wkey[0]}.${app.wkey[1]}`); } catch(e) {}
+    }
+  });
+  showToast('Todos los datos eliminados');
+  render();
+}
+
+function wipeSingleApp(appId) {
+  const app = APPS.find(a => a.id === appId); if (!app) return;
+  if (!confirm(`¿Borrar todos los datos de "${app.name}"?`)) return;
+  try { localStorage.removeItem(app.key); } catch(e) {}
+  if (app.wkey) {
+    try { localStorage.removeItem(`wapps.${app.wkey[0]}.${app.wkey[1]}`); } catch(e) {}
+  }
+  showToast(`Datos de ${app.name} eliminados`);
+  render();
+}
+
+// ── SELECT ALL / NONE ──
+function selectAll() {
+  selectedApps = new Set(APPS.map(a => a.id));
+  renderChecklist();
+}
+function deselectAll() {
+  selectedApps.clear();
+  renderChecklist();
+}
+function toggleApp(id) {
+  if (selectedApps.has(id)) selectedApps.delete(id);
+  else selectedApps.add(id);
+}
+
+// ── RENDER ──
+function render() {
+  renderStatusGrid();
+  renderAppListFull();
+  renderChecklist();
+  renderHistory();
+  renderDangerZone();
+  renderLastBackupInfo();
+}
+
+function renderStatusGrid() {
+  let totalSize = 0;
+  let appsWithData = 0;
+  APPS.forEach(a => { const d = readApp(a); if (d !== null) { appsWithData++; totalSize += byteSize(d); } });
+  const lastBackup = localStorage.getItem(LAST_BACKUP_KEY);
+
+  document.getElementById('status-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Apps activas</div><div class="stat-val">${appsWithData}</div><div class="stat-sub">de ${APPS.length} total</div></div>
+    <div class="stat-card"><div class="stat-label">Datos totales</div><div class="stat-val" style="font-size:16px;">${fmtSize(totalSize)}</div><div class="stat-sub">en localStorage</div></div>
+    <div class="stat-card"><div class="stat-label">Último backup</div><div class="stat-val" style="font-size:14px;color:${lastBackup?'var(--g)':'var(--r)'};">${lastBackup?'✓':'—'}</div><div class="stat-sub">${lastBackup?fmtDate(lastBackup):'Nunca'}</div></div>`;
+}
+
+function renderAppListFull() {
+  document.getElementById('app-list-full').innerHTML = APPS.map(app => {
+    const data = readApp(app);
+    const size = data !== null ? fmtSize(byteSize(data)) : '—';
+    const hasData = data !== null;
+    return `<div class="app-check-row">
+      <span style="font-size:16px;">${app.emoji}</span>
+      <span class="app-check-label">${app.name} <span style="font-size:9px;color:var(--dim);font-family:var(--fm);">${app.version}</span></span>
+      <span class="app-check-size">${size}</span>
+      <span class="app-check-status ${hasData?'has-data':'no-data'}">${hasData?'✓ datos':'vacío'}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderChecklist() {
+  document.getElementById('app-checklist').innerHTML = APPS.map(app => {
+    const data = readApp(app);
+    const hasData = data !== null;
+    const checked = selectedApps.has(app.id);
+    return `<div class="app-check-row">
+      <input class="app-check" type="checkbox" id="check-${app.id}" ${checked?'checked':''} onchange="toggleApp('${app.id}')">
+      <label for="check-${app.id}" class="app-check-label" style="cursor:pointer;">${app.emoji} ${app.name}</label>
+      <span class="app-check-status ${hasData?'has-data':'no-data'}">${hasData?'✓':'—'}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderHistory() {
+  let history = [];
+  try { history = JSON.parse(localStorage.getItem(BACKUP_HISTORY_KEY)||'[]'); } catch(e) {}
+  const el = document.getElementById('backup-history');
+  if (!history.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--muted);font-family:var(--fm);padding:8px 0;">Sin historial de backups todavía.</div>';
+    return;
+  }
+  el.innerHTML = history.map((b, i) => {
+    const apps = (b.apps||[]).map(id => APPS.find(a=>a.id===id)?.emoji||'').join('');
+    return `<div class="backup-card">
+      <div class="backup-icon">📦</div>
+      <div class="backup-body">
+        <div class="backup-name">Backup ${i===0?'(más reciente)':''}</div>
+        <div class="backup-meta">${fmtDate(b.date)} · ${fmtSize(b.size||0)} · ${(b.apps||[]).length} apps</div>
+        <div style="font-size:11px;margin-top:3px;">${apps}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderDangerZone() {
+  document.getElementById('danger-app-list').innerHTML = APPS.map(app => {
+    const data = readApp(app);
+    const hasData = data !== null;
+    if (!hasData) return '';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid var(--border);font-size:13px;">
+      <span>${app.emoji} ${app.name}</span>
+      <button class="btn btn-sm btn-r" onclick="wipeSingleApp('${app.id}')">Borrar</button>
+    </div>`;
+  }).join('');
+}
+
+function renderLastBackupInfo() {
+  const last = localStorage.getItem(LAST_BACKUP_KEY);
+  const el = document.getElementById('last-backup-info');
+  if (!last) {
+    el.innerHTML = '⚠ No tienes ningún backup reciente. <strong style="color:var(--text)">Recomendamos hacer un backup periódico.</strong>';
+    el.style.color = 'var(--o)';
+  } else {
+    const days = Math.floor((Date.now() - new Date(last)) / 864e5);
+    el.innerHTML = `Último backup: ${fmtDate(last)} ${days > 7 ? '— <strong style="color:var(--o)">Hace '+days+' días, considera hacer uno nuevo</strong>' : '<span style="color:var(--g)">✓ Reciente</span>'}`;
+  }
+}
+
+// ── TOAST ──
+function showToast(msg, isErr=false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.color = isErr ? 'var(--r)' : 'var(--g)';
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ── INIT ──
+render();
+</script>
+</body>
+</html>
