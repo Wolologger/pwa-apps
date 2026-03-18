@@ -373,10 +373,43 @@ function renderComprados(){
     comprados.map(i=>wishCard(i)).join('');
 }
 
+function priceHistHTML(i) {
+  const hist = (i.historialPrecios || []).slice(-5).reverse();
+  if (!hist.length) {
+    return `<div style="display:flex;align-items:center;gap:6px;margin-top:8px;">
+      <input type="number" id="ph-price-${i.id}" placeholder="Precio €" step="0.01" min="0"
+        style="flex:1;background:var(--bg3);border:0.5px solid var(--border2);color:var(--text);font-family:var(--fm);font-size:11px;padding:5px 8px;border-radius:6px;outline:none;"
+        onkeydown="if(event.key==='Enter')addPriceRecord(${i.id},event)">
+      <button class="btn btn-sm" style="flex-shrink:0;font-size:10px;padding:5px 10px;" onclick="addPriceRecord(${i.id},event)">+ Anotar</button>
+    </div>`;
+  }
+  const precios = hist.map(h => h.precio);
+  const min = Math.min(...precios);
+  const max = Math.max(...precios);
+  const tend = precios.length > 1
+    ? (precios[0] > precios[precios.length-1] ? '↑' : precios[0] < precios[precios.length-1] ? '↓' : '→')
+    : '→';
+  const tendColor = tend === '↑' ? 'var(--r)' : tend === '↓' ? 'var(--g)' : 'var(--muted)';
+  return `<div style="margin-top:8px;background:var(--bg3);border-radius:8px;padding:8px 10px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <span style="font-size:9px;letter-spacing:1px;color:var(--muted);font-family:var(--fm);">HISTORIAL PRECIOS</span>
+      <span style="font-size:10px;font-family:var(--fm);color:${tendColor};">${tend} mín ${fmt(min)}€ · máx ${fmt(max)}€</span>
+    </div>
+    ${hist.map(h => `<div style="display:flex;justify-content:space-between;font-size:10px;font-family:var(--fm);color:var(--muted);padding:2px 0;border-bottom:0.5px solid var(--border);">
+      <span>${h.fecha}</span><span style="color:var(--text);">${fmt(h.precio)} €</span>
+    </div>`).join('')}
+    <div style="display:flex;align-items:center;gap:6px;margin-top:8px;">
+      <input type="number" id="ph-price-${i.id}" placeholder="Nuevo precio €" step="0.01" min="0"
+        style="flex:1;background:var(--bg);border:0.5px solid var(--border2);color:var(--text);font-family:var(--fm);font-size:11px;padding:5px 8px;border-radius:6px;outline:none;"
+        onkeydown="if(event.key==='Enter')addPriceRecord(${i.id},event)">
+      <button class="btn btn-sm" style="flex-shrink:0;font-size:10px;padding:5px 10px;" onclick="addPriceRecord(${i.id},event)">+ Anotar</button>
+    </div>
+  </div>`;
+}
+
 function wishCard(i){
   const isEd=editId===i.id;
   const p=PRIOS[i.prio]||PRIOS.media;
-  const _phHTML = priceHistHTML;
   return`<div class="wish-card ${i.comprado?'comprado':''} prio-${i.prio}">
     <div class="wish-top">
       <div class="wish-check ${i.comprado?'done':''}" onclick="toggleComprado(${i.id})"></div>
@@ -389,6 +422,7 @@ function wishCard(i){
           ${i.url?`<a class="link-btn" href="${esc(i.url)}" target="_blank">↗ ver</a>`:''}
         </div>
         ${i.notas?`<div class="wish-notas">${esc(i.notas)}</div>`:''}
+        ${priceHistHTML(i)}
       </div>
       <button class="btn btn-sm" style="opacity:0.3;border:none;padding:2px 6px;font-size:13px;flex-shrink:0;" onclick="startEdit(${i.id})">✎</button>
     </div>
