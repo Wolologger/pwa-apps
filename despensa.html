@@ -304,6 +304,7 @@ function showTab(name,el){
   currentTab=name;
   document.getElementById('fab-area').style.display=name==='despensa'?'block':'none';
   if(name==='config') renderConfig();
+  if(name==='recetas') initRecetasTab();
 }
 
 // ── ADD ──
@@ -529,6 +530,16 @@ function changeStock(id, delta) {
 }
 
 // ── RECETAS (Spoonacular) ──────────────────────────────────────
+function initRecetasTab() {
+  renderIngredientesChips();
+  if (!recetasCache) {
+    const body = document.getElementById('recetas-body');
+    if (body && !body.innerHTML.trim()) {
+      body.innerHTML = '<div class="recetas-empty">Selecciona los ingredientes que quieres usar<br>y pulsa 🔍 Buscar.</div>';
+    }
+  }
+}
+
 const SPOONACULAR_KEY = 'e901cbe291914cd9853080e418b61391';
 let recetasCache = null;
 let selectedIngredientes = new Set();
@@ -687,19 +698,6 @@ function añadirFaltantesACompra(recetaId, recetaTitulo, faltantes) {
       ? `✓ ${añadidos} ingrediente${añadidos > 1 ? 's' : ''} añadido${añadidos > 1 ? 's' : ''} a la compra`
       : '✓ Ya estaban en la lista';
     btn.disabled = true;
-  }
-}
-
-// Inicializar chips al mostrar tab de recetas
-const _origShowTab = showTab;
-function showTab(name, el) {
-  _origShowTab(name, el);
-  if (name === 'recetas') {
-    renderIngredientesChips();
-    if (!recetasCache) {
-      document.getElementById('recetas-body').innerHTML =
-        '<div class="recetas-empty">Selecciona los ingredientes que quieres usar<br>y pulsa 🔍 Buscar.</div>';
-    }
   }
 }
 
