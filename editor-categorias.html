@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0a0a09">
+<title>W // EDITOR CATEGORÍAS</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;
+  --line:rgba(255,255,255,0.06);--line2:rgba(255,255,255,0.12);
+  --text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;
+  --y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;
+  --fh:'Bebas Neue',sans-serif;--fm:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{background:var(--bg);}
+body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm);overflow-x:hidden;}
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:40px 40px;}
+.shell{position:relative;z-index:1;max-width:520px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;padding:0 0 80px;}
+
+/* TOPBAR */
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line2);}
+.logo{font-family:var(--fh);font-size:26px;letter-spacing:2px;color:var(--text);line-height:1;text-decoration:none;}
+.logo-slash{color:var(--y);}
+.back-btn{font-size:10px;color:var(--muted);text-decoration:none;border:0.5px solid var(--dim);padding:5px 10px;letter-spacing:1px;transition:all 0.15s;}
+.back-btn:hover{color:var(--y);border-color:var(--y);}
+
+/* HERO */
+.hero{padding:24px 20px 18px;border-bottom:1px solid var(--line2);}
+.hero-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.hero-title{font-family:var(--fh);font-size:clamp(36px,11vw,52px);line-height:0.95;letter-spacing:1px;margin-bottom:12px;}
+.hero-title em{color:var(--y);font-style:normal;display:block;}
+.hero-desc{font-size:11px;color:var(--muted);line-height:1.6;}
+
+/* INSTRUCCIONES */
+.instructions{padding:12px 20px;border-bottom:1px solid var(--line2);background:var(--bg2);}
+.instr-row{display:flex;align-items:flex-start;gap:10px;font-size:10px;color:var(--muted);line-height:1.5;}
+.instr-step{color:var(--y);font-family:var(--fh);font-size:14px;line-height:1;flex-shrink:0;width:16px;}
+
+/* TAGS GLOBALES */
+.section-hd{display:flex;justify-content:space-between;align-items:center;padding:14px 20px 8px;}
+.section-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+.section-action{font-size:9px;color:var(--b);cursor:pointer;letter-spacing:1px;background:none;border:none;font-family:var(--fm);padding:0;}
+.section-action:hover{color:var(--y);}
+
+.tags-manager{padding:0 20px 14px;border-bottom:1px solid var(--line2);}
+.tags-list{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.global-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;font-size:10px;border:0.5px solid var(--line2);color:var(--text);letter-spacing:0.5px;cursor:default;}
+.global-tag-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:0;line-height:1;font-family:var(--fm);}
+.global-tag-del:hover{color:var(--r);}
+
+.new-tag-row{display:flex;gap:6px;}
+.new-tag-input{flex:1;background:var(--bg3);border:0.5px solid var(--line2);color:var(--text);font-family:var(--fm);font-size:10px;padding:7px 10px;letter-spacing:0.5px;outline:none;transition:border-color 0.15s;}
+.new-tag-input::placeholder{color:var(--dim);}
+.new-tag-input:focus{border-color:var(--y);}
+.new-tag-btn{background:var(--y);border:none;color:#0a0a09;font-family:var(--fh);font-size:14px;padding:7px 14px;cursor:pointer;letter-spacing:1px;transition:opacity 0.15s;}
+.new-tag-btn:hover{opacity:0.85;}
+
+/* APP ROWS */
+.apps-section{padding:0 20px;display:flex;flex-direction:column;gap:1px;}
+
+.app-row{background:var(--bg2);border:1px solid var(--line2);overflow:hidden;transition:border-color 0.2s;}
+.app-row.modified{border-color:rgba(232,240,64,0.3);}
+
+.app-row-header{display:flex;align-items:stretch;cursor:pointer;}
+.app-row-header:hover .app-num{color:var(--y);}
+
+.app-num{font-family:var(--fh);font-size:24px;color:var(--dim);padding:12px 10px 12px 14px;line-height:1;border-right:1px solid var(--line2);min-width:48px;display:flex;align-items:center;justify-content:center;transition:color 0.2s;flex-shrink:0;}
+.app-info{flex:1;padding:10px 12px;}
+.app-name{font-family:var(--fh);font-size:18px;letter-spacing:0.5px;line-height:1;margin-bottom:3px;}
+.app-file{font-size:9px;color:var(--dim);letter-spacing:0.5px;}
+.app-current-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
+.curr-tag{font-size:9px;padding:2px 6px;border:1px solid var(--dim);color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;}
+.curr-tag.new{border-color:rgba(232,240,64,0.4);color:var(--y);}
+.no-tags{font-size:9px;color:var(--dim);font-style:italic;}
+
+.app-toggle{padding:10px 14px;display:flex;align-items:center;color:var(--dim);font-size:14px;transition:color 0.2s,transform 0.3s;flex-shrink:0;font-family:var(--fh);}
+.app-row.open .app-toggle{transform:rotate(90deg);color:var(--y);}
+
+/* TAG EDITOR PANEL */
+.tag-panel{display:none;border-top:1px solid var(--line2);padding:12px 14px;background:var(--bg3);}
+.app-row.open .tag-panel{display:block;}
+.tag-panel-label{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;}
+.tag-checkboxes{display:flex;flex-wrap:wrap;gap:6px;}
+
+.tag-check-item{display:inline-flex;align-items:center;gap:5px;cursor:pointer;}
+.tag-check-item input[type=checkbox]{appearance:none;width:12px;height:12px;border:0.5px solid var(--muted);background:transparent;cursor:pointer;flex-shrink:0;position:relative;}
+.tag-check-item input[type=checkbox]:checked{background:var(--y);border-color:var(--y);}
+.tag-check-item input[type=checkbox]:checked::after{content:'';position:absolute;inset:2px;background:var(--bg);}
+.tag-check-label{font-size:10px;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;user-select:none;}
+.tag-check-item:hover .tag-check-label{color:var(--text);}
+.tag-check-item input:checked + .tag-check-label{color:var(--y);}
+
+/* OUTPUT */
+.output-section{margin-top:2px;padding:0 20px;}
+.output-hd{display:flex;justify-content:space-between;align-items:center;padding:14px 0 8px;}
+.output-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+.copy-btn{font-size:9px;color:var(--bg);background:var(--y);border:none;font-family:var(--fm);padding:5px 12px;cursor:pointer;letter-spacing:1px;transition:opacity 0.15s;}
+.copy-btn:hover{opacity:0.85;}
+.copy-btn.copied{background:var(--g);color:var(--bg);}
+
+.output-box{background:var(--bg3);border:1px solid var(--line2);padding:14px;font-size:10px;color:var(--muted);line-height:1.7;overflow-x:auto;white-space:pre;max-height:300px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--dim) transparent;}
+.output-box .ky{color:var(--b);}
+.output-box .st{color:var(--g);}
+.output-box .tg{color:var(--y);}
+
+/* SAVE NOTICE */
+.save-bar{position:fixed;bottom:0;left:0;right:0;z-index:10;display:flex;justify-content:center;padding:10px 20px;background:var(--bg);border-top:1px solid var(--line2);}
+.save-inner{max-width:520px;width:100%;display:flex;gap:8px;align-items:center;}
+.save-note{font-size:9px;color:var(--muted);letter-spacing:0.5px;flex:1;line-height:1.4;}
+.save-note strong{color:var(--y);}
+
+/* STATES */
+.state-msg{padding:28px 20px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:12px;}
+.spinner{width:14px;height:14px;border:1.5px solid var(--dim);border-top-color:var(--y);border-radius:50%;animation:spin 0.6s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="shell">
+
+  <div class="topbar">
+    <a class="logo" href="index.html">W<span class="logo-slash">//</span>APPS</a>
+    <a class="back-btn" href="index.html">← VOLVER</a>
+  </div>
+
+  <div class="hero">
+    <div class="hero-label">Herramientas · Admin</div>
+    <div class="hero-title">EDITOR<em>CATEGORÍAS</em></div>
+    <div class="hero-desc">Asigna o quita categorías a cada herramienta. Copia el bloque META generado y pégalo en <code>index.html</code>.</div>
+  </div>
+
+  <div class="instructions" style="padding:12px 20px 14px;border-bottom:1px solid var(--line2);background:var(--bg2);display:flex;flex-direction:column;gap:6px;">
+    <div class="instr-row"><span class="instr-step">1</span><span>Añade o elimina categorías globales en el bloque de abajo.</span></div>
+    <div class="instr-row"><span class="instr-step">2</span><span>Abre cada herramienta y marca las categorías que le correspondan.</span></div>
+    <div class="instr-row"><span class="instr-step">3</span><span>Copia el bloque <code style="color:var(--y)">const META</code> generado y sustitúyelo en <code>index.html</code>.</span></div>
+  </div>
+
+  <!-- CATEGORÍAS GLOBALES -->
+  <div class="section-hd">
+    <div class="section-title">Categorías globales</div>
+    <button class="section-action" onclick="resetTags()">RESETEAR</button>
+  </div>
+  <div class="tags-manager">
+    <div class="tags-list" id="global-tags-list"></div>
+    <div class="new-tag-row">
+      <input class="new-tag-input" id="new-tag-input" type="text" placeholder="nueva categoría..." maxlength="20" onkeydown="if(event.key==='Enter')addTag()">
+      <button class="new-tag-btn" onclick="addTag()">+ ADD</button>
+    </div>
+  </div>
+
+  <!-- APPS -->
+  <div class="section-hd" style="padding-bottom:6px;">
+    <div class="section-title">Herramientas</div>
+    <div id="modified-count" style="font-size:9px;color:var(--dim);letter-spacing:1px;"></div>
+  </div>
+  <div class="apps-section" id="apps-list">
+    <div class="state-msg"><div class="spinner"></div>Cargando desde GitHub…</div>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="output-section">
+    <div class="output-hd">
+      <div class="output-title">Bloque META generado</div>
+      <button class="copy-btn" id="copy-btn" onclick="copyMeta()">COPIAR</button>
+    </div>
+    <div class="output-box" id="output-box">Genera el código editando las categorías…</div>
+  </div>
+
+</div>
+
+<!-- SAVE BAR -->
+<div class="save-bar">
+  <div class="save-inner">
+    <div class="save-note">Los cambios <strong>no se guardan automáticamente</strong>. Copia el bloque META y pégalo en <code>index.html</code>.</div>
+    <button class="copy-btn" onclick="copyMeta()">COPIAR META</button>
+  </div>
+</div>
+
+<script>
+const GITHUB_USER = 'Wolologger';
+const GITHUB_REPO = 'pwa-apps';
+
+// Estado inicial META del index.html original
+const DEFAULT_META = {
+  'obra.html':             { name:'Mi Obra',        desc:'Gestión de reforma · presupuesto · tareas · fases',                        tags:['obra','finanzas'] },
+  'gastos-diarios.html':   { name:'Gastos Diarios',  desc:'Control de gastos cotidianos · presupuesto mensual',                       tags:['dinero','diario'] },
+  'suministros.html':      { name:'Suministros',     desc:'Facturas de luz · gas · agua · gráficas · alertas',                        tags:['hogar','dinero'] },
+  'finanzas.html':         { name:'Finanzas',         desc:'Ingresos vs gastos · conectado con otras apps · proyección anual',         tags:['dinero'] },
+  'despensa.html':         { name:'Despensa',         desc:'Inventario de alimentos · caducidades',                                    tags:['hogar','cocina'] },
+  'compra.html':           { name:'Lista Compra',    desc:'Listas reutilizables · categorías custom · establecimientos',              tags:['hogar','cocina'] },
+  'setlist.html':          { name:'Setlist',          desc:'Canciones por grupo · drag & drop · modo actuación · exportar',           tags:['música'] },
+  'instrumentos.html':     { name:'Instrumentos',    desc:'Inventario de guitarras · bajos · amplis · pedales · setups',             tags:['música'] },
+  'semana.html':           { name:'Semana',           desc:'Tareas semanales · calendario · vacaciones y eventos',                    tags:['productividad'] },
+  'deseados.html':         { name:'Deseados',         desc:'Lista de deseos · prioridad · categorías · seguimiento de compras',       tags:['dinero'] },
+  'decisor.html':          { name:'Decisor',          desc:'Elige por ti · presets editables · historial',                            tags:['utilidad'] },
+  'guia_factura_luz.html': { name:'Factura Luz',     desc:'Guía interactiva · entiende tu factura · test',                           tags:['hogar'] },
+};
+
+const DEFAULT_TAGS = ['cocina','diario','dinero','finanzas','hogar','música','obra','productividad','utilidad'];
+
+let globalTags = JSON.parse(localStorage.getItem('pwa_tags') || JSON.stringify(DEFAULT_TAGS));
+let meta = JSON.parse(localStorage.getItem('pwa_meta') || '{}');
+let files = [];
+
+// Merge default meta with stored
+function getMeta(filename) {
+  if (meta[filename]) return meta[filename];
+  if (DEFAULT_META[filename]) return JSON.parse(JSON.stringify(DEFAULT_META[filename]));
+  return { name: filename.replace('.html','').replace(/[-_]/g,' ').toUpperCase(), desc: filename, tags: [] };
+}
+
+function saveMeta(filename, tags) {
+  const base = getMeta(filename);
+  meta[filename] = { ...base, tags };
+  localStorage.setItem('pwa_meta', JSON.stringify(meta));
+}
+
+function saveGlobalTags() {
+  localStorage.setItem('pwa_tags', JSON.stringify(globalTags));
+}
+
+// ─── GLOBAL TAGS ─────────────────────────────────────────────────────────────
+function renderGlobalTags() {
+  const el = document.getElementById('global-tags-list');
+  if (!globalTags.length) {
+    el.innerHTML = '<span style="font-size:10px;color:var(--dim)">Sin categorías. Añade una.</span>';
+    return;
+  }
+  el.innerHTML = globalTags.map(t => `
+    <span class="global-tag">
+      ${t}
+      <button class="global-tag-del" onclick="deleteTag('${t}')" title="Eliminar categoría">×</button>
+    </span>
+  `).join('');
+}
+
+function addTag() {
+  const inp = document.getElementById('new-tag-input');
+  const val = inp.value.trim().toLowerCase().replace(/\s+/g, '-');
+  if (!val || globalTags.includes(val)) { inp.value=''; return; }
+  globalTags.push(val);
+  globalTags.sort();
+  saveGlobalTags();
+  inp.value = '';
+  renderGlobalTags();
+  renderApps();
+  updateOutput();
+}
+
+function deleteTag(tag) {
+  globalTags = globalTags.filter(t => t !== tag);
+  saveGlobalTags();
+  // Remove tag from all apps
+  files.forEach(f => {
+    const m = getMeta(f.name);
+    if (m.tags.includes(tag)) {
+      saveMeta(f.name, m.tags.filter(t => t !== tag));
+    }
+  });
+  renderGlobalTags();
+  renderApps();
+  updateOutput();
+}
+
+function resetTags() {
+  if (!confirm('¿Resetear todo al estado original del index.html?')) return;
+  globalTags = [...DEFAULT_TAGS];
+  meta = {};
+  localStorage.removeItem('pwa_meta');
+  saveGlobalTags();
+  renderGlobalTags();
+  renderApps();
+  updateOutput();
+}
+
+// ─── APPS LIST ────────────────────────────────────────────────────────────────
+function renderApps() {
+  const list = document.getElementById('apps-list');
+  if (!files.length) return;
+
+  let modifiedCount = 0;
+
+  list.innerHTML = files.map((f, i) => {
+    const m = getMeta(f.name);
+    const num = String(i + 1).padStart(2, '0');
+    const original = DEFAULT_META[f.name];
+    const originalTags = original ? original.tags : [];
+    const isModified = JSON.stringify([...m.tags].sort()) !== JSON.stringify([...originalTags].sort());
+    if (isModified) modifiedCount++;
+
+    const tagsHtml = m.tags.length
+      ? m.tags.map(t => {
+          const isNew = !originalTags.includes(t);
+          return `<span class="curr-tag${isNew?' new':''}">${t}</span>`;
+        }).join('')
+      : '<span class="no-tags">sin categoría</span>';
+
+    const checkboxes = globalTags.map(t => `
+      <label class="tag-check-item">
+        <input type="checkbox" ${m.tags.includes(t) ? 'checked' : ''}
+          onchange="toggleTag('${f.name}', '${t}', this.checked)">
+        <span class="tag-check-label">${t}</span>
+      </label>
+    `).join('');
+
+    return `
+      <div class="app-row${isModified?' modified':''}" id="row-${f.name.replace('.','_')}">
+        <div class="app-row-header" onclick="toggleRow('${f.name.replace('.','_')}')">
+          <div class="app-num">${num}</div>
+          <div class="app-info">
+            <div class="app-name">${m.name}</div>
+            <div class="app-file">${f.name}${isModified?' · <span style="color:var(--y)">modificado</span>':''}</div>
+            <div class="app-current-tags">${tagsHtml}</div>
+          </div>
+          <div class="app-toggle">▶</div>
+        </div>
+        <div class="tag-panel">
+          <div class="tag-panel-label">Asignar categorías</div>
+          <div class="tag-checkboxes">${checkboxes || '<span style="font-size:10px;color:var(--dim)">No hay categorías. Añade una arriba.</span>'}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('modified-count').textContent =
+    modifiedCount ? `${modifiedCount} MODIFICADA${modifiedCount > 1 ? 'S' : ''}` : '';
+}
+
+function toggleRow(id) {
+  const row = document.getElementById('row-' + id);
+  row.classList.toggle('open');
+}
+
+function toggleTag(filename, tag, checked) {
+  const m = getMeta(filename);
+  let tags = [...m.tags];
+  if (checked && !tags.includes(tag)) tags.push(tag);
+  if (!checked) tags = tags.filter(t => t !== tag);
+  tags.sort();
+  saveMeta(filename, tags);
+  // Re-render just the header tags + modified state
+  renderApps();
+  updateOutput();
+}
+
+// ─── OUTPUT ───────────────────────────────────────────────────────────────────
+function updateOutput() {
+  if (!files.length) return;
+
+  const lines = files.map(f => {
+    const m = getMeta(f.name);
+    const tagsStr = m.tags.map(t => `'${t}'`).join(',');
+    return `  '${f.name}': {name:'${m.name}', desc:'${m.desc}', tags:[${tagsStr}]}`;
+  });
+
+  const code = `const META={\n${lines.join(',\n')},\n};`;
+
+  // Syntax highlight
+  const highlighted = code
+    .replace(/const META=/g, '<span class="ky">const META</span>=')
+    .replace(/'([^']+)':/g, (_, k) => `<span class="st">'${k}'</span>:`)
+    .replace(/name:'([^']+)'/g, (_, v) => `name:<span class="st">'${v}'</span>`)
+    .replace(/desc:'([^']+)'/g, (_, v) => `desc:<span class="st">'${v}'</span>`)
+    .replace(/'([^']+)'/g, (m, v) => `<span class="tg">'${v}'</span>`);
+
+  document.getElementById('output-box').innerHTML = highlighted;
+}
+
+function copyMeta() {
+  if (!files.length) return;
+  const lines = files.map(f => {
+    const m = getMeta(f.name);
+    const tagsStr = m.tags.map(t => `'${t}'`).join(',');
+    return `  '${f.name}': {name:'${m.name}', desc:'${m.desc}', tags:[${tagsStr}]}`;
+  });
+  const code = `const META={\n${lines.join(',\n')},\n};`;
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '✓ COPIADO';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'COPIAR'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ─── LOAD ─────────────────────────────────────────────────────────────────────
+async function loadApps() {
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/`);
+    if (!res.ok) throw new Error(`API ${res.status}`);
+    const data = await res.json();
+    files = data
+      .filter(f => f.type === 'file' && f.name.endsWith('.html') && f.name !== 'index.html' && f.name !== 'editor-categorias.html')
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    renderGlobalTags();
+    renderApps();
+    updateOutput();
+  } catch (err) {
+    document.getElementById('apps-list').innerHTML =
+      `<div class="state-msg" style="color:var(--r)">No se pudo cargar: ${err.message}</div>`;
+  }
+}
+
+loadApps();
+</script>
+</body>
+</html>
