@@ -13,7 +13,7 @@
 <style>
 :root{
   --bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;
-  --line:rgba(255,255,255,0.06);--line2:rgba(255,255,255,0.12);
+  --line:rgba(255,255,255,0.05);--line2:rgba(255,255,255,0.11);
   --text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;
   --y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;--o:#f09030;
   --fh:'Bebas Neue',sans-serif;--fm:'DM Mono',monospace;
@@ -21,143 +21,174 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html{background:var(--bg);}
 body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm);overflow-x:hidden;}
-.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:40px 40px;}
-.shell{position:relative;z-index:1;max-width:520px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;padding:0 0 60px;}
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:40px 40px;}
+.shell{position:relative;z-index:1;max-width:540px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;padding:0 0 80px;}
 
 /* TOPBAR */
-.topbar{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line2);}
-.logo{font-family:var(--fh);font-size:26px;letter-spacing:2px;color:var(--text);line-height:1;}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1px solid var(--line2);position:sticky;top:0;z-index:50;background:rgba(10,10,9,0.93);backdrop-filter:blur(8px);}
+.logo{font-family:var(--fh);font-size:24px;letter-spacing:2px;color:var(--text);line-height:1;}
 .logo-slash{color:var(--y);}
-.topbar-right{display:flex;align-items:center;gap:10px;}
-.version-badge{font-size:9px;color:var(--y);letter-spacing:1px;border:1px solid rgba(232,240,64,0.35);background:rgba(232,240,64,0.08);padding:3px 8px;border-radius:3px;font-family:var(--fm);}
-.build-tag{font-size:9px;color:var(--muted);letter-spacing:1px;border:1px solid var(--dim);padding:3px 7px;border-radius:3px;}
-.clock{font-family:var(--fh);font-size:20px;letter-spacing:1px;color:var(--muted);}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.vbadge{font-size:9px;color:var(--y);letter-spacing:1px;border:1px solid rgba(232,240,64,0.3);background:rgba(232,240,64,0.07);padding:3px 7px;border-radius:3px;}
+.clock{font-family:var(--fh);font-size:18px;letter-spacing:1px;color:var(--muted);}
 
 /* HERO */
-.hero{padding:28px 20px 20px;border-bottom:1px solid var(--line2);position:relative;overflow:hidden;}
-.hero-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
-.hero-title{font-family:var(--fh);font-size:clamp(44px,14vw,64px);line-height:0.95;letter-spacing:1px;margin-bottom:14px;}
+.hero{padding:22px 18px 18px;border-bottom:1px solid var(--line2);position:relative;overflow:hidden;}
+.hero-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.hero-title{font-family:var(--fh);font-size:clamp(40px,12vw,58px);line-height:0.95;letter-spacing:1px;margin-bottom:12px;}
 .hero-title em{color:var(--y);font-style:normal;display:block;}
-.hero-meta{display:flex;gap:14px;flex-wrap:wrap;}
+.hero-meta{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
 .hero-stat{font-size:11px;color:var(--muted);}
 .hero-stat strong{color:var(--text);font-weight:500;}
-.hero-corner{position:absolute;bottom:16px;right:20px;font-family:var(--fh);font-size:72px;color:var(--dim);line-height:1;pointer-events:none;user-select:none;}
+.hero-corner{position:absolute;bottom:10px;right:18px;font-family:var(--fh);font-size:64px;color:var(--dim);line-height:1;pointer-events:none;user-select:none;}
 .status{display:inline-flex;align-items:center;gap:5px;font-size:9px;color:var(--g);letter-spacing:1px;}
-.status-dot{width:5px;height:5px;border-radius:50%;background:var(--g);animation:pulse 2s ease-in-out infinite;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.status-dot{width:5px;height:5px;border-radius:50%;background:var(--g);animation:blink 2s ease infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.25}}
 
 /* TICKER */
-.ticker{border-bottom:1px solid var(--line2);padding:7px 0;overflow:hidden;white-space:nowrap;}
-.ticker-inner{display:inline-block;animation:ticker 30s linear infinite;}
-.ticker-item{display:inline-block;font-size:10px;color:var(--muted);letter-spacing:1px;padding:0 20px;}
+.ticker{border-bottom:1px solid var(--line2);padding:6px 0;overflow:hidden;white-space:nowrap;}
+.ticker-inner{display:inline-block;animation:ticker 32s linear infinite;}
+.ticker-item{display:inline-block;font-size:10px;color:var(--muted);letter-spacing:1px;padding:0 18px;}
 .ticker-item span{color:var(--y);}
 @keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
 /* SEARCH */
-.search-bar{padding:10px 20px;border-bottom:1px solid var(--line2);}
-.search-input{width:100%;background:var(--bg2);border:0.5px solid var(--line2);border-radius:8px;color:var(--text);font-family:var(--fm);font-size:12px;padding:9px 14px;outline:none;transition:border-color 0.15s;}
+.search-wrap{padding:10px 18px;border-bottom:1px solid var(--line2);position:relative;}
+.search-icon{position:absolute;left:30px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none;}
+.search-input{width:100%;background:var(--bg2);border:0.5px solid var(--line2);border-radius:8px;color:var(--text);font-family:var(--fm);font-size:12px;padding:9px 14px 9px 34px;outline:none;transition:border-color 0.15s;}
 .search-input:focus{border-color:var(--y);}
 .search-input::placeholder{color:var(--muted);}
 
-/* CATEGORY SECTIONS */
-.cat-section{margin-bottom:4px;}
-.cat-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px 6px;cursor:pointer;user-select:none;}
-.cat-header:hover .cat-title{color:var(--text);}
-.cat-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);transition:color 0.15s;display:flex;align-items:center;gap:8px;}
-.cat-icon{font-size:13px;}
-.cat-line{flex:1;height:0.5px;background:var(--dim);margin:0 10px;}
-.cat-count{font-size:9px;color:var(--dim);letter-spacing:1px;}
-.cat-toggle{font-size:10px;color:var(--dim);transition:transform 0.2s;}
-.cat-toggle.open{transform:rotate(90deg);}
-.cat-body{overflow:hidden;transition:max-height 0.3s ease;}
-.cat-body.collapsed{max-height:0!important;}
+/* CATS PANEL */
+.cats-panel{padding:14px 18px 16px;border-bottom:1px solid var(--line2);}
+.cats-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.cats-hd-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+.cats-hd-actions{display:flex;gap:6px;}
+.cats-btn{background:transparent;border:0.5px solid var(--dim);border-radius:5px;color:var(--muted);font-family:var(--fm);font-size:10px;padding:4px 10px;cursor:pointer;transition:all 0.15s;letter-spacing:0.5px;}
+.cats-btn:hover{border-color:var(--line2);color:var(--text);}
+.cats-btn.edit-on{background:var(--y);color:#0a0a09;border-color:var(--y);}
+.cats-btn.all-on{background:rgba(232,240,64,0.12);color:var(--y);border-color:rgba(232,240,64,0.3);}
 
-/* APP CARDS */
-.apps-list{padding:0 20px;display:flex;flex-direction:column;gap:1px;}
-.app-card{display:block;text-decoration:none;color:var(--text);background:var(--bg2);border:1px solid var(--line2);overflow:hidden;position:relative;transition:border-color 0.2s;animation:cardIn 0.4s ease both;}
-@keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.app-card:active{opacity:0.85;}
-.app-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;transform:scaleY(0);transform-origin:bottom;transition:transform 0.2s cubic-bezier(.4,0,.2,1);}
-.app-card:hover::before,.app-card:active::before{transform:scaleY(1);}
+/* GRID 2 col */
+.cats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+
+/* CAT TILE */
+.cat-tile{position:relative;border-radius:10px;padding:14px 12px 12px;cursor:pointer;transition:transform 0.15s,border-color 0.15s;border:1px solid transparent;overflow:hidden;user-select:none;}
+.cat-tile:active{transform:scale(0.97);}
+.cat-tile-bar{position:absolute;top:0;left:0;right:0;height:3px;border-radius:10px 10px 0 0;}
+.cat-tile-emoji{font-size:24px;margin-bottom:7px;display:block;line-height:1;}
+.cat-tile-name{font-family:var(--fh);font-size:17px;letter-spacing:0.5px;line-height:1;margin-bottom:3px;}
+.cat-tile-count{font-size:10px;color:var(--muted);font-family:var(--fm);}
+.cat-tile-desc{font-size:9px;color:var(--muted);margin-top:5px;line-height:1.5;letter-spacing:0.2px;}
+
+/* edit buttons on tile */
+.cat-tile-edit{position:absolute;top:7px;right:7px;display:none;gap:4px;}
+.cat-tile.edit-mode .cat-tile-edit{display:flex;}
+.teb{width:22px;height:22px;border-radius:4px;background:rgba(0,0,0,0.55);border:0.5px solid var(--line2);color:var(--muted);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.12s;}
+.teb:hover{background:var(--bg3);color:var(--text);}
+.teb.del:hover{color:var(--r);border-color:rgba(240,64,48,0.4);}
+
+/* ADD TILE */
+.cat-tile-add{border:1px dashed var(--dim);border-radius:10px;padding:14px;cursor:pointer;transition:all 0.18s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:96px;}
+.cat-tile-add:hover{border-color:rgba(232,240,64,0.4);background:rgba(232,240,64,0.03);}
+.cat-tile-add span{font-size:20px;color:var(--dim);}
+.cat-tile-add small{font-size:9px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.72);backdrop-filter:blur(5px);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:var(--bg2);border:0.5px solid var(--line2);border-radius:16px 16px 0 0;width:100%;max-width:540px;padding:18px 18px 40px;animation:slideUp 0.22s ease;}
+@keyframes slideUp{from{transform:translateY(48px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-grip{width:36px;height:3px;background:var(--dim);border-radius:99px;margin:0 auto 18px;}
+.modal-title{font-family:var(--fh);font-size:20px;letter-spacing:0.5px;margin-bottom:16px;}
+.mfield{margin-bottom:12px;}
+.mlabel{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
+.minput{width:100%;background:var(--bg3);border:0.5px solid var(--line2);border-radius:8px;color:var(--text);font-family:var(--fm);font-size:13px;padding:9px 12px;outline:none;transition:border-color 0.15s;}
+.minput:focus{border-color:var(--y);}
+.cpicker{display:flex;gap:7px;flex-wrap:wrap;margin-top:2px;}
+.cdot{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all 0.12s;flex-shrink:0;}
+.cdot.on{border-color:#fff;transform:scale(1.18);}
+.mbtns{display:flex;gap:8px;margin-top:18px;}
+.mbtn{flex:1;padding:11px;font-family:var(--fh);font-size:14px;border-radius:8px;border:0.5px solid var(--line2);background:transparent;color:var(--text);cursor:pointer;transition:all 0.15s;letter-spacing:0.3px;}
+.mbtn:hover{background:var(--bg3);}
+.mbtn.primary{background:var(--y);color:#0a0a09;border-color:var(--y);}
+.mbtn.primary:hover{opacity:0.9;}
+.mbtn.danger{color:var(--r);border-color:rgba(240,64,48,0.3);}
+
+/* APP SECTIONS */
+.apps-section{padding:0;}
+.sec-hd{display:flex;justify-content:space-between;align-items:center;padding:12px 18px 6px;cursor:pointer;user-select:none;}
+.sec-hd-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
+.sec-icon{font-size:14px;flex-shrink:0;}
+.sec-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;flex-shrink:0;}
+.sec-line{flex:1;height:0.5px;background:var(--dim);margin-left:6px;}
+.sec-right{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:10px;}
+.sec-count{font-size:9px;color:var(--dim);}
+.sec-toggle{font-size:10px;color:var(--dim);transition:transform 0.2s;display:inline-block;}
+.sec-toggle.open{transform:rotate(90deg);}
+
+.sec-body{overflow:hidden;transition:max-height 0.28s ease;}
+.sec-body.collapsed{max-height:0!important;}
+.apps-list{padding:0 18px;display:flex;flex-direction:column;gap:1px;}
+
+/* APP CARD */
+.app-card{display:block;text-decoration:none;color:var(--text);background:var(--bg2);border:1px solid var(--line2);overflow:hidden;position:relative;transition:border-color 0.18s;animation:cardIn 0.32s ease both;}
+@keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.app-card:active{opacity:0.8;}
+.abar{position:absolute;left:0;top:0;bottom:0;width:3px;transform:scaleY(0);transform-origin:bottom;transition:transform 0.18s cubic-bezier(.4,0,.2,1);}
+.app-card:hover .abar,.app-card:active .abar{transform:scaleY(1);}
 .app-inner{display:flex;align-items:stretch;}
-.app-num{font-family:var(--fh);font-size:28px;color:var(--dim);padding:14px 12px 14px 16px;line-height:1;border-right:1px solid var(--line2);min-width:52px;display:flex;align-items:center;justify-content:center;transition:color 0.2s;flex-shrink:0;}
-.app-body{flex:1;padding:12px 14px;min-width:0;}
-.app-name{font-family:var(--fh);font-size:20px;letter-spacing:0.5px;line-height:1;margin-bottom:4px;}
+.app-num{font-family:var(--fh);font-size:26px;color:var(--dim);padding:12px 10px 12px 14px;line-height:1;border-right:1px solid var(--line2);min-width:48px;display:flex;align-items:center;justify-content:center;transition:color 0.18s;flex-shrink:0;}
+.app-body{flex:1;padding:11px 13px;min-width:0;}
+.app-name{font-family:var(--fh);font-size:19px;letter-spacing:0.5px;line-height:1;margin-bottom:3px;}
 .app-desc{font-size:11px;color:var(--muted);line-height:1.4;}
-.app-tags{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap;}
+.app-tags{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap;}
 .app-tag{font-size:9px;padding:2px 6px;border-radius:3px;border:1px solid var(--dim);color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;}
-.app-file{font-size:9px;color:var(--dim);margin-top:3px;letter-spacing:0.5px;}
-.app-arrow{padding:12px 16px;display:flex;align-items:center;color:var(--dim);font-size:18px;transition:color 0.2s,transform 0.2s;flex-shrink:0;}
-.app-card:hover .app-arrow{transform:translateX(3px);}
+.app-file{font-size:9px;color:var(--dim);margin-top:3px;}
+.app-arrow{padding:11px 14px;display:flex;align-items:center;color:var(--dim);font-size:16px;transition:color 0.18s,transform 0.18s;flex-shrink:0;}
 
-/* Color accent per category */
-.cat-hogar .app-card::before{background:var(--b);}
-.cat-hogar .app-card:hover .app-num{color:var(--b);}
-.cat-hogar .app-card:hover .app-arrow{color:var(--b);}
-.cat-dinero .app-card::before{background:var(--g);}
-.cat-dinero .app-card:hover .app-num{color:var(--g);}
-.cat-dinero .app-card:hover .app-arrow{color:var(--g);}
-.cat-musica .app-card::before{background:var(--r);}
-.cat-musica .app-card:hover .app-num{color:var(--r);}
-.cat-musica .app-card:hover .app-arrow{color:var(--r);}
-.cat-productividad .app-card::before{background:var(--y);}
-.cat-productividad .app-card:hover .app-num{color:var(--y);}
-.cat-productividad .app-card:hover .app-arrow{color:var(--y);}
-.cat-utilidad .app-card::before{background:var(--o);}
-.cat-utilidad .app-card:hover .app-num{color:var(--o);}
-.cat-utilidad .app-card:hover .app-arrow{color:var(--o);}
-
-/* Highlight category title color */
-.cat-hogar-hd .cat-icon{filter:none;color:var(--b);}
-.cat-dinero-hd .cat-icon{color:var(--g);}
-.cat-musica-hd .cat-icon{color:var(--r);}
-.cat-productividad-hd .cat-icon{color:var(--y);}
-.cat-utilidad-hd .cat-icon{color:var(--o);}
-
-/* LOADING */
-.state-msg{padding:28px 20px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:12px;}
+/* MISC */
+.state-msg{padding:28px 18px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:12px;}
 .spinner{width:14px;height:14px;border:1.5px solid var(--dim);border-top-color:var(--y);border-radius:50%;animation:spin 0.6s linear infinite;flex-shrink:0;}
 @keyframes spin{to{transform:rotate(360deg)}}
-.err-msg{color:var(--r);font-size:11px;line-height:1.7;padding:20px;}
-
-/* EMPTY SEARCH */
-.search-empty{padding:28px 20px;text-align:center;font-size:12px;color:var(--muted);line-height:1.8;}
+.empty-msg{color:var(--muted);font-size:12px;text-align:center;padding:28px 18px;line-height:1.8;}
 
 /* FOOTER */
-.footer{margin-top:auto;padding:20px 20px 0;border-top:1px solid var(--line2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
-.footer-left{font-size:10px;color:var(--muted);line-height:1.6;}
-.footer-right{font-size:10px;color:var(--dim);}
+.footer{margin-top:auto;padding:18px 18px 0;border-top:1px solid var(--line2);display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+.footer-left{font-size:10px;color:var(--muted);line-height:1.7;}
+.footer-right{font-size:9px;color:var(--dim);text-align:right;line-height:1.7;flex-shrink:0;}
 .footer a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--dim);}
-.footer-version{font-size:10px;color:var(--muted);font-family:var(--fm);letter-spacing:0.5px;margin-top:4px;}
-.footer-version span{color:var(--y);}
+.fv{color:var(--y);}
 </style>
 </head>
 <body>
 <div class="grid-bg"></div>
 <div class="shell">
 
+  <!-- TOPBAR -->
   <div class="topbar">
-    <div>
-      <div class="logo">W<span class="logo-slash">//</span>APPS</div>
-    </div>
+    <div class="logo">W<span class="logo-slash">//</span>APPS</div>
     <div class="topbar-right">
-      <div class="version-badge" id="version-badge">v1.3</div>
-      <div class="build-tag">PERSONAL</div>
+      <div class="vbadge" id="vbadge">v1.4</div>
       <div class="clock" id="clock">--:--</div>
     </div>
   </div>
 
+  <!-- HERO -->
   <div class="hero">
-    <div class="hero-label">Panel de control</div>
+    <div class="hero-label">Panel de control · Personal</div>
     <div class="hero-title">MIS<em>HERRAMIENTAS</em></div>
     <div class="hero-meta">
       <div class="hero-stat"><strong id="app-count">—</strong> apps</div>
       <div class="hero-stat"><span class="status"><span class="status-dot"></span>LIVE</span></div>
-      <div class="hero-stat">github.com/<strong>Wolologger</strong></div>
+      <div class="hero-stat">github/<strong>Wolologger</strong></div>
     </div>
     <div class="hero-corner">W</div>
   </div>
 
+  <!-- TICKER -->
   <div class="ticker">
     <div class="ticker-inner">
       <span class="ticker-item">OBRA <span>●</span></span><span class="ticker-item">GASTOS <span>●</span></span><span class="ticker-item">DESPENSA <span>●</span></span><span class="ticker-item">SETLIST <span>●</span></span><span class="ticker-item">FINANZAS <span>●</span></span><span class="ticker-item">SEMANA <span>●</span></span><span class="ticker-item">DESEADOS <span>●</span></span><span class="ticker-item">COMPRA <span>●</span></span><span class="ticker-item">INSTRUMENTOS <span>●</span></span><span class="ticker-item">SUMINISTROS <span>●</span></span><span class="ticker-item">DECISOR <span>●</span></span>
@@ -165,182 +196,264 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
     </div>
   </div>
 
-  <div class="search-bar">
-    <input class="search-input" type="search" placeholder="Buscar app…" id="search-input" oninput="handleSearch(this.value)" autocomplete="off">
+  <!-- SEARCH -->
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input class="search-input" type="search" id="search-input" placeholder="Buscar app…" oninput="handleSearch(this.value)" autocomplete="off">
   </div>
 
+  <!-- CATEGORIES -->
+  <div class="cats-panel" id="cats-panel">
+    <div class="cats-hd">
+      <div class="cats-hd-label">Categorías</div>
+      <div class="cats-hd-actions">
+        <button class="cats-btn" id="btn-edit" onclick="toggleEditMode()">✎ Editar</button>
+        <button class="cats-btn all-on" id="btn-all" onclick="selectAll()">Todas</button>
+      </div>
+    </div>
+    <div class="cats-grid" id="cats-grid"></div>
+  </div>
+
+  <!-- APPS -->
   <div id="main-content">
     <div class="state-msg"><div class="spinner"></div>Cargando desde GitHub…</div>
   </div>
 
+  <!-- FOOTER -->
   <div class="footer">
     <div class="footer-left">
-      Actualizado <span id="updated-at">—</span><br>
+      Act. <span id="updated-at">—</span><br>
       <a href="https://github.com/Wolologger/pwa-apps" target="_blank">github.com/Wolologger/pwa-apps</a>
-      <div class="footer-version">versión <span id="footer-version">—</span> · <span id="file-count">—</span></div>
     </div>
-    <div class="footer-right" id="repo-tag">WOLOLOGGER/PWA-APPS</div>
+    <div class="footer-right">
+      v<span class="fv" id="fv">—</span><br>
+      <span id="file-count">—</span>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-grip"></div>
+    <div class="modal-title" id="modal-title">Nueva categoría</div>
+    <div class="mfield">
+      <div class="mlabel">Nombre</div>
+      <input class="minput" id="m-name" placeholder="Ej: Personal" maxlength="20">
+    </div>
+    <div class="mfield">
+      <div class="mlabel">Icono (emoji)</div>
+      <input class="minput" id="m-icon" placeholder="🏠" maxlength="4">
+    </div>
+    <div class="mfield">
+      <div class="mlabel">Descripción (opcional)</div>
+      <input class="minput" id="m-desc" placeholder="Breve descripción…" maxlength="40">
+    </div>
+    <div class="mfield">
+      <div class="mlabel">Color de acento</div>
+      <div class="cpicker" id="cpicker"></div>
+    </div>
+    <div class="mbtns">
+      <button class="mbtn" onclick="closeModal()">Cancelar</button>
+      <button class="mbtn danger" id="m-del" onclick="deleteCurrent()" style="display:none">Borrar</button>
+      <button class="mbtn primary" onclick="saveModal()">Guardar</button>
+    </div>
   </div>
 </div>
 
 <script>
+// ── CONFIG ──
 const GITHUB_USER = 'Wolologger';
 const GITHUB_REPO = 'pwa-apps';
-const APP_VERSION = '1.3.0';
-const APP_BUILD   = '2026.03';
+const APP_VERSION = '1.4.0';
+const EXCLUDED = ['index.html','guia_factura_luz.html'];
+const PALETTE = ['#e8f040','#30d880','#30a8f0','#f04030','#f09030','#b060f0','#f0c030','#30d8c8','#f060a8','#a8e030'];
 
-// Metadata de apps — con categoría y color
+// ── APPS META ──
 const META = {
-  // HOGAR
-  'suministros.html':      { name:'Suministros',    desc:'Facturas de luz · gas · agua · gráficas · guías · alertas', tags:['hogar','dinero'], cat:'hogar' },
-  'despensa.html':         { name:'Despensa',        desc:'Inventario de alimentos · caducidades · stock mínimo',       tags:['hogar','cocina'], cat:'hogar' },
-  'compra.html':           { name:'Lista Compra',    desc:'Listas reutilizables · categorías custom · establecimientos', tags:['hogar','cocina'], cat:'hogar' },
-  'obra.html':             { name:'Mi Obra',         desc:'Gestión de reforma · presupuesto · tareas · fases',          tags:['hogar','dinero'], cat:'hogar' },
-  // DINERO
-  'finanzas.html':         { name:'Finanzas',        desc:'Ingresos vs gastos · proyección anual · conectado',          tags:['dinero'],         cat:'dinero' },
-  'gastos-diarios.html':   { name:'Gastos Diarios',  desc:'Control de gastos cotidianos · presupuesto mensual',         tags:['dinero','diario'], cat:'dinero' },
-  'deseados.html':         { name:'Deseados',        desc:'Lista de deseos · prioridad · categorías · seguimiento',      tags:['dinero'],         cat:'dinero' },
-  // MÚSICA
-  'setlist.html':          { name:'Setlist',         desc:'Canciones por grupo · drag & drop · modo actuación · exportar', tags:['música'],      cat:'musica' },
-  'instrumentos.html':     { name:'Instrumentos',    desc:'Inventario de guitarras · bajos · amplis · pedales · setups',  tags:['música'],      cat:'musica' },
-  // PRODUCTIVIDAD
-  'semana.html':           { name:'Semana',          desc:'Tareas semanales · calendario · vacaciones y eventos',        tags:['productividad'],  cat:'productividad' },
-  // UTILIDAD
-  'decisor.html':          { name:'Decisor',         desc:'Elige por ti · presets editables · historial de decisiones',  tags:['utilidad'],       cat:'utilidad' },
+  'suministros.html':    { name:'Suministros',   desc:'Facturas de luz · gas · agua · gráficas · guías', tags:['hogar','dinero'], cat:'hogar' },
+  'despensa.html':       { name:'Despensa',       desc:'Inventario de alimentos · caducidades · stock',    tags:['hogar','cocina'], cat:'hogar' },
+  'compra.html':         { name:'Lista Compra',   desc:'Listas reutilizables · categorías · tiendas',      tags:['hogar','cocina'], cat:'hogar' },
+  'obra.html':           { name:'Mi Obra',        desc:'Reforma · presupuesto · tareas · fases',           tags:['hogar','dinero'], cat:'hogar' },
+  'finanzas.html':       { name:'Finanzas',       desc:'Ingresos vs gastos · proyección anual',            tags:['dinero'],         cat:'dinero' },
+  'gastos-diarios.html': { name:'Gastos Diarios', desc:'Gastos cotidianos · presupuesto mensual',          tags:['dinero','diario'],cat:'dinero' },
+  'deseados.html':       { name:'Deseados',       desc:'Lista de deseos · prioridad · seguimiento',        tags:['dinero'],         cat:'dinero' },
+  'setlist.html':        { name:'Setlist',        desc:'Canciones · drag & drop · modo actuación',         tags:['música'],         cat:'musica' },
+  'instrumentos.html':   { name:'Instrumentos',   desc:'Guitarras · bajos · amplis · pedales · setups',    tags:['música'],         cat:'musica' },
+  'semana.html':         { name:'Semana',         desc:'Tareas semanales · calendario · eventos',          tags:['productividad'],  cat:'productividad' },
+  'decisor.html':        { name:'Decisor',        desc:'Elige por ti · presets editables · historial',     tags:['utilidad'],       cat:'utilidad' },
 };
 
-// Categorías en orden, con meta visual
-const CATS = [
-  { id:'hogar',          label:'Hogar',        icon:'🏠', desc:'Casa, cocina y suministros' },
-  { id:'dinero',         label:'Dinero',       icon:'💰', desc:'Finanzas y gastos' },
-  { id:'musica',         label:'Música',       icon:'🎸', desc:'Canciones e instrumentos' },
-  { id:'productividad',  label:'Productividad',icon:'📅', desc:'Planificación y tareas' },
-  { id:'utilidad',       label:'Utilidad',     icon:'⚙️',  desc:'Herramientas generales' },
+// ── DEFAULT CATS ──
+const DEFAULT_CATS = [
+  { id:'hogar',         label:'Hogar',         icon:'🏠', color:'#30a8f0', desc:'Casa, cocina y suministros' },
+  { id:'dinero',        label:'Dinero',        icon:'💰', color:'#30d880', desc:'Finanzas y gastos' },
+  { id:'musica',        label:'Música',        icon:'🎸', color:'#f04030', desc:'Canciones e instrumentos' },
+  { id:'productividad', label:'Productividad', icon:'📅', color:'#e8f040', desc:'Planificación y tareas' },
+  { id:'utilidad',      label:'Utilidad',      icon:'⚙️', color:'#f09030', desc:'Herramientas generales' },
 ];
 
+function loadCats() {
+  try { const s = localStorage.getItem('wapps_cats_v1'); if(s) return JSON.parse(s); } catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_CATS));
+}
+function saveCats() {
+  try { localStorage.setItem('wapps_cats_v1', JSON.stringify(cats)); } catch(e){}
+}
+
+// ── STATE ──
+let cats = loadCats();
 let allFiles = [];
-let catOpenState = {}; // true = abierta
+let selectedCat = null;
+let editMode = false;
 let searchQuery = '';
+let secOpen = {};
+let modalEditId = null;
+let mColor = PALETTE[0];
 
 // ── CLOCK ──
-function updateClock() {
-  const now = new Date();
-  document.getElementById('clock').textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-}
-updateClock(); setInterval(updateClock, 10000);
-
-// ── VERSION ──
-document.getElementById('version-badge').textContent = `v${APP_VERSION}`;
-document.getElementById('footer-version').textContent = `${APP_VERSION} · build ${APP_BUILD}`;
+(function tick(){ const n=new Date(); document.getElementById('clock').textContent=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`; setInterval(tick,10000); })();
+document.getElementById('vbadge').textContent=`v${APP_VERSION}`;
+document.getElementById('fv').textContent=APP_VERSION;
 
 // ── SEARCH ──
-function handleSearch(val) {
-  searchQuery = val.toLowerCase().trim();
+function handleSearch(v){
+  searchQuery=v.toLowerCase().trim();
+  if(searchQuery) selectedCat=null;
+  renderAll();
+}
+
+// ── SELECT CAT ──
+function selectCat(id){
+  if(editMode) return;
+  selectedCat = selectedCat===id ? null : id;
+  syncAllBtn();
+  renderGrid();
   renderContent();
 }
-
-function autoMeta(filename) {
-  const name = filename.replace('.html','').replace(/[-_]/g,' ').toUpperCase();
-  return { name, desc: filename, tags:[], cat:'utilidad' };
+function selectAll(){
+  selectedCat=null;
+  syncAllBtn();
+  renderGrid();
+  renderContent();
+}
+function syncAllBtn(){
+  const b=document.getElementById('btn-all');
+  b.classList.toggle('all-on',!selectedCat);
 }
 
-// ── RENDER ──
-function renderContent() {
-  const container = document.getElementById('main-content');
-
-  if (searchQuery) {
-    renderSearch(container);
-    return;
-  }
-  renderCategories(container);
+// ── EDIT MODE ──
+function toggleEditMode(){
+  editMode=!editMode;
+  document.getElementById('btn-edit').classList.toggle('edit-on',editMode);
+  renderGrid();
 }
 
-function renderSearch(container) {
-  const filtered = allFiles.filter(f => {
-    const m = META[f.name] || autoMeta(f.name);
-    return (
-      m.name.toLowerCase().includes(searchQuery) ||
-      m.desc.toLowerCase().includes(searchQuery) ||
-      f.name.toLowerCase().includes(searchQuery) ||
-      (m.tags||[]).some(t => t.includes(searchQuery))
-    );
-  });
-  if (!filtered.length) {
-    container.innerHTML = `<div class="search-empty">Sin resultados para "<strong>${searchQuery}</strong>"</div>`;
-    return;
-  }
-  document.getElementById('app-count').textContent = filtered.length;
-  let html = `<div class="cat-section">
-    <div class="cat-header" style="cursor:default;">
-      <div class="cat-title">🔍 <span class="cat-line"></span> ${filtered.length} resultado${filtered.length!==1?'s':''}</div>
-    </div>
-    <div class="apps-list cat-utilidad">`;
-  filtered.forEach((f, i) => {
-    html += buildCard(f, i+1);
-  });
-  html += `</div></div>`;
-  container.innerHTML = html;
+// ── COUNT BY CAT ──
+function countByCat(){
+  const c={};
+  allFiles.forEach(f=>{ const cat=(META[f.name]||{}).cat||'utilidad'; c[cat]=(c[cat]||0)+1; });
+  return c;
 }
 
-function renderCategories(container) {
-  // Group files by category
-  const bycat = {};
-  CATS.forEach(c => bycat[c.id] = []);
-  bycat['_other'] = [];
+// ── HEX UTILS ──
+function hexRgba(hex,a){
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
 
-  allFiles.forEach(f => {
-    const m = META[f.name] || autoMeta(f.name);
-    const cat = m.cat || '_other';
-    if (bycat[cat]) bycat[cat].push(f);
-    else bycat['_other'].push(f);
-  });
-
-  let totalVisible = 0;
-  let html = '';
-
-  CATS.forEach(cat => {
-    const files = bycat[cat.id] || [];
-    if (!files.length) return;
-    totalVisible += files.length;
-    const isOpen = catOpenState[cat.id] !== false; // default open
-    html += `<div class="cat-section" id="cat-section-${cat.id}">
-      <div class="cat-header cat-${cat.id}-hd" onclick="toggleCat('${cat.id}')">
-        <div class="cat-title">
-          <span class="cat-icon">${cat.icon}</span>
-          ${cat.label.toUpperCase()}
-          <span class="cat-line"></span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div class="cat-count">${files.length}</div>
-          <div class="cat-toggle ${isOpen?'open':''}" id="cat-toggle-${cat.id}">▶</div>
-        </div>
+// ── RENDER GRID ──
+function renderGrid(){
+  const bc=countByCat();
+  let h=cats.map(cat=>{
+    const count=bc[cat.id]||0;
+    const isSel=selectedCat===cat.id;
+    const bg=hexRgba(cat.color,0.07);
+    const border=isSel?cat.color:hexRgba(cat.color,0.22);
+    const ring=isSel?`box-shadow:0 0 0 1.5px ${cat.color};`:'';
+    return `<div class="cat-tile${editMode?' edit-mode':''}"
+      style="background:${bg};border-color:${border};${ring}"
+      onclick="${editMode?`openEdit('${cat.id}')`:`selectCat('${cat.id}')`}">
+      <div class="cat-tile-bar" style="background:${cat.color}"></div>
+      <span class="cat-tile-emoji">${cat.icon}</span>
+      <div class="cat-tile-name" style="color:${cat.color}">${cat.label}</div>
+      <div class="cat-tile-count">${count} app${count!==1?'s':''}</div>
+      ${cat.desc?`<div class="cat-tile-desc">${cat.desc}</div>`:''}
+      <div class="cat-tile-edit">
+        <button class="teb" onclick="event.stopPropagation();openEdit('${cat.id}')">✎</button>
+        <button class="teb del" onclick="event.stopPropagation();deleteCat('${cat.id}')">✕</button>
       </div>
-      <div class="cat-body ${isOpen?'':'collapsed'}" id="cat-body-${cat.id}" style="max-height:${isOpen?files.length*100+'px':'0'}">
-        <div class="apps-list cat-${cat.id}">`;
-    files.forEach((f, i) => {
-      html += buildCard(f, i+1);
-    });
-    html += `</div></div></div>`;
-  });
-
-  document.getElementById('app-count').textContent = totalVisible;
-  document.getElementById('file-count').textContent = `${totalVisible} app${totalVisible!==1?'s':''}`;
-  container.innerHTML = html;
+    </div>`;
+  }).join('');
+  if(editMode){
+    h+=`<div class="cat-tile-add" onclick="openNew()">
+      <span>＋</span><small>Nueva categoría</small>
+    </div>`;
+  }
+  document.getElementById('cats-grid').innerHTML=h;
 }
 
-function buildCard(f, num) {
-  const m = META[f.name] || autoMeta(f.name);
-  const n = String(num).padStart(2,'0');
-  const tagsHtml = (m.tags||[]).length
-    ? `<div class="app-tags">${m.tags.map(t=>`<span class="app-tag">${t}</span>`).join('')}</div>`
-    : '';
-  return `<a class="app-card" href="${f.name}" style="animation-delay:${num*0.04}s">
+// ── RENDER CONTENT ──
+function renderAll(){ renderGrid(); renderContent(); }
+
+function renderContent(){
+  const el=document.getElementById('main-content');
+  if(searchQuery){ renderSearch(el); return; }
+
+  const show=selectedCat ? allFiles.filter(f=>(META[f.name]?.cat||'utilidad')===selectedCat) : allFiles;
+  document.getElementById('app-count').textContent=show.length;
+
+  if(!show.length){ el.innerHTML=`<div class="empty-msg">Sin apps en esta categoría.</div>`; return; }
+
+  let html='';
+  cats.forEach(cat=>{
+    const files=show.filter(f=>(META[f.name]?.cat||'utilidad')===cat.id);
+    if(!files.length) return;
+    html+=buildSection(cat,files);
+  });
+  // uncategorised
+  const known=cats.map(c=>c.id);
+  const other=show.filter(f=>!known.includes(META[f.name]?.cat||'utilidad'));
+  if(other.length) html+=buildSection({id:'_other',label:'Otras',icon:'📦',color:'#5a5850',desc:''},other);
+
+  el.innerHTML=html;
+}
+
+function buildSection(cat,files){
+  const isOpen=secOpen[cat.id]!==false;
+  const lcolor=hexRgba(cat.color,0.28);
+  return `<div class="apps-section" id="sec-${cat.id}">
+    <div class="sec-hd" onclick="toggleSec('${cat.id}')">
+      <div class="sec-hd-left">
+        <span class="sec-icon" style="color:${cat.color}">${cat.icon}</span>
+        <span class="sec-label" style="color:${cat.color}">${cat.label.toUpperCase()}</span>
+        <span class="sec-line" style="background:${lcolor}"></span>
+      </div>
+      <div class="sec-right">
+        <span class="sec-count">${files.length}</span>
+        <span class="sec-toggle ${isOpen?'open':''}" id="st-${cat.id}">▶</span>
+      </div>
+    </div>
+    <div class="sec-body ${isOpen?'':'collapsed'}" id="sb-${cat.id}" style="max-height:${isOpen?files.length*100+'px':'0'}">
+      <div class="apps-list">${files.map((f,i)=>buildCard(f,i+1,cat.color)).join('')}</div>
+    </div>
+  </div>`;
+}
+
+function buildCard(f,num,color){
+  const m=META[f.name]||{name:f.name.replace('.html','').toUpperCase(),desc:f.name,tags:[]};
+  const n=String(num).padStart(2,'0');
+  const tags=(m.tags||[]).length?`<div class="app-tags">${m.tags.map(t=>`<span class="app-tag">${t}</span>`).join('')}</div>`:'';
+  return `<a class="app-card" href="${f.name}" style="animation-delay:${num*0.04}s"
+    onmouseenter="this.querySelector('.app-num').style.color='${color}';this.querySelector('.app-arrow').style.color='${color}'"
+    onmouseleave="this.querySelector('.app-num').style.color='';this.querySelector('.app-arrow').style.color=''">
+    <div class="abar" style="background:${color}"></div>
     <div class="app-inner">
       <div class="app-num">${n}</div>
       <div class="app-body">
         <div class="app-name">${m.name}</div>
         <div class="app-desc">${m.desc}</div>
-        ${tagsHtml}
+        ${tags}
         <div class="app-file">${f.name}</div>
       </div>
       <div class="app-arrow">→</div>
@@ -348,52 +461,124 @@ function buildCard(f, num) {
   </a>`;
 }
 
-function toggleCat(id) {
-  const isOpen = catOpenState[id] !== false;
-  catOpenState[id] = !isOpen;
-  const body = document.getElementById('cat-body-'+id);
-  const toggle = document.getElementById('cat-toggle-'+id);
-  if (!body) return;
-  if (catOpenState[id]) {
-    body.classList.remove('collapsed');
-    body.style.maxHeight = body.scrollHeight + 'px';
-    toggle.classList.add('open');
-  } else {
-    body.style.maxHeight = '0';
-    body.classList.add('collapsed');
-    toggle.classList.remove('open');
-  }
+function renderSearch(el){
+  const filtered=allFiles.filter(f=>{
+    const m=META[f.name]||{};
+    return (m.name||'').toLowerCase().includes(searchQuery)||
+      (m.desc||'').toLowerCase().includes(searchQuery)||
+      f.name.toLowerCase().includes(searchQuery)||
+      (m.tags||[]).some(t=>t.includes(searchQuery));
+  });
+  document.getElementById('app-count').textContent=filtered.length;
+  if(!filtered.length){ el.innerHTML=`<div class="empty-msg">Sin resultados para "<strong>${searchQuery}</strong>"</div>`; return; }
+  el.innerHTML=`<div class="apps-section">
+    <div class="sec-hd" style="cursor:default;">
+      <div class="sec-hd-left"><span class="sec-label" style="color:var(--muted)">🔍 RESULTADOS</span><span class="sec-line"></span></div>
+      <span class="sec-count">${filtered.length}</span>
+    </div>
+    <div class="apps-list">${filtered.map((f,i)=>buildCard(f,i+1,'#e8f040')).join('')}</div>
+  </div>`;
 }
 
-async function loadApps() {
-  const container = document.getElementById('main-content');
-  try {
-    const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/`);
-    if (!res.ok) throw new Error(`API ${res.status}`);
-    const files = await res.json();
-    allFiles = files
-      .filter(f => f.type==='file' && f.name.endsWith('.html') && f.name!=='index.html')
-      .sort((a,b) => {
-        // Sort by category order then name
-        const ca = (META[a.name]||{}).cat || 'z';
-        const cb = (META[b.name]||{}).cat || 'z';
-        const catOrder = ['hogar','dinero','musica','productividad','utilidad'];
-        const ia = catOrder.indexOf(ca);
-        const ib = catOrder.indexOf(cb);
-        if (ia !== ib) return (ia===-1?99:ia) - (ib===-1?99:ib);
+function toggleSec(id){
+  const isOpen=secOpen[id]!==false;
+  secOpen[id]=!isOpen;
+  const body=document.getElementById('sb-'+id);
+  const tog=document.getElementById('st-'+id);
+  if(!body) return;
+  if(secOpen[id]){ body.classList.remove('collapsed'); body.style.maxHeight=body.scrollHeight+'px'; tog?.classList.add('open'); }
+  else { body.style.maxHeight='0'; body.classList.add('collapsed'); tog?.classList.remove('open'); }
+}
+
+// ── MODAL ──
+function buildCPicker(sel){
+  return PALETTE.map(c=>`<div class="cdot${c===sel?' on':''}" style="background:${c}" onclick="pickColor('${c}')"></div>`).join('');
+}
+function pickColor(c){
+  mColor=c;
+  document.querySelectorAll('.cdot').forEach(d=>d.classList.toggle('on',d.style.background===c));
+}
+function openNew(){
+  modalEditId=null; mColor=PALETTE[0];
+  document.getElementById('modal-title').textContent='Nueva categoría';
+  document.getElementById('m-name').value='';
+  document.getElementById('m-icon').value='';
+  document.getElementById('m-desc').value='';
+  document.getElementById('m-del').style.display='none';
+  document.getElementById('cpicker').innerHTML=buildCPicker(mColor);
+  document.getElementById('overlay').classList.add('open');
+}
+function openEdit(id){
+  const cat=cats.find(c=>c.id===id); if(!cat) return;
+  modalEditId=id; mColor=cat.color;
+  document.getElementById('modal-title').textContent='Editar categoría';
+  document.getElementById('m-name').value=cat.label;
+  document.getElementById('m-icon').value=cat.icon;
+  document.getElementById('m-desc').value=cat.desc||'';
+  document.getElementById('m-del').style.display='block';
+  document.getElementById('cpicker').innerHTML=buildCPicker(cat.color);
+  document.getElementById('overlay').classList.add('open');
+}
+function closeModal(e){
+  if(e&&e.target!==document.getElementById('overlay')) return;
+  document.getElementById('overlay').classList.remove('open');
+}
+function saveModal(){
+  const name=document.getElementById('m-name').value.trim();
+  const icon=document.getElementById('m-icon').value.trim()||'📦';
+  const desc=document.getElementById('m-desc').value.trim();
+  if(!name) return;
+  if(modalEditId){
+    const cat=cats.find(c=>c.id===modalEditId);
+    if(cat){cat.label=name;cat.icon=icon;cat.color=mColor;cat.desc=desc;}
+  } else {
+    const id=name.toLowerCase().replace(/[^a-z0-9]/g,'-')+'-'+Date.now();
+    cats.push({id,label:name,icon,color:mColor,desc});
+  }
+  saveCats();
+  document.getElementById('overlay').classList.remove('open');
+  renderAll();
+}
+function deleteCurrent(){
+  if(!modalEditId) return;
+  deleteCat(modalEditId);
+  document.getElementById('overlay').classList.remove('open');
+}
+function deleteCat(id){
+  const cat=cats.find(c=>c.id===id);
+  if(!cat) return;
+  if(!confirm(`¿Borrar categoría "${cat.label}"?`)) return;
+  cats=cats.filter(c=>c.id!==id);
+  if(selectedCat===id) selectedCat=null;
+  saveCats(); renderAll();
+}
+
+// ── LOAD ──
+async function loadApps(){
+  const el=document.getElementById('main-content');
+  try{
+    const res=await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/`);
+    if(!res.ok) throw new Error(`API ${res.status}`);
+    const files=await res.json();
+    const catOrder=cats.map(c=>c.id);
+    allFiles=files
+      .filter(f=>f.type==='file'&&f.name.endsWith('.html')&&!EXCLUDED.includes(f.name))
+      .sort((a,b)=>{
+        const ca=META[a.name]?.cat||'_z', cb=META[b.name]?.cat||'_z';
+        const ia=catOrder.indexOf(ca), ib=catOrder.indexOf(cb);
+        if(ia!==ib) return (ia===-1?99:ia)-(ib===-1?99:ib);
         return a.name.localeCompare(b.name);
       });
-    document.getElementById('updated-at').textContent = new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
-    renderContent();
-  } catch(err) {
-    container.innerHTML = `<div class="err-msg">No se pudo cargar la lista.<br>${err.message}</div>`;
-    document.getElementById('app-count').textContent = '?';
+    document.getElementById('updated-at').textContent=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('file-count').textContent=`${allFiles.length} apps`;
+    renderAll();
+  } catch(e){
+    el.innerHTML=`<div class="empty-msg" style="color:var(--r)">Error cargando.<br>${e.message}</div>`;
   }
 }
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => { navigator.serviceWorker.register('/pwa-apps/sw.js').catch(()=>{}); });
-}
+if('serviceWorker' in navigator)
+  window.addEventListener('load',()=>navigator.serviceWorker.register('/pwa-apps/sw.js').catch(()=>{}));
 
 loadApps();
 </script>

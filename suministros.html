@@ -376,32 +376,40 @@ select option{background:var(--bg2);}
           </div>
         </div>
 
-        <!-- Próximamente Gas -->
-        <div class="guia-card" style="opacity:0.45;pointer-events:none;">
+        <!-- Guía Gas/Propano -->
+        <div class="guia-card" onclick="openGuia('gas')">
           <div class="guia-card-inner">
             <div class="guia-card-accent" style="background:var(--gas)"></div>
             <div class="guia-card-body">
-              <div class="guia-card-tag" style="color:var(--gas)">🔥 Gas Natural</div>
+              <div class="guia-card-tag" style="color:var(--gas)">🔥 Gas / Propano</div>
               <div class="guia-card-name">Factura del Gas</div>
-              <div class="guia-card-desc">Próximamente — término fijo, variable, caudal, presión, peajes y más.</div>
+              <div class="guia-card-desc">Término fijo de alquiler, consumo en kWh o m³, conversión de propano, peajes y diferencias entre gas de red y bombona.</div>
               <div class="guia-card-chips">
-                <span class="guia-chip" style="color:var(--dim);border-color:var(--dim)">Próximamente</span>
+                <span class="guia-chip">Resumen</span>
+                <span class="guia-chip">Conceptos</span>
+                <span class="guia-chip">Propano vs Red</span>
+                <span class="guia-chip">Actores</span>
+                <span class="guia-chip">Test</span>
               </div>
             </div>
             <div class="guia-card-arrow">→</div>
           </div>
         </div>
 
-        <!-- Próximamente Agua -->
-        <div class="guia-card" style="opacity:0.45;pointer-events:none;">
+        <!-- Guía Agua -->
+        <div class="guia-card" onclick="openGuia('agua')">
           <div class="guia-card-inner">
             <div class="guia-card-accent" style="background:var(--agua)"></div>
             <div class="guia-card-body">
               <div class="guia-card-tag" style="color:var(--agua)">💧 Agua</div>
               <div class="guia-card-name">Factura del Agua</div>
-              <div class="guia-card-desc">Próximamente — cuota de servicio, consumo por bloques, canon de saneamiento y más.</div>
+              <div class="guia-card-desc">Cuota de servicio fija, bloques de consumo progresivos, canon de saneamiento, IVA reducido y cómo leer el contador.</div>
               <div class="guia-card-chips">
-                <span class="guia-chip" style="color:var(--dim);border-color:var(--dim)">Próximamente</span>
+                <span class="guia-chip">Resumen</span>
+                <span class="guia-chip">Conceptos</span>
+                <span class="guia-chip">Bloques</span>
+                <span class="guia-chip">Actores</span>
+                <span class="guia-chip">Test</span>
               </div>
             </div>
             <div class="guia-card-arrow">→</div>
@@ -545,6 +553,316 @@ select option{background:var(--bg2);}
         </div>
 
       </div><!-- /guia-luz -->
+
+      <!-- ════════════════════════════
+           GUÍA GAS / PROPANO
+      ════════════════════════════ -->
+      <div id="guia-gas" class="guia-content">
+        <button class="guias-back-btn" onclick="closeGuia()">← Volver a guías</button>
+
+        <div class="guias-hero" style="margin-bottom:10px;">
+          <div class="guias-hero-label" style="color:var(--gas)">🔥 Gas · Propano · Ejemplo orientativo</div>
+          <div class="guias-hero-title">FACTURA DEL GAS</div>
+          <div class="guias-hero-desc">Entiende cada línea de tu factura de gas natural o propano, ya sea de red o de bombona.</div>
+          <div style="font-family:var(--fh);font-size:32px;color:var(--gas);margin-top:8px;">~55 – 120 € / bimestre</div>
+        </div>
+
+        <div class="gtabs">
+          <button class="gtab active" onclick="showGtab('gg-resumen',this)">Resumen</button>
+          <button class="gtab" onclick="showGtab('gg-conceptos',this)">Conceptos</button>
+          <button class="gtab" onclick="showGtab('gg-propano',this)">Propano vs Red</button>
+          <button class="gtab" onclick="showGtab('gg-actores',this)">Actores</button>
+          <button class="gtab" onclick="showGtab('gg-quiz',this)">Test</button>
+        </div>
+
+        <!-- gg-resumen -->
+        <div id="gg-resumen" class="gsubsection active">
+          <div class="g-metrics">
+            <div class="g-metric"><div class="g-m-label">Ejemplo factura</div><div class="g-m-value">87,40 <span class="g-m-unit">€</span></div></div>
+            <div class="g-metric"><div class="g-m-label">Días facturados</div><div class="g-m-value">62 <span class="g-m-unit">días</span></div></div>
+            <div class="g-metric"><div class="g-m-label">Consumo</div><div class="g-m-value">142 <span class="g-m-unit">kWh</span></div></div>
+            <div class="g-metric"><div class="g-m-label">Coste / día</div><div class="g-m-value">1,41 <span class="g-m-unit">€</span></div></div>
+          </div>
+          <div class="g-card">
+            <div class="g-card-title">Desglose típico (gas natural de red)</div>
+            <div class="g-num-row"><span class="lbl">Cuota fija de alquiler contador</span><span class="val">3,20 €</span></div>
+            <div class="g-num-row"><span class="lbl">Término fijo (disponibilidad)</span><span class="val">8,60 €</span></div>
+            <div class="g-num-row"><span class="lbl">Energía consumida (142 kWh)</span><span class="val">54,76 €</span></div>
+            <div class="g-num-row"><span class="lbl">Peaje de acceso y cargos</span><span class="val">6,48 €</span></div>
+            <div class="g-num-row"><span class="lbl">Impuesto especial hidrocarburos</span><span class="val">3,22 €</span></div>
+            <div class="g-num-row"><span class="lbl">IVA (21%)</span><span class="val">16,14 €</span></div>
+            <div class="g-total-row"><span>Total bimestral</span><span>92,40 €</span></div>
+          </div>
+          <div style="margin-top:4px;">
+            <div class="g-bar-wrap"><div class="g-bar-label"><span>Energía consumida</span><span style="color:var(--gas)">62,7%</span></div><div class="g-bar-bg"><div class="g-bar-fill" style="width:62.7%;background:var(--gas)"></div></div></div>
+            <div class="g-bar-wrap"><div class="g-bar-label"><span>IVA (21%)</span><span style="color:var(--r)">18,5%</span></div><div class="g-bar-bg"><div class="g-bar-fill" style="width:18.5%;background:var(--r)"></div></div></div>
+            <div class="g-bar-wrap"><div class="g-bar-label"><span>Fijo (disponibilidad + contador)</span><span style="color:var(--b)">13,5%</span></div><div class="g-bar-bg"><div class="g-bar-fill" style="width:13.5%;background:var(--b)"></div></div></div>
+            <div class="g-bar-wrap"><div class="g-bar-label"><span>Peajes e impuesto</span><span style="color:var(--muted)">5,3%</span></div><div class="g-bar-bg"><div class="g-bar-fill" style="width:5.3%;background:var(--muted)"></div></div></div>
+          </div>
+          <div class="g-tip">Las facturas de gas suelen ser <strong>bimestrales</strong> (cada 2 meses). El mayor ahorro está en reducir el consumo: calefacción eficiente, aislar ventanas y bajar 1°C el termostato puede reducir hasta un 7% el gasto.</div>
+        </div>
+
+        <!-- gg-conceptos -->
+        <div id="gg-conceptos" class="gsubsection">
+          <div class="g-card">
+            <div class="g-hl hl-info">Término fijo de disponibilidad</div>
+            <div class="g-card-title">¿Qué es?</div>
+            <div class="g-card-desc">Es el cargo por tener la conexión disponible, independientemente de cuánto consumas. Similar al término de potencia en la luz. Cubre el mantenimiento de la infraestructura y la conexión a la red.</div>
+            <div class="g-tip">Lo pagas aunque no enciendas ni un quemador. Solo se puede reducir dando de baja el suministro.</div>
+          </div>
+          <div class="g-card">
+            <div class="g-hl hl-info">Término de consumo (energía)</div>
+            <div class="g-card-title">¿Qué es?</div>
+            <div class="g-card-desc">Es lo que pagas por el gas que realmente usas. Se mide en kWh, aunque el contador mide en m³. La comercializadora convierte m³ → kWh usando el <strong>poder calorífico</strong> del gas de tu zona (varía por red).</div>
+            <div class="g-num-row" style="margin-top:10px;"><span class="lbl">Lectura: 18,4 m³</span><span class="val accent">× factor ~10,5</span></div>
+            <div class="g-num-row"><span class="lbl">= 193 kWh</span><span class="val accent">× 0,0634 €/kWh</span></div>
+            <div class="g-num-row"><span class="lbl">= Coste energía</span><span class="val">12,23 €</span></div>
+            <div class="g-tip">El <strong>factor de conversión</strong> (kWh/m³) aparece en tu factura. En España suele estar entre 10,5 y 11,0. Si no aparece, lo puedes consultar a tu distribuidora.</div>
+          </div>
+          <div class="g-card">
+            <div class="g-hl hl-warn">Peajes de acceso y cargos del sistema</div>
+            <div class="g-card-title">¿Qué es?</div>
+            <div class="g-card-desc">Son los cargos regulados por el Gobierno que financian la red de transporte y distribución de gas, así como políticas energéticas. Los fija la CNMC y no dependen de tu comercializadora.</div>
+          </div>
+          <div class="g-card">
+            <div class="g-hl hl-warn">Impuesto especial de hidrocarburos</div>
+            <div class="g-card-title">¿Qué es?</div>
+            <div class="g-card-desc">Un impuesto por unidad de energía consumida. Se aplica sobre los kWh antes del IVA. No lo controla tu comercializadora — lo fija el Ministerio de Hacienda.</div>
+          </div>
+          <div class="g-card">
+            <div class="g-hl hl-warn">IVA — 21%</div>
+            <div class="g-card-title">¿Qué es?</div>
+            <div class="g-card-desc">El IVA general del 21% se aplica sobre el total de la factura (fijo + variable + peajes + impuesto). En periodos de crisis energética puede estar temporalmente reducido al 5% por decreto del Gobierno.</div>
+          </div>
+          <div class="g-card">
+            <div class="g-hl hl-info">Alquiler del contador / regulador</div>
+            <div class="g-card-title">¿Qué es?</div>
+            <div class="g-card-desc">El contador de gas es propiedad de la distribuidora. Pagas una cuota diaria de alquiler (~0,051 €/día). Para facturas bimestrales suele ser ~3,20 €.</div>
+          </div>
+        </div>
+
+        <!-- gg-propano -->
+        <div id="gg-propano" class="gsubsection">
+          <p style="margin-bottom:14px;font-size:13px;color:var(--muted);line-height:1.7;">En España conviven dos sistemas de gas muy diferentes: la <strong style="color:var(--text)">red de gas natural</strong> y el <strong style="color:var(--text)">gas licuado (propano / butano)</strong>. La factura cambia mucho según cuál tengas.</p>
+
+          <div class="g-card">
+            <div class="g-hl hl-info">🔗 Gas de red (natural)</div>
+            <div class="g-card-title">Cómo funciona</div>
+            <div class="g-card-desc">Llega por tubería directamente a tu casa desde la red nacional. Tienes una comercializadora (como Naturgy, Endesa, Repsol…) que te manda facturas periódicas. Pagas por kWh consumidos.</div>
+            <div class="g-num-row" style="margin-top:8px;"><span class="lbl">Unidad de medida contador</span><span class="val accent">m³</span></div>
+            <div class="g-num-row"><span class="lbl">Unidad de facturación</span><span class="val accent">kWh</span></div>
+            <div class="g-num-row"><span class="lbl">Precio orientativo</span><span class="val">0,05 – 0,10 €/kWh</span></div>
+            <div class="g-num-row"><span class="lbl">Facturación típica</span><span class="val">Bimestral</span></div>
+            <div class="g-tip">Si vives en zona urbana con red de gas, es el sistema más económico a largo plazo para calefacción y ACS.</div>
+          </div>
+
+          <div class="g-card">
+            <div class="g-hl hl-warn">🪣 Propano (depósito o bombonas)</div>
+            <div class="g-card-title">Cómo funciona</div>
+            <div class="g-card-desc">Es gas licuado de petróleo (GLP). Puedes tenerlo en <strong>bombonas individuales</strong> (butano/propano, 12 kg) o en un <strong>depósito enterrado o aéreo</strong> de propano con llenados periódicos.</div>
+            <div class="g-num-row" style="margin-top:8px;"><span class="lbl">Bombonas butano (precio regulado)</span><span class="val accent">~14,65 € / bombona</span></div>
+            <div class="g-num-row"><span class="lbl">Propano a granel (depósito)</span><span class="val accent">~0,95 – 1,25 €/kg</span></div>
+            <div class="g-num-row"><span class="lbl">Poder calorífico propano</span><span class="val">~12,88 kWh/kg</span></div>
+            <div class="g-num-row"><span class="lbl">Coste equivalente propano</span><span class="val">~0,07 – 0,10 €/kWh</span></div>
+            <div class="g-tip">Con depósito de propano pagas la instalación y el alquiler del depósito (si es de la empresa). El <strong>precio por kWh</strong> suele ser mayor que el gas de red, pero es la única opción en zonas rurales sin conexión.</div>
+          </div>
+
+          <div class="g-card">
+            <div class="g-card-title">¿Cómo calcular el coste de una bombona?</div>
+            <div class="g-card-desc" style="margin-bottom:10px;">Una bombona de butano de 12,5 kg tiene aproximadamente 116 kWh de energía útil:</div>
+            <div class="g-num-row"><span class="lbl">12,5 kg × 9,4 kWh/kg (útil)</span><span class="val">= 117,5 kWh</span></div>
+            <div class="g-num-row"><span class="lbl">Precio bombona: ~14,65 €</span><span class="val">= 0,12 €/kWh</span></div>
+            <div class="g-tip">El butano es más caro por kWh que el gas de red o el propano a granel. Si tienes calefacción de butano y tienes opción de cambiar, merece la pena calcular la inversión.</div>
+          </div>
+
+          <div class="g-card">
+            <div class="g-card-title">Comparativa rápida</div>
+            <div class="g-num-row"><span class="lbl">Gas de red</span><span class="val accent">0,05–0,10 €/kWh</span></div>
+            <div class="g-num-row"><span class="lbl">Propano a granel</span><span class="val" style="color:var(--o)">0,07–0,10 €/kWh</span></div>
+            <div class="g-num-row"><span class="lbl">Butano (bombona)</span><span class="val" style="color:var(--r)">~0,12 €/kWh</span></div>
+            <div class="g-num-row"><span class="lbl">Electricidad (P3)</span><span class="val" style="color:var(--g)">~0,07 €/kWh</span></div>
+          </div>
+        </div>
+
+        <!-- gg-actores -->
+        <div id="gg-actores" class="gsubsection">
+          <p style="margin-bottom:20px;font-size:13px;color:var(--muted);line-height:1.7;">En la factura del gas aparecen distintas empresas. El sistema es parecido al de la luz.</p>
+          <div class="g-step"><div class="g-step-num">1</div><div class="g-step-body"><div class="title">Comercializadora</div><div class="desc">Te vende el gas y emite la factura (ej: Naturgy, Endesa Gas, Repsol, Iberdrola…). Puedes cambiar libremente, igual que en la luz. El suministro no se interrumpe durante el cambio.</div></div></div>
+          <div class="divider"></div>
+          <div class="g-step"><div class="g-step-num">2</div><div class="g-step-body"><div class="title">Distribuidora</div><div class="desc">Mantiene las tuberías hasta tu casa. No puedes elegirla. En caso de fuga o avería, llamas a ellos (número en tu factura o en el Protocolo de Emergencias de Gas). Son responsables de las instalaciones hasta el contador.</div></div></div>
+          <div class="divider"></div>
+          <div class="g-step"><div class="g-step-num">3</div><div class="g-step-body"><div class="title">CORES / CNMC</div><div class="desc">El Comité de Regulación supervisa el sector del gas. La CNMC fija los peajes de acceso y vela por la competencia. Puedes comparar ofertas en <strong style="color:var(--text)">comparador.cnmc.gob.es</strong>.</div></div></div>
+          <div class="g-card" style="margin-top:6px;">
+            <div class="g-card-title">Tarifa de Último Recurso (TUR)</div>
+            <div class="g-num-row"><span class="lbl">¿Qué es?</span><span class="val accent" style="font-size:11px">Precio regulado</span></div>
+            <div class="g-num-row"><span class="lbl">Disponible para</span><span class="val" style="font-size:11px">Consumo &lt; 10.000 kWh/año</span></div>
+            <div class="g-num-row"><span class="lbl">Comercializadora</span><span class="val" style="font-size:11px">Solo en empresa habilitada</span></div>
+            <div class="g-tip">Si consumes poco gas (uso doméstico básico), la TUR puede ser más barata que las ofertas de mercado libre en ciertos momentos. Compara antes de contratar.</div>
+          </div>
+        </div>
+
+        <!-- gg-quiz -->
+        <div id="gg-quiz" class="gsubsection">
+          <div class="quiz-progress" id="quiz-gas-progress">Pregunta 1 de 5</div>
+          <div id="quiz-gas-container"></div>
+        </div>
+
+      </div><!-- /guia-gas -->
+
+      <!-- ════════════════════════════
+           GUÍA AGUA
+      ════════════════════════════ -->
+      <div id="guia-agua" class="guia-content">
+        <button class="guias-back-btn" onclick="closeGuia()">← Volver a guías</button>
+
+        <div class="guias-hero" style="margin-bottom:10px;">
+          <div class="guias-hero-label" style="color:var(--agua)">💧 Agua · Ejemplo orientativo</div>
+          <div class="guias-hero-title">FACTURA DEL AGUA</div>
+          <div class="guias-hero-desc">Entiende el sistema de bloques, la cuota fija, el saneamiento y cómo controlar tu consumo.</div>
+          <div style="font-family:var(--fh);font-size:32px;color:var(--agua);margin-top:8px;">~20 – 50 € / bimestre</div>
+        </div>
+
+        <div class="gtabs">
+          <button class="gtab active" onclick="showGtab('ga-resumen',this)">Resumen</button>
+          <button class="gtab" onclick="showGtab('ga-conceptos',this)">Conceptos</button>
+          <button class="gtab" onclick="showGtab('ga-bloques',this)">Bloques</button>
+          <button class="gtab" onclick="showGtab('ga-actores',this)">Actores</button>
+          <button class="gtab" onclick="showGtab('ga-quiz',this)">Test</button>
+        </div>
+
+        <!-- ga-resumen -->
+        <div id="ga-resumen" class="gsubsection active">
+          <div class="g-metrics">
+            <div class="g-metric"><div class="g-m-label">Ejemplo factura</div><div class="g-m-value">34,20 <span class="g-m-unit">€</span></div></div>
+            <div class="g-metric"><div class="g-m-label">Días facturados</div><div class="g-m-value">62 <span class="g-m-unit">días</span></div></div>
+            <div class="g-metric"><div class="g-m-label">Consumo</div><div class="g-m-value">14 <span class="g-m-unit">m³</span></div></div>
+            <div class="g-metric"><div class="g-m-label">Litros / día</div><div class="g-m-value">226 <span class="g-m-unit">L</span></div></div>
+          </div>
+          <div class="g-card">
+            <div class="g-card-title">Desglose típico (2 personas)</div>
+            <div class="g-num-row"><span class="lbl">Cuota de servicio fija (contador)</span><span class="val">5,80 €</span></div>
+            <div class="g-num-row"><span class="lbl">Consumo — Bloque 1 (0–6 m³)</span><span class="val">5,40 €</span></div>
+            <div class="g-num-row"><span class="lbl">Consumo — Bloque 2 (6–14 m³)</span><span class="val">8,96 €</span></div>
+            <div class="g-num-row"><span class="lbl">Canon de saneamiento (autonómico)</span><span class="val">5,46 €</span></div>
+            <div class="g-num-row"><span class="lbl">Tasa de alcantarillado (municipal)</span><span class="val">2,80 €</span></div>
+            <div class="g-num-row"><span class="lbl">IVA (10% — tipo reducido)</span><span class="val">2,80 €</span></div>
+            <div class="g-total-row"><span>Total bimestral</span><span>31,22 €</span></div>
+          </div>
+          <div style="margin-top:4px;">
+            <div class="g-bar-wrap"><div class="g-bar-label"><span>Consumo por bloques</span><span style="color:var(--agua)">46,2%</span></div><div class="g-bar-bg"><div class="g-bar-fill" style="width:46.2%;background:var(--agua)"></div></div></div>
+            <div class="g-bar-wrap"><div class="g-bar-label"><span>Cánones y tasas</span><span style="color:var(--o)">26,9%</span></div><div class="g-bar-bg"><div class="g-bar-fill" style="width:26.9%;background:var(--o)"></div></div></div>
+            <div class="g-bar-wrap"><div class="g-bar-label"><span>Cuota fija de servicio</span><span style="color:var(--b)">18,6%</span></div><div class="g-bar-bg"><div class="g-bar-fill" style="width:18.6%;background:var(--b)"></div></div></div>
+            <div class="g-bar-wrap"><div class="g-bar-label"><span>IVA (10%)</span><span style="color:var(--muted)">9,0%</span></div><div class="g-bar-bg"><div class="g-bar-fill" style="width:9%;background:var(--muted)"></div></div></div>
+          </div>
+          <div class="g-tip">El consumo medio en España es <strong>~130 litros/persona/día</strong>. Con 2 personas, lo normal es 14–20 m³/bimestre. Si consumes más, revisa posibles fugas — un inodoro con fuga puede desperdiciar 100–200 L/día.</div>
+        </div>
+
+        <!-- ga-conceptos -->
+        <div id="ga-conceptos" class="gsubsection">
+          <div class="g-card">
+            <div class="g-hl hl-info">Cuota fija de servicio</div>
+            <div class="g-card-title">¿Qué es?</div>
+            <div class="g-card-desc">Es el cargo fijo por tener el suministro disponible, independientemente de lo que consumas. Cubre el mantenimiento del contador, la lectura y la infraestructura. Su importe varía según el calibre del contador (el tuyo probablemente es de 13 o 15 mm — el doméstico estándar).</div>
+            <div class="g-tip">Esta cuota se paga siempre. Si te vas de viaje o no consumes nada, la sigues pagando.</div>
+          </div>
+          <div class="g-card">
+            <div class="g-hl hl-info">Término de consumo (por bloques)</div>
+            <div class="g-card-title">¿Qué es?</div>
+            <div class="g-card-desc">El agua se factura por tramos de consumo con precios progresivos: cuanto más consumes, más cara es cada unidad. El objetivo es incentivar el ahorro y penalizar el desperdicio. Los bloques y precios los fija cada ayuntamiento — varían mucho entre municipios.</div>
+          </div>
+          <div class="g-card">
+            <div class="g-hl hl-warn">Canon de saneamiento (autonómico)</div>
+            <div class="g-card-title">¿Qué es?</div>
+            <div class="g-card-desc">Es un impuesto de la Comunidad Autónoma que financia el tratamiento de aguas residuales y depuradoras. Aparece en tu factura aunque lo cobre el ayuntamiento en nombre de la comunidad. Su importe depende del m³ consumido.</div>
+          </div>
+          <div class="g-card">
+            <div class="g-hl hl-warn">Tasa de alcantarillado</div>
+            <div class="g-card-title">¿Qué es?</div>
+            <div class="g-card-desc">Es un cargo municipal por el mantenimiento de la red de alcantarillado y la recogida de aguas residuales. Lo cobra el ayuntamiento. En algunas ciudades está incluido dentro del canon de saneamiento; en otras va separado.</div>
+          </div>
+          <div class="g-card">
+            <div class="g-hl hl-success">IVA — 10% (tipo reducido)</div>
+            <div class="g-card-title">¿Qué es?</div>
+            <div class="g-card-desc">El agua doméstica tributa al tipo reducido del IVA (10%), no al general del 21%. Esto aplica al consumo y a la cuota fija. Algunos cargos de saneamiento están exentos de IVA (depende de la comunidad).</div>
+            <div class="g-tip">En periodos de sequía o emergencia hídrica, el IVA puede bajar temporalmente al 4% por decreto.</div>
+          </div>
+        </div>
+
+        <!-- ga-bloques -->
+        <div id="ga-bloques" class="gsubsection">
+          <p style="margin-bottom:14px;font-size:13px;color:var(--muted);line-height:1.7;">El sistema de bloques es lo más característico de la factura del agua. Funciona de forma <strong style="color:var(--text)">progresiva</strong>: los primeros metros cúbicos son los más baratos.</p>
+
+          <div class="g-card">
+            <div class="g-hl hl-success">Bloque 1 — Consumo mínimo / básico</div>
+            <div class="g-card-title">0 a 6 m³ / bimestre (~100 L/día)</div>
+            <div class="g-card-desc">Es el tramo más barato. Cubre las necesidades básicas de una persona. Precio orientativo: 0,80–1,00 €/m³. En este bloque entras con un consumo muy bajo, habitual en personas que viven solas y son ahorrativas.</div>
+            <div class="g-pill-grid">
+              <span class="g-pill p-p3">~0,90 €/m³ orientativo</span>
+              <span class="g-pill p-p3">Uso básico</span>
+            </div>
+          </div>
+
+          <div class="g-card">
+            <div class="g-hl hl-warn">Bloque 2 — Consumo normal</div>
+            <div class="g-card-title">6 a 15 m³ / bimestre (~150–250 L/día)</div>
+            <div class="g-card-desc">El tramo habitual para 2–3 personas. El precio por m³ sube respecto al bloque 1. Precio orientativo: 1,10–1,40 €/m³. La mayoría de hogares españoles están en este bloque.</div>
+            <div class="g-pill-grid">
+              <span class="g-pill p-p2">~1,20 €/m³ orientativo</span>
+              <span class="g-pill p-p2">Uso doméstico normal</span>
+            </div>
+          </div>
+
+          <div class="g-card">
+            <div class="g-hl hl-danger">Bloque 3 — Consumo elevado</div>
+            <div class="g-card-title">15 a 25 m³ / bimestre (+250 L/día)</div>
+            <div class="g-card-desc">Precio más alto por m³. Si llegas a este bloque habitualmente, revisa posibles fugas (inodoro, grifos) o equipos que consumen mucho agua (lavadoras antiguas, riego sin temporizador).</div>
+            <div class="g-pill-grid">
+              <span class="g-pill p-p1">~1,80–2,40 €/m³ orientativo</span>
+              <span class="g-pill p-p1">Revisar fugas</span>
+            </div>
+          </div>
+
+          <div class="g-card">
+            <div class="g-card-title">Cómo leer el contador</div>
+            <div class="g-card-desc" style="margin-bottom:10px;">El contador de agua mide en m³ acumulados. La factura resta la lectura anterior de la actual:</div>
+            <div class="g-num-row"><span class="lbl">Lectura actual</span><span class="val">1.284 m³</span></div>
+            <div class="g-num-row"><span class="lbl">Lectura anterior</span><span class="val">1.270 m³</span></div>
+            <div class="g-num-row"><span class="lbl">Consumo bimestral</span><span class="val accent">14 m³</span></div>
+            <div class="g-tip">Si en la factura pone <strong>"Lectura estimada"</strong>, el lector no pudo acceder al contador y usó un valor calculado. Puedes enviar tu propia lectura a la empresa. Los diales del contador son los números antes del punto rojo (los últimos dígitos son para litros, no para m³).</div>
+          </div>
+
+          <div class="g-card">
+            <div class="g-card-title">Detectar una fuga oculta</div>
+            <div class="g-card-desc">Cierra todos los grifos y electrodomésticos. Mira el contador: si el dial de litros (el más pequeño) sigue girando, hay una fuga. La causa más común es el mecanismo del inodoro (la cadena o la válvula de entrada).</div>
+            <div class="g-tip">Una fuga de inodoro puede añadir <strong>3–6 m³/mes</strong> extra a tu factura sin que lo notes. Detectarla pronto puede ahorrarte 30–60 € al mes.</div>
+          </div>
+        </div>
+
+        <!-- ga-actores -->
+        <div id="ga-actores" class="gsubsection">
+          <p style="margin-bottom:20px;font-size:13px;color:var(--muted);line-height:1.7;">El agua es el suministro más local de todos: depende casi completamente del ayuntamiento o de la empresa que éste contrate.</p>
+          <div class="g-step"><div class="g-step-num">1</div><div class="g-step-body"><div class="title">Empresa distribuidora / gestora</div><div class="desc">Puede ser directamente el ayuntamiento, una empresa municipal (EMT de aguas, etc.) o una empresa privada concesionaria (Aqualia, FCC Aqualia, Agbar/Suez, Aguas de Valencia…). No puedes elegirla — viene determinada por tu municipio.</div></div></div>
+          <div class="divider"></div>
+          <div class="g-step"><div class="g-step-num">2</div><div class="g-step-body"><div class="title">Ayuntamiento</div><div class="desc">Fija las tarifas, los bloques de consumo y las tasas de alcantarillado. Cualquier reclamación de facturación empieza aquí (o en la empresa gestora). Si no resuelven, puedes acudir al Defensor del Consumidor de tu comunidad.</div></div></div>
+          <div class="divider"></div>
+          <div class="g-step"><div class="g-step-num">3</div><div class="g-step-body"><div class="title">Comunidad Autónoma</div><div class="desc">Regula y cobra el canon de saneamiento. También supervisa la calidad del agua potable a través de los organismos autonómicos de salud pública.</div></div></div>
+          <div class="g-card" style="margin-top:6px;">
+            <div class="g-card-title">Bonificaciones sociales</div>
+            <div class="g-num-row"><span class="lbl">Familias numerosas</span><span class="val accent">Descuento en cuota fija</span></div>
+            <div class="g-num-row"><span class="lbl">Pensionistas / renta baja</span><span class="val accent">Bloque social a precio 0</span></div>
+            <div class="g-num-row"><span class="lbl">Discapacidad</span><span class="val accent">Varía por municipio</span></div>
+            <div class="g-tip">Muchos ayuntamientos tienen tarifas sociales que no se aplican automáticamente: hay que solicitarlas. Consulta en tu ayuntamiento o empresa de agua si tienes derecho a algún descuento.</div>
+          </div>
+        </div>
+
+        <!-- ga-quiz -->
+        <div id="ga-quiz" class="gsubsection">
+          <div class="quiz-progress" id="quiz-agua-progress">Pregunta 1 de 5</div>
+          <div id="quiz-agua-container"></div>
+        </div>
+
+      </div><!-- /guia-agua -->
+
     </div>
 
     <!-- ── DATOS ── -->
@@ -940,7 +1258,9 @@ function importFile(e) {
 function openGuia(tipo) {
   document.getElementById('guias-list').style.display = 'none';
   document.getElementById('guia-'+tipo).classList.add('active');
-  renderQuiz();
+  if (tipo === 'luz') initQuiz('luz');
+  if (tipo === 'gas') initQuiz('gas');
+  if (tipo === 'agua') initQuiz('agua');
 }
 function closeGuia() {
   document.querySelectorAll('.guia-content').forEach(g => g.classList.remove('active'));
@@ -953,51 +1273,80 @@ function showGtab(id, el) {
   el.classList.add('active');
 }
 
-// ── QUIZ ──
-const questions = [
-  {q:"¿Cuánto pagarías en potencia aunque no consumieras ni un kWh en todo el mes?",opts:["0 € — si no consumes, no pagas nada","9,54 € — el término fijo siempre se paga","51,57 € — es el coste principal","13,64 € — el IVA"],correct:1,feedback:"El término de potencia es fijo: pagas por tener la línea disponible independientemente del consumo."},
-  {q:"Si pones la lavadora a las 3 de la mañana un sábado, ¿en qué periodo estás?",opts:["P1 (punta) — el más caro","P2 (llano) — precio medio","P3 (valle) — el más barato","Depende de la comercializadora"],correct:2,feedback:"Las noches (0h–8h) y los fines de semana y festivos son siempre P3 (valle). ¡Aprovéchalo!"},
-  {q:"¿Qué significa 'Lectura Estimada' en tu factura?",opts:["Que la comercializadora ha subido el precio","Que el distribuidor calculó el consumo sin leer el contador","Que tu contador está averiado","Que consumes más que la media"],correct:1,feedback:"Cuando el distribuidor no puede leer físicamente el contador, estima el consumo. Se ajusta en la siguiente factura con lectura real."},
-  {q:"Quieres cambiar de comercializadora. ¿Esto afecta a tu distribuidora?",opts:["Sí, tendrías que cambiar también el distribuidor","No, el distribuidor es independiente de la comercializadora","Sí, y puede tardar hasta 6 meses","Solo si cambias a tarifa regulada (PVPC)"],correct:1,feedback:"El distribuidor está asignado por zona geográfica y no cambia. Solo cambia quién te factura y el precio de la energía."},
-  {q:"¿Qué porcentaje aproximado de una factura típica se va en impuestos (IE + IVA)?",opts:["Menos del 5%","Entre el 10% y el 15%","Alrededor del 21%","Más del 30%"],correct:2,feedback:"IE (~5%) + IVA (21%) aplicados sobre la factura suponen alrededor del 21% del total. Es el segundo mayor coste después de la energía."}
-];
-let quizCurrent = 0, quizAnswered = false;
-function renderQuiz() {
-  quizCurrent = 0; quizAnswered = false;
-  renderQuestion();
+// ── QUIZ ENGINE ──
+const QUIZZES = {
+  luz: [
+    {q:"¿Cuánto pagarías en potencia aunque no consumieras ni un kWh en todo el mes?",opts:["0 € — si no consumes, no pagas nada","9,54 € — el término fijo siempre se paga","51,57 € — es el coste principal","13,64 € — el IVA"],correct:1,feedback:"El término de potencia es fijo: pagas por tener la línea disponible independientemente del consumo."},
+    {q:"Si pones la lavadora a las 3 de la mañana un sábado, ¿en qué periodo estás?",opts:["P1 (punta) — el más caro","P2 (llano) — precio medio","P3 (valle) — el más barato","Depende de la comercializadora"],correct:2,feedback:"Las noches (0h–8h) y los fines de semana y festivos son siempre P3 (valle). ¡Aprovéchalo!"},
+    {q:"¿Qué significa 'Lectura Estimada' en tu factura de luz?",opts:["Que la comercializadora ha subido el precio","Que el distribuidor calculó el consumo sin leer el contador","Que tu contador está averiado","Que consumes más que la media"],correct:1,feedback:"Cuando el distribuidor no puede leer físicamente el contador, estima el consumo. Se ajusta en la siguiente factura con lectura real."},
+    {q:"Quieres cambiar de comercializadora. ¿Esto afecta a tu distribuidora de luz?",opts:["Sí, tendrías que cambiar también el distribuidor","No, el distribuidor es independiente de la comercializadora","Sí, y puede tardar hasta 6 meses","Solo si cambias a tarifa regulada (PVPC)"],correct:1,feedback:"El distribuidor está asignado por zona geográfica y no cambia. Solo cambia quién te factura y el precio de la energía."},
+    {q:"¿Qué IVA se aplica en la factura de la luz?",opts:["4% — tipo superreducido","10% — tipo reducido","21% — tipo general","Está exenta de IVA"],correct:2,feedback:"La electricidad tributa al 21% de IVA general. Solo baja temporalmente por decreto en situaciones de crisis energética."}
+  ],
+  gas: [
+    {q:"Tu factura de gas mide el consumo en m³, pero te factura en kWh. ¿Por qué?",opts:["Es un error de la comercializadora","La energía del gas varía por zona; se convierte usando el poder calorífico","Para que pagues más","Porque los contadores nuevos ya miden en kWh"],correct:1,feedback:"El gas no tiene la misma densidad energética en todas las redes. El factor de conversión (kWh/m³) aparece en tu factura y puede variar entre 10,5 y 11,0."},
+    {q:"¿Qué IVA se aplica a la factura del gas de red doméstico?",opts:["4%","10%","21%","Está exento"],correct:2,feedback:"El gas natural doméstico tributa al 21% de IVA general, igual que la electricidad. Solo puede bajar por decreto en situaciones excepcionales."},
+    {q:"Tienes propano a granel en depósito. ¿Qué suele ser más económico por kWh?",opts:["El propano a granel siempre es más barato","El gas de red suele ser más barato que el propano","Las bombonas de butano son lo más barato","El propano y el gas de red tienen siempre el mismo precio"],correct:1,feedback:"El gas de red suele ser el más económico por kWh (~0,05–0,10 €/kWh), seguido del propano a granel (~0,07–0,10 €/kWh). Las bombonas de butano son las más caras por kWh útil."},
+    {q:"¿Qué es el término fijo de disponibilidad en la factura del gas?",opts:["El coste del gas que consumes","Un cargo fijo por tener el suministro disponible, aunque no consumas","El impuesto del Estado sobre el gas","El alquiler del contador únicamente"],correct:1,feedback:"Es similar al término de potencia en la luz: pagas por tener la conexión disponible aunque no enciendas ni un quemador. Se paga siempre."},
+    {q:"Si hay una fuga de gas, ¿a quién llamas primero?",opts:["A tu comercializadora","A la distribuidora (la que mantiene las tuberías)","Al ayuntamiento","Al 112 y después al número de urgencias de gas"],correct:3,feedback:"Ante una fuga de gas: ventila la estancia, no enciendas luces ni enchufes, sal del edificio y llama al 112. Después contacta con la distribuidora. Tu comercializadora no gestiona emergencias físicas."}
+  ],
+  agua: [
+    {q:"¿Por qué el agua se factura en bloques con precios progresivos?",opts:["Para que la empresa gane más","Para incentivar el ahorro: cuanto más consumes, más cara es cada unidad","Es el sistema más fácil de calcular","Por normativa europea que obliga a bloques fijos"],correct:1,feedback:"El sistema de bloques progresivos penaliza el consumo excesivo y protege el acceso al agua básica. Los primeros m³ (uso básico) son los más baratos."},
+    {q:"¿Qué IVA se aplica al agua doméstica?",opts:["21%","10% — tipo reducido","4% — tipo superreducido","Está exenta"],correct:1,feedback:"El agua potable doméstica tributa al 10% de IVA (tipo reducido), no al 21%. Es uno de los pocos suministros con tipo reducido permanente."},
+    {q:"¿Cómo puedes detectar una fuga oculta en tu instalación?",opts:["Compara tu factura con la del vecino","Cierra todo y mira si el dial de litros del contador sigue girando","Llama a la empresa del agua para que venga a comprobar","Solo se detecta si la factura sube mucho"],correct:1,feedback:"Con todos los grifos y electrodomésticos cerrados, observa el dial más pequeño del contador. Si sigue girando, hay una fuga. Un inodoro con fuga puede desperdiciar 100–200 L/día."},
+    {q:"¿Quién fija el precio del agua en tu municipio?",opts:["El Gobierno central mediante decreto","La empresa privada que gestiona el suministro libremente","El ayuntamiento (y en algunos casos la comunidad autónoma)","La Unión Europea"],correct:2,feedback:"Las tarifas del agua las fija el ayuntamiento, que puede gestionar el servicio directamente o concesionarlo a una empresa privada. Por eso los precios varían tanto entre municipios."},
+    {q:"El canon de saneamiento que aparece en tu factura, ¿a quién financia?",opts:["El mantenimiento de las tuberías de tu calle","El tratamiento de aguas residuales y depuradoras (comunidad autónoma)","Los servicios de lectura del contador","La instalación interior de tu vivienda"],correct:1,feedback:"El canon de saneamiento es un impuesto autonómico que financia las depuradoras y el tratamiento de aguas residuales. Lo cobra la empresa de agua en nombre de la comunidad autónoma."}
+  ]
+};
+
+const quizState = { luz: {current:0, answered:false}, gas: {current:0, answered:false}, agua: {current:0, answered:false} };
+
+function initQuiz(tipo) {
+  quizState[tipo].current = 0;
+  quizState[tipo].answered = false;
+  renderQuizFor(tipo);
 }
-function renderQuestion() {
-  const q = questions[quizCurrent];
-  document.getElementById('quiz-progress').textContent = `Pregunta ${quizCurrent+1} de ${questions.length}`;
-  document.getElementById('quiz-container').innerHTML = `
+
+function renderQuizFor(tipo) {
+  const cfg = { luz: {progress:'quiz-progress', container:'quiz-container'}, gas: {progress:'quiz-gas-progress', container:'quiz-gas-container'}, agua: {progress:'quiz-agua-progress', container:'quiz-agua-container'} };
+  const qs = QUIZZES[tipo];
+  const st = quizState[tipo];
+  const q = qs[st.current];
+  const c = cfg[tipo];
+  const progressEl = document.getElementById(c.progress);
+  const containerEl = document.getElementById(c.container);
+  if (!progressEl || !containerEl) return;
+  progressEl.textContent = `Pregunta ${st.current+1} de ${qs.length}`;
+  containerEl.innerHTML = `
     <div class="quiz-q">${q.q}</div>
-    <div class="quiz-opts">${q.opts.map((o,i)=>`<button class="quiz-opt" onclick="answer(${i})">${o}</button>`).join('')}</div>
-    <div class="quiz-feedback" id="qfeedback"></div>
-    ${quizCurrent<questions.length-1?`<button class="quiz-next" id="qnext" onclick="nextQ()">Siguiente →</button>`:`<button class="quiz-next" id="qnext" onclick="restartQ()">Volver a empezar</button>`}
+    <div class="quiz-opts">${q.opts.map((o,i)=>`<button class="quiz-opt" onclick="answerQuiz('${tipo}',${i})">${o}</button>`).join('')}</div>
+    <div class="quiz-feedback" id="qfb-${tipo}"></div>
+    ${st.current<qs.length-1?`<button class="quiz-next" id="qnext-${tipo}" onclick="nextQuiz('${tipo}')">Siguiente →</button>`:`<button class="quiz-next" id="qnext-${tipo}" onclick="initQuiz('${tipo}')">Volver a empezar</button>`}
   `;
-  quizAnswered = false;
+  st.answered = false;
 }
-function answer(i) {
-  if (quizAnswered) return;
-  quizAnswered = true;
-  const q = questions[quizCurrent];
-  document.querySelectorAll('.quiz-opt').forEach((o,idx) => {
+
+function answerQuiz(tipo, i) {
+  const st = quizState[tipo];
+  if (st.answered) return;
+  st.answered = true;
+  const q = QUIZZES[tipo][st.current];
+  const cfg = { luz: 'quiz-container', gas: 'quiz-gas-container', agua: 'quiz-agua-container' };
+  document.querySelectorAll(`#${cfg[tipo]} .quiz-opt`).forEach((o,idx) => {
     if (idx===q.correct) o.classList.add('correct');
     else if (idx===i && i!==q.correct) o.classList.add('wrong');
     o.style.pointerEvents = 'none';
   });
-  const fb = document.getElementById('qfeedback');
+  const fb = document.getElementById('qfb-'+tipo);
   fb.style.display = 'block';
   fb.style.background = i===q.correct?'rgba(48,216,128,0.1)':'rgba(240,64,48,0.1)';
   fb.style.color = i===q.correct?'var(--g)':'var(--r)';
   fb.style.border = `0.5px solid ${i===q.correct?'rgba(48,216,128,0.25)':'rgba(240,64,48,0.25)'}`;
-  fb.style.borderRadius = '8px';
-  fb.style.padding = '12px 16px';
+  fb.style.borderRadius = '8px'; fb.style.padding = '12px 16px';
   fb.textContent = q.feedback;
-  document.getElementById('qnext').style.display = 'inline-block';
+  document.getElementById('qnext-'+tipo).style.display = 'inline-block';
 }
-function nextQ() { quizCurrent++; renderQuestion(); }
-function restartQ() { quizCurrent = 0; renderQuestion(); }
+
+function nextQuiz(tipo) { quizState[tipo].current++; renderQuizFor(tipo); }
 
 // ── INIT ──
 setTipo('todos');
