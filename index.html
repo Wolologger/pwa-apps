@@ -242,7 +242,8 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
     </div>
     <div class="footer-right">
       v<span class="fv" id="fv">—</span><br>
-      <span id="file-count">—</span>
+      <span id="file-count">—</span><br>
+      <button onclick="clearCache()" style="margin-top:6px;background:transparent;border:0.5px solid rgba(240,64,48,0.3);border-radius:5px;color:var(--r);font-family:var(--fm);font-size:9px;padding:3px 8px;cursor:pointer;letter-spacing:0.5px;" title="Borra Service Worker y caché del navegador">🗑 Limpiar caché</button>
     </div>
   </div>
 </div>
@@ -603,6 +604,21 @@ function toggleNotifPanel(){
   const isOpen=panel.classList.toggle('open');
   btn.classList.toggle('active',isOpen);
   if(isOpen) WNotify.renderConfigPanel('notif-config-container');
+}
+
+async function clearCache(){
+  if(!confirm('¿Limpiar caché y Service Worker?\nLa app se recargará. Los datos de las apps NO se borran.')) return;
+  // Desregistrar SW
+  if('serviceWorker' in navigator){
+    const regs = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(regs.map(r=>r.unregister()));
+  }
+  // Borrar caches del navegador
+  if('caches' in window){
+    const keys = await caches.keys();
+    await Promise.all(keys.map(k=>caches.delete(k)));
+  }
+  window.location.reload(true);
 }
 
 loadApps();

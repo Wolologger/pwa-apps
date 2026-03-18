@@ -8,281 +8,181 @@
 <meta name="theme-color" content="#0a0a09">
 <title>Despensa — W//APPS</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<!-- ★ Bus compartido -->
+<script src="wapps-store.js"></script>
 <style>
 :root{
-  --bg:#0a0a09; --bg2:#141412; --bg3:#1e1e1b;
-  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
-  --text:#f0ebe0; --muted:#5a5850; --dim:#2a2a26;
-  --y:#e8f040; --r:#f04030; --g:#30d880; --b:#30a8f0; --o:#f09030;
-  --fh:'Bebas Neue',sans-serif; --fm:'DM Mono',monospace; --fs:'DM Sans',sans-serif;
+--bg:#0a0a09; --bg2:#141412; --bg3:#1e1e1b;
+--border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
+--text:#f0ebe0; --muted:#5a5850; --dim:#2a2a26;
+--y:#e8f040; --r:#f04030; --g:#30d880; --b:#30a8f0; --o:#f09030;
+--fh:'Bebas Neue',sans-serif; --fm:'DM Mono',monospace; --fs:'DM Sans',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--fs);overflow-x:hidden;}
-
-/* ═══ W//NAV ═══ */
 .wnav{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:100;flex-shrink:0;}
 .wnav-back{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--muted);text-decoration:none;transition:all 0.15s;flex-shrink:0;}
 .wnav-back:hover{background:rgba(255,255,255,0.06);color:var(--y);}
 .wnav-back:active{transform:scale(0.94);}
 .wnav-logo{font-family:var(--fh);font-size:16px;letter-spacing:2px;line-height:1;flex-shrink:0;}
-.wnav-logo a{color:var(--muted);text-decoration:none;transition:color 0.15s;}
+.wnav-logo a{color:var(--muted);text-decoration:none;}
 .wnav-logo a span{color:var(--y);}
-.wnav-logo a:hover{color:var(--text);}
 .wnav-sep{width:1px;height:16px;background:var(--border2);flex-shrink:0;}
-.wnav-title{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-
-/* SHELL */
+.wnav-title{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);flex:1;}
+.wnav-version{font-size:9px;color:var(--dim);font-family:var(--fm);letter-spacing:0.5px;border:1px solid var(--dim);padding:2px 6px;border-radius:3px;flex-shrink:0;}
 .shell{display:flex;flex-direction:column;height:100dvh;max-width:480px;margin:0 auto;}
-
-/* TABS */
 .tabs{display:flex;padding:0 16px;gap:2px;border-bottom:1px solid var(--border2);flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
 .tabs::-webkit-scrollbar{display:none;}
-.tab{flex-shrink:0;padding:10px 14px;font-size:11px;font-family:var(--fm);border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;letter-spacing:0.3px;white-space:nowrap;}
+.tab{flex-shrink:0;padding:10px 14px;font-size:11px;font-family:var(--fm);border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;white-space:nowrap;}
 .tab.active{color:var(--y);border-bottom-color:var(--y);}
-.tab:hover{color:var(--text);}
-
-/* CONTENT */
 .content{flex:1;overflow-y:auto;padding:0 16px 100px;scrollbar-width:none;}
 .content::-webkit-scrollbar{display:none;}
 .section{display:none;padding-top:14px;}
 .section.active{display:block;}
-
-/* SUMMARY BAR */
+/* ALERTS BANNER */
+.alert-bar{background:rgba(240,144,48,0.1);border:0.5px solid rgba(240,144,48,0.3);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--o);font-family:var(--fm);line-height:1.6;display:none;}
+.alert-bar.visible{display:block;}
+.alert-bar strong{color:var(--text);}
+.alert-bar-crit{background:rgba(240,64,48,0.1);border-color:rgba(240,64,48,0.3);color:var(--r);}
+/* SUMMARY */
 .summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
 .scard{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px;}
 .scard-label{font-size:9px;color:var(--muted);font-family:var(--fm);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:4px;}
-.scard-val{font-family:var(--fh);font-size:26px;line-height:1;color:var(--text);}
-
+.scard-val{font-family:var(--fh);font-size:26px;line-height:1;}
 /* ADD PANEL */
 .add-panel{background:var(--bg2);border:0.5px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:12px;display:none;}
 .add-panel.open{display:block;}
-.ap-title{font-family:var(--fh);font-size:16px;letter-spacing:0.3px;margin-bottom:12px;}
+.ap-title{font-family:var(--fh);font-size:16px;margin-bottom:12px;}
 .field{margin-bottom:8px;}
 .field-label{font-size:9px;color:var(--muted);font-family:var(--fm);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
 .field-row{display:flex;gap:8px;}
 .field-row>*{flex:1;min-width:0;}
-input,select,textarea{width:100%;background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--fm);font-size:13px;padding:9px 12px;outline:none;transition:border-color 0.15s;}
-input:focus,select:focus,textarea:focus{border-color:var(--y);}
+input,select{width:100%;background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--fm);font-size:13px;padding:9px 12px;outline:none;transition:border-color 0.15s;}
+input:focus,select:focus{border-color:var(--y);}
 select option{background:var(--bg2);}
 .ap-btns{display:flex;gap:8px;margin-top:4px;}
 .btn{padding:9px 16px;font-size:12px;font-family:var(--fm);border:0.5px solid var(--border2);border-radius:8px;background:transparent;color:var(--text);cursor:pointer;transition:all 0.15s;flex-shrink:0;}
 .btn:hover{background:var(--bg3);}
 .btn-y{background:var(--y);color:#0a0a09;border-color:var(--y);font-weight:500;}
-.btn-y:hover{opacity:0.9;background:var(--y);}
+.btn-y:hover{opacity:0.9;}
 .btn-r{color:var(--r);border-color:rgba(240,64,48,0.3);}
+.btn-b{color:var(--b);border-color:rgba(48,168,240,0.3);}
 .btn-sm{padding:5px 11px;font-size:11px;}
-.btn-full{width:100%;}
-
-/* ALIMENTO CARDS */
+/* GRUPOS */
 .grupo{margin-bottom:16px;}
 .grupo-hd{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
 .grupo-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--fm);}
 .grupo-line{flex:1;height:0.5px;background:var(--border2);}
 .grupo-count{font-size:9px;color:var(--dim);}
-
 .ali-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--border);cursor:pointer;}
 .ali-row:last-child{border-bottom:none;}
-.ali-row:active{opacity:0.7;}
-
-/* Urgency dot */
 .urgency-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-
 .ali-body{flex:1;min-width:0;}
 .ali-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ali-meta{display:flex;gap:8px;margin-top:2px;align-items:center;flex-wrap:wrap;}
 .ali-cat{font-size:10px;color:var(--muted);}
 .ali-qty{font-size:10px;color:var(--muted);}
-
-/* Expiry badge */
 .exp-badge{font-size:9px;padding:2px 8px;border-radius:99px;font-family:var(--fm);flex-shrink:0;white-space:nowrap;}
 .exp-hoy{background:rgba(240,64,48,0.15);color:var(--r);border:0.5px solid rgba(240,64,48,0.3);}
 .exp-pronto{background:rgba(240,144,48,0.15);color:var(--o);border:0.5px solid rgba(240,144,48,0.3);}
 .exp-ok{background:rgba(48,216,128,0.1);color:var(--g);border:0.5px solid rgba(48,216,128,0.2);}
 .exp-sin{background:rgba(90,88,80,0.15);color:var(--muted);border:0.5px solid var(--border2);}
-
-/* Checkbox selector */
-.ali-check{width:18px;height:18px;flex-shrink:0;border:1.5px solid var(--border2);border-radius:5px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
-.ali-check.sel{background:var(--y);border-color:var(--y);}
-.ali-check.sel::after{content:'✓';font-size:10px;color:#0a0a09;font-weight:700;}
-
-/* Edit form */
 .edit-form{background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;padding:10px;margin-top:8px;display:none;}
 .edit-form.open{display:block;}
-.ef-field{margin-bottom:7px;}
-
-/* RECIPE SECTION */
-.recipe-bar{background:var(--bg2);border:0.5px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:12px;}
-.recipe-bar-title{font-family:var(--fh);font-size:15px;letter-spacing:0.3px;margin-bottom:4px;}
-.recipe-bar-sub{font-size:11px;color:var(--muted);margin-bottom:10px;font-family:var(--fm);}
-.sel-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;min-height:20px;}
-.sel-chip{padding:3px 10px;border-radius:99px;font-size:11px;font-family:var(--fm);background:var(--y);color:#0a0a09;display:flex;align-items:center;gap:5px;}
-.sel-chip-x{cursor:pointer;opacity:0.6;font-size:13px;line-height:1;}
-.sel-chip-x:hover{opacity:1;}
-.no-sel{font-size:11px;color:var(--dim);font-family:var(--fm);}
-
-/* API KEY setup */
-.apikey-setup{background:var(--bg2);border:0.5px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:12px;}
-.apikey-setup-title{font-family:var(--fh);font-size:15px;margin-bottom:6px;}
-.apikey-setup-note{font-size:11px;color:var(--muted);font-family:var(--fm);line-height:1.6;margin-bottom:10px;}
-.apikey-setup-note a{color:var(--b);text-decoration:none;}
-.apikey-row{display:flex;gap:8px;}
-
-/* Recipe cards */
-.recipe-grid{display:flex;flex-direction:column;gap:10px;}
-.recipe-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;overflow:hidden;display:flex;gap:0;text-decoration:none;color:var(--text);transition:border-color 0.15s;}
-.recipe-card:hover{border-color:var(--y);}
-.recipe-img{width:80px;height:80px;object-fit:cover;flex-shrink:0;background:var(--bg3);}
-.recipe-img-placeholder{width:80px;height:80px;flex-shrink:0;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:24px;}
-.recipe-body{padding:10px 12px;flex:1;min-width:0;}
-.recipe-title{font-size:13px;font-weight:500;line-height:1.3;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.recipe-meta{font-size:10px;color:var(--muted);font-family:var(--fm);}
-.recipe-match{font-size:10px;color:var(--g);font-family:var(--fm);margin-top:3px;}
-
-.loading-recipes{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);font-family:var(--fm);padding:16px 0;}
-.spinner{width:14px;height:14px;border:1.5px solid var(--dim);border-top-color:var(--y);border-radius:50%;animation:spin 0.6s linear infinite;flex-shrink:0;}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-.empty{color:var(--muted);font-size:13px;text-align:center;padding:2rem 1rem;line-height:1.7;}
-.err-box{background:rgba(240,64,48,0.08);border:0.5px solid rgba(240,64,48,0.25);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--r);font-family:var(--fm);line-height:1.6;}
-
+/* Mover a compra btn */
+.move-compra{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-family:var(--fm);padding:3px 9px;border-radius:99px;background:rgba(48,168,240,0.1);color:var(--b);border:0.5px solid rgba(48,168,240,0.25);cursor:pointer;margin-top:4px;transition:all 0.15s;}
+.move-compra:hover{background:rgba(48,168,240,0.2);}
+/* CONFIG */
+.config-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:14px;margin-bottom:10px;}
+.config-title{font-family:var(--fh);font-size:16px;margin-bottom:6px;}
+.config-desc{font-size:11px;color:var(--muted);margin-bottom:10px;font-family:var(--fm);line-height:1.6;}
 /* FAB */
 .fab-area{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;padding:12px 16px 24px;background:linear-gradient(to top,var(--bg) 60%,transparent);pointer-events:none;}
-.fab{pointer-events:all;width:100%;padding:13px;font-family:var(--fh);font-size:14px;font-weight:600;background:var(--y);color:#0a0a09;border:none;border-radius:12px;cursor:pointer;transition:transform 0.12s,opacity 0.12s;letter-spacing:0.3px;}
+.fab{pointer-events:all;width:100%;padding:13px;font-family:var(--fh);font-size:14px;background:var(--y);color:#0a0a09;border:none;border-radius:12px;cursor:pointer;transition:transform 0.12s,opacity 0.12s;}
 .fab:active{transform:scale(0.97);opacity:0.85;}
-
-.divider{height:0.5px;background:var(--border2);margin:12px 0;}
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:2rem 1rem;line-height:1.7;}
 </style>
 </head>
 <body>
 <div class="shell">
 
-  <!-- NAV -->
-  <div class="wnav">
-    <a class="wnav-back" href="index.html">
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </a>
-    <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
-    <div class="wnav-sep"></div>
-    <div class="wnav-title">DESPENSA</div>
-  </div>
+<div class="wnav">
+  <a class="wnav-back" href="index.html">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </a>
+  <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
+  <div class="wnav-sep"></div>
+  <div class="wnav-title">DESPENSA</div>
+  <div class="wnav-version">v1.1</div>
+</div>
 
-  <!-- TABS -->
-  <div class="tabs">
-    <button class="tab active" onclick="showTab('despensa',this)">Despensa</button>
-    <!-- STANBY: Recetas — pendiente integración Google. Descomentar cuando esté lista.
-    <button class="tab" onclick="showTab('recetas',this)">Recetas</button>
-    -->
-    <button class="tab" onclick="showTab('ajustes',this)">Config</button>
-  </div>
+<div class="tabs">
+  <button class="tab active" onclick="showTab('despensa',this)">Despensa</button>
+  <button class="tab" onclick="showTab('config',this)">Config</button>
+</div>
 
-  <div class="content">
-
-    <!-- ── DESPENSA ── -->
-    <div id="despensa" class="section active">
-      <div class="add-panel" id="add-panel">
-        <div class="ap-title">Nuevo alimento</div>
-        <div class="field-row">
-          <div class="field">
-            <div class="field-label">Nombre</div>
-            <input type="text" id="f-nombre" placeholder="ej: Leche, Tomates…">
-          </div>
-          <div class="field">
-            <div class="field-label">Cantidad</div>
-            <input type="text" id="f-qty" placeholder="ej: 2L, 500g">
-          </div>
-        </div>
-        <div class="field-row" style="margin-top:8px;">
-          <div class="field">
-            <div class="field-label">Categoría</div>
-            <select id="f-cat">
-              <option value="lacteos">🥛 Lácteos</option>
-              <option value="verdura">🥦 Verdura y fruta</option>
-              <option value="carne">🥩 Carne y pescado</option>
-              <option value="conservas">🥫 Conservas</option>
-              <option value="cereales">🌾 Cereales y pasta</option>
-              <option value="congelados">🧊 Congelados</option>
-              <option value="bebidas">🧃 Bebidas</option>
-              <option value="salsas">🫙 Salsas y condimentos</option>
-              <option value="otros">📦 Otros</option>
-            </select>
-          </div>
-          <div class="field">
-            <div class="field-label">Caduca</div>
-            <input type="date" id="f-fecha">
-          </div>
-        </div>
-        <div class="ap-btns" style="margin-top:10px;">
-          <button class="btn btn-y" style="flex:1" onclick="addAlimento()">Añadir</button>
-          <button class="btn" onclick="closeAdd()">Cancelar</button>
-        </div>
+<div class="content">
+  <div id="despensa" class="section active">
+    <!-- alertas de caducidad en tiempo real -->
+    <div id="alert-caducidad" class="alert-bar"></div>
+    <div class="add-panel" id="add-panel">
+      <div class="ap-title">Nuevo alimento</div>
+      <div class="field-row">
+        <div class="field"><div class="field-label">Nombre</div><input type="text" id="f-nombre" placeholder="ej: Leche, Tomates…"></div>
+        <div class="field"><div class="field-label">Cantidad</div><input type="text" id="f-qty" placeholder="ej: 2L"></div>
       </div>
-
-      <div id="summary-bar"></div>
-      <div id="alimentos-body"></div>
-    </div>
-
-    <!-- STANBY: Sección Recetas — pendiente integración Google / Spoonacular.
-    <div id="recetas" class="section">
-      <div class="recipe-bar">
-        <div class="recipe-bar-title">Buscar recetas</div>
-        <div class="recipe-bar-sub">Selecciona alimentos en la despensa (toca cada uno) y busca qué puedes cocinar con ellos</div>
-        <div class="sel-chips" id="sel-chips"><span class="no-sel">Ningún alimento seleccionado</span></div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btn-y" style="flex:1" onclick="buscarRecetas()">Buscar recetas →</button>
-          <button class="btn btn-sm" onclick="clearSel()">Limpiar</button>
+      <div class="field-row" style="margin-top:8px;">
+        <div class="field">
+          <div class="field-label">Categoría</div>
+          <select id="f-cat">
+            <option value="lacteos">🥛 Lácteos</option>
+            <option value="verdura">🥦 Verdura y fruta</option>
+            <option value="carne">🥩 Carne y pescado</option>
+            <option value="conservas">🥫 Conservas</option>
+            <option value="cereales">🌾 Cereales y pasta</option>
+            <option value="congelados">🧊 Congelados</option>
+            <option value="bebidas">🧃 Bebidas</option>
+            <option value="salsas">🫙 Salsas y condimentos</option>
+            <option value="otros">📦 Otros</option>
+          </select>
         </div>
+        <div class="field"><div class="field-label">Caduca</div><input type="date" id="f-fecha"></div>
       </div>
-      <div id="recipes-body"></div>
-    </div>
-    -->
-
-    <!-- ── AJUSTES ── -->
-    <div id="ajustes" class="section">
-      <!-- STANBY: API Key Spoonacular — pendiente integración Google. Descomentar cuando esté lista.
-      <div class="apikey-setup">
-        <div class="apikey-setup-title">API Key de Spoonacular</div>
-        <div class="apikey-setup-note">
-          Necesaria para buscar recetas. Es gratis (150 peticiones/día).<br>
-          1. Ve a <a href="https://spoonacular.com/food-api" target="_blank">spoonacular.com/food-api</a><br>
-          2. Crea cuenta → copia tu API Key<br>
-          3. Pégala aquí y guarda
-        </div>
-        <div class="apikey-row">
-          <input type="text" id="apikey-input" placeholder="tu-api-key-aquí" style="flex:1;font-size:12px;">
-          <button class="btn btn-y btn-sm" onclick="saveApiKey()">Guardar</button>
-        </div>
-        <div id="apikey-status" style="font-size:11px;color:var(--muted);margin-top:8px;font-family:var(--fm);"></div>
-      </div>
-      -->
-
-      <div class="apikey-setup" style="margin-top:0;">
-        <div class="apikey-setup-title">Datos</div>
-        <div class="apikey-setup-note">Exporta o importa tu despensa como JSON</div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn" style="flex:1" onclick="exportJSON()">↓ Exportar</button>
-          <button class="btn" style="flex:1" onclick="document.getElementById('fi').click()">↑ Importar</button>
-          <input type="file" id="fi" accept=".json" style="display:none" onchange="importFile(event)">
-        </div>
-        <div id="data-fb" style="font-size:11px;margin-top:8px;display:none;font-family:var(--fm);"></div>
-      </div>
-
-      <div class="apikey-setup" style="margin-top:0;">
-        <div class="apikey-setup-title">Alertas de caducidad</div>
-        <div class="apikey-setup-note">Colores de referencia:</div>
-        <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-family:var(--fm);">
-          <div style="display:flex;align-items:center;gap:8px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--r);flex-shrink:0;"></div><span style="color:var(--muted)">Rojo — caduca hoy o ya caducó</span></div>
-          <div style="display:flex;align-items:center;gap:8px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--o);flex-shrink:0;"></div><span style="color:var(--muted)">Naranja — caduca en menos de 3 días</span></div>
-          <div style="display:flex;align-items:center;gap:8px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--y);flex-shrink:0;"></div><span style="color:var(--muted)">Amarillo — caduca en menos de 7 días</span></div>
-          <div style="display:flex;align-items:center;gap:8px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--g);flex-shrink:0;"></div><span style="color:var(--muted)">Verde — más de 7 días o sin fecha</span></div>
-        </div>
+      <div class="ap-btns" style="margin-top:10px;">
+        <button class="btn btn-y" style="flex:1" onclick="addAlimento()">Añadir</button>
+        <button class="btn" onclick="closeAdd()">Cancelar</button>
       </div>
     </div>
-
-  </div><!-- /content -->
-
-  <div class="fab-area" id="fab-area">
-    <button class="fab" onclick="toggleAdd()">+ Añadir alimento</button>
+    <div id="summary-bar"></div>
+    <div id="alimentos-body"></div>
   </div>
+
+  <div id="config" class="section">
+    <div class="config-card">
+      <div class="config-title">Notificaciones de caducidad</div>
+      <div class="config-desc">Activa las alertas para que aparezcan al abrir la app cuando haya productos próximos a caducar.</div>
+      <div id="notif-config-despensa"></div>
+    </div>
+    <div class="config-card">
+      <div class="config-title">Conexiones activas</div>
+      <div id="conexiones-status" style="font-size:11px;color:var(--muted);font-family:var(--fm);line-height:1.8;"></div>
+    </div>
+    <div class="config-card">
+      <div class="config-title">Datos</div>
+      <div class="config-desc">Exporta o importa tu despensa como JSON.</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" style="flex:1" onclick="exportJSON()">↓ Exportar</button>
+        <button class="btn" style="flex:1" onclick="document.getElementById('fi').click()">↑ Importar</button>
+        <input type="file" id="fi" accept=".json" style="display:none" onchange="importFile(event)">
+      </div>
+      <div id="data-fb" style="font-size:11px;margin-top:8px;display:none;font-family:var(--fm);"></div>
+    </div>
+  </div>
+</div>
+
+<div class="fab-area" id="fab-area">
+  <button class="fab" onclick="toggleAdd()">+ Añadir alimento</button>
+</div>
 </div>
 
 <script>
@@ -293,62 +193,43 @@ const CATS={
 };
 const CAT_EMOJI={lacteos:'🥛',verdura:'🥦',carne:'🥩',conservas:'🥫',cereales:'🌾',congelados:'🧊',bebidas:'🧃',salsas:'🫙',otros:'📦'};
 
-let state=loadState();
-let nid=state.nextId||1;
-let editId=null;
-let selected=new Set(); // selected alimento ids for recipes
-let currentTab='despensa';
-let recipeResults=[];
-
-function loadState(){
-  try{const r=localStorage.getItem('despensa_v1');if(r)return JSON.parse(r);}catch(e){}
-  return{alimentos:[],nextId:1,apiKey:''};
+// ── ★ STORE INTEGRATION ──
+// Cargamos desde WStore (compatible con clave legacy despensa_v1)
+function loadState() {
+  const d = WStore.get('despensa','items');
+  if (d) return d;
+  return { alimentos:[], nextId:1 };
 }
-function save(){
-  state.nextId=nid;
-  try{localStorage.setItem('despensa_v1',JSON.stringify(state));}catch(e){}
+function saveState() {
+  state.nextId = nid;
+  WStore.set('despensa','items', state);
 }
-function nxtId(){return++nid;}
 
-function today(){
-  const d=new Date();
-  return`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;
-}
-function p2(n){return String(n).padStart(2,'0');}
+let state = loadState();
+let nid = state.nextId || 1;
+let editId = null;
+let currentTab = 'despensa';
 
+// Escuchar cambios de otras apps en tiempo real (ej: compra marca algo)
+WStore.on('compra','data', () => renderConexiones());
+
+function today(){ const d=new Date(); return`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`; }
+function p2(n){ return String(n).padStart(2,'0'); }
 function daysUntil(dateStr){
-  if(!dateStr)return null;
-  const diff=new Date(dateStr)-new Date(today());
-  return Math.ceil(diff/(1000*60*60*24));
+  if(!dateStr) return null;
+  return Math.ceil((new Date(dateStr)-new Date(today()))/(1000*60*60*24));
 }
-
-function urgencyColor(days){
-  if(days===null)return'#30d880';
-  if(days<=0)return'#f04030';
-  if(days<=3)return'#f09030';
-  if(days<=7)return'#e8f040';
-  return'#30d880';
-}
-
+function urgencyColor(d){ if(d===null)return'#30d880'; if(d<=0)return'#f04030'; if(d<=3)return'#f09030'; if(d<=7)return'#e8f040'; return'#30d880'; }
 function expBadge(dateStr){
-  const days=daysUntil(dateStr);
-  if(days===null)return`<span class="exp-badge exp-sin">Sin fecha</span>`;
-  if(days<=0)return`<span class="exp-badge exp-hoy">${days===0?'Caduca HOY':'Caducado'}</span>`;
-  if(days<=3)return`<span class="exp-badge exp-pronto">${days}d</span>`;
-  if(days<=7)return`<span class="exp-badge exp-pronto" style="background:rgba(232,240,64,0.1);color:var(--y);border-color:rgba(232,240,64,0.3)">${days}d</span>`;
+  const d=daysUntil(dateStr);
+  if(d===null) return`<span class="exp-badge exp-sin">Sin fecha</span>`;
+  if(d<=0) return`<span class="exp-badge exp-hoy">${d===0?'Caduca HOY':'Caducado'}</span>`;
+  if(d<=3) return`<span class="exp-badge exp-pronto">${d}d</span>`;
+  if(d<=7) return`<span class="exp-badge exp-pronto" style="background:rgba(232,240,64,0.1);color:var(--y);border-color:rgba(232,240,64,0.3)">${d}d</span>`;
   return`<span class="exp-badge exp-ok">${dateStr.slice(5).replace('-','/')}</span>`;
 }
-
-function sortAlimentos(arr){
-  return [...arr].sort((a,b)=>{
-    const da=daysUntil(a.fecha);
-    const db=daysUntil(b.fecha);
-    if(da===null&&db===null)return a.nombre.localeCompare(b.nombre);
-    if(da===null)return 1;
-    if(db===null)return -1;
-    return da-db;
-  });
-}
+function sortAlimentos(arr){ return [...arr].sort((a,b)=>{ const da=daysUntil(a.fecha), db=daysUntil(b.fecha); if(da===null&&db===null)return a.nombre.localeCompare(b.nombre); if(da===null)return 1; if(db===null)return -1; return da-db; }); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 // ── TABS ──
 function showTab(name,el){
@@ -357,109 +238,48 @@ function showTab(name,el){
   document.getElementById(name).classList.add('active');
   el.classList.add('active');
   currentTab=name;
-  const fabArea=document.getElementById('fab-area');
-  fabArea.style.display=name==='despensa'?'block':'none';
-  if(name==='recetas')renderRecipePanel();
-  if(name==='ajustes')renderAjustes();
-  if(name==='despensa')renderDespensa();
+  document.getElementById('fab-area').style.display=name==='despensa'?'block':'none';
+  if(name==='config') renderConfig();
 }
 
 // ── ADD ──
-function toggleAdd(){document.getElementById('add-panel').classList.toggle('open');}
-function closeAdd(){document.getElementById('add-panel').classList.remove('open');}
-
+function toggleAdd(){ document.getElementById('add-panel').classList.toggle('open'); }
+function closeAdd(){ document.getElementById('add-panel').classList.remove('open'); }
 function addAlimento(){
-  const nombre=document.getElementById('f-nombre').value.trim();
-  if(!nombre)return;
-  const qty=document.getElementById('f-qty').value.trim();
-  const cat=document.getElementById('f-cat').value;
-  const fecha=document.getElementById('f-fecha').value;
-  state.alimentos.push({id:nxtId(),nombre,qty,cat,fecha});
-  document.getElementById('f-nombre').value='';
-  document.getElementById('f-qty').value='';
-  document.getElementById('f-fecha').value='';
-  closeAdd();
-  save();
-  renderDespensa();
+  const nombre=document.getElementById('f-nombre').value.trim(); if(!nombre)return;
+  state.alimentos.push({ id:++nid, nombre, qty:document.getElementById('f-qty').value.trim(), cat:document.getElementById('f-cat').value, fecha:document.getElementById('f-fecha').value });
+  document.getElementById('f-nombre').value=''; document.getElementById('f-qty').value=''; document.getElementById('f-fecha').value='';
+  closeAdd(); saveState(); renderDespensa();
+}
+
+// ── ★ MOVER A LISTA COMPRA ──
+function moverACompra(id) {
+  const a = state.alimentos.find(x=>x.id===id); if(!a) return;
+  const compra = WStore.get('compra','data') || { listas:[], nextId:1 };
+  // Buscar lista activa o crear una
+  let lista = compra.listas?.find(l=>l.activa);
+  if(!lista) {
+    if(!compra.listas) compra.listas=[];
+    lista = { id: Date.now(), nombre:'Pendiente comprar', activa:true, items:[] };
+    compra.listas.push(lista);
+  }
+  lista.items = lista.items||[];
+  lista.items.push({ id:Date.now()+Math.random(), nombre:a.nombre, cat:a.cat, qty:a.qty||'', done:false });
+  WStore.set('compra','data', compra);
+  showDataFb(`"${a.nombre}" añadido a Lista Compra ✓`,'var(--b)');
 }
 
 // ── RENDER DESPENSA ──
-function renderDespensa(){
-  renderSummary();
-  const sorted=sortAlimentos(state.alimentos);
-  if(!sorted.length){
-    document.getElementById('alimentos-body').innerHTML='<div class="empty">Tu despensa está vacía.<br>Pulsa + para añadir alimentos.</div>';
-    return;
-  }
-
-  // Group by category
-  const groups={};
-  sorted.forEach(a=>{
-    if(!groups[a.cat])groups[a.cat]=[];
-    groups[a.cat].push(a);
-  });
-
-  // Sort groups: first those with expiring items
-  const groupKeys=Object.keys(groups).sort((a,b)=>{
-    const minA=Math.min(...groups[a].map(x=>daysUntil(x.fecha)??999));
-    const minB=Math.min(...groups[b].map(x=>daysUntil(x.fecha)??999));
-    return minA-minB;
-  });
-
-  let html='';
-  // Urgentes first (caducan en <=7 días)
-  const urgentes=sorted.filter(a=>{const d=daysUntil(a.fecha);return d!==null&&d<=7;});
-  if(urgentes.length){
-    html+=`<div class="grupo"><div class="grupo-hd"><span class="grupo-label" style="color:var(--o)">⚠ Usar pronto</span><div class="grupo-line"></div><span class="grupo-count">${urgentes.length}</span></div>`;
-    urgentes.forEach(a=>{html+=aliRow(a);});
-    html+='</div>';
-  }
-
-  groupKeys.forEach(cat=>{
-    const items=groups[cat];
-    html+=`<div class="grupo"><div class="grupo-hd"><span class="grupo-label">${CATS[cat]||cat}</span><div class="grupo-line"></div><span class="grupo-count">${items.length}</span></div>`;
-    items.forEach(a=>{html+=aliRow(a);});
-    html+='</div>';
-  });
-
-  document.getElementById('alimentos-body').innerHTML=html;
-}
-
-function aliRow(a){
-  const days=daysUntil(a.fecha);
-  const color=urgencyColor(days);
-  const isSel=selected.has(a.id);
-  const isEd=editId===a.id;
-  return`<div class="ali-row" onclick="toggleSel(${a.id},event)">
-    <div class="urgency-dot" style="background:${color}"></div>
-    <div class="ali-body">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span class="ali-name">${esc(a.nombre)}</span>
-        ${expBadge(a.fecha)}
-      </div>
-      <div class="ali-meta">
-        <span class="ali-cat">${CAT_EMOJI[a.cat]||''} ${CATS[a.cat]||a.cat}</span>
-        ${a.qty?`<span class="ali-qty">· ${esc(a.qty)}</span>`:''}
-      </div>
-      <div class="edit-form ${isEd?'open':''}" id="ef-${a.id}" onclick="event.stopPropagation()">
-        <div class="ef-field"><input type="text" id="ei-n-${a.id}" value="${esc(a.nombre)}" placeholder="Nombre"></div>
-        <div style="display:flex;gap:6px;margin-bottom:7px;">
-          <input type="text" id="ei-q-${a.id}" value="${esc(a.qty||'')}" placeholder="Cantidad" style="flex:1;">
-          <input type="date" id="ei-f-${a.id}" value="${a.fecha||''}" style="flex:1;">
-        </div>
-        <div class="ef-field"><select id="ei-c-${a.id}">${Object.entries(CATS).map(([k,v])=>`<option value="${k}"${k===a.cat?' selected':''}>${v}</option>`).join('')}</select></div>
-        <div style="display:flex;gap:6px;margin-top:6px;">
-          <button class="btn btn-y btn-sm" style="flex:1" onclick="saveEdit(${a.id})">Guardar</button>
-          <button class="btn btn-sm" onclick="cancelEdit()">Cancelar</button>
-          <button class="btn btn-sm btn-r" onclick="delAlimento(${a.id})">Eliminar</button>
-        </div>
-      </div>
-    </div>
-    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-      <div class="ali-check ${isSel?'sel':''}" title="Seleccionar para receta"></div>
-      <button class="btn btn-sm" style="padding:4px 8px;font-size:13px;opacity:0.35;border:none;" onclick="startEdit(${a.id},event)">✎</button>
-    </div>
-  </div>`;
+function renderAlertasCaducidad() {
+  const hoy = state.alimentos.filter(a=>{const d=daysUntil(a.fecha);return d!==null&&d<=0;});
+  const pronto = state.alimentos.filter(a=>{const d=daysUntil(a.fecha);return d!==null&&d>0&&d<=3;});
+  const el = document.getElementById('alert-caducidad');
+  if(!hoy.length && !pronto.length){ el.className='alert-bar'; return; }
+  let msg='';
+  if(hoy.length) msg+=`<strong>🔴 Caducados hoy:</strong> ${hoy.map(a=>a.nombre).join(', ')}<br>`;
+  if(pronto.length) msg+=`<strong>🟠 Caducan en ≤3 días:</strong> ${pronto.map(a=>a.nombre).join(', ')}`;
+  el.innerHTML=msg;
+  el.className='alert-bar visible'+(hoy.length?' alert-bar-crit':'');
 }
 
 function renderSummary(){
@@ -474,151 +294,126 @@ function renderSummary(){
     </div>`;
 }
 
+function renderDespensa(){
+  renderAlertasCaducidad();
+  renderSummary();
+  const sorted=sortAlimentos(state.alimentos);
+  if(!sorted.length){ document.getElementById('alimentos-body').innerHTML='<div class="empty">Tu despensa está vacía.<br>Pulsa + para añadir alimentos.</div>'; return; }
+  const groups={};
+  sorted.forEach(a=>{ if(!groups[a.cat])groups[a.cat]=[]; groups[a.cat].push(a); });
+  const groupKeys=Object.keys(groups).sort((a,b)=>{
+    const ma=Math.min(...groups[a].map(x=>daysUntil(x.fecha)??999));
+    const mb=Math.min(...groups[b].map(x=>daysUntil(x.fecha)??999));
+    return ma-mb;
+  });
+  let html='';
+  const urgentes=sorted.filter(a=>{const d=daysUntil(a.fecha);return d!==null&&d<=7;});
+  if(urgentes.length){
+    html+=`<div class="grupo"><div class="grupo-hd"><span class="grupo-label" style="color:var(--o)">⚠ Usar pronto</span><div class="grupo-line"></div><span class="grupo-count">${urgentes.length}</span></div>`;
+    urgentes.forEach(a=>{ html+=aliRow(a); }); html+='</div>';
+  }
+  groupKeys.forEach(cat=>{
+    const items=groups[cat];
+    html+=`<div class="grupo"><div class="grupo-hd"><span class="grupo-label">${CATS[cat]||cat}</span><div class="grupo-line"></div><span class="grupo-count">${items.length}</span></div>`;
+    items.forEach(a=>{ html+=aliRow(a); }); html+='</div>';
+  });
+  document.getElementById('alimentos-body').innerHTML=html;
+}
+
+function aliRow(a){
+  const d=daysUntil(a.fecha);
+  const isEd=editId===a.id;
+  return`<div class="ali-row" onclick="startEdit(${a.id},event)">
+    <div class="urgency-dot" style="background:${urgencyColor(d)}"></div>
+    <div class="ali-body">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="ali-name">${esc(a.nombre)}</span>
+        ${expBadge(a.fecha)}
+      </div>
+      <div class="ali-meta">
+        <span class="ali-cat">${CAT_EMOJI[a.cat]||''} ${CATS[a.cat]||a.cat}</span>
+        ${a.qty?`<span class="ali-qty">· ${esc(a.qty)}</span>`:''}
+      </div>
+      <button class="move-compra" onclick="event.stopPropagation();moverACompra(${a.id})">→ Añadir a Lista Compra</button>
+      <div class="edit-form ${isEd?'open':''}" id="ef-${a.id}" onclick="event.stopPropagation()">
+        <div style="display:flex;gap:6px;margin-bottom:7px;">
+          <input type="text" id="ei-n-${a.id}" value="${esc(a.nombre)}" placeholder="Nombre" style="flex:2">
+          <input type="text" id="ei-q-${a.id}" value="${esc(a.qty||'')}" placeholder="Cantidad" style="flex:1">
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:7px;">
+          <select id="ei-c-${a.id}" style="flex:1">${Object.entries(CATS).map(([k,v])=>`<option value="${k}"${k===a.cat?' selected':''}>${v}</option>`).join('')}</select>
+          <input type="date" id="ei-f-${a.id}" value="${a.fecha||''}" style="flex:1">
+        </div>
+        <div style="display:flex;gap:6px;margin-top:6px;">
+          <button class="btn btn-y btn-sm" style="flex:1" onclick="saveEdit(${a.id})">Guardar</button>
+          <button class="btn btn-sm" onclick="cancelEdit()">Cancelar</button>
+          <button class="btn btn-sm btn-r" onclick="delAlimento(${a.id})">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
 // ── EDIT ──
-function startEdit(id,e){e.stopPropagation();editId=(editId===id?null:id);renderDespensa();}
-function cancelEdit(){editId=null;renderDespensa();}
+function startEdit(id,e){ if(e.target.closest('.edit-form')||e.target.closest('button:not(.move-compra)')) return; editId=(editId===id?null:id); renderDespensa(); }
+function cancelEdit(){ editId=null; renderDespensa(); }
 function saveEdit(id){
-  const a=state.alimentos.find(x=>x.id===id);if(!a)return;
-  const n=document.getElementById('ei-n-'+id).value.trim();if(!n)return;
-  a.nombre=n;
-  a.qty=document.getElementById('ei-q-'+id).value.trim();
-  a.fecha=document.getElementById('ei-f-'+id).value;
-  a.cat=document.getElementById('ei-c-'+id).value;
-  editId=null;save();renderDespensa();
+  const a=state.alimentos.find(x=>x.id===id); if(!a)return;
+  const n=document.getElementById('ei-n-'+id).value.trim(); if(!n)return;
+  a.nombre=n; a.qty=document.getElementById('ei-q-'+id).value.trim();
+  a.fecha=document.getElementById('ei-f-'+id).value; a.cat=document.getElementById('ei-c-'+id).value;
+  editId=null; saveState(); renderDespensa();
 }
 function delAlimento(id){
   if(!confirm('¿Eliminar este alimento?'))return;
   state.alimentos=state.alimentos.filter(x=>x.id!==id);
-  selected.delete(id);editId=null;save();renderDespensa();
+  editId=null; saveState(); renderDespensa();
 }
 
-// ── SELECTION ──
-function toggleSel(id,e){
-  if(e.target.closest('.edit-form')||e.target.closest('button'))return;
-  if(selected.has(id))selected.delete(id);else selected.add(id);
-  renderDespensa();
-  renderChips();
+// ── CONFIG ──
+function renderConfig(){
+  // Panel notificaciones
+  WNotify.renderConfigPanel('notif-config-despensa');
+  // Estado conexiones
+  const compra=WStore.get('compra','data');
+  const finanzas=WStore.get('finanzas','data');
+  document.getElementById('conexiones-status').innerHTML=`
+    Lista Compra: <span style="color:${compra?'var(--g)':'var(--muted)'}">${compra?'✓ conectada':'sin datos'}</span><br>
+    Finanzas: <span style="color:${finanzas?'var(--g)':'var(--muted)'}">${finanzas?'✓ conectado':'sin datos'}</span>
+  `;
 }
-function clearSel(){selected.clear();renderDespensa();renderChips();}
-
-function renderChips(){
-  const el=document.getElementById('sel-chips');
-  if(!el)return;
-  if(!selected.size){el.innerHTML='<span class="no-sel">Ningún alimento seleccionado</span>';return;}
-  const items=state.alimentos.filter(a=>selected.has(a.id));
-  el.innerHTML=items.map(a=>`<div class="sel-chip">${esc(a.nombre)}<span class="sel-chip-x" onclick="removeSel(${a.id})">×</span></div>`).join('');
-}
-function removeSel(id){selected.delete(id);renderDespensa();renderChips();}
-
-// ── RECIPE PANEL ──
-function renderRecipePanel(){
-  renderChips();
-  if(!recipeResults.length){
-    document.getElementById('recipes-body').innerHTML='';
-  }
-}
-
-async function buscarRecetas(){
-  const apiKey=state.apiKey||'';
-  if(!apiKey){
-    document.getElementById('recipes-body').innerHTML=`<div class="err-box">Necesitas configurar tu API Key de Spoonacular en la pestaña Config.</div>`;
-    return;
-  }
-  if(!selected.size){
-    document.getElementById('recipes-body').innerHTML=`<div class="err-box">Selecciona al menos un alimento en la pestaña Despensa primero.</div>`;
-    return;
-  }
-  const items=state.alimentos.filter(a=>selected.has(a.id));
-  const ingredientes=items.map(a=>encodeURIComponent(a.nombre)).join(',');
-  document.getElementById('recipes-body').innerHTML=`<div class="loading-recipes"><div class="spinner"></div>Buscando recetas con ${items.length} ingrediente${items.length!==1?'s':''}…</div>`;
-  try{
-    const url=`https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredientes}&number=8&ranking=1&ignorePantry=true&apiKey=${apiKey}&language=es`;
-    const res=await fetch(url);
-    if(!res.ok){
-      if(res.status===401)throw new Error('API Key inválida. Compruébala en Config.');
-      if(res.status===402)throw new Error('Has superado el límite diario de peticiones gratuitas (150/día).');
-      throw new Error(`Error ${res.status}`);
-    }
-    const data=await res.json();
-    recipeResults=data;
-    renderRecipes(data);
-  }catch(err){
-    document.getElementById('recipes-body').innerHTML=`<div class="err-box">${err.message}</div>`;
-  }
-}
-
-function renderRecipes(recipes){
-  if(!recipes.length){
-    document.getElementById('recipes-body').innerHTML='<div class="empty">No se encontraron recetas con esos ingredientes.<br>Prueba seleccionando otros alimentos.</div>';
-    return;
-  }
-  let html='<div class="recipe-grid">';
-  recipes.forEach(r=>{
-    const used=r.usedIngredientCount;
-    const missed=r.missedIngredientCount;
-    const imgHtml=r.image
-      ?`<img class="recipe-img" src="${r.image}" alt="${esc(r.title)}" loading="lazy" onerror="this.style.display='none'">`
-      :`<div class="recipe-img-placeholder">🍽️</div>`;
-    html+=`<a class="recipe-card" href="https://spoonacular.com/recipes/${r.title.toLowerCase().replace(/\s+/g,'-')}-${r.id}" target="_blank">
-      ${imgHtml}
-      <div class="recipe-body">
-        <div class="recipe-title">${esc(r.title)}</div>
-        <div class="recipe-meta">Faltan ${missed} ingrediente${missed!==1?'s':''}</div>
-        <div class="recipe-match">${used} de tus ingredientes ✓</div>
-      </div>
-    </a>`;
-  });
-  html+='</div>';
-  document.getElementById('recipes-body').innerHTML=html;
-}
-
-// ── AJUSTES ──
-function renderAjustes(){
-  const el=document.getElementById('apikey-input');
-  if(el)el.value=state.apiKey||'';
-  const st=document.getElementById('apikey-status');
-  if(st)st.textContent=state.apiKey?'API Key configurada ✓':'Sin API Key — las recetas no funcionarán';
-}
-
-function saveApiKey(){
-  const v=document.getElementById('apikey-input').value.trim();
-  state.apiKey=v;save();
-  const st=document.getElementById('apikey-status');
-  if(st){st.textContent=v?'API Key guardada ✓':'API Key eliminada';st.style.color=v?'var(--g)':'var(--muted)';}
-}
+function renderConexiones(){ if(currentTab==='config') renderConfig(); }
 
 // ── DATA ──
 function exportJSON(){
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));
-  a.download=`despensa-${today()}.json`;a.click();
-  showDataFb('Descargado ✓','var(--g)');
+  a.download=`despensa-${today()}.json`; a.click();
 }
 function importFile(e){
-  const f=e.target.files[0];if(!f)return;
+  const f=e.target.files[0]; if(!f)return;
   const r=new FileReader();
   r.onload=ev=>{
     try{
       const p=JSON.parse(ev.target.result);
       if(!p.alimentos)throw new Error('Formato inválido');
-      if(!confirm(`¿Importar ${p.alimentos.length} alimentos? Se reemplazarán los datos actuales.`))return;
-      state=p;nid=state.nextId||1;save();renderDespensa();
+      if(!confirm(`¿Importar ${p.alimentos.length} alimentos?`))return;
+      state=p; nid=state.nextId||1; saveState(); renderDespensa();
       showDataFb(`${p.alimentos.length} alimentos importados ✓`,'var(--g)');
-    }catch(err){showDataFb('Error: '+err.message,'var(--r)');}
+    }catch(err){ showDataFb('Error: '+err.message,'var(--r)'); }
   };
   r.readAsText(f);
 }
 function showDataFb(msg,color){
   const el=document.getElementById('data-fb');
-  if(!el)return;
-  el.textContent=msg;el.style.color=color;el.style.display='block';
+  el.textContent=msg; el.style.color=color; el.style.display='block';
   setTimeout(()=>el.style.display='none',2500);
 }
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 // ── INIT ──
-document.getElementById('f-fecha').value='';
 renderDespensa();
+// ★ Lanzar check de notificaciones al abrir (WNotify lo throttlea a 2h)
+if(typeof WNotify !== 'undefined') WNotify.check();
 </script>
 </body>
 </html>
