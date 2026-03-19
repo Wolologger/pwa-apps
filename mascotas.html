@@ -435,6 +435,7 @@ function addPet() {
   };
   state.pets.push(pet);
   activePetId = pet.id;
+  if (pet.nacimiento) addBirthdayToCalendar(pet.nombre, pet.nacimiento, pet.emoji);
   ['fp-nombre','fp-emoji','fp-raza','fp-nacimiento','fp-chip','fp-peso'].forEach(id => document.getElementById(id).value = '');
   closeAddPet(); save(); render();
 }
@@ -542,6 +543,7 @@ function savePetEdit(id) {
   p.raza = document.getElementById('ep-r-'+id).value.trim();
   p.nacimiento = document.getElementById('ep-b-'+id).value;
   p.chip = document.getElementById('ep-c-'+id).value.trim();
+  if (p.nacimiento) addBirthdayToCalendar(p.nombre, p.nacimiento, p.emoji);
   editPetId = null; save(); render();
 }
 
@@ -860,6 +862,52 @@ function importFile(e) {
 function showFB(msg,color) { const el=document.getElementById('datos-fb');if(!el)return;el.textContent=msg;el.style.color=color;el.style.display='block';setTimeout(()=>el.style.display='none',2500); }
 
 // ── CROSS-APP HELPERS ──
+
+// ── CUMPLEAÑOS RECURRENTE ──
+function addBirthdayToCalendar(nombre, nacimiento, emoji) {
+  if (!nacimiento) return;
+  try {
+    const raw = localStorage.getItem('semana_v2');
+    const cal = raw ? JSON.parse(raw) : { tasks:{}, events:[], nextId:100 };
+    if (!cal.events) cal.events = [];
+    if (!cal.recurrentes) cal.recurrentes = [];
+    // Store birthday as a recurring event (annual)
+    const exists = cal.recurrentes && cal.recurrentes.some(r => r.birthdayKey === `mascota_${nombre}_${nacimiento}`);
+    if (!exists) {
+      const month = nacimiento.slice(5,7);
+      const day = nacimiento.slice(8,10);
+      const thisYear = new Date().getFullYear();
+      const nextBirthday = `${thisYear}-${month}-${day}`;
+      const birthDate = new Date(nacimiento);
+      const nota = `Nacido/a el ${nacimiento}`;
+      // Add recurring marker
+      if (!cal.recurrentes) cal.recurrentes = [];
+      cal.recurrentes.push({
+        id: (cal.nextId||100)+1,
+        birthdayKey: `mascota_${nombre}_${nacimiento}`,
+        titulo: `🎂 Cumpleaños de ${nombre} ${emoji||'🐾'}`,
+        diaMes: `${month}-${day}`,
+        tipo: 'personal',
+        color: '#c060f0',
+        notas: nota,
+        recurrencia: 'anual'
+      });
+      // Also add the upcoming occurrence as a normal event
+      cal.events.push({
+        id: (cal.nextId||100)+2,
+        titulo: `🎂 Cumpleaños de ${nombre} ${emoji||'🐾'}`,
+        inicio: nextBirthday,
+        fin: nextBirthday,
+        tipo: 'personal',
+        color: '#c060f0',
+        notas: nota,
+        recurrenciaAnual: true
+      });
+      cal.nextId = (cal.nextId||100)+3;
+      localStorage.setItem('semana_v2', JSON.stringify(cal));
+    }
+  } catch(e) {}
+}
 function addToCalendar(titulo, inicio, fin, tipo, color, notas) {
   try {
     const raw = localStorage.getItem('semana_v2');

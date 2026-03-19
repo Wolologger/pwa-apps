@@ -1,6 +1,6 @@
 # W//APPS · Personal PWA Suite
 
-**Versión:** `v2.0.0` · Build `2026.03`
+**Versión:** `v2.1.0` · Build `2026.03`
 **Autor:** [@Wolologger](https://github.com/Wolologger)
 **URL:** `https://wolologger.github.io/pwa-apps/`
 **Stack:** HTML · CSS · Vanilla JS · localStorage · Firebase · Chart.js · Spoonacular API
@@ -16,7 +16,7 @@ pwa-apps/
 ├── wapps-store.js            # Bus de datos (WStore) · notificaciones (WNotify) · sync Firebase
 ├── wapps-firebase.js         # Auth Google · Firestore sync (WFirebase + WSync)
 ├── wapps-onboarding.js       # Onboarding por app (muestra una vez)
-├── manifest.json / sw.js     # PWA · network-first para HTML · wapps-v2
+├── manifest.json / sw.js     # PWA · network-first para HTML · wapps-v3
 ├── icons/
 │
 ├── — HOGAR —
@@ -24,6 +24,7 @@ pwa-apps/
 ├── compra.html               # Listas · historial · reutilizar · WStore
 ├── suministros.html          # Facturas luz/gas/agua · guías · alertas
 ├── mascotas.html             # Perfil · medicación · vet · peso · → Calendario y Compra
+├── ninos.html                # Perfil · medicación · médico · exámenes · crecimiento · gastos · → Calendario y Compra
 │
 ├── — DINERO —
 ├── obra.html                 # Múltiples proyectos · archivar · resumen global
@@ -33,13 +34,13 @@ pwa-apps/
 │
 ├── — MÚSICA —
 ├── setlist.html              # Setlists por grupo · drag & drop · modo actuación
-├── instrumentos.html         # Inventario instrumentos
+├── instrumentos.html         # Inventario de guitarras, bajos, amplis y pedales
 │
 ├── — PRODUCTIVIDAD —
 ├── semana.html               # Planificador · tareas editables · recurrentes
 │
 ├── — UTILIDAD —
-├── decisor.html              # Decisor aleatorio · presets editables
+├── decisor.html              # Decisor aleatorio · presets editables · historial
 └── backup.html               # Backup/restauración · reset por app · Firestore delete
 ```
 
@@ -54,7 +55,8 @@ pwa-apps/
 | **Despensa** | Inventario de alimentos y caducidades | ★ Stock +/− · stockMin · recetas con Spoonacular · ingredientes faltantes → Compra |
 | **Lista Compra** | Listas de la compra reutilizables | Historial · reutilizar lista · WStore |
 | **Suministros** | Facturas de luz, gas y agua | Guías Luz/Gas/Agua con test · alertas subida >20% |
-| **Mascotas** | Gestión de mascotas | Perfil · medicación · visitas vet · registro de peso |
+| **Mascotas** | Gestión de mascotas | Perfil · medicación · visitas vet · registro de peso · 🎂 cumpleaños → Calendario |
+| **Niños** | Salud y seguimiento de hijos | Perfil · medicación · visitas médico · exámenes · crecimiento · gastos · 🎂 cumpleaños → Calendario |
 
 ### 💰 Dinero
 
@@ -88,6 +90,72 @@ pwa-apps/
 ---
 
 ## ★ Funcionalidades detalladas
+
+### ninos.html — Seguimiento de hijos
+
+App de salud y gestión integral para niños. Soporta múltiples perfiles (selector en barra superior, igual que mascotas).
+
+**Pestañas:**
+
+| Pestaña | Contenido |
+|---------|-----------|
+| **Perfil** | Nombre, emoji, sexo, nacimiento, colegio, curso, pediatra, tarjeta sanitaria, alergias. Alertas automáticas de medicaciones próximas, exámenes alterados y alergias. |
+| **Medicación** | Frecuencias específicas (cada 8h, cada 12h, si fiebre). Stock, próxima dosis, marcar dosis administrada → stock bajo conecta con Lista Compra. |
+| **Médico** | Visitas con tipo (revisión, enfermedad, vacuna, urgencias, especialista). Coste → Gastos Diarios. Próxima visita → Calendario. |
+| **Exámenes** | Analíticas, radiografías, ecografías, test alergias, revisión visión/auditivo, test desarrollo. Resultado (normal / alterado / pendiente) con alertas destacadas. |
+| **Crecimiento** | Talla, peso y perímetro cefálico. Historial con diferencias entre registros. |
+| **Gastos** | Categorías propias (médico, farmacia, colegio, ropa, actividades extraesc., alimentación). Resumen mensual, desglose por categoría, sincronización opcional con Gastos Diarios. |
+
+**Estructura de datos:**
+```js
+state = {
+  kids: [{
+    id, nombre, emoji, sexo, nacimiento,
+    colegio, curso, pediatra, tarjeta, alergias,
+    meds:    [{ id, nombre, dosis, freq, proxima, stock, notas }],
+    visits:  [{ id, fecha, motivo, medico, tipo, coste, notas, proxima }],
+    exams:   [{ id, fecha, tipo, centro, resultado, coste, notas, proximo }],
+    growth:  [{ id, fecha, talla, peso, cabeza, notas }],
+    gastos:  [{ id, concepto, importe, fecha, cat, notas }]
+  }],
+  nextId: 1
+}
+```
+
+**Conexiones cross-app:**
+- Coste de visita médica → `gastos_v1` (Gastos Diarios)
+- Coste de examen → `gastos_v1` (Gastos Diarios)
+- Gastos propios → `gastos_v1` (opcional)
+- Medicamento con stock bajo → `compra_v2` (Lista Compra)
+- Próxima visita / examen → `semana_v2` (Calendario)
+- Fecha de nacimiento → `semana_v2` (Calendario, recurrente anual)
+
+---
+
+### mascotas.html y ninos.html — Cumpleaños recurrente
+
+Al guardar (o editar) una mascota o niño con fecha de nacimiento, se crea automáticamente en `semana_v2`:
+
+- Un evento normal para la ocurrencia del año en curso (`events[]`)
+- Una entrada en `recurrentes[]` con `birthdayKey` único para evitar duplicados
+
+```js
+// Estructura en semana_v2
+cal.recurrentes.push({
+  id,
+  birthdayKey: 'mascota_Rex_2019-05-10',  // o 'nino_Pablo_2018-03-22'
+  titulo: '🎂 Cumpleaños de Rex 🐾',
+  diaMes: '05-10',   // MM-DD — para renderizar cada año
+  tipo: 'personal',
+  color: '#c060f0',  // mascotas: morado · niños: teal
+  notas: 'Nacido/a el 2019-05-10',
+  recurrencia: 'anual'
+});
+```
+
+> **Nota para semana.html:** el campo `recurrentes[]` ya se escribe desde mascotas y niños. Para que aparezca en semanas futuras, semana.html debe renderizar estos eventos por `diaMes` además de los `events[]` normales.
+
+---
 
 ### despensa.html — Recetas con Spoonacular
 - Pestaña **🍳 Recetas** con chips de ingredientes seleccionables
@@ -126,6 +194,7 @@ state = {
 ### semana.html — Recurrentes y edición
 - Doble tap o ✎ → edición inline
 - Frecuencias: Diaria · L–V · Fin de semana · Semanal
+- `recurrentes[]` con `birthdayKey` para cumpleaños anuales de mascotas y niños
 
 ### deseados.html — Historial de precios
 - `historialPrecios: [{fecha, precio}]` por ítem
@@ -135,6 +204,7 @@ state = {
 - Botón **Borrar** por app en zona de peligro → borra localStorage **y** el documento de Firestore
 - Botón **Borrar TODOS** → batch delete completo en Firestore
 - Requiere sesión activa para borrar en Firestore; si no hay sesión, solo borra local
+- Incluye `ninos_v1` en el listado de apps
 
 ---
 
@@ -242,6 +312,7 @@ Acceso desde botón ⚙ en el topbar del index.
 | Deseados | `deseados_v2` | `wapps.deseados.data` |
 | Obra | `obra_multiproj_v1` | `wapps.obra.data` |
 | Mascotas | `mascotas_v1` | — |
+| Niños | `ninos_v1` | — |
 | Backup | — | `wapps.backup.history` |
 | Config notificaciones | — | `notify.config` |
 | Onboarding | — | `wapps.onboarding.<app>` |
@@ -255,7 +326,7 @@ Acceso desde botón ⚙ en el topbar del index.
 - Estrategia **network-first para HTML** → cambios visibles sin Ctrl+F5
 - Cache-first para assets estáticos (manifest, iconos)
 - Offline fallback → sirve desde caché si no hay red
-- Versión de caché: `wapps-v2`
+- Versión de caché: `wapps-v3`
 - Para forzar actualización en todos los dispositivos: subir versión en `sw.js`
 
 ---
@@ -266,7 +337,8 @@ Acceso desde botón ⚙ en el topbar del index.
 |-----------|--------|
 | Alta | Compra → Gastos Diarios al completar (modal precios) |
 | Alta | Compra: artículos con unidad (kg, L, uds) |
-| Media | Semana: importar .ics (Google Calendar / Outlook) |
+| Media | semana.html: renderizar cumpleaños recurrentes (`recurrentes[]`) en todas las semanas del año |
+| Media | semana.html: importar .ics (Google Calendar / Outlook) |
 | Media | `WStore.syncOnLoad` en cada herramienta individual |
 | Media | Gastos Diarios integración WStore completa |
 | Baja | Modo oscuro/claro configurable |
@@ -274,6 +346,14 @@ Acceso desde botón ⚙ en el topbar del index.
 ---
 
 ## 📋 Changelog
+
+### v2.1.0 (2026-03)
+- `ninos.html` — nueva app: perfil · medicación · visitas médico · exámenes/análisis · crecimiento (talla/peso/per.cefálico) · gastos por categoría · conectada con Gastos Diarios, Compra y Calendario
+- `mascotas.html` — fecha de nacimiento crea automáticamente evento de cumpleaños recurrente anual en `semana_v2` (campo `recurrentes[]` con `birthdayKey` para evitar duplicados)
+- `ninos.html` — ídem para cumpleaños de niños
+- `backup.html` — añadida app `ninos_v1` al listado de backup/restore
+- `index.html` — nueva entrada `ninos.html` con tags `hogar` y `salud`
+- `README.md` — documentación actualizada
 
 ### v2.0.0 (2026-03)
 - `wapps-firebase.js` — nuevo módulo: auth Google + Firestore sync (WFirebase + WSync)
