@@ -196,21 +196,32 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
 .cl-new-badge{display:inline-flex;align-items:center;gap:4px;font-size:8px;padding:2px 7px;border-radius:99px;background:rgba(232,240,64,0.15);color:var(--y);border:0.5px solid rgba(232,240,64,0.3);margin-left:8px;vertical-align:middle;}
 
 /* CATEGORY GRID */
-.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:0 20px 14px;}
-.cat-cell{background:var(--bg2);border:1px solid var(--line2);border-radius:8px;padding:13px 14px;cursor:pointer;transition:all 0.15s;position:relative;overflow:hidden;text-decoration:none;color:var(--text);}
-.cat-cell:hover{border-color:rgba(232,240,64,0.3);background:#1a1a17;}
-.cat-cell::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
-.cat-cell.c-hogar::before{background:#30d880;}
-.cat-cell.c-dinero::before{background:#e8f040;}
-.cat-cell.c-musica::before{background:#c060f0;}
-.cat-cell.c-produc::before{background:#30a8f0;}
-.cat-cell.c-util::before{background:#5a5850;}
-.cat-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;font-family:var(--fm);}
-.cat-apps{font-size:11px;color:var(--text);font-family:var(--fm);line-height:1.7;}
-.cat-count{position:absolute;top:10px;right:12px;font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--dim);line-height:1;}
-.cat-all-btn{margin:0 20px 0;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;background:transparent;border:0.5px solid var(--line2);border-radius:6px;font-size:10px;font-family:var(--fm);color:var(--muted);cursor:pointer;transition:all 0.15s;letter-spacing:1px;}
-.cat-all-btn:hover{border-color:rgba(232,240,64,0.3);color:var(--y);}
-.cat-all-btn.active{background:rgba(232,240,64,0.07);color:var(--y);border-color:rgba(232,240,64,0.3);}
+/* SIDEBAR + ICON GRID LAYOUT */
+.launcher{display:flex;flex:1;min-height:320px;}
+.launcher-sidebar{width:72px;background:#0d0d0c;border-right:1px solid var(--line2);flex-shrink:0;display:flex;flex-direction:column;padding:8px 0;overflow-y:auto;scrollbar-width:none;}
+.launcher-sidebar::-webkit-scrollbar{display:none;}
+.sb-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;cursor:pointer;transition:all 0.12s;border-left:2px solid transparent;position:relative;}
+.sb-item.active{border-left-color:var(--y);background:rgba(232,240,64,0.04);}
+.sb-item:hover:not(.active){background:rgba(255,255,255,0.025);}
+.sb-icon{font-size:20px;line-height:1;}
+.sb-label{font-size:7px;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);text-align:center;font-family:var(--fm);}
+.sb-item.active .sb-label{color:var(--y);}
+.sb-count{position:absolute;top:6px;right:5px;font-size:7px;background:var(--y);color:#0a0a09;border-radius:99px;min-width:13px;height:13px;display:flex;align-items:center;justify-content:center;font-weight:700;padding:0 3px;font-family:var(--fm);line-height:1;}
+.launcher-content{flex:1;overflow-y:auto;padding:12px 16px 24px;scrollbar-width:none;}
+.launcher-content::-webkit-scrollbar{display:none;}
+.icon-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.icon-card{background:var(--bg2);border:0.5px solid var(--line2);border-radius:10px;padding:12px 8px 10px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:all 0.15s;text-decoration:none;color:var(--text);border-top-width:2px;}
+.icon-card:hover{border-color:rgba(232,240,64,0.4);background:#1a1a17;transform:translateY(-2px);}
+.icon-card:active{transform:scale(0.95);}
+.icon-card.c-hogar{border-top-color:rgba(48,216,128,0.5);}
+.icon-card.c-dinero{border-top-color:rgba(232,240,64,0.5);}
+.icon-card.c-musica{border-top-color:rgba(192,96,240,0.5);}
+.icon-card.c-produc{border-top-color:rgba(48,168,240,0.5);}
+.icon-card.c-util{border-top-color:rgba(90,88,80,0.6);}
+.icon-card.c-all{border-top-color:rgba(255,255,255,0.1);}
+.ic-emoji{font-size:26px;line-height:1;}
+.ic-name{font-size:10px;color:var(--text);text-align:center;line-height:1.3;font-family:var(--fm);}
+.launcher-cat-title{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;font-family:var(--fm);}
 
 /* COMMAND PALETTE */
 .cmd-bar{margin:10px 20px 0;background:#111110;border:0.5px solid rgba(255,255,255,0.12);border-radius:8px;display:flex;align-items:center;gap:8px;padding:8px 12px;transition:border-color 0.15s;}
@@ -322,16 +333,10 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
   </div>
   <div class="cmd-dropdown" id="cmd-dropdown"></div>
 
-  <!-- CATEGORY GRID -->
-  <div id="cat-grid-wrap"></div>
-
-  <!-- APPS LIST (modo lista / búsqueda) -->
-  <div id="apps-list-wrap" style="display:none;">
-    <div class="section-hd">
-      <div class="section-title" id="apps-list-title">Apps disponibles</div>
-      <button style="background:none;border:none;font-size:10px;color:var(--muted);font-family:var(--fm);cursor:pointer;letter-spacing:1px;" onclick="showCatView()">← Categorías</button>
-    </div>
-    <div class="apps-list" id="apps-list">
+  <!-- SIDEBAR + ICON GRID LAUNCHER -->
+  <div class="launcher" id="launcher-wrap">
+    <div class="launcher-sidebar" id="launcher-sidebar"></div>
+    <div class="launcher-content" id="launcher-content">
       <div class="state-msg"><div class="spinner"></div>Cargando…</div>
     </div>
   </div>
@@ -472,11 +477,11 @@ function checkVersionBadge() {
 
 // ── CATEGORY CONFIG ────────────────────────────────────────────────
 const CATEGORIES = [
-  { id: 'hogar',  label: 'Hogar',        cls: 'c-hogar',  files: ['despensa.html','compra.html','suministros.html','mascotas.html','ninos.html','coches.html'] },
-  { id: 'dinero', label: 'Dinero',        cls: 'c-dinero', files: ['gastos-diarios.html','finanzas.html','deseados.html','obra.html'] },
-  { id: 'musica', label: 'Música',        cls: 'c-musica', files: ['setlist.html','instrumentos.html'] },
-  { id: 'produc', label: 'Productividad', cls: 'c-produc', files: ['semana.html','decisor.html'] },
-  { id: 'util',   label: 'Utilidad',      cls: 'c-util',   files: ['backup.html'] },
+  { id: 'hogar',  label: 'Hogar',        icon: '🏠', cls: 'c-hogar',  files: ['despensa.html','compra.html','suministros.html','mascotas.html','ninos.html','coches.html'] },
+  { id: 'dinero', label: 'Dinero',        icon: '💰', cls: 'c-dinero', files: ['gastos-diarios.html','finanzas.html','deseados.html','obra.html'] },
+  { id: 'musica', label: 'Música',        icon: '🎸', cls: 'c-musica', files: ['setlist.html','instrumentos.html'] },
+  { id: 'produc', label: 'Productividad', icon: '📅', cls: 'c-produc', files: ['semana.html','decisor.html'] },
+  { id: 'util',   label: 'Utilidad',      icon: '⚙️', cls: 'c-util',   files: ['backup.html'] },
 ];
 
 const META={
@@ -512,78 +517,74 @@ function updateClock(){
 }
 updateClock();setInterval(updateClock,10000);
 
-// ── CATEGORY GRID VIEW ─────────────────────────────────────────────
-function renderCatGrid() {
+// ── LAUNCHER: SIDEBAR + ICON GRID ─────────────────────────────────
+let activeCatId = 'hogar';
+
+// Categoría "all" sintética — se puebla en renderLauncher
+const CAT_ALL = { id:'all', label:'Todas', icon:'⊞', cls:'c-all' };
+
+function renderLauncher() {
   const visible = allFiles.filter(f => !hidden.has(f.name));
   document.getElementById('app-count').textContent = visible.length;
   document.getElementById('file-count').textContent = `${visible.length} app${visible.length!==1?'s':''}`;
 
-  const html = CATEGORIES.map(cat => {
-    const catFiles = visible.filter(f => cat.files.includes(f.name));
-    if (!catFiles.length) return '';
-    const names = catFiles.map(f => (META[f.name]||autoMeta(f.name)).name).join(' · ');
-    return `<div class="cat-cell ${cat.cls}" onclick="showCatApps('${cat.id}')">
-      <div class="cat-count">${String(catFiles.length).padStart(2,'0')}</div>
-      <div class="cat-label">${cat.label}</div>
-      <div class="cat-apps">${names}</div>
+  // Sidebar
+  const sidebarCats = [CAT_ALL, ...CATEGORIES];
+  document.getElementById('launcher-sidebar').innerHTML = sidebarCats.map(cat => {
+    const count = cat.id === 'all'
+      ? visible.length
+      : visible.filter(f => cat.files && cat.files.includes(f.name)).length;
+    if (count === 0 && cat.id !== 'all') return '';
+    return `<div class="sb-item ${activeCatId === cat.id ? 'active' : ''}" onclick="selectLauncherCat('${cat.id}')">
+      ${cat.id !== 'all' ? `<span class="sb-count">${count}</span>` : ''}
+      <span class="sb-icon">${cat.icon||'⊞'}</span>
+      <span class="sb-label">${cat.label}</span>
     </div>`;
   }).join('');
 
-  document.getElementById('cat-grid-wrap').innerHTML = `
-    <div class="section-hd" style="padding-top:14px;">
-      <div class="section-title">Categorías</div>
-      <div class="section-count">WOLOLOGGER/PWA-APPS</div>
-    </div>
-    <div class="cat-grid">${html}</div>
-    <button class="cat-all-btn" onclick="showAllApps()">Ver todas las apps →</button>`;
+  // Icon grid
+  renderLauncherGrid(visible);
 }
 
+function renderLauncherGrid(visible) {
+  const cat = activeCatId === 'all'
+    ? CAT_ALL
+    : CATEGORIES.find(c => c.id === activeCatId);
+
+  const files = activeCatId === 'all'
+    ? visible
+    : visible.filter(f => cat && cat.files && cat.files.includes(f.name));
+
+  const cls = cat ? cat.cls : 'c-all';
+  const label = cat ? cat.label : 'Todas';
+
+  const grid = files.map(f => {
+    const m = META[f.name] || autoMeta(f.name);
+    return `<a class="icon-card ${cls}" href="${f.name}">
+      <span class="ic-emoji">${m.emoji||'→'}</span>
+      <span class="ic-name">${m.name}</span>
+    </a>`;
+  }).join('');
+
+  document.getElementById('launcher-content').innerHTML =
+    `<div class="launcher-cat-title">${label} — ${files.length} app${files.length!==1?'s':''}</div>
+     <div class="icon-grid">${grid || '<div class="err-msg">Sin apps</div>'}</div>`;
+}
+
+function selectLauncherCat(id) {
+  activeCatId = id;
+  const visible = allFiles.filter(f => !hidden.has(f.name));
+  // Update sidebar active state
+  document.querySelectorAll('.sb-item').forEach(el => {
+    el.classList.toggle('active', el.getAttribute('onclick').includes(`'${id}'`));
+  });
+  renderLauncherGrid(visible);
+}
+
+// showCatView kept for cmd palette "back" action — just resets search
 function showCatView() {
-  document.getElementById('apps-list-wrap').style.display = 'none';
-  document.getElementById('cat-grid-wrap').style.display = '';
   document.getElementById('cmd-dropdown').classList.remove('open');
   document.getElementById('cmd-input').value = '';
-}
-
-function showCatApps(catId) {
-  const cat = CATEGORIES.find(c => c.id === catId);
-  if (!cat) return;
-  const visible = allFiles.filter(f => !hidden.has(f.name) && cat.files.includes(f.name));
-  document.getElementById('apps-list-title').textContent = cat.label;
-  renderAppsList(visible);
-  document.getElementById('cat-grid-wrap').style.display = 'none';
-  document.getElementById('apps-list-wrap').style.display = '';
-}
-
-function showAllApps() {
-  const visible = allFiles.filter(f => !hidden.has(f.name));
-  document.getElementById('apps-list-title').textContent = 'Todas las apps';
-  renderAppsList(visible);
-  document.getElementById('cat-grid-wrap').style.display = 'none';
-  document.getElementById('apps-list-wrap').style.display = '';
-}
-
-function renderAppsList(files) {
-  if (!files.length) {
-    document.getElementById('apps-list').innerHTML = '<div class="err-msg">Sin apps en esta categoría.</div>';
-    return;
-  }
-  document.getElementById('apps-list').innerHTML = files.map((f, i) => {
-    const m = META[f.name] || autoMeta(f.name);
-    const num = String(i+1).padStart(2,'0');
-    const tagsHtml = (m.tags||[]).length ? `<div class="app-tags">${m.tags.map(t=>`<span class="app-tag">${t}</span>`).join('')}</div>` : '';
-    return `<a class="app-card" href="${f.name}">
-  <div class="app-inner">
-    <div class="app-num">${num}</div>
-    <div class="app-body">
-      <div class="app-name">${m.name}</div>
-      <div class="app-desc">${m.desc}</div>
-      ${tagsHtml}
-    </div>
-    <div class="app-arrow">→</div>
-  </div>
-</a>`;
-  }).join('');
 }
 
 // ── COMMAND PALETTE ────────────────────────────────────────────────
@@ -679,10 +680,10 @@ async function loadApps(){
     const files=await res.json();
     allFiles=files.filter(f=>f.type==='file'&&f.name.endsWith('.html')&&f.name!=='index.html'&&f.name!=='editor-categorias.html'&&f.name!=='guia_factura_luz.html').sort((a,b)=>a.name.localeCompare(b.name));
     document.getElementById('updated-at').textContent=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
-    renderCatGrid();
+    renderLauncher();
     initCmdPalette();
   }catch(err){
-    document.getElementById('cat-grid-wrap').innerHTML=`<div class="err-msg" style="padding:20px;">No se pudo cargar la lista.<br>${err.message}</div>`;
+    document.getElementById('launcher-content').innerHTML=`<div class="err-msg" style="padding:20px;">No se pudo cargar la lista.<br>${err.message}</div>`;
     document.getElementById('app-count').textContent='?';
   }
 }
