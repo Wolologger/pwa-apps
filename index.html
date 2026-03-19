@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0a0a09">
 <link rel="manifest" href="manifest.json">
 <title>W // APPS</title>
-<!-- version: 2.4.0 -->
+<!-- version: 2.2.0 -->
 <!-- Firebase SDK v9 compat -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -163,6 +163,74 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
 .footer-left{font-size:10px;color:var(--muted);line-height:1.6;}
 .footer-right{font-size:10px;color:var(--dim);}
 .footer a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--dim);}
+
+/* VERSION BADGE */
+.version-badge{display:inline-flex;align-items:center;gap:6px;font-size:9px;font-family:var(--fm);padding:3px 9px;border-radius:3px;background:rgba(232,240,64,0.1);color:var(--y);border:0.5px solid rgba(232,240,64,0.25);cursor:pointer;transition:all 0.15s;letter-spacing:1px;}
+.version-badge:hover{background:rgba(232,240,64,0.18);border-color:rgba(232,240,64,0.5);}
+.version-dot{width:5px;height:5px;border-radius:50%;background:var(--y);}
+
+/* CHANGELOG MODAL */
+.cl-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:flex-end;justify-content:center;padding:0;opacity:0;pointer-events:none;transition:opacity 0.25s;}
+.cl-backdrop.open{opacity:1;pointer-events:all;}
+.cl-modal{width:100%;max-width:520px;max-height:82dvh;background:#141412;border:1px solid rgba(255,255,255,0.13);border-bottom:none;border-radius:16px 16px 0 0;display:flex;flex-direction:column;transform:translateY(100%);transition:transform 0.3s cubic-bezier(.32,0,.67,0);}
+.cl-backdrop.open .cl-modal{transform:translateY(0);}
+.cl-handle{width:36px;height:4px;background:rgba(255,255,255,0.12);border-radius:2px;margin:10px auto 4px;flex-shrink:0;}
+.cl-header{display:flex;align-items:center;justify-content:space-between;padding:10px 20px 12px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;}
+.cl-header-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;}
+.cl-close{background:none;border:0.5px solid rgba(255,255,255,0.12);color:var(--muted);font-size:14px;width:28px;height:28px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.cl-close:hover{color:var(--y);border-color:rgba(232,240,64,0.4);}
+.cl-body{overflow-y:auto;padding:16px 20px 32px;scrollbar-width:none;flex:1;}
+.cl-body::-webkit-scrollbar{display:none;}
+.cl-version-block{margin-bottom:24px;}
+.cl-version-block:last-child{margin-bottom:0;}
+.cl-version-num{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;color:var(--y);line-height:1;margin-bottom:2px;}
+.cl-version-date{font-size:9px;color:var(--muted);font-family:var(--fm);letter-spacing:1px;margin-bottom:10px;}
+.cl-item{display:flex;gap:10px;margin-bottom:7px;font-size:12px;font-family:var(--fm);line-height:1.6;}
+.cl-item-tag{font-size:9px;padding:1px 7px;border-radius:3px;font-family:var(--fm);flex-shrink:0;margin-top:2px;letter-spacing:0.5px;}
+.cl-tag-new{background:rgba(48,216,128,0.12);color:#30d880;border:0.5px solid rgba(48,216,128,0.25);}
+.cl-tag-fix{background:rgba(48,168,240,0.1);color:#30a8f0;border:0.5px solid rgba(48,168,240,0.25);}
+.cl-tag-imp{background:rgba(255,140,0,0.1);color:#f09030;border:0.5px solid rgba(255,140,0,0.25);}
+.cl-tag-del{background:rgba(240,64,48,0.08);color:#f04030;border:0.5px solid rgba(240,64,48,0.2);}
+.cl-item-text{color:var(--text);flex:1;}
+.cl-item-text span{color:var(--muted);}
+.cl-new-badge{display:inline-flex;align-items:center;gap:4px;font-size:8px;padding:2px 7px;border-radius:99px;background:rgba(232,240,64,0.15);color:var(--y);border:0.5px solid rgba(232,240,64,0.3);margin-left:8px;vertical-align:middle;}
+
+/* CATEGORY GRID */
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:0 20px 14px;}
+.cat-cell{background:var(--bg2);border:1px solid var(--line2);border-radius:8px;padding:13px 14px;cursor:pointer;transition:all 0.15s;position:relative;overflow:hidden;text-decoration:none;color:var(--text);}
+.cat-cell:hover{border-color:rgba(232,240,64,0.3);background:#1a1a17;}
+.cat-cell::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+.cat-cell.c-hogar::before{background:#30d880;}
+.cat-cell.c-dinero::before{background:#e8f040;}
+.cat-cell.c-musica::before{background:#c060f0;}
+.cat-cell.c-produc::before{background:#30a8f0;}
+.cat-cell.c-util::before{background:#5a5850;}
+.cat-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;font-family:var(--fm);}
+.cat-apps{font-size:11px;color:var(--text);font-family:var(--fm);line-height:1.7;}
+.cat-count{position:absolute;top:10px;right:12px;font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--dim);line-height:1;}
+.cat-all-btn{margin:0 20px 0;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;background:transparent;border:0.5px solid var(--line2);border-radius:6px;font-size:10px;font-family:var(--fm);color:var(--muted);cursor:pointer;transition:all 0.15s;letter-spacing:1px;}
+.cat-all-btn:hover{border-color:rgba(232,240,64,0.3);color:var(--y);}
+.cat-all-btn.active{background:rgba(232,240,64,0.07);color:var(--y);border-color:rgba(232,240,64,0.3);}
+
+/* COMMAND PALETTE */
+.cmd-bar{margin:10px 20px 0;background:#111110;border:0.5px solid rgba(255,255,255,0.12);border-radius:8px;display:flex;align-items:center;gap:8px;padding:8px 12px;transition:border-color 0.15s;}
+.cmd-bar:focus-within{border-color:rgba(232,240,64,0.4);}
+.cmd-slash{font-size:13px;color:var(--muted);font-family:var(--fm);}
+.cmd-input{background:transparent;border:none;outline:none;color:var(--y);font-family:var(--fm);font-size:12px;flex:1;caret-color:var(--y);}
+.cmd-input::placeholder{color:var(--muted);}
+.cmd-input::-webkit-input-placeholder{color:var(--muted);}
+.cmd-kbd{font-size:8px;color:var(--dim);font-family:var(--fm);padding:2px 5px;border:0.5px solid var(--dim);border-radius:3px;}
+.cmd-dropdown{background:#111110;border:0.5px solid rgba(255,255,255,0.12);border-top:none;border-radius:0 0 8px 8px;margin:0 20px;display:none;}
+.cmd-dropdown.open{display:block;}
+.cmd-row{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;transition:background 0.1s;text-decoration:none;}
+.cmd-row:hover,.cmd-row.active{background:rgba(232,240,64,0.05);}
+.cmd-row-icon{font-size:15px;flex-shrink:0;}
+.cmd-row-body{flex:1;min-width:0;}
+.cmd-row-name{font-size:12px;color:var(--text);font-family:var(--fm);}
+.cmd-row-desc{font-size:9px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--fm);}
+.cmd-row-arrow{font-size:10px;color:var(--dim);}
+.cmd-empty{padding:12px;font-size:11px;color:var(--muted);font-family:var(--fm);text-align:center;}
+
 </style>
 </head>
 <body>
@@ -202,7 +270,10 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
       <div class="logo">W<span class="logo-slash">//</span>APPS</div>
     </div>
     <div class="topbar-right">
-      <div class="build-tag">PERSONAL</div>
+      <button class="version-badge" onclick="openChangelog()" title="Ver changelog">
+        <span class="version-dot"></span>
+        <span id="version-display">v2.2.0</span>
+      </button>
       <div class="clock" id="clock">--:--</div>
       <button class="auth-btn" id="auth-btn" onclick="handleAuth()" title="Login con Google">
         ENTRAR
@@ -231,7 +302,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
     <div class="hero-meta">
       <div class="hero-stat"><strong id="app-count">—</strong> apps</div>
       <div class="hero-stat"><span class="status"><span class="status-dot"></span>LIVE</span></div>
-      <div class="hero-stat">github.com/<strong>Wolologger</strong></div>
+      <div class="hero-stat">Build <strong>2026.03</strong></div>
     </div>
     <div class="hero-corner">W</div>
   </div>
@@ -243,15 +314,26 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
     </div>
   </div>
 
-  <div class="filter-bar" id="filter-bar"></div>
-
-  <div class="section-hd">
-    <div class="section-title">Apps disponibles</div>
-    <div class="section-count" id="repo-tag">WOLOLOGGER/PWA-APPS</div>
+  <!-- COMMAND PALETTE -->
+  <div class="cmd-bar">
+    <span class="cmd-slash">/</span>
+    <input class="cmd-input" id="cmd-input" placeholder="buscar app…" autocomplete="off" spellcheck="false">
+    <span class="cmd-kbd">/ para buscar</span>
   </div>
+  <div class="cmd-dropdown" id="cmd-dropdown"></div>
 
-  <div class="apps-list" id="apps-list">
-    <div class="state-msg"><div class="spinner"></div>Cargando desde GitHub…</div>
+  <!-- CATEGORY GRID -->
+  <div id="cat-grid-wrap"></div>
+
+  <!-- APPS LIST (modo lista / búsqueda) -->
+  <div id="apps-list-wrap" style="display:none;">
+    <div class="section-hd">
+      <div class="section-title" id="apps-list-title">Apps disponibles</div>
+      <button style="background:none;border:none;font-size:10px;color:var(--muted);font-family:var(--fm);cursor:pointer;letter-spacing:1px;" onclick="showCatView()">← Categorías</button>
+    </div>
+    <div class="apps-list" id="apps-list">
+      <div class="state-msg"><div class="spinner"></div>Cargando…</div>
+    </div>
   </div>
 
   <div class="footer">
@@ -262,34 +344,161 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
     </div>
   </div>
 
+
+  <!-- CHANGELOG MODAL -->
+  <div class="cl-backdrop" id="cl-backdrop" onclick="closeChangelogOutside(event)">
+    <div class="cl-modal">
+      <div class="cl-handle"></div>
+      <div class="cl-header">
+        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v2.2.0</span></div>
+        <button class="cl-close" onclick="closeChangelog()">✕</button>
+      </div>
+      <div class="cl-body" id="cl-body"></div>
+    </div>
+  </div>
+
 </div><!-- /app-shell -->
 
 <script>
 const GITHUB_USER='Wolologger';
 const GITHUB_REPO='pwa-apps';
 
+const APP_VERSION = 'v2.2.0';
+
+// ── CHANGELOG ──────────────────────────────────────────────────────
+const CHANGELOG = [
+  {
+    version: 'v2.2.0',
+    date: 'Marzo 2026',
+    items: [
+      { type: 'new', text: 'coches.html — nueva app: perfil · mantenimiento con progreso km · historial servicios · combustible (L/100km) · documentos · ITV/seguro → Calendario' },
+      { type: 'imp', text: 'coches.html — combustible y documentos conectados con Gastos Diarios' },
+      { type: 'imp', text: 'backup.html — coches_v1 añadido al listado de backup/restore' },
+    ]
+  },
+  {
+    version: 'v2.1.0',
+    date: 'Marzo 2026',
+    items: [
+      { type: 'new', text: 'ninos.html — nueva app: perfil · medicación · visitas médico · exámenes/análisis · crecimiento · gastos' },
+      { type: 'imp', text: 'mascotas.html — cumpleaños → Calendario con recurrencia anual (recurrentes[])' },
+      { type: 'imp', text: 'ninos.html — ídem para cumpleaños de niños' },
+      { type: 'imp', text: 'backup.html — ninos_v1 añadido al listado' },
+    ]
+  },
+  {
+    version: 'v2.0.0',
+    date: 'Marzo 2026',
+    items: [
+      { type: 'new', text: 'wapps-firebase.js — auth Google + Firestore sync (WFirebase + WSync)' },
+      { type: 'imp', text: 'wapps-store.js — set() marca pending y sube a Firestore · _updatedAt · syncOnLoad()' },
+      { type: 'new', text: 'index.html — login obligatorio Google · indicador ONLINE/OFFLINE/SINCRONIZANDO · sync manual' },
+      { type: 'imp', text: 'backup.html — reset por app borra localStorage Y Firestore' },
+      { type: 'new', text: 'despensa.html — pestaña Recetas con Spoonacular · ingredientes faltantes → Compra' },
+    ]
+  },
+  {
+    version: 'v1.5.0',
+    date: 'Marzo 2026',
+    items: [
+      { type: 'new', text: 'mascotas.html — nueva app: perfil · medicación · vet · registro de peso' },
+      { type: 'imp', text: 'despensa.html — stock +/−, stockMin, botón automático → Compra' },
+      { type: 'imp', text: 'compra.html — historial de compras, reutilizar listas, WStore' },
+      { type: 'imp', text: 'semana.html — tareas editables inline, tareas recurrentes' },
+      { type: 'new', text: 'backup.html — backup y restauración completa del sistema' },
+      { type: 'new', text: 'editor-categorias.html — panel de ajustes con visibilidad on/off por app' },
+    ]
+  },
+  {
+    version: 'v1.4.0',
+    date: '2026',
+    items: [
+      { type: 'new', text: 'wapps-store.js — WStore + WNotify' },
+      { type: 'new', text: 'index.html — panel notificaciones, botón limpiar caché' },
+    ]
+  },
+  {
+    version: 'v1.0.0',
+    date: '2025',
+    items: [
+      { type: 'new', text: 'Versión inicial — todas las apps base: gastos, despensa, compra, semana, finanzas, setlist, instrumentos, deseados, suministros, decisor, obra' },
+    ]
+  }
+];
+
+const CL_TYPE_LABELS = { new: 'NUEVO', imp: 'MEJORA', fix: 'FIX', del: 'ELIMINA' };
+const CL_TYPE_CLASSES = { new: 'cl-tag-new', imp: 'cl-tag-imp', fix: 'cl-tag-fix', del: 'cl-tag-del' };
+
+function openChangelog() {
+  const body = document.getElementById('cl-body');
+  document.getElementById('cl-version-title').textContent = APP_VERSION;
+  body.innerHTML = CHANGELOG.map(v => `
+    <div class="cl-version-block">
+      <div class="cl-version-num">${v.version}</div>
+      <div class="cl-version-date">${v.date}</div>
+      ${v.items.map(it => `
+        <div class="cl-item">
+          <span class="cl-item-tag ${CL_TYPE_CLASSES[it.type]||'cl-tag-fix'}">${CL_TYPE_LABELS[it.type]||it.type}</span>
+          <span class="cl-item-text">${it.text}</span>
+        </div>`).join('')}
+    </div>`).join('<hr style="border:none;border-top:1px solid rgba(255,255,255,0.06);margin:0 0 20px;">');
+  document.getElementById('cl-backdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // Marcar versión como vista
+  localStorage.setItem('wapps.lastSeenVersion', APP_VERSION);
+  document.querySelector('.version-dot').style.animation = 'none';
+  document.querySelector('.version-dot').style.background = 'rgba(232,240,64,0.4)';
+}
+
+function closeChangelog() {
+  document.getElementById('cl-backdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeChangelogOutside(e) {
+  if (e.target === document.getElementById('cl-backdrop')) closeChangelog();
+}
+
+// Mostrar punto parpadeante si hay versión nueva sin ver
+function checkVersionBadge() {
+  const seen = localStorage.getItem('wapps.lastSeenVersion');
+  const dot = document.querySelector('.version-dot');
+  if (seen !== APP_VERSION && dot) {
+    dot.style.animation = 'pulse 1.5s ease-in-out infinite';
+  }
+  document.getElementById('version-display').textContent = APP_VERSION;
+}
+
+// ── CATEGORY CONFIG ────────────────────────────────────────────────
+const CATEGORIES = [
+  { id: 'hogar',  label: 'Hogar',        cls: 'c-hogar',  files: ['despensa.html','compra.html','suministros.html','mascotas.html','ninos.html','coches.html'] },
+  { id: 'dinero', label: 'Dinero',        cls: 'c-dinero', files: ['gastos-diarios.html','finanzas.html','deseados.html','obra.html'] },
+  { id: 'musica', label: 'Música',        cls: 'c-musica', files: ['setlist.html','instrumentos.html'] },
+  { id: 'produc', label: 'Productividad', cls: 'c-produc', files: ['semana.html','decisor.html'] },
+  { id: 'util',   label: 'Utilidad',      cls: 'c-util',   files: ['backup.html'] },
+];
+
 const META={
-'obra.html': {name:'Mi Obra', desc:'Gestión de reforma · presupuesto · tareas · fases', tags:['obra','finanzas']},
-'gastos-diarios.html': {name:'Gastos Diarios', desc:'Control de gastos cotidianos · presupuesto mensual', tags:['dinero','diario']},
-'suministros.html': {name:'Suministros', desc:'Facturas de luz · gas · agua · gráficas · alertas', tags:['hogar','dinero']},
-'finanzas.html': {name:'Finanzas', desc:'Ingresos vs gastos · conectado con otras apps · proyección anual', tags:['dinero']},
-'despensa.html': {name:'Despensa', desc:'Inventario de alimentos · caducidades', tags:['hogar','cocina']},
-'compra.html': {name:'Lista Compra', desc:'Listas reutilizables · categorías custom · establecimientos', tags:['hogar','cocina']},
-'setlist.html': {name:'Setlist', desc:'Canciones por grupo · drag & drop · modo actuación · exportar', tags:['música']},
-'instrumentos.html': {name:'Instrumentos', desc:'Inventario de guitarras · bajos · amplis · pedales · setups', tags:['música']},
-'semana.html': {name:'Semana', desc:'Tareas semanales · calendario · vacaciones y eventos', tags:['productividad']},
-'deseados.html': {name:'Deseados', desc:'Lista de deseos · prioridad · categorías · seguimiento de compras', tags:['dinero']},
-'decisor.html':   {name:'Decisor',  desc:'Elige por ti · presets editables · historial',                          tags:['utilidad']},
-'mascotas.html':  {name:'Mascotas', desc:'Perfil · medicación · vet · peso · conectado con calendario y compra',   tags:['hogar']},
-'ninos.html':     {name:'Niños',    desc:'Perfil · medicación · médico · exámenes · crecimiento · gastos · conectado con calendario y compra', tags:['hogar','salud']},
-'coches.html':    {name:'Coches',   desc:'Mantenimiento · historial · combustible · documentos · ITV · seguro · gastos', tags:['hogar','transporte']},
-'backup.html':    {name:'Backup',   desc:'Backup y restauración completa de todos los datos del sistema',          tags:['utilidad']},
+'obra.html': {name:'Mi Obra', emoji:'🏗', desc:'Gestión de reforma · presupuesto · tareas · fases', tags:['obra','finanzas']},
+'gastos-diarios.html': {name:'Gastos Diarios', emoji:'💸', desc:'Control de gastos cotidianos · presupuesto mensual', tags:['dinero','diario']},
+'suministros.html': {name:'Suministros', emoji:'💡', desc:'Facturas de luz · gas · agua · gráficas · alertas', tags:['hogar','dinero']},
+'finanzas.html': {name:'Finanzas', emoji:'💰', desc:'Ingresos vs gastos · conectado con otras apps · proyección anual', tags:['dinero']},
+'despensa.html': {name:'Despensa', emoji:'🥫', desc:'Inventario de alimentos · caducidades', tags:['hogar','cocina']},
+'compra.html': {name:'Lista Compra', emoji:'🛒', desc:'Listas reutilizables · categorías custom · establecimientos', tags:['hogar','cocina']},
+'setlist.html': {name:'Setlist', emoji:'🎸', desc:'Canciones por grupo · drag & drop · modo actuación · exportar', tags:['música']},
+'instrumentos.html': {name:'Instrumentos', emoji:'🎛', desc:'Inventario de guitarras · bajos · amplis · pedales · setups', tags:['música']},
+'semana.html': {name:'Semana', emoji:'📅', desc:'Tareas semanales · calendario · vacaciones y eventos', tags:['productividad']},
+'deseados.html': {name:'Deseados', emoji:'❤️', desc:'Lista de deseos · prioridad · categorías · seguimiento de compras', tags:['dinero']},
+'decisor.html':   {name:'Decisor',  emoji:'🎲', desc:'Elige por ti · presets editables · historial',                          tags:['utilidad']},
+'mascotas.html':  {name:'Mascotas', emoji:'🐾', desc:'Perfil · medicación · vet · peso · conectado con calendario y compra', tags:['hogar']},
+'ninos.html':     {name:'Niños',    emoji:'👦', desc:'Perfil · medicación · médico · exámenes · crecimiento · gastos · conectado con calendario y compra', tags:['hogar','salud']},
+'coches.html':    {name:'Coches',   emoji:'🚗', desc:'Mantenimiento · historial · combustible · documentos · ITV · seguro · gastos', tags:['hogar','transporte']},
+'backup.html':    {name:'Backup',   emoji:'💾', desc:'Backup y restauración completa de todos los datos del sistema', tags:['utilidad']},
 };
 
 const ALL_TAGS=[...new Set(Object.values(META).flatMap(m=>m.tags||[]))].sort();
-let activeTag='';
 let allFiles=[];
-
 const hidden=new Set(JSON.parse(localStorage.getItem('pwa_hidden')||'[]'));
 
 function autoMeta(filename){
@@ -303,32 +512,73 @@ function updateClock(){
 }
 updateClock();setInterval(updateClock,10000);
 
-function renderFilterBar(){
-  document.getElementById('filter-bar').innerHTML=
-    `<button class="filter-chip ${!activeTag?'active':''}" onclick="setTag('')">Todas</button>`+
-    ALL_TAGS.map(t=>`<button class="filter-chip ${activeTag===t?'active':''}" onclick="setTag('${t}')">${t}</button>`).join('');
+// ── CATEGORY GRID VIEW ─────────────────────────────────────────────
+function renderCatGrid() {
+  const visible = allFiles.filter(f => !hidden.has(f.name));
+  document.getElementById('app-count').textContent = visible.length;
+  document.getElementById('file-count').textContent = `${visible.length} app${visible.length!==1?'s':''}`;
+
+  const html = CATEGORIES.map(cat => {
+    const catFiles = visible.filter(f => cat.files.includes(f.name));
+    if (!catFiles.length) return '';
+    const names = catFiles.map(f => (META[f.name]||autoMeta(f.name)).name).join(' · ');
+    return `<div class="cat-cell ${cat.cls}" onclick="showCatApps('${cat.id}')">
+      <div class="cat-count">${String(catFiles.length).padStart(2,'0')}</div>
+      <div class="cat-label">${cat.label}</div>
+      <div class="cat-apps">${names}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('cat-grid-wrap').innerHTML = `
+    <div class="section-hd" style="padding-top:14px;">
+      <div class="section-title">Categorías</div>
+      <div class="section-count">WOLOLOGGER/PWA-APPS</div>
+    </div>
+    <div class="cat-grid">${html}</div>
+    <button class="cat-all-btn" onclick="showAllApps()">Ver todas las apps →</button>`;
 }
 
-function setTag(t){activeTag=t;renderApps();}
+function showCatView() {
+  document.getElementById('apps-list-wrap').style.display = 'none';
+  document.getElementById('cat-grid-wrap').style.display = '';
+  document.getElementById('cmd-dropdown').classList.remove('open');
+  document.getElementById('cmd-input').value = '';
+}
 
-function renderApps(){
-  const visible=allFiles.filter(f=>!hidden.has(f.name));
-  const filtered=activeTag?visible.filter(f=>{const m=META[f.name]||autoMeta(f.name);return(m.tags||[]).includes(activeTag);}):visible;
-  document.getElementById('app-count').textContent=filtered.length;
-  document.getElementById('file-count').textContent=`${filtered.length} app${filtered.length!==1?'s':''}`;
-  if(!filtered.length){document.getElementById('apps-list').innerHTML='<div class="err-msg">Sin apps en esta categoría.</div>';return;}
-  document.getElementById('apps-list').innerHTML=filtered.map((f,i)=>{
-    const m=META[f.name]||autoMeta(f.name);
-    const num=String(i+1).padStart(2,'0');
-    const tagsHtml=(m.tags||[]).length?`<div class="app-tags">${m.tags.map(t=>`<span class="app-tag">${t}</span>`).join('')}</div>`:'';
-    return`<a class="app-card" href="${f.name}">
+function showCatApps(catId) {
+  const cat = CATEGORIES.find(c => c.id === catId);
+  if (!cat) return;
+  const visible = allFiles.filter(f => !hidden.has(f.name) && cat.files.includes(f.name));
+  document.getElementById('apps-list-title').textContent = cat.label;
+  renderAppsList(visible);
+  document.getElementById('cat-grid-wrap').style.display = 'none';
+  document.getElementById('apps-list-wrap').style.display = '';
+}
+
+function showAllApps() {
+  const visible = allFiles.filter(f => !hidden.has(f.name));
+  document.getElementById('apps-list-title').textContent = 'Todas las apps';
+  renderAppsList(visible);
+  document.getElementById('cat-grid-wrap').style.display = 'none';
+  document.getElementById('apps-list-wrap').style.display = '';
+}
+
+function renderAppsList(files) {
+  if (!files.length) {
+    document.getElementById('apps-list').innerHTML = '<div class="err-msg">Sin apps en esta categoría.</div>';
+    return;
+  }
+  document.getElementById('apps-list').innerHTML = files.map((f, i) => {
+    const m = META[f.name] || autoMeta(f.name);
+    const num = String(i+1).padStart(2,'0');
+    const tagsHtml = (m.tags||[]).length ? `<div class="app-tags">${m.tags.map(t=>`<span class="app-tag">${t}</span>`).join('')}</div>` : '';
+    return `<a class="app-card" href="${f.name}">
   <div class="app-inner">
     <div class="app-num">${num}</div>
     <div class="app-body">
       <div class="app-name">${m.name}</div>
       <div class="app-desc">${m.desc}</div>
       ${tagsHtml}
-      <div class="app-file">${f.name}</div>
     </div>
     <div class="app-arrow">→</div>
   </div>
@@ -336,18 +586,103 @@ function renderApps(){
   }).join('');
 }
 
+// ── COMMAND PALETTE ────────────────────────────────────────────────
+function initCmdPalette() {
+  const input = document.getElementById('cmd-input');
+  const dropdown = document.getElementById('cmd-dropdown');
+  let activeIdx = -1;
+  let currentResults = [];
+
+  function getResults(q) {
+    const visible = allFiles.filter(f => !hidden.has(f.name));
+    if (!q) return visible.slice(0, 7);
+    const ql = q.toLowerCase();
+    return visible.filter(f => {
+      const m = META[f.name] || autoMeta(f.name);
+      return m.name.toLowerCase().includes(ql) || (m.desc||'').toLowerCase().includes(ql) || (m.tags||[]).some(t=>t.includes(ql));
+    });
+  }
+
+  function renderResults(results) {
+    currentResults = results;
+    activeIdx = results.length ? 0 : -1;
+    if (!results.length) {
+      dropdown.innerHTML = `<div class="cmd-empty">Sin resultados</div>`;
+      dropdown.classList.add('open');
+      return;
+    }
+    dropdown.innerHTML = results.map((f, i) => {
+      const m = META[f.name] || autoMeta(f.name);
+      return `<a class="cmd-row${i===0?' active':''}" href="${f.name}" data-idx="${i}">
+        <span class="cmd-row-icon">${m.emoji||'→'}</span>
+        <div class="cmd-row-body">
+          <div class="cmd-row-name">${m.name}</div>
+          <div class="cmd-row-desc">${m.desc}</div>
+        </div>
+        <span class="cmd-row-arrow">↗</span>
+      </a>`;
+    }).join('');
+    dropdown.classList.add('open');
+  }
+
+  function closeDropdown() {
+    dropdown.classList.remove('open');
+    activeIdx = -1;
+  }
+
+  input.addEventListener('input', e => {
+    const q = e.target.value.trim();
+    if (!q) { closeDropdown(); return; }
+    renderResults(getResults(q));
+  });
+
+  input.addEventListener('focus', () => {
+    renderResults(getResults(input.value.trim()));
+  });
+
+  input.addEventListener('keydown', e => {
+    const rows = dropdown.querySelectorAll('.cmd-row[data-idx]');
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeIdx = Math.min(activeIdx+1, currentResults.length-1);
+      rows.forEach(r => r.classList.toggle('active', +r.dataset.idx === activeIdx));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIdx = Math.max(activeIdx-1, 0);
+      rows.forEach(r => r.classList.toggle('active', +r.dataset.idx === activeIdx));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const active = dropdown.querySelector('.cmd-row.active');
+      if (active) active.click();
+    } else if (e.key === 'Escape') {
+      closeDropdown();
+      input.blur();
+    }
+  });
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.cmd-bar') && !e.target.closest('.cmd-dropdown')) closeDropdown();
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === '/' && document.activeElement !== input && !document.getElementById('cl-backdrop').classList.contains('open')) {
+      e.preventDefault();
+      input.focus();
+    }
+  });
+}
+
 async function loadApps(){
-  const list=document.getElementById('apps-list');
   try{
     const res=await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/`);
     if(!res.ok)throw new Error(`API ${res.status}`);
     const files=await res.json();
     allFiles=files.filter(f=>f.type==='file'&&f.name.endsWith('.html')&&f.name!=='index.html'&&f.name!=='editor-categorias.html'&&f.name!=='guia_factura_luz.html').sort((a,b)=>a.name.localeCompare(b.name));
     document.getElementById('updated-at').textContent=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
-    renderFilterBar();
-    renderApps();
+    renderCatGrid();
+    initCmdPalette();
   }catch(err){
-    list.innerHTML=`<div class="err-msg">No se pudo cargar la lista.<br>${err.message}</div>`;
+    document.getElementById('cat-grid-wrap').innerHTML=`<div class="err-msg" style="padding:20px;">No se pudo cargar la lista.<br>${err.message}</div>`;
     document.getElementById('app-count').textContent='?';
   }
 }
@@ -367,11 +702,20 @@ async function clearCache() {
     await Promise.all(keys.map(k => caches.delete(k)));
   }
   window.location.reload(true);
+
 }
 
 // loadApps() se llama desde showApp() cuando hay sesión activa
 </script>
 <script>
+// ── helpers para acceder a WFirebase/WSync de forma segura ────────
+// Los scripts externos (wapps-store.js, wapps-firebase.js) se cargan
+// antes del </body> pero los bloques inline ejecutan en orden de parsing.
+// Usamos getters lazy para evitar ReferenceError si aún no están listos.
+function _fb()   { return (typeof WFirebase !== 'undefined') ? WFirebase : null; }
+function _sync() { return (typeof WSync     !== 'undefined') ? WSync     : null; }
+function _store(){ return (typeof WStore    !== 'undefined') ? WStore    : null; }
+
 // ── Login gate ───────────────────────────────────────────────────
 async function doLogin() {
   const btn     = document.getElementById('login-btn');
@@ -381,7 +725,9 @@ async function doLogin() {
   btnText.innerHTML = '<div class="login-spinner"></div>';
   errEl.style.display = 'none';
   try {
-    const user = await WFirebase.login();
+    const fb = _fb();
+    if (!fb) throw new Error('Firebase no disponible');
+    const user = await fb.login();
     if (!user) throw new Error('Login cancelado');
   } catch(e) {
     btn.disabled  = false;
@@ -397,30 +743,32 @@ function showApp(user) {
   document.getElementById('login-screen').style.display  = 'none';
   document.getElementById('app-shell').style.display     = '';
   updateAuthBtn(user);
+  checkVersionBadge();
   if (!allFiles.length) loadApps();
+  const seenVer = localStorage.getItem('wapps.lastSeenVersion');
+  if (seenVer && seenVer !== APP_VERSION) setTimeout(openChangelog, 800);
 }
 
 function showLogin() {
   document.getElementById('login-screen').style.display  = '';
   document.getElementById('app-shell').style.display     = 'none';
-  // Ocultar spinner de resolución, mostrar card de login
   const resolving = document.getElementById('login-resolving');
   const card      = document.getElementById('login-card');
   if (resolving) resolving.style.display = 'none';
   if (card)      card.style.display      = '';
-  // Reset login btn
-  const btn = document.getElementById('login-btn');
+  const btn     = document.getElementById('login-btn');
   const btnText = document.getElementById('login-btn-text');
-  if (btn) btn.disabled = false;
+  if (btn)     btn.disabled = false;
   if (btnText) btnText.textContent = 'ENTRAR CON GOOGLE';
 }
 
 // ── Auth UI (topbar) ──────────────────────────────────────────────
 async function handleAuth() {
-  const user = WFirebase.getUser();
+  const fb   = _fb();
+  const user = fb ? fb.getUser() : null;
   if (user) {
     if (confirm(`¿Cerrar sesión de ${user.displayName}?`)) {
-      await WFirebase.logout();
+      await fb.logout();
     }
   }
 }
@@ -443,89 +791,80 @@ function updateAuthBtn(user) {
 
 // ── Sync UI ───────────────────────────────────────────────────────
 function updateSyncUI(state, pendingCount) {
-  const dot   = document.getElementById('sync-dot');
-  const label = document.getElementById('sync-label');
-  const btn   = document.getElementById('sync-btn');
-  const pend  = document.getElementById('sync-pending');
+  const dot  = document.getElementById('sync-dot');
+  const label= document.getElementById('sync-label');
+  const btn  = document.getElementById('sync-btn');
+  const pend = document.getElementById('sync-pending');
   if (!dot) return;
 
   dot.className   = `sync-dot ${state}`;
   label.className = `sync-label ${state}`;
-
-  const labels = { online: 'ONLINE', offline: 'OFFLINE', syncing: 'SINCRONIZANDO...' };
+  const labels = { online:'ONLINE', offline:'OFFLINE', syncing:'SINCRONIZANDO...' };
   label.textContent = labels[state] || state.toUpperCase();
 
-  if (pendingCount > 0) {
-    pend.textContent = `· ${pendingCount} PENDIENTE${pendingCount > 1 ? 'S' : ''}`;
-  } else {
-    pend.textContent = '';
-  }
+  pend.textContent = pendingCount > 0
+    ? `· ${pendingCount} PENDIENTE${pendingCount > 1 ? 'S' : ''}` : '';
 
-  const canSync = state === 'online' && WFirebase.getUser() && pendingCount > 0;
+  const fb = _fb();
+  const canSync = state === 'online' && fb && fb.getUser() && pendingCount > 0;
   btn.disabled = !canSync;
 }
 
 async function manualSync() {
-  const user = WFirebase.getUser();
-  if (!user || !WFirebase.isOnline()) return;
+  const fb   = _fb();
+  const sync = _sync();
+  if (!fb || !sync) return;
+  const user = fb.getUser();
+  if (!user || !fb.isOnline()) return;
 
-  updateSyncUI('syncing', WSync.getPending().length);
+  updateSyncUI('syncing', sync.getPending().length);
   document.getElementById('sync-btn').disabled = true;
 
-  const { pushed, failed } = await WSync.syncAll(user.uid);
-
-  const pending = WSync.getPending().length;
-  updateSyncUI(WFirebase.isOnline() ? 'online' : 'offline', pending);
-
-  if (failed > 0) {
-    console.warn(`[Sync] ${failed} errores al sincronizar`);
-  }
+  const { pushed, failed } = await sync.syncAll(user.uid);
+  updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
+  if (failed > 0) console.warn(`[Sync] ${failed} errores al sincronizar`);
 }
 
 // ── Eventos Firebase ──────────────────────────────────────────────
 window.addEventListener('wapps:auth-change', async e => {
-  const user = e.detail.user;
+  const fb    = _fb();
+  const sync  = _sync();
+  const store = _store();
+  const user  = e.detail.user;
 
   if (user) {
     showApp(user);
-    // Pull remoto primero, luego push pendientes
-    updateSyncUI('syncing', WSync.getPending().length);
-    await WStore.syncAllOnLoad();
-    await WSync.syncAll(user.uid);
-    updateSyncUI(WFirebase.isOnline() ? 'online' : 'offline', WSync.getPending().length);
+    if (sync)  updateSyncUI('syncing', sync.getPending().length);
+    if (store) await store.syncAllOnLoad();
+    if (sync)  await sync.syncAll(user.uid);
+    updateSyncUI(fb ? (fb.isOnline() ? 'online' : 'offline') : 'offline',
+                 sync ? sync.getPending().length : 0);
   } else {
     showLogin();
-    updateSyncUI(WFirebase.isOnline() ? 'online' : 'offline', 0);
+    updateSyncUI(fb ? (fb.isOnline() ? 'online' : 'offline') : 'offline', 0);
   }
 });
 
-window.addEventListener('wapps:online', () => {
-  updateSyncUI('online', WSync.getPending().length);
+window.addEventListener('wapps:online',      () => updateSyncUI('online',  _sync()?.getPending().length ?? 0));
+window.addEventListener('wapps:offline',     () => updateSyncUI('offline', _sync()?.getPending().length ?? 0));
+window.addEventListener('wapps:sync-start',  () => updateSyncUI('syncing', _sync()?.getPending().length ?? 0));
+window.addEventListener('wapps:sync-done',   () => {
+  const fb = _fb();
+  updateSyncUI(fb ? (fb.isOnline() ? 'online' : 'offline') : 'offline', _sync()?.getPending().length ?? 0);
 });
-
-window.addEventListener('wapps:offline', () => {
-  updateSyncUI('offline', WSync.getPending().length);
-});
-
-window.addEventListener('wapps:sync-start', () => {
-  updateSyncUI('syncing', WSync.getPending().length);
-});
-
-window.addEventListener('wapps:sync-done', () => {
-  updateSyncUI(WFirebase.isOnline() ? 'online' : 'offline', WSync.getPending().length);
-});
-
 window.addEventListener('wapps:pending-change', e => {
-  const state = document.getElementById('sync-label')?.className?.includes('syncing')
-    ? 'syncing'
-    : WFirebase.isOnline() ? 'online' : 'offline';
+  const fb    = _fb();
+  const label = document.getElementById('sync-label');
+  const isSyncing = label?.className?.includes('syncing');
+  const state = isSyncing ? 'syncing' : (fb ? (fb.isOnline() ? 'online' : 'offline') : 'offline');
   updateSyncUI(state, e.detail.pending.length);
 });
 
-// Init estado inicial — mostrar login hasta que Firebase resuelva
-// Si el usuario ya estaba logado, wapps:auth-change se disparará automáticamente
-updateSyncUI(navigator.onLine ? 'online' : 'offline', WSync.getPending().length);
-// No llamamos loadApps() aquí — se llama en showApp() cuando hay usuario
+// ── Init ─────────────────────────────────────────────────────────
+// updateSyncUI se llama aquí solo para poner el estado de red inicial;
+// WFirebase/WSync aún no existen en este punto, se usan de forma segura
+// a través de los getters _fb() / _sync() dentro de la función.
+updateSyncUI(navigator.onLine ? 'online' : 'offline', 0);
 </script>
 </body>
 </html>
