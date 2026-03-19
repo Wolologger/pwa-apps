@@ -1,6 +1,6 @@
 # W//APPS · Personal PWA Suite
 
-**Versión:** `v2.1.0` · Build `2026.03`
+**Versión:** `v2.2.0` · Build `2026.03`
 **Autor:** [@Wolologger](https://github.com/Wolologger)
 **URL:** `https://wolologger.github.io/pwa-apps/`
 **Stack:** HTML · CSS · Vanilla JS · localStorage · Firebase · Chart.js · Spoonacular API
@@ -25,6 +25,7 @@ pwa-apps/
 ├── suministros.html          # Facturas luz/gas/agua · guías · alertas
 ├── mascotas.html             # Perfil · medicación · vet · peso · → Calendario y Compra
 ├── ninos.html                # Perfil · medicación · médico · exámenes · crecimiento · gastos · → Calendario y Compra
+├── coches.html               # Mantenimiento · historial servicios · combustible · documentos · ITV/seguro · gastos
 │
 ├── — DINERO —
 ├── obra.html                 # Múltiples proyectos · archivar · resumen global
@@ -57,6 +58,7 @@ pwa-apps/
 | **Suministros** | Facturas de luz, gas y agua | Guías Luz/Gas/Agua con test · alertas subida >20% |
 | **Mascotas** | Gestión de mascotas | Perfil · medicación · visitas vet · registro de peso · 🎂 cumpleaños → Calendario |
 | **Niños** | Salud y seguimiento de hijos | Perfil · medicación · visitas médico · exámenes · crecimiento · gastos · 🎂 cumpleaños → Calendario |
+| **Coches** | Mantenimiento y gastos de vehículos | Perfil · tareas mantenimiento con km/tiempo · historial servicios · combustible · documentos · ITV · seguro |
 
 ### 💰 Dinero
 
@@ -154,6 +156,46 @@ cal.recurrentes.push({
 ```
 
 > **Nota para semana.html:** el campo `recurrentes[]` ya se escribe desde mascotas y niños. Para que aparezca en semanas futuras, semana.html debe renderizar estos eventos por `diaMes` además de los `events[]` normales.
+
+---
+
+### coches.html — Mantenimiento de vehículos
+
+App para llevar el control completo de uno o varios vehículos. Soporta múltiples perfiles (selector en barra superior).
+
+**Pestañas:**
+
+| Pestaña | Contenido |
+|---------|-----------|
+| **Perfil** | Alias, marca/modelo, año, combustible, matrícula, km, VIN, color, ITV y seguro. Alertas de ITV próxima/vencida, seguro próximo, tareas urgentes. |
+| **Mantenimiento** | Tareas planificadas con disparador por km y/o fecha/meses. Barra de progreso visual. Marcar como hecha → calcula siguiente intervalo automáticamente. |
+| **Historial** | Servicios realizados: fecha, taller, trabajos, km, coste, próxima revisión. Total gastado en taller. Coste → Gastos Diarios. Próxima → Calendario. |
+| **Combustible** | Repostajes con litros, precio/L, total, gasolinera y km. Cálculo automático de consumo L/100km entre repostajes completos. Media histórica. |
+| **Documentos** | Seguro, ITV, permiso de circulación, garantía, multas, informes. Alertas de vencimiento. Vencimiento → Calendario. |
+| **Gastos** | Vista consolidada de taller + combustible + documentos. Resumen mensual, desglose por categoría (taller / combustible). |
+
+**Estructura de datos:**
+```js
+state = {
+  cars: [{
+    id, alias, emoji, marca, modelo, anno, combustible,
+    matricula, km, vin, color, itv, seguro,
+    mants:    [{ id, desc, tipo, prioridad, kmTrigger, kmIntervalo, fecha, mesesIntervalo, notas, done, doneKm, doneDate }],
+    servicios:[{ id, fecha, taller, trabajos, km, coste, proxKm, proxFecha, notas }],
+    fuels:    [{ id, fecha, km, litros, precio, total, lleno, gasolinera, lp100 }],
+    docs:     [{ id, tipo, nombre, inicio, vence, importe, entidad, notas }]
+  }],
+  nextId: 1
+}
+```
+
+**Conexiones cross-app:**
+- Coste de servicio → `gastos_v1` (Gastos Diarios, categoría: transporte)
+- Repostaje → `gastos_v1` (Gastos Diarios, opcional)
+- Próxima revisión → `semana_v2` (Calendario)
+- ITV y vencimiento de seguro → `semana_v2` (Calendario)
+- Vencimiento de documentos → `semana_v2` (Calendario)
+
 
 ---
 
@@ -313,6 +355,7 @@ Acceso desde botón ⚙ en el topbar del index.
 | Obra | `obra_multiproj_v1` | `wapps.obra.data` |
 | Mascotas | `mascotas_v1` | — |
 | Niños | `ninos_v1` | — |
+| Coches | `coches_v1` | — |
 | Backup | — | `wapps.backup.history` |
 | Config notificaciones | — | `notify.config` |
 | Onboarding | — | `wapps.onboarding.<app>` |
@@ -346,6 +389,12 @@ Acceso desde botón ⚙ en el topbar del index.
 ---
 
 ## 📋 Changelog
+
+### v2.2.0 (2026-03)
+- `coches.html` — nueva app: perfil del vehículo · tareas de mantenimiento con intervalo km/meses y barra de progreso · historial de servicios · repostajes con cálculo automático de consumo L/100km · documentos (ITV, seguro, multas…) · vista consolidada de gastos · conectada con Gastos Diarios y Calendario
+- `backup.html` — añadida app `coches_v1`
+- `index.html` — nueva entrada `coches.html` con tags `hogar` y `transporte`
+- `README.md` — documentación actualizada
 
 ### v2.1.0 (2026-03)
 - `ninos.html` — nueva app: perfil · medicación · visitas médico · exámenes/análisis · crecimiento (talla/peso/per.cefálico) · gastos por categoría · conectada con Gastos Diarios, Compra y Calendario

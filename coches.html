@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a09">
+<title>Coches — W//APPS</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;
+  --y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;--o:#f09030;--p:#c060f0;
+  --a:#ff8c00;/* amber — color principal de coches */
+  --fh:'Bebas Neue',sans-serif;--fm:'DM Mono',monospace;--fs:'DM Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--fs);overflow-x:hidden;}
+
+/* NAV */
+.wnav{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:100;flex-shrink:0;}
+.wnav-back{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--muted);text-decoration:none;transition:all 0.15s;flex-shrink:0;}
+.wnav-back:hover{background:rgba(255,255,255,0.06);color:var(--y);}
+.wnav-logo{font-family:var(--fh);font-size:16px;letter-spacing:2px;flex-shrink:0;}
+.wnav-logo a{color:var(--muted);text-decoration:none;}
+.wnav-logo a span{color:var(--y);}
+.wnav-sep{width:1px;height:16px;background:var(--border2);flex-shrink:0;}
+.wnav-title{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* SHELL */
+.shell{display:flex;flex-direction:column;height:100dvh;max-width:600px;margin:0 auto;}
+
+/* CAR SELECTOR BAR */
+.car-bar{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border2);flex-shrink:0;overflow-x:auto;scrollbar-width:none;background:var(--bg);}
+.car-bar::-webkit-scrollbar{display:none;}
+.car-chip{flex-shrink:0;display:flex;align-items:center;gap:6px;padding:6px 12px;border:0.5px solid var(--border2);border-radius:99px;background:transparent;color:var(--muted);cursor:pointer;transition:all 0.15s;font-family:var(--fm);font-size:12px;white-space:nowrap;}
+.car-chip.active{border-color:var(--a);color:var(--a);background:rgba(255,140,0,0.08);}
+.car-chip:hover{color:var(--text);}
+.car-add-btn{flex-shrink:0;width:30px;height:30px;border-radius:50%;border:0.5px solid var(--border2);background:transparent;color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.car-add-btn:hover{color:var(--y);border-color:var(--y);}
+
+/* TABS */
+.tabs{display:flex;padding:0 16px;gap:2px;border-bottom:1px solid var(--border2);flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:9px 14px;font-size:11px;font-family:var(--fm);border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;white-space:nowrap;}
+.tab.active{color:var(--y);border-bottom-color:var(--y);}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:0 16px 100px;scrollbar-width:none;}
+.content::-webkit-scrollbar{display:none;}
+.section{display:none;padding-top:14px;}
+.section.active{display:block;}
+
+/* ALERTS */
+.alert-card{background:rgba(240,64,48,0.08);border:0.5px solid rgba(240,64,48,0.25);border-radius:10px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:flex-start;gap:10px;}
+.alert-dot{width:7px;height:7px;border-radius:50%;background:var(--r);flex-shrink:0;margin-top:4px;animation:pulse 1.5s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.alert-text{font-size:12px;font-family:var(--fm);color:var(--r);line-height:1.6;flex:1;}
+.alert-card.warn{background:rgba(255,140,0,0.08);border-color:rgba(255,140,0,0.3);}
+.alert-card.warn .alert-dot{background:var(--a);}
+.alert-card.warn .alert-text{color:var(--a);}
+.alert-card.ok{background:rgba(48,216,128,0.08);border-color:rgba(48,216,128,0.25);}
+.alert-card.ok .alert-dot{background:var(--g);}
+.alert-card.ok .alert-text{color:var(--g);}
+
+/* CAR PROFILE */
+.car-profile{background:var(--bg2);border:0.5px solid var(--border2);border-radius:14px;padding:18px;margin-bottom:14px;position:relative;}
+.car-profile-top{display:flex;gap:14px;align-items:flex-start;}
+.car-avatar{width:64px;height:64px;border-radius:14px;background:rgba(255,140,0,0.12);border:1px solid rgba(255,140,0,0.25);display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;}
+.car-info{flex:1;min-width:0;}
+.car-name-display{font-family:var(--fh);font-size:28px;letter-spacing:0.5px;line-height:1;}
+.car-model{font-size:13px;color:var(--muted);font-family:var(--fm);margin-top:2px;}
+.car-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-family:var(--fm);padding:3px 10px;border-radius:99px;background:rgba(255,140,0,0.1);color:var(--a);border:0.5px solid rgba(255,140,0,0.3);margin-top:6px;}
+.car-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px;}
+.car-stat{background:var(--bg3);border-radius:8px;padding:10px;text-align:center;}
+.car-stat-label{font-size:9px;color:var(--muted);font-family:var(--fm);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:3px;}
+.car-stat-val{font-family:var(--fh);font-size:18px;line-height:1;}
+.car-edit-btn{position:absolute;top:14px;right:14px;background:none;border:0.5px solid var(--border2);border-radius:6px;color:var(--muted);font-size:13px;padding:4px 10px;cursor:pointer;font-family:var(--fm);}
+.car-edit-btn:hover{color:var(--text);}
+
+/* ITV BADGE */
+.itv-ok{color:var(--g);}
+.itv-pronto{color:var(--a);}
+.itv-vencida{color:var(--r);}
+
+/* MAINTENANCE CARDS */
+.mant-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:13px 14px;margin-bottom:8px;}
+.mant-top{display:flex;align-items:flex-start;gap:10px;}
+.mant-icon{font-size:18px;flex-shrink:0;width:36px;height:36px;background:var(--bg3);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.mant-body{flex:1;min-width:0;}
+.mant-name{font-size:14px;font-weight:500;}
+.mant-meta{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;align-items:center;}
+.mant-km{font-size:11px;color:var(--muted);font-family:var(--fm);}
+.mant-type{font-size:9px;padding:2px 8px;border-radius:99px;font-family:var(--fm);}
+.mant-type-aceite{background:rgba(255,140,0,0.1);color:var(--a);border:0.5px solid rgba(255,140,0,0.3);}
+.mant-type-frenos{background:rgba(240,64,48,0.1);color:var(--r);border:0.5px solid rgba(240,64,48,0.25);}
+.mant-type-neumaticos{background:rgba(48,168,240,0.1);color:var(--b);border:0.5px solid rgba(48,168,240,0.25);}
+.mant-type-revision{background:rgba(48,216,128,0.1);color:var(--g);border:0.5px solid rgba(48,216,128,0.25);}
+.mant-type-filtro{background:rgba(192,96,240,0.1);color:var(--p);border:0.5px solid rgba(192,96,240,0.25);}
+.mant-type-otro{background:rgba(90,88,80,0.12);color:var(--muted);border:0.5px solid var(--border2);}
+
+/* KM PROGRESS BAR */
+.km-bar-wrap{margin-top:8px;}
+.km-bar-labels{display:flex;justify-content:space-between;font-size:9px;font-family:var(--fm);color:var(--muted);margin-bottom:4px;}
+.km-bar-track{height:4px;background:var(--bg3);border-radius:99px;overflow:hidden;}
+.km-bar-fill{height:100%;border-radius:99px;transition:width 0.3s ease;}
+
+/* SERVICE HISTORY */
+.serv-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:8px;}
+.serv-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.serv-body{flex:1;}
+.serv-date{font-family:var(--fh);font-size:18px;letter-spacing:0.3px;}
+.serv-title{font-size:13px;margin-top:2px;}
+.serv-meta{font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;}
+.serv-cost{font-family:var(--fh);font-size:20px;color:var(--y);flex-shrink:0;}
+.serv-upcoming{border-color:rgba(232,240,64,0.3);}
+
+/* FUEL LOG */
+.fuel-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:0.5px solid var(--border);}
+.fuel-row:last-child{border-bottom:none;}
+.fuel-date{color:var(--muted);font-family:var(--fm);font-size:11px;}
+.fuel-val{font-family:var(--fh);font-size:17px;}
+.fuel-lp100{font-size:10px;font-family:var(--fm);padding:2px 6px;border-radius:99px;}
+.fuel-eco{background:rgba(48,216,128,0.1);color:var(--g);}
+.fuel-normal{background:rgba(255,140,0,0.1);color:var(--a);}
+.fuel-gasto{background:rgba(240,64,48,0.1);color:var(--r);}
+
+/* DOCUMENTS */
+.doc-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.doc-body{flex:1;}
+.doc-name{font-size:13px;font-weight:500;}
+.doc-meta{font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;}
+.doc-status{font-size:9px;padding:2px 8px;border-radius:99px;font-family:var(--fm);}
+.doc-vigente{background:rgba(48,216,128,0.1);color:var(--g);border:0.5px solid rgba(48,216,128,0.25);}
+.doc-pronto{background:rgba(255,140,0,0.1);color:var(--a);border:0.5px solid rgba(255,140,0,0.3);}
+.doc-vencido{background:rgba(240,64,48,0.1);color:var(--r);border:0.5px solid rgba(240,64,48,0.25);}
+
+/* SUMMARY */
+.summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;}
+.summary-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px;}
+.summary-label{font-size:9px;color:var(--muted);font-family:var(--fm);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:4px;}
+.summary-val{font-family:var(--fh);font-size:24px;line-height:1;}
+.summary-sub{font-size:10px;color:var(--muted);font-family:var(--fm);margin-top:2px;}
+
+/* ADD PANELS */
+.add-panel{background:var(--bg2);border:0.5px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:14px;display:none;}
+.add-panel.open{display:block;animation:sd 0.15s ease;}
+@keyframes sd{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.ap-title{font-family:var(--fh);font-size:18px;letter-spacing:0.5px;margin-bottom:12px;}
+.field{margin-bottom:8px;}
+.field-label{font-size:9px;color:var(--muted);font-family:var(--fm);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.field-row{display:flex;gap:8px;flex-wrap:wrap;}
+.field-row>*{flex:1;min-width:100px;}
+input,select,textarea{width:100%;background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--fm);font-size:13px;padding:9px 12px;outline:none;transition:border-color 0.15s;}
+input:focus,select:focus,textarea:focus{border-color:var(--y);}
+select option{background:var(--bg2);}
+textarea{resize:vertical;min-height:60px;line-height:1.5;}
+
+/* BUTTONS */
+.btn{padding:9px 16px;font-size:12px;font-family:var(--fm);border:0.5px solid var(--border2);border-radius:8px;background:transparent;color:var(--text);cursor:pointer;transition:all 0.15s;flex-shrink:0;}
+.btn:hover{background:var(--bg3);}
+.btn-y{background:var(--y);color:#0a0a09;border-color:var(--y);font-weight:500;}
+.btn-b{background:rgba(48,168,240,0.1);color:var(--b);border-color:rgba(48,168,240,0.3);}
+.btn-r{color:var(--r);border-color:rgba(240,64,48,0.3);}
+.btn-sm{padding:5px 11px;font-size:11px;}
+
+/* EDIT FORM */
+.edit-form{background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;padding:12px;margin-top:10px;display:none;}
+.edit-form.open{display:block;}
+.ef-row{display:flex;gap:8px;margin-bottom:7px;flex-wrap:wrap;}
+.ef-row>*{flex:1;min-width:100px;}
+.ef-btns{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
+
+/* CONN BADGE */
+.conn-badge{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-family:var(--fm);padding:3px 8px;border-radius:99px;background:rgba(48,168,240,0.1);color:var(--b);border:0.5px solid rgba(48,168,240,0.25);}
+.conn-dot{width:5px;height:5px;border-radius:50%;background:var(--b);animation:pulse 2s ease infinite;}
+
+/* DATA */
+.data-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:14px;margin-bottom:10px;}
+.fb{font-size:11px;margin-top:8px;display:none;font-family:var(--fm);}
+
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:2.5rem 1rem;line-height:1.7;}
+.section-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:14px 0 8px;font-family:var(--fm);}
+.icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:4px 6px;opacity:0.3;transition:opacity 0.15s;color:var(--text);flex-shrink:0;}
+.icon-btn:hover{opacity:1;}
+.icon-btn.del:hover{color:var(--r);}
+.fab-area{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:600px;padding:12px 16px 24px;background:linear-gradient(to top,var(--bg) 60%,transparent);pointer-events:none;}
+.fab{pointer-events:all;width:100%;padding:13px;font-family:var(--fh);font-size:14px;background:var(--y);color:#0a0a09;border:none;border-radius:12px;cursor:pointer;letter-spacing:0.3px;}
+.fab:active{transform:scale(0.97);}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- NAV -->
+  <div class="wnav">
+    <a class="wnav-back" href="index.html"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
+    <div class="wnav-sep"></div>
+    <div class="wnav-title" id="wnav-title">COCHES</div>
+  </div>
+
+  <!-- CAR SELECTOR -->
+  <div class="car-bar" id="car-bar"></div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('perfil',this)">Perfil</button>
+    <button class="tab" onclick="showTab('mantenimiento',this)">Mantenimiento</button>
+    <button class="tab" onclick="showTab('historial',this)">Historial</button>
+    <button class="tab" onclick="showTab('combustible',this)">Combustible</button>
+    <button class="tab" onclick="showTab('documentos',this)">Documentos</button>
+    <button class="tab" onclick="showTab('gastos',this)">Gastos</button>
+    <button class="tab" onclick="showTab('datos',this)">Datos</button>
+  </div>
+
+  <div class="content">
+
+    <!-- PERFIL -->
+    <div id="perfil" class="section active">
+      <div class="add-panel" id="add-car-panel">
+        <div class="ap-title">Nuevo vehículo</div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Alias / nombre</div><input type="text" id="fc-alias" placeholder="ej: El Golf, Coche de Ana"></div>
+          <div class="field"><div class="field-label">Emoji / icono</div><input type="text" id="fc-emoji" placeholder="🚗" maxlength="2" style="text-align:center;font-size:20px;"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Marca</div><input type="text" id="fc-marca" placeholder="ej: Volkswagen, Toyota…"></div>
+          <div class="field"><div class="field-label">Modelo</div><input type="text" id="fc-modelo" placeholder="ej: Golf, Corolla…"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Año</div><input type="number" id="fc-anno" placeholder="2018" min="1900" max="2099"></div>
+          <div class="field"><div class="field-label">Combustible</div>
+            <select id="fc-combustible">
+              <option value="gasolina">⛽ Gasolina</option>
+              <option value="diesel">⛽ Diésel</option>
+              <option value="hibrido">⚡ Híbrido</option>
+              <option value="electrico">⚡ Eléctrico</option>
+              <option value="glp">🔵 GLP</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Matrícula</div><input type="text" id="fc-matricula" placeholder="1234 ABC" style="text-transform:uppercase;"></div>
+          <div class="field"><div class="field-label">Km actuales</div><input type="number" id="fc-km" placeholder="85000" min="0"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Nº bastidor (VIN)</div><input type="text" id="fc-vin" placeholder="WVWZZZ…" style="text-transform:uppercase;"></div>
+          <div class="field"><div class="field-label">Color</div><input type="text" id="fc-color" placeholder="ej: Blanco perla"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Próxima ITV</div><input type="date" id="fc-itv"></div>
+          <div class="field"><div class="field-label">Seguro — vence</div><input type="date" id="fc-seguro"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;">
+          <button class="btn btn-y" style="flex:1" onclick="addCar()">Añadir vehículo</button>
+          <button class="btn" onclick="closeAddCar()">Cancelar</button>
+        </div>
+      </div>
+      <div id="perfil-body"></div>
+    </div>
+
+    <!-- MANTENIMIENTO (próximos / planificados) -->
+    <div id="mantenimiento" class="section">
+      <div class="add-panel" id="add-mant-panel">
+        <div class="ap-title">Nueva tarea de mantenimiento</div>
+        <div class="field"><div class="field-label">Descripción</div><input type="text" id="fm-desc" placeholder="ej: Cambio de aceite y filtro, Pastillas de freno…"></div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Tipo</div>
+            <select id="fm-tipo">
+              <option value="aceite">🛢 Aceite / filtro</option>
+              <option value="frenos">🔴 Frenos</option>
+              <option value="neumaticos">⚫ Neumáticos</option>
+              <option value="revision">🔧 Revisión periódica</option>
+              <option value="filtro">🌀 Filtros (aire/habitáculo)</option>
+              <option value="correa">⚙️ Correa distribución</option>
+              <option value="bateria">🔋 Batería</option>
+              <option value="limpiaparabrisas">💧 Escobillas</option>
+              <option value="refrigerante">🌡 Líquido refrigerante</option>
+              <option value="transmision">⚙️ Transmisión</option>
+              <option value="suspension">🔩 Suspensión / amortiguadores</option>
+              <option value="otro">🔧 Otro</option>
+            </select>
+          </div>
+          <div class="field"><div class="field-label">Prioridad</div>
+            <select id="fm-prioridad">
+              <option value="normal">Normal</option>
+              <option value="proxima">Próxima revisión</option>
+              <option value="urgente">Urgente</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Km en que toca (opcional)</div><input type="number" id="fm-km-trigger" placeholder="90000" min="0"></div>
+          <div class="field"><div class="field-label">Cada N km (intervalo)</div><input type="number" id="fm-km-intervalo" placeholder="10000" min="0"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Fecha estimada (opcional)</div><input type="date" id="fm-fecha"></div>
+          <div class="field"><div class="field-label">Cada N meses (intervalo)</div><input type="number" id="fm-meses-intervalo" placeholder="12" min="0"></div>
+        </div>
+        <div class="field"><div class="field-label">Notas</div><input type="text" id="fm-notas" placeholder="Observaciones…"></div>
+        <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;">
+          <button class="btn btn-y" style="flex:1" onclick="addMant()">Añadir tarea</button>
+          <button class="btn" onclick="document.getElementById('add-mant-panel').classList.remove('open')">Cancelar</button>
+        </div>
+      </div>
+      <div id="mantenimiento-body"></div>
+    </div>
+
+    <!-- HISTORIAL DE SERVICIOS -->
+    <div id="historial" class="section">
+      <div class="add-panel" id="add-serv-panel">
+        <div class="ap-title">Registrar servicio realizado</div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Fecha</div><input type="date" id="fs-fecha"></div>
+          <div class="field"><div class="field-label">Taller / lugar</div><input type="text" id="fs-taller" placeholder="ej: Taller Pérez, Midas, Concesionario"></div>
+        </div>
+        <div class="field"><div class="field-label">Trabajos realizados</div><textarea id="fs-trabajos" placeholder="ej: Cambio aceite 5W30, filtro aceite, filtro habitáculo…"></textarea></div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Km al realizar</div><input type="number" id="fs-km" placeholder="85000" min="0"></div>
+          <div class="field"><div class="field-label">Coste total €</div><input type="number" id="fs-coste" placeholder="0.00" step="0.01" min="0"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Próxima revisión (km)</div><input type="number" id="fs-proxkm" placeholder="95000" min="0"></div>
+          <div class="field"><div class="field-label">Próxima revisión (fecha)</div><input type="date" id="fs-proxfecha"></div>
+        </div>
+        <div class="field"><div class="field-label">Notas / repuestos usados</div><input type="text" id="fs-notas" placeholder="Marca aceite, referencias de repuestos…"></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;font-family:var(--fm);">
+          <input type="checkbox" id="fs-add-gasto" style="width:16px;height:16px;cursor:pointer;accent-color:var(--y);">
+          <label for="fs-add-gasto" style="cursor:pointer;color:var(--text);">Añadir coste a Gastos Diarios</label>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:12px;font-family:var(--fm);">
+          <input type="checkbox" id="fs-add-cal" style="width:16px;height:16px;cursor:pointer;accent-color:var(--y);">
+          <label for="fs-add-cal" style="cursor:pointer;color:var(--text);">Añadir próxima revisión al Calendario</label>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-y" style="flex:1" onclick="addServ()">Guardar servicio</button>
+          <button class="btn" onclick="document.getElementById('add-serv-panel').classList.remove('open')">Cancelar</button>
+        </div>
+      </div>
+      <div id="historial-body"></div>
+    </div>
+
+    <!-- COMBUSTIBLE -->
+    <div id="combustible" class="section">
+      <div class="add-panel open" id="add-fuel-panel" style="margin-bottom:14px;">
+        <div class="ap-title">Registrar repostaje</div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Fecha</div><input type="date" id="ff-fecha"></div>
+          <div class="field"><div class="field-label">Km actuales</div><input type="number" id="ff-km" placeholder="85420" min="0"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Litros / kWh</div><input type="number" id="ff-litros" placeholder="40.5" step="0.01" min="0"></div>
+          <div class="field"><div class="field-label">Precio por litro €</div><input type="number" id="ff-precio" placeholder="1.62" step="0.001" min="0"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Importe total €</div><input type="number" id="ff-total" placeholder="65.61" step="0.01" min="0"></div>
+          <div class="field"><div class="field-label">Gasolinera (opcional)</div><input type="text" id="ff-gasolinera" placeholder="ej: Repsol A-8"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;font-family:var(--fm);">
+          <input type="checkbox" id="ff-lleno" checked style="width:16px;height:16px;cursor:pointer;accent-color:var(--y);">
+          <label for="ff-lleno" style="cursor:pointer;color:var(--text);">Depósito lleno</label>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:12px;font-family:var(--fm);">
+          <input type="checkbox" id="ff-add-gasto" style="width:16px;height:16px;cursor:pointer;accent-color:var(--y);">
+          <label for="ff-add-gasto" style="cursor:pointer;color:var(--text);">Añadir a Gastos Diarios</label>
+        </div>
+        <button class="btn btn-y btn-sm" onclick="addFuel()" style="margin-top:4px;">Guardar repostaje</button>
+      </div>
+      <div id="combustible-body"></div>
+    </div>
+
+    <!-- DOCUMENTOS -->
+    <div id="documentos" class="section">
+      <div class="add-panel" id="add-doc-panel">
+        <div class="ap-title">Nuevo documento</div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Tipo</div>
+            <select id="fd-tipo">
+              <option value="seguro">🛡 Seguro</option>
+              <option value="itv">🔍 ITV</option>
+              <option value="permiso">📄 Permiso de circulación</option>
+              <option value="garantia">✅ Garantía</option>
+              <option value="contrato">📋 Contrato de compra</option>
+              <option value="multa">⚠️ Multa</option>
+              <option value="revision_doc">🔧 Informe revisión</option>
+              <option value="otro">📁 Otro</option>
+            </select>
+          </div>
+          <div class="field"><div class="field-label">Nombre / descripción</div><input type="text" id="fd-nombre" placeholder="ej: Seguro a todo riesgo, ITV 2025…"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Fecha emisión / inicio</div><input type="date" id="fd-inicio"></div>
+          <div class="field"><div class="field-label">Fecha vencimiento</div><input type="date" id="fd-vence"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Importe €</div><input type="number" id="fd-importe" placeholder="0.00" step="0.01" min="0"></div>
+          <div class="field"><div class="field-label">Compañía / entidad</div><input type="text" id="fd-entidad" placeholder="ej: Mapfre, Jefatura…"></div>
+        </div>
+        <div class="field"><div class="field-label">Notas / nº de póliza / referencia</div><input type="text" id="fd-notas" placeholder="Nº póliza, referencia, observaciones…"></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;font-family:var(--fm);">
+          <input type="checkbox" id="fd-add-gasto" style="width:16px;height:16px;cursor:pointer;accent-color:var(--y);">
+          <label for="fd-add-gasto" style="cursor:pointer;color:var(--text);">Añadir importe a Gastos Diarios</label>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:12px;font-family:var(--fm);">
+          <input type="checkbox" id="fd-add-cal" checked style="width:16px;height:16px;cursor:pointer;accent-color:var(--y);">
+          <label for="fd-add-cal" style="cursor:pointer;color:var(--text);">Añadir vencimiento al Calendario</label>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-y" style="flex:1" onclick="addDoc()">Guardar documento</button>
+          <button class="btn" onclick="document.getElementById('add-doc-panel').classList.remove('open')">Cancelar</button>
+        </div>
+      </div>
+      <div id="documentos-body"></div>
+    </div>
+
+    <!-- GASTOS -->
+    <div id="gastos" class="section">
+      <div id="gastos-body"></div>
+    </div>
+
+    <!-- DATOS -->
+    <div id="datos" class="section">
+      <div class="data-card">
+        <div style="font-family:var(--fh);font-size:16px;margin-bottom:6px;">Conexiones activas</div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-family:var(--fm);color:var(--muted);margin-bottom:12px;line-height:1.7;">
+          <span><span class="conn-badge"><span class="conn-dot"></span>gastos_v1</span> Gastos Diarios — servicios · repostajes · documentos (seguro, ITV, multas…)</span>
+          <span><span class="conn-badge"><span class="conn-dot"></span>semana_v2</span> Calendario — revisiones, ITV y vencimientos</span>
+        </div>
+        <div style="font-family:var(--fh);font-size:16px;margin-bottom:6px;">Actualizar km</div>
+        <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-bottom:8px;">Actualiza el odómetro sin registrar un repostaje</div>
+        <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;" id="km-update-row"></div>
+        <div style="font-family:var(--fh);font-size:16px;margin-top:16px;margin-bottom:6px;">Exportar / Importar</div>
+        <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-bottom:10px;" id="datos-info"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-y btn-sm" style="flex:1" onclick="exportJSON()">↓ Exportar JSON</button>
+          <button class="btn btn-sm" style="flex:1" onclick="document.getElementById('fi').click()">↑ Importar JSON</button>
+          <input type="file" id="fi" accept=".json" style="display:none" onchange="importFile(event)">
+        </div>
+        <div id="datos-fb" class="fb"></div>
+      </div>
+      <div class="data-card">
+        <div style="font-family:var(--fh);font-size:16px;margin-bottom:8px;">Zona de peligro</div>
+        <div id="danger-zone"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="fab-area" id="fab-area">
+    <button class="fab" id="fab-btn" onclick="fabAction()">+ Registrar servicio</button>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+let state = loadState();
+let nid = state.nextId || 1;
+let activeCarId = null;
+let currentTab = 'perfil';
+let editCarId = null;
+
+function loadState() {
+  try { const r = localStorage.getItem('coches_v1'); if (r) return JSON.parse(r); } catch(e) {}
+  return { cars: [], nextId: 1 };
+}
+function save() {
+  state.nextId = nid;
+  try { localStorage.setItem('coches_v1', JSON.stringify(state)); } catch(e) {}
+}
+function nxtId() { return ++nid; }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt(n,d=2) { return Number(n||0).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d}); }
+function fmtKm(n) { return Number(n||0).toLocaleString('es-ES') + ' km'; }
+function today() { const d=new Date(); return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`; }
+function p2(n) { return String(n).padStart(2,'0'); }
+function daysUntil(dateStr) { if(!dateStr) return null; return Math.ceil((new Date(dateStr)-new Date())/(1000*60*60*24)); }
+
+function activeCar() { return state.cars.find(c => c.id === activeCarId); }
+
+const mantTipoLabels = { aceite:'Aceite / filtro', frenos:'Frenos', neumaticos:'Neumáticos', revision:'Revisión periódica', filtro:'Filtros', correa:'Correa distribución', bateria:'Batería', limpiaparabrisas:'Escobillas', refrigerante:'Refrigerante', transmision:'Transmisión', suspension:'Suspensión', otro:'Otro' };
+const mantTipoEmojis = { aceite:'🛢', frenos:'🔴', neumaticos:'⚫', revision:'🔧', filtro:'🌀', correa:'⚙️', bateria:'🔋', limpiaparabrisas:'💧', refrigerante:'🌡', transmision:'⚙️', suspension:'🔩', otro:'🔧' };
+const docTipoLabels = { seguro:'Seguro', itv:'ITV', permiso:'Permiso circulación', garantia:'Garantía', contrato:'Contrato', multa:'Multa', revision_doc:'Informe revisión', otro:'Otro' };
+const docTipoEmojis = { seguro:'🛡', itv:'🔍', permiso:'📄', garantia:'✅', contrato:'📋', multa:'⚠️', revision_doc:'🔧', otro:'📁' };
+const combLabels = { gasolina:'⛽ Gasolina', diesel:'⛽ Diésel', hibrido:'⚡ Híbrido', electrico:'⚡ Eléctrico', glp:'🔵 GLP', otro:'Otro' };
+
+// ── INIT ──
+if (state.cars.length) activeCarId = state.cars[0].id;
+document.getElementById('fs-fecha').value = today();
+document.getElementById('ff-fecha').value = today();
+document.getElementById('fd-inicio').value = today();
+document.getElementById('fs-add-gasto').checked = true;
+document.getElementById('fs-add-cal').checked = true;
+document.getElementById('ff-add-gasto').checked = true;
+document.getElementById('fd-add-gasto').checked = false;
+
+// ── TABS ──
+function showTab(name, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  el.classList.add('active');
+  currentTab = name;
+  const fab = document.getElementById('fab-area');
+  const fabBtn = document.getElementById('fab-btn');
+  const fabLabels = {
+    perfil: null,
+    mantenimiento: '+ Añadir tarea',
+    historial: '+ Registrar servicio',
+    combustible: null,
+    documentos: '+ Añadir documento',
+    gastos: null,
+    datos: null
+  };
+  if (fabLabels[name]) { fabBtn.textContent = fabLabels[name]; fab.style.display = 'block'; }
+  else fab.style.display = 'none';
+  render();
+}
+
+function fabAction() {
+  if (currentTab === 'mantenimiento') document.getElementById('add-mant-panel').classList.toggle('open');
+  if (currentTab === 'historial') document.getElementById('add-serv-panel').classList.toggle('open');
+  if (currentTab === 'documentos') document.getElementById('add-doc-panel').classList.toggle('open');
+}
+
+// ── CAR BAR ──
+function renderCarBar() {
+  const bar = document.getElementById('car-bar');
+  bar.innerHTML = state.cars.map(c =>
+    `<button class="car-chip ${c.id === activeCarId ? 'active' : ''}" onclick="selectCar(${c.id})">
+      <span>${c.emoji||'🚗'}</span>${esc(c.alias||c.marca)}
+    </button>`
+  ).join('') + `<button class="car-add-btn" onclick="toggleAddCar()">+</button>`;
+  const car = activeCar();
+  document.getElementById('wnav-title').textContent = car ? (car.alias||car.marca).toUpperCase() : 'COCHES';
+}
+
+function selectCar(id) { activeCarId = id; render(); }
+function toggleAddCar() { document.getElementById('add-car-panel').classList.toggle('open'); }
+function closeAddCar() { document.getElementById('add-car-panel').classList.remove('open'); }
+
+// ── ADD CAR ──
+function addCar() {
+  const alias = document.getElementById('fc-alias').value.trim();
+  const marca = document.getElementById('fc-marca').value.trim();
+  if (!alias && !marca) return;
+  const car = {
+    id: nxtId(),
+    alias, emoji: document.getElementById('fc-emoji').value.trim() || '🚗',
+    marca, modelo: document.getElementById('fc-modelo').value.trim(),
+    anno: parseInt(document.getElementById('fc-anno').value) || null,
+    combustible: document.getElementById('fc-combustible').value,
+    matricula: document.getElementById('fc-matricula').value.trim().toUpperCase(),
+    km: parseInt(document.getElementById('fc-km').value) || 0,
+    vin: document.getElementById('fc-vin').value.trim().toUpperCase(),
+    color: document.getElementById('fc-color').value.trim(),
+    itv: document.getElementById('fc-itv').value,
+    seguro: document.getElementById('fc-seguro').value,
+    mants: [], servicios: [], fuels: [], docs: []
+  };
+  state.cars.push(car);
+  activeCarId = car.id;
+
+  // Add ITV and seguro to calendar
+  if (car.itv) addToCalendar(`🔍 ITV — ${car.alias||car.marca}`, car.itv, car.itv, 'personal', '#ff8c00', car.matricula);
+  if (car.seguro) addToCalendar(`🛡 Seguro vence — ${car.alias||car.marca}`, car.seguro, car.seguro, 'personal', '#f04030', '');
+
+  ['fc-alias','fc-emoji','fc-marca','fc-modelo','fc-anno','fc-matricula','fc-km','fc-vin','fc-color','fc-itv','fc-seguro'].forEach(id => document.getElementById(id).value = '');
+  closeAddCar(); save(); render();
+}
+
+function delCar(id) {
+  if (!confirm('¿Eliminar este vehículo y todos sus datos?')) return;
+  state.cars = state.cars.filter(c => c.id !== id);
+  activeCarId = state.cars[0]?.id || null;
+  save(); render();
+}
+
+// ── RENDER ──
+function render() {
+  renderCarBar();
+  if (currentTab === 'perfil') renderPerfil();
+  if (currentTab === 'mantenimiento') renderMantenimiento();
+  if (currentTab === 'historial') renderHistorial();
+  if (currentTab === 'combustible') renderCombustible();
+  if (currentTab === 'documentos') renderDocumentos();
+  if (currentTab === 'gastos') renderGastos();
+  if (currentTab === 'datos') renderDatos();
+}
+
+// ── PERFIL ──
+function renderPerfil() {
+  const car = activeCar();
+  if (!state.cars.length) {
+    document.getElementById('perfil-body').innerHTML = '<div class="empty">No tienes vehículos registrados.<br>Pulsa el <strong>+</strong> de arriba para añadir el primero.</div>';
+    return;
+  }
+  if (!car) return;
+
+  const itvDays = daysUntil(car.itv);
+  const segDays = daysUntil(car.seguro);
+  const totalGastado = [...(car.servicios||[]), ...(car.fuels||[]), ...(car.docs||[])].reduce((s,x) => s + (parseFloat(x.coste||x.total||x.importe)||0), 0);
+  const gastoMes = (() => {
+    const m = today().slice(0,7);
+    return [...(car.servicios||[]), ...(car.fuels||[])].filter(x=>(x.fecha||'').startsWith(m)).reduce((s,x)=>s+(parseFloat(x.coste||x.total)||0),0);
+  })();
+
+  const urgentMants = (car.mants||[]).filter(m => {
+    if (m.done) return false;
+    if (m.prioridad === 'urgente') return true;
+    if (m.kmTrigger && car.km >= m.kmTrigger - 500) return true;
+    if (m.fecha) { const d = daysUntil(m.fecha); return d !== null && d <= 14; }
+    return false;
+  });
+
+  let html = '';
+
+  // Alerts
+  if (itvDays !== null && itvDays <= 60) {
+    const cls = itvDays < 0 ? '' : itvDays <= 15 ? '' : 'warn';
+    html += `<div class="alert-card ${cls}"><div class="alert-dot"></div><div class="alert-text">🔍 ITV — ${itvDays < 0 ? `venció hace ${Math.abs(itvDays)} días` : itvDays === 0 ? 'vence HOY' : `vence en ${itvDays} días`} (${car.itv})</div></div>`;
+  }
+  if (segDays !== null && segDays <= 30) {
+    const cls = segDays < 0 ? '' : 'warn';
+    html += `<div class="alert-card ${cls}"><div class="alert-dot"></div><div class="alert-text">🛡 Seguro — ${segDays < 0 ? `venció hace ${Math.abs(segDays)} días` : segDays === 0 ? 'vence HOY' : `vence en ${segDays} días`} (${car.seguro})</div></div>`;
+  }
+  urgentMants.forEach(m => {
+    const kmLeft = m.kmTrigger ? m.kmTrigger - car.km : null;
+    html += `<div class="alert-card warn"><div class="alert-dot"></div><div class="alert-text">${mantTipoEmojis[m.tipo]||'🔧'} <strong>${esc(m.desc)}</strong>${kmLeft !== null ? ` — ${kmLeft <= 0 ? 'toca ahora' : `en ${fmtKm(kmLeft)}`}` : ''}${m.fecha ? ` (${m.fecha})` : ''}</div></div>`;
+  });
+
+  const itvClass = itvDays === null ? '' : itvDays < 0 ? 'itv-vencida' : itvDays <= 30 ? 'itv-pronto' : 'itv-ok';
+
+  html += `<div class="car-profile">
+    <button class="car-edit-btn" onclick="toggleEditCar(${car.id})">✎ editar</button>
+    <div class="car-profile-top">
+      <div class="car-avatar">${car.emoji||'🚗'}</div>
+      <div class="car-info">
+        <div class="car-name-display">${esc(car.alias || car.marca)}</div>
+        <div class="car-model">${[car.marca, car.modelo, car.anno].filter(Boolean).join(' · ')}</div>
+        ${car.matricula ? `<div class="car-badge">🪪 ${esc(car.matricula)}</div>` : ''}
+      </div>
+    </div>
+    <div class="car-stats">
+      <div class="car-stat"><div class="car-stat-label">Km</div><div class="car-stat-val" style="font-size:14px;">${Number(car.km||0).toLocaleString('es-ES')}</div></div>
+      <div class="car-stat"><div class="car-stat-label">Servicios</div><div class="car-stat-val">${(car.servicios||[]).length}</div></div>
+      <div class="car-stat"><div class="car-stat-label">Repostajes</div><div class="car-stat-val">${(car.fuels||[]).length}</div></div>
+      <div class="car-stat"><div class="car-stat-label">Gasto mes</div><div class="car-stat-val" style="font-size:14px;">${fmt(gastoMes,0)} €</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:4px;margin-top:12px;font-size:11px;color:var(--muted);font-family:var(--fm);line-height:1.7;">
+      ${combLabels[car.combustible] ? `<span>${combLabels[car.combustible]}</span>` : ''}
+      ${car.color ? `<span>🎨 ${esc(car.color)}</span>` : ''}
+      ${car.vin ? `<span>🔖 VIN: ${esc(car.vin)}</span>` : ''}
+      ${car.itv ? `<span class="${itvClass}">🔍 ITV: ${car.itv}${itvDays !== null ? ` (${itvDays < 0 ? 'VENCIDA' : itvDays === 0 ? 'HOY' : itvDays+'d'})` : ''}</span>` : ''}
+      ${car.seguro ? `<span>🛡 Seguro vence: ${car.seguro}</span>` : ''}
+    </div>
+  </div>
+
+  <div class="edit-form ${editCarId === car.id ? 'open' : ''}" id="ecf-${car.id}">
+    <div class="ef-row">
+      <div><div class="field-label">Alias</div><input type="text" id="ec-al-${car.id}" value="${esc(car.alias||'')}"></div>
+      <div><div class="field-label">Emoji</div><input type="text" id="ec-em-${car.id}" value="${esc(car.emoji||'🚗')}" style="text-align:center;font-size:18px;" maxlength="2"></div>
+    </div>
+    <div class="ef-row">
+      <div><div class="field-label">Marca</div><input type="text" id="ec-ma-${car.id}" value="${esc(car.marca||'')}"></div>
+      <div><div class="field-label">Modelo</div><input type="text" id="ec-mo-${car.id}" value="${esc(car.modelo||'')}"></div>
+    </div>
+    <div class="ef-row">
+      <div><div class="field-label">Año</div><input type="number" id="ec-an-${car.id}" value="${car.anno||''}"></div>
+      <div><div class="field-label">Matrícula</div><input type="text" id="ec-mt-${car.id}" value="${esc(car.matricula||'')}" style="text-transform:uppercase;"></div>
+    </div>
+    <div class="ef-row">
+      <div><div class="field-label">Km actuales</div><input type="number" id="ec-km-${car.id}" value="${car.km||0}" min="0"></div>
+      <div><div class="field-label">Color</div><input type="text" id="ec-co-${car.id}" value="${esc(car.color||'')}"></div>
+    </div>
+    <div class="ef-row">
+      <div><div class="field-label">Próxima ITV</div><input type="date" id="ec-itv-${car.id}" value="${car.itv||''}"></div>
+      <div><div class="field-label">Seguro vence</div><input type="date" id="ec-seg-${car.id}" value="${car.seguro||''}"></div>
+    </div>
+    <div class="ef-btns">
+      <button class="btn btn-y btn-sm" style="flex:1" onclick="saveCarEdit(${car.id})">Guardar</button>
+      <button class="btn btn-sm" onclick="editCarId=null;renderPerfil()">Cancelar</button>
+      <button class="btn btn-sm btn-r" onclick="delCar(${car.id})">Eliminar vehículo</button>
+    </div>
+  </div>`;
+
+  document.getElementById('perfil-body').innerHTML = html;
+}
+
+function toggleEditCar(id) { editCarId = (editCarId === id ? null : id); renderPerfil(); }
+function saveCarEdit(id) {
+  const c = state.cars.find(x => x.id === id); if (!c) return;
+  c.alias = document.getElementById('ec-al-'+id).value.trim();
+  c.emoji = document.getElementById('ec-em-'+id).value.trim() || '🚗';
+  c.marca = document.getElementById('ec-ma-'+id).value.trim();
+  c.modelo = document.getElementById('ec-mo-'+id).value.trim();
+  c.anno = parseInt(document.getElementById('ec-an-'+id).value) || null;
+  c.matricula = document.getElementById('ec-mt-'+id).value.trim().toUpperCase();
+  c.km = parseInt(document.getElementById('ec-km-'+id).value) || 0;
+  c.color = document.getElementById('ec-co-'+id).value.trim();
+  const newItv = document.getElementById('ec-itv-'+id).value;
+  const newSeg = document.getElementById('ec-seg-'+id).value;
+  if (newItv && newItv !== c.itv) addToCalendar(`🔍 ITV — ${c.alias||c.marca}`, newItv, newItv, 'personal', '#ff8c00', c.matricula);
+  if (newSeg && newSeg !== c.seguro) addToCalendar(`🛡 Seguro vence — ${c.alias||c.marca}`, newSeg, newSeg, 'personal', '#f04030', '');
+  c.itv = newItv; c.seguro = newSeg;
+  editCarId = null; save(); render();
+}
+
+// ── MANTENIMIENTO ──
+function addMant() {
+  const car = activeCar(); if (!car) return;
+  const desc = document.getElementById('fm-desc').value.trim(); if (!desc) return;
+  if (!car.mants) car.mants = [];
+  car.mants.push({
+    id: nxtId(), desc,
+    tipo: document.getElementById('fm-tipo').value,
+    prioridad: document.getElementById('fm-prioridad').value,
+    kmTrigger: parseInt(document.getElementById('fm-km-trigger').value) || null,
+    kmIntervalo: parseInt(document.getElementById('fm-km-intervalo').value) || null,
+    fecha: document.getElementById('fm-fecha').value,
+    mesesIntervalo: parseInt(document.getElementById('fm-meses-intervalo').value) || null,
+    notas: document.getElementById('fm-notas').value.trim(),
+    done: false
+  });
+  const fecha = car.mants[car.mants.length-1].fecha;
+  if (fecha) addToCalendar(`🔧 ${desc} — ${car.alias||car.marca}`, fecha, fecha, 'personal', '#ff8c00', '');
+  ['fm-desc','fm-km-trigger','fm-km-intervalo','fm-fecha','fm-meses-intervalo','fm-notas'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('add-mant-panel').classList.remove('open');
+  save(); render();
+}
+
+function completeMant(carId, mantId) {
+  const car = state.cars.find(c => c.id === carId); if (!car) return;
+  const m = (car.mants||[]).find(x => x.id === mantId); if (!m) return;
+  m.done = true;
+  m.doneKm = car.km;
+  m.doneDate = today();
+  // Recalculate next trigger
+  if (m.kmIntervalo) m.kmTrigger = car.km + m.kmIntervalo;
+  if (m.mesesIntervalo) {
+    const d = new Date(); d.setMonth(d.getMonth() + m.mesesIntervalo);
+    m.fecha = `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;
+    m.done = false; // reset to show as upcoming again
+  } else {
+    m.done = true;
+  }
+  save(); render();
+}
+
+function delMant(id) {
+  const car = activeCar(); if (!car) return;
+  if (!confirm('¿Eliminar esta tarea?')) return;
+  car.mants = (car.mants||[]).filter(m => m.id !== id);
+  save(); render();
+}
+
+function renderMantenimiento() {
+  const car = activeCar();
+  if (!car) { document.getElementById('mantenimiento-body').innerHTML = '<div class="empty">Selecciona un vehículo primero.</div>'; return; }
+  const mants = car.mants || [];
+  if (!mants.length) { document.getElementById('mantenimiento-body').innerHTML = '<div class="empty">Sin tareas de mantenimiento.<br>Pulsa + para añadir.</div>'; return; }
+
+  const pending = mants.filter(m => !m.done).sort((a,b) => {
+    const pa = a.prioridad === 'urgente' ? 0 : a.prioridad === 'proxima' ? 1 : 2;
+    const pb = b.prioridad === 'urgente' ? 0 : b.prioridad === 'proxima' ? 1 : 2;
+    return pa - pb;
+  });
+  const done = mants.filter(m => m.done);
+
+  let html = '';
+  if (pending.length) {
+    html += `<div class="section-label">Pendientes (${pending.length})</div>`;
+    pending.forEach(m => html += mantCard(m, car));
+  }
+  if (done.length) {
+    html += `<div class="section-label">Completadas (${done.length})</div>`;
+    done.forEach(m => html += mantCard(m, car));
+  }
+  document.getElementById('mantenimiento-body').innerHTML = html;
+}
+
+function mantCard(m, car) {
+  const kmLeft = m.kmTrigger && car.km ? m.kmTrigger - car.km : null;
+  const urgent = m.prioridad === 'urgente' || (kmLeft !== null && kmLeft <= 0);
+  const soon = m.prioridad === 'proxima' || (kmLeft !== null && kmLeft <= 1000) || (m.fecha && daysUntil(m.fecha) !== null && daysUntil(m.fecha) <= 30);
+  const borderColor = urgent ? 'rgba(240,64,48,0.4)' : soon ? 'rgba(255,140,0,0.35)' : '';
+  const typeClass = `mant-type-${m.tipo}` in document.createElement('div').style ? '' : `mant-type-${m.tipo}`;
+
+  let kmBarHtml = '';
+  if (m.kmTrigger && m.kmIntervalo && car.km) {
+    const startKm = m.kmTrigger - m.kmIntervalo;
+    const pct = Math.min(100, Math.max(0, ((car.km - startKm) / m.kmIntervalo) * 100));
+    const fillColor = pct >= 90 ? 'var(--r)' : pct >= 70 ? 'var(--a)' : 'var(--g)';
+    kmBarHtml = `<div class="km-bar-wrap">
+      <div class="km-bar-labels"><span>${Number(startKm).toLocaleString('es-ES')} km</span><span>${Number(m.kmTrigger).toLocaleString('es-ES')} km</span></div>
+      <div class="km-bar-track"><div class="km-bar-fill" style="width:${pct}%;background:${fillColor};"></div></div>
+    </div>`;
+  }
+
+  return `<div class="mant-card" style="${borderColor?`border-color:${borderColor}`:''}">
+    <div class="mant-top">
+      <div class="mant-icon">${mantTipoEmojis[m.tipo]||'🔧'}</div>
+      <div class="mant-body">
+        <div class="mant-name" style="${m.done?'text-decoration:line-through;color:var(--muted)':''}">${esc(m.desc)}</div>
+        <div class="mant-meta">
+          <span class="mant-type mant-type-${m.tipo}||mant-type-otro">${mantTipoLabels[m.tipo]||m.tipo}</span>
+          ${m.kmTrigger ? `<span class="mant-km">🎯 ${Number(m.kmTrigger).toLocaleString('es-ES')} km${kmLeft !== null ? ` (${kmLeft <= 0 ? '<span style="color:var(--r)">TOCA YA</span>' : 'faltan '+Number(kmLeft).toLocaleString('es-ES')+' km'})` : ''}</span>` : ''}
+          ${m.fecha ? `<span class="mant-km">📅 ${m.fecha}${m.fecha ? ` (${daysUntil(m.fecha)} d)` : ''}</span>` : ''}
+          ${m.done && m.doneKm ? `<span class="mant-km" style="color:var(--g);">✓ Hecho a ${Number(m.doneKm).toLocaleString('es-ES')} km (${m.doneDate})</span>` : ''}
+        </div>
+        ${m.notas ? `<div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:3px;">${esc(m.notas)}</div>` : ''}
+        ${kmBarHtml}
+      </div>
+      <div style="display:flex;gap:4px;flex-shrink:0;align-items:flex-start;">
+        ${!m.done ? `<button class="icon-btn" title="Marcar como hecho" onclick="completeMant(${car.id},${m.id})" style="color:var(--g)">✓</button>` : ''}
+        <button class="icon-btn del" title="Eliminar" onclick="delMant(${m.id})">×</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── HISTORIAL ──
+function addServ() {
+  const car = activeCar(); if (!car) return;
+  const fecha = document.getElementById('fs-fecha').value; if (!fecha) return;
+  const coste = parseFloat(document.getElementById('fs-coste').value) || 0;
+  const km = parseInt(document.getElementById('fs-km').value) || 0;
+  const taller = document.getElementById('fs-taller').value.trim();
+  const trabajos = document.getElementById('fs-trabajos').value.trim();
+  const proxKm = parseInt(document.getElementById('fs-proxkm').value) || null;
+  const proxFecha = document.getElementById('fs-proxfecha').value;
+  const notas = document.getElementById('fs-notas').value.trim();
+  const addGasto = document.getElementById('fs-add-gasto').checked;
+  const addCal = document.getElementById('fs-add-cal').checked;
+
+  if (!car.servicios) car.servicios = [];
+  car.servicios.push({ id: nxtId(), fecha, taller, trabajos, km, coste, proxKm, proxFecha, notas });
+
+  // Update car km if higher
+  if (km > (car.km||0)) car.km = km;
+
+  if (addGasto && coste > 0) {
+    try {
+      const raw = localStorage.getItem('gastos_v1');
+      const gastos = raw ? JSON.parse(raw) : { gastos: [], nextId: 1 };
+      gastos.gastos.push({ id: (gastos.nextId||1)+1, importe: coste, concepto: `Taller (${car.alias||car.marca}): ${trabajos.slice(0,50)||'Servicio'}`, fecha, cat: 'transporte', nota: taller });
+      gastos.nextId = (gastos.nextId||1)+2;
+      localStorage.setItem('gastos_v1', JSON.stringify(gastos));
+      showToast(`${fmt(coste)} € añadidos a Gastos Diarios ✓`);
+    } catch(e) {}
+  }
+  if (addCal && proxFecha) {
+    addToCalendar(`🔧 Revisión — ${car.alias||car.marca}${proxKm?' ('+Number(proxKm).toLocaleString('es-ES')+' km)':''}`, proxFecha, proxFecha, 'personal', '#ff8c00', taller);
+  }
+
+  ['fs-fecha','fs-taller','fs-trabajos','fs-km','fs-coste','fs-proxkm','fs-proxfecha','fs-notas'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fs-fecha').value = today();
+  document.getElementById('add-serv-panel').classList.remove('open');
+  save(); render();
+}
+
+function renderHistorial() {
+  const car = activeCar();
+  if (!car) { document.getElementById('historial-body').innerHTML = '<div class="empty">Selecciona un vehículo primero.</div>'; return; }
+  const servs = (car.servicios||[]).sort((a,b) => b.fecha.localeCompare(a.fecha));
+
+  const totalGastado = servs.reduce((s,x)=>s+(parseFloat(x.coste)||0),0);
+
+  let html = '';
+  if (totalGastado > 0) {
+    html += `<div style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;">
+      <div><div style="font-size:9px;color:var(--muted);font-family:var(--fm);letter-spacing:1px;text-transform:uppercase;">Total en taller</div><div style="font-family:var(--fh);font-size:26px;">${fmt(totalGastado)} €</div></div>
+      <div style="text-align:right;"><div style="font-size:9px;color:var(--muted);font-family:var(--fm);letter-spacing:1px;text-transform:uppercase;">Servicios</div><div style="font-family:var(--fh);font-size:26px;">${servs.length}</div></div>
+    </div>`;
+  }
+
+  if (!servs.length) { html += '<div class="empty">Sin servicios registrados.<br>Pulsa + para añadir.</div>'; }
+  else servs.forEach(s => html += servCard(s));
+
+  document.getElementById('historial-body').innerHTML = html;
+}
+
+function servCard(s) {
+  return `<div class="serv-card">
+    <div class="serv-top">
+      <div class="serv-body">
+        <div class="serv-date">🔧 ${s.fecha}</div>
+        <div class="serv-title">${esc(s.trabajos||'Servicio')}</div>
+        <div class="serv-meta">
+          ${s.taller ? `<span>🏪 ${esc(s.taller)}</span>` : ''}
+          ${s.km ? `<span>📍 ${Number(s.km).toLocaleString('es-ES')} km</span>` : ''}
+          ${s.proxKm ? `<span>⏭ Próx: ${Number(s.proxKm).toLocaleString('es-ES')} km</span>` : ''}
+          ${s.proxFecha ? `<span>📅 Próx: ${s.proxFecha}</span>` : ''}
+          ${s.notas ? `<span style="display:block;width:100%;margin-top:2px;">${esc(s.notas)}</span>` : ''}
+        </div>
+      </div>
+      <div style="text-align:right;">
+        ${s.coste ? `<div class="serv-cost">${fmt(s.coste)} €</div>` : ''}
+        <button class="icon-btn del" onclick="delServ(${s.id})" style="margin-top:4px;">×</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function delServ(id) {
+  const car = activeCar(); if (!car) return;
+  if (!confirm('¿Eliminar este registro?')) return;
+  car.servicios = (car.servicios||[]).filter(s => s.id !== id);
+  save(); render();
+}
+
+// ── COMBUSTIBLE ──
+function addFuel() {
+  const car = activeCar(); if (!car) return;
+  const km = parseInt(document.getElementById('ff-km').value) || 0;
+  const litros = parseFloat(document.getElementById('ff-litros').value);
+  if (!litros) return;
+  const precio = parseFloat(document.getElementById('ff-precio').value) || 0;
+  const totalInput = parseFloat(document.getElementById('ff-total').value) || 0;
+  const total = totalInput || +(litros * precio).toFixed(2);
+  const fecha = document.getElementById('ff-fecha').value || today();
+  const lleno = document.getElementById('ff-lleno').checked;
+  const gasolinera = document.getElementById('ff-gasolinera').value.trim();
+  const addGasto = document.getElementById('ff-add-gasto').checked;
+
+  // Calculate consumption if possible
+  let lp100 = null;
+  if (lleno && km > 0 && car.fuels?.length) {
+    const lastFuel = [...(car.fuels||[])].filter(f=>f.lleno).sort((a,b)=>b.km-a.km)[0];
+    if (lastFuel && lastFuel.km > 0 && km > lastFuel.km) {
+      lp100 = +((litros / (km - lastFuel.km)) * 100).toFixed(2);
+    }
+  }
+
+  if (!car.fuels) car.fuels = [];
+  car.fuels.push({ id: nxtId(), fecha, km, litros, precio, total, lleno, gasolinera, lp100 });
+
+  if (km > (car.km||0)) car.km = km;
+
+  if (addGasto && total > 0) {
+    try {
+      const raw = localStorage.getItem('gastos_v1');
+      const gastos = raw ? JSON.parse(raw) : { gastos: [], nextId: 1 };
+      gastos.gastos.push({ id: (gastos.nextId||1)+1, importe: total, concepto: `Combustible (${car.alias||car.marca})`, fecha, cat: 'transporte', nota: gasolinera });
+      gastos.nextId = (gastos.nextId||1)+2;
+      localStorage.setItem('gastos_v1', JSON.stringify(gastos));
+    } catch(e) {}
+  }
+
+  ['ff-km','ff-litros','ff-precio','ff-total','ff-gasolinera'].forEach(id => document.getElementById(id).value = '');
+  save(); render();
+}
+
+function renderCombustible() {
+  const car = activeCar();
+  if (!car) { document.getElementById('combustible-body').innerHTML = '<div class="empty">Selecciona un vehículo primero.</div>'; return; }
+  const fuels = (car.fuels||[]).sort((a,b) => b.fecha.localeCompare(a.fecha));
+
+  const totalL = fuels.reduce((s,f)=>s+f.litros,0);
+  const totalEur = fuels.reduce((s,f)=>s+(f.total||0),0);
+  const avgLp100 = fuels.filter(f=>f.lp100).map(f=>f.lp100);
+  const avgCons = avgLp100.length ? +(avgLp100.reduce((s,x)=>s+x,0)/avgLp100.length).toFixed(2) : null;
+
+  let html = '';
+  if (fuels.length) {
+    html += `<div class="summary-grid">
+      <div class="summary-card"><div class="summary-label">Total litros</div><div class="summary-val">${fmt(totalL,0)} L</div></div>
+      <div class="summary-card"><div class="summary-label">Total gastado</div><div class="summary-val">${fmt(totalEur,0)} €</div></div>
+      ${avgCons ? `<div class="summary-card" style="grid-column:span 2"><div class="summary-label">Consumo medio</div><div class="summary-val">${avgCons} L/100km</div><div class="summary-sub">de ${avgLp100.length} repostajes completos</div></div>` : ''}
+    </div>`;
+  }
+
+  if (!fuels.length) { html += '<div class="empty">Sin repostajes registrados.<br>Usa el formulario de arriba.</div>'; }
+  else {
+    html += `<div class="section-label">Historial de repostajes (${fuels.length})</div>`;
+    fuels.forEach(f => {
+      const lp100Class = !f.lp100 ? '' : f.lp100 < 6 ? 'fuel-eco' : f.lp100 < 9 ? 'fuel-normal' : 'fuel-gasto';
+      html += `<div style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:8px;">
+        <div class="fuel-row" style="border:none;padding:0;">
+          <div>
+            <div class="fuel-val">⛽ ${fmt(f.litros,2)} L${f.total ? ` · ${fmt(f.total)} €` : ''}${f.lp100 ? ` <span class="fuel-lp100 ${lp100Class}">${f.lp100} L/100km</span>` : ''}</div>
+            <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:3px;">
+              ${f.fecha} ${f.km ? `· 📍 ${Number(f.km).toLocaleString('es-ES')} km` : ''} ${f.gasolinera ? `· ${esc(f.gasolinera)}` : ''} ${f.precio ? `· ${fmt(f.precio,3)} €/L` : ''}
+            </div>
+          </div>
+          <button class="icon-btn del" onclick="delFuel(${f.id})">×</button>
+        </div>
+      </div>`;
+    });
+  }
+
+  document.getElementById('combustible-body').innerHTML = html;
+}
+
+function delFuel(id) {
+  const car = activeCar(); if (!car) return;
+  car.fuels = (car.fuels||[]).filter(f => f.id !== id);
+  save(); render();
+}
+
+// ── DOCUMENTOS ──
+function addDoc() {
+  const car = activeCar(); if (!car) return;
+  const tipo = document.getElementById('fd-tipo').value;
+  const nombre = document.getElementById('fd-nombre').value.trim() || docTipoLabels[tipo];
+  const inicio = document.getElementById('fd-inicio').value;
+  const vence = document.getElementById('fd-vence').value;
+  const importe = parseFloat(document.getElementById('fd-importe').value) || 0;
+  const entidad = document.getElementById('fd-entidad').value.trim();
+  const notas = document.getElementById('fd-notas').value.trim();
+  const addCal = document.getElementById('fd-add-cal').checked;
+
+  if (!car.docs) car.docs = [];
+  car.docs.push({ id: nxtId(), tipo, nombre, inicio, vence, importe, entidad, notas });
+
+  const addGastoDoc = document.getElementById('fd-add-gasto').checked;
+  if (addGastoDoc && importe > 0) {
+    try {
+      const raw = localStorage.getItem('gastos_v1');
+      const gastos = raw ? JSON.parse(raw) : { gastos: [], nextId: 1 };
+      gastos.gastos.push({ id: (gastos.nextId||1)+1, importe, concepto: `${nombre} (${car.alias||car.marca})`, fecha: inicio||today(), cat: 'transporte', nota: entidad });
+      gastos.nextId = (gastos.nextId||1)+2;
+      localStorage.setItem('gastos_v1', JSON.stringify(gastos));
+      showToast(`${fmt(importe)} € añadidos a Gastos Diarios ✓`);
+    } catch(e) {}
+  }
+  if (addCal && vence) {
+    addToCalendar(`${docTipoEmojis[tipo]||'📁'} Vence: ${nombre} — ${car.alias||car.marca}`, vence, vence, 'personal', '#f04030', entidad);
+  }
+
+  ['fd-nombre','fd-inicio','fd-vence','fd-importe','fd-entidad','fd-notas'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fd-inicio').value = today();
+  document.getElementById('add-doc-panel').classList.remove('open');
+  save(); render();
+}
+
+function renderDocumentos() {
+  const car = activeCar();
+  if (!car) { document.getElementById('documentos-body').innerHTML = '<div class="empty">Selecciona un vehículo primero.</div>'; return; }
+  const docs = (car.docs||[]).sort((a,b) => {
+    if (!a.vence) return 1; if (!b.vence) return -1; return a.vence.localeCompare(b.vence);
+  });
+  if (!docs.length) { document.getElementById('documentos-body').innerHTML = '<div class="empty">Sin documentos registrados.<br>Pulsa + para añadir.</div>'; return; }
+
+  const vencidos = docs.filter(d => d.vence && daysUntil(d.vence) < 0);
+  const pronto = docs.filter(d => d.vence && daysUntil(d.vence) >= 0 && daysUntil(d.vence) <= 30);
+  const vigentes = docs.filter(d => !d.vence || daysUntil(d.vence) > 30);
+
+  let html = '';
+  if (vencidos.length) { html += `<div class="section-label">⚠ Vencidos (${vencidos.length})</div>`; vencidos.forEach(d => html += docCard(d)); }
+  if (pronto.length) { html += `<div class="section-label">Próximos a vencer (${pronto.length})</div>`; pronto.forEach(d => html += docCard(d)); }
+  if (vigentes.length) { html += `<div class="section-label">Vigentes (${vigentes.length})</div>`; vigentes.forEach(d => html += docCard(d)); }
+
+  document.getElementById('documentos-body').innerHTML = html;
+}
+
+function docCard(d) {
+  const days = daysUntil(d.vence);
+  const statusClass = days === null ? 'doc-vigente' : days < 0 ? 'doc-vencido' : days <= 30 ? 'doc-pronto' : 'doc-vigente';
+  const statusLabel = days === null ? 'Sin vencimiento' : days < 0 ? `Vencido hace ${Math.abs(days)}d` : days === 0 ? 'Vence HOY' : days <= 30 ? `Vence en ${days}d` : 'Vigente';
+  return `<div class="doc-card">
+    <div class="doc-body">
+      <div class="doc-name">${docTipoEmojis[d.tipo]||'📁'} ${esc(d.nombre)}</div>
+      <div class="doc-meta">
+        <span class="doc-status ${statusClass}">${statusLabel}</span>
+        ${d.vence ? `<span>Vence: ${d.vence}</span>` : ''}
+        ${d.entidad ? `<span>${esc(d.entidad)}</span>` : ''}
+        ${d.importe ? `<span style="color:var(--y);font-family:var(--fh);font-size:14px;">${fmt(d.importe)} €</span>` : ''}
+        ${d.notas ? `<span>${esc(d.notas)}</span>` : ''}
+      </div>
+    </div>
+    <button class="icon-btn del" onclick="delDoc(${d.id})">×</button>
+  </div>`;
+}
+
+function delDoc(id) {
+  const car = activeCar(); if (!car) return;
+  if (!confirm('¿Eliminar este documento?')) return;
+  car.docs = (car.docs||[]).filter(d => d.id !== id);
+  save(); render();
+}
+
+// ── GASTOS RESUMEN ──
+function renderGastos() {
+  const car = activeCar();
+  if (!car) { document.getElementById('gastos-body').innerHTML = '<div class="empty">Selecciona un vehículo primero.</div>'; return; }
+
+  const allServs = (car.servicios||[]).map(s=>({fecha:s.fecha, concepto: s.trabajos||'Servicio', importe:s.coste||0, cat:'taller', sub:s.taller}));
+  const allFuels = (car.fuels||[]).map(f=>({fecha:f.fecha, concepto:`Repostaje${f.gasolinera?' — '+f.gasolinera:''}`, importe:f.total||0, cat:'combustible', sub:f.litros+'L'}));
+  const allDocs  = (car.docs||[]).filter(d=>d.importe>0).map(d=>({fecha:d.inicio, concepto:d.nombre, importe:d.importe||0, cat:d.tipo, sub:d.entidad}));
+
+  const all = [...allServs, ...allFuels, ...allDocs].sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  const total = all.reduce((s,x)=>s+(parseFloat(x.importe)||0),0);
+  const mesActual = today().slice(0,7);
+  const totalMes = all.filter(x=>x.fecha?.startsWith(mesActual)).reduce((s,x)=>s+(parseFloat(x.importe)||0),0);
+  const totalTaller = allServs.reduce((s,x)=>s+(parseFloat(x.importe)||0),0);
+  const totalComb = allFuels.reduce((s,x)=>s+(parseFloat(x.importe)||0),0);
+
+  let html = `<div class="summary-grid">
+    <div class="summary-card"><div class="summary-label">Total acumulado</div><div class="summary-val">${fmt(total,0)} €</div></div>
+    <div class="summary-card"><div class="summary-label">Este mes</div><div class="summary-val">${fmt(totalMes,0)} €</div></div>
+    <div class="summary-card"><div class="summary-label">En taller</div><div class="summary-val">${fmt(totalTaller,0)} €</div></div>
+    <div class="summary-card"><div class="summary-label">Combustible</div><div class="summary-val">${fmt(totalComb,0)} €</div></div>
+  </div>`;
+
+  if (!all.length) { html += '<div class="empty">Sin gastos registrados todavía.</div>'; }
+  else {
+    html += `<div class="section-label">Todos los movimientos (${all.length})</div>`;
+    all.forEach(g => {
+      const catEmoji = {taller:'🔧', combustible:'⛽', seguro:'🛡', itv:'🔍', multa:'⚠️', otro:'📦'}[g.cat] || '💶';
+      html += `<div style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+        <div>
+          <div style="font-size:13px;font-weight:500;">${catEmoji} ${esc(g.concepto)}</div>
+          <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:3px;">${g.fecha||''}${g.sub?' · '+esc(g.sub):''}</div>
+        </div>
+        <div style="font-family:var(--fh);font-size:20px;color:var(--y);flex-shrink:0;">${fmt(g.importe)} €</div>
+      </div>`;
+    });
+  }
+  document.getElementById('gastos-body').innerHTML = html;
+}
+
+// ── DATOS ──
+function renderDatos() {
+  const total = state.cars.length;
+  const servs = state.cars.reduce((s,c)=>s+(c.servicios||[]).length,0);
+  const fuels = state.cars.reduce((s,c)=>s+(c.fuels||[]).length,0);
+  const gastos = state.cars.reduce((s,c) => {
+    return s + [...(c.servicios||[]), ...(c.fuels||[])].reduce((a,x)=>a+(parseFloat(x.coste||x.total)||0),0);
+  }, 0);
+  document.getElementById('datos-info').textContent = `${total} vehículo${total!==1?'s':''} · ${servs} servicios · ${fuels} repostajes · ${fmt(gastos,0)} € en gastos`;
+
+  // KM update widget
+  const car = activeCar();
+  const kmRow = document.getElementById('km-update-row');
+  if (kmRow && car) {
+    kmRow.innerHTML = `<div style="flex:1;min-width:120px;"><div class="field-label">Km actuales (${Number(car.km||0).toLocaleString('es-ES')} km)</div><input type="number" id="km-new-val" placeholder="${car.km||0}" min="0" style="background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--fm);font-size:13px;padding:9px 12px;outline:none;width:100%;"></div>
+    <button class="btn btn-y btn-sm" style="margin-bottom:1px;" onclick="updateKm()">Actualizar</button>`;
+  }
+
+  document.getElementById('danger-zone').innerHTML = state.cars.map(c =>
+    `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:13px;">
+      <span>${c.emoji||'🚗'} ${esc(c.alias||c.marca)}</span>
+      <button class="btn btn-sm btn-r" onclick="delCar(${c.id})">Eliminar</button>
+    </div>`
+  ).join('') || '<div style="font-size:12px;color:var(--muted);font-family:var(--fm);">Sin vehículos registrados.</div>';
+}
+
+function updateKm() {
+  const car = activeCar(); if (!car) return;
+  const val = parseInt(document.getElementById('km-new-val')?.value);
+  if (!val || val <= 0) return;
+  car.km = val;
+  save(); render();
+  showToast(`Km actualizados a ${Number(val).toLocaleString('es-ES')} km ✓`);
+}
+
+function exportJSON() {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));
+  a.download = `coches-${today()}.json`; a.click();
+  showFB('Descargado ✓','var(--g)');
+}
+function importFile(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const p = JSON.parse(ev.target.result);
+      if (!p.cars) throw new Error('Formato inválido');
+      if (!confirm(`¿Importar ${p.cars.length} vehículo${p.cars.length!==1?'s':''}?`)) return;
+      state = p; nid = state.nextId||1;
+      activeCarId = state.cars[0]?.id || null;
+      save(); render(); showFB('Importado ✓','var(--g)');
+    } catch(err) { showFB('Error: '+err.message,'var(--r)'); }
+  }; r.readAsText(f);
+}
+function showFB(msg,color) { const el=document.getElementById('datos-fb');if(!el)return;el.textContent=msg;el.style.color=color;el.style.display='block';setTimeout(()=>el.style.display='none',2500); }
+
+// ── CROSS-APP ──
+function addToCalendar(titulo, inicio, fin, tipo, color, notas) {
+  try {
+    const raw = localStorage.getItem('semana_v2');
+    const cal = raw ? JSON.parse(raw) : { tasks:{}, events:[], nextId:100 };
+    if (!cal.events) cal.events = [];
+    cal.events.push({ id: (cal.nextId||100)+1, titulo, inicio, fin: fin||inicio, tipo: tipo||'personal', color: color||'#ff8c00', notas: notas||'' });
+    cal.nextId = (cal.nextId||100)+2;
+    localStorage.setItem('semana_v2', JSON.stringify(cal));
+  } catch(e) {}
+}
+
+// ── TOAST ──
+function showToast(msg, isErr=false) {
+  let el = document.getElementById('toast-el');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'toast-el';
+    el.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;padding:10px 16px;font-size:12px;font-family:var(--fm);color:var(--text);z-index:999;max-width:320px;text-align:center;transition:opacity 0.3s;';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.color = isErr ? 'var(--r)' : 'var(--g)';
+  el.style.opacity = '1';
+  setTimeout(() => { el.style.opacity = '0'; }, 2500);
+}
+
+// ── INIT ──
+render();
+</script>
+</body>
+</html>
