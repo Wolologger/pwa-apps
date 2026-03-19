@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a09">
+<title>Niños — W//APPS</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;
+  --y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;--o:#f09030;--p:#c060f0;--t:#30e8d0;
+  --fh:'Bebas Neue',sans-serif;--fm:'DM Mono',monospace;--fs:'DM Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--fs);overflow-x:hidden;}
+
+/* NAV */
+.wnav{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:100;flex-shrink:0;}
+.wnav-back{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--muted);text-decoration:none;transition:all 0.15s;flex-shrink:0;}
+.wnav-back:hover{background:rgba(255,255,255,0.06);color:var(--y);}
+.wnav-logo{font-family:var(--fh);font-size:16px;letter-spacing:2px;flex-shrink:0;}
+.wnav-logo a{color:var(--muted);text-decoration:none;}
+.wnav-logo a span{color:var(--y);}
+.wnav-sep{width:1px;height:16px;background:var(--border2);flex-shrink:0;}
+.wnav-title{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* SHELL */
+.shell{display:flex;flex-direction:column;height:100dvh;max-width:600px;margin:0 auto;}
+
+/* KID SELECTOR BAR */
+.kid-bar{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border2);flex-shrink:0;overflow-x:auto;scrollbar-width:none;background:var(--bg);}
+.kid-bar::-webkit-scrollbar{display:none;}
+.kid-chip{flex-shrink:0;display:flex;align-items:center;gap:6px;padding:6px 12px;border:0.5px solid var(--border2);border-radius:99px;background:transparent;color:var(--muted);cursor:pointer;transition:all 0.15s;font-family:var(--fm);font-size:12px;white-space:nowrap;}
+.kid-chip.active{border-color:var(--t);color:var(--t);background:rgba(48,232,208,0.08);}
+.kid-chip:hover{color:var(--text);}
+.kid-chip-emoji{font-size:14px;}
+.kid-add-btn{flex-shrink:0;width:30px;height:30px;border-radius:50%;border:0.5px solid var(--border2);background:transparent;color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.kid-add-btn:hover{color:var(--y);border-color:var(--y);}
+
+/* TABS */
+.tabs{display:flex;padding:0 16px;gap:2px;border-bottom:1px solid var(--border2);flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:9px 14px;font-size:11px;font-family:var(--fm);border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;white-space:nowrap;}
+.tab.active{color:var(--y);border-bottom-color:var(--y);}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:0 16px 100px;scrollbar-width:none;}
+.content::-webkit-scrollbar{display:none;}
+.section{display:none;padding-top:14px;}
+.section.active{display:block;}
+
+/* SPINNER */
+.spinner-overlay{display:none;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1rem;gap:12px;}
+.spinner-overlay.show{display:flex;}
+.spinner{width:20px;height:20px;border:2px solid var(--border2);border-top-color:var(--y);border-radius:50%;animation:spin 0.6s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner-label{font-size:12px;color:var(--muted);font-family:var(--fm);}
+
+/* KID PROFILE CARD */
+.kid-profile{background:var(--bg2);border:0.5px solid var(--border2);border-radius:14px;padding:18px;margin-bottom:14px;position:relative;}
+.kid-profile-top{display:flex;gap:14px;align-items:flex-start;}
+.kid-avatar{width:64px;height:64px;border-radius:14px;background:rgba(48,232,208,0.15);border:1px solid rgba(48,232,208,0.25);display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;}
+.kid-info{flex:1;min-width:0;}
+.kid-name-display{font-family:var(--fh);font-size:28px;letter-spacing:0.5px;line-height:1;}
+.kid-school{font-size:13px;color:var(--muted);font-family:var(--fm);margin-top:2px;}
+.kid-age-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-family:var(--fm);padding:3px 10px;border-radius:99px;background:rgba(48,232,208,0.1);color:var(--t);border:0.5px solid rgba(48,232,208,0.25);margin-top:6px;}
+.kid-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px;}
+.kid-stat{background:var(--bg3);border-radius:8px;padding:10px;text-align:center;}
+.kid-stat-label{font-size:9px;color:var(--muted);font-family:var(--fm);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:3px;}
+.kid-stat-val{font-family:var(--fh);font-size:18px;line-height:1;}
+.kid-edit-btn{position:absolute;top:14px;right:14px;background:none;border:0.5px solid var(--border2);border-radius:6px;color:var(--muted);font-size:13px;padding:4px 10px;cursor:pointer;font-family:var(--fm);}
+.kid-edit-btn:hover{color:var(--text);}
+
+/* ALERTS */
+.alert-card{background:rgba(240,64,48,0.08);border:0.5px solid rgba(240,64,48,0.25);border-radius:10px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:flex-start;gap:10px;}
+.alert-dot{width:7px;height:7px;border-radius:50%;background:var(--r);flex-shrink:0;margin-top:4px;animation:pulse 1.5s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.alert-text{font-size:12px;font-family:var(--fm);color:var(--r);line-height:1.6;flex:1;}
+.alert-card.warn{background:rgba(240,144,48,0.08);border-color:rgba(240,144,48,0.25);}
+.alert-card.warn .alert-dot{background:var(--o);}
+.alert-card.warn .alert-text{color:var(--o);}
+.alert-card.info{background:rgba(48,232,208,0.08);border-color:rgba(48,232,208,0.25);}
+.alert-card.info .alert-dot{background:var(--t);}
+.alert-card.info .alert-text{color:var(--t);}
+
+/* MED CARDS */
+.med-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:13px 14px;margin-bottom:8px;}
+.med-top{display:flex;align-items:flex-start;gap:10px;}
+.med-icon{font-size:20px;flex-shrink:0;width:36px;height:36px;background:var(--bg3);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.med-body{flex:1;min-width:0;}
+.med-name{font-size:14px;font-weight:500;}
+.med-meta{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;align-items:center;}
+.med-dose{font-size:11px;color:var(--muted);font-family:var(--fm);}
+.med-freq{font-size:9px;padding:2px 8px;border-radius:99px;font-family:var(--fm);}
+.med-freq-diario{background:rgba(48,216,128,0.1);color:var(--g);border:0.5px solid rgba(48,216,128,0.25);}
+.med-freq-semanal{background:rgba(48,168,240,0.1);color:var(--b);border:0.5px solid rgba(48,168,240,0.25);}
+.med-freq-mensual{background:rgba(240,144,48,0.1);color:var(--o);border:0.5px solid rgba(240,144,48,0.25);}
+.med-freq-otro{background:rgba(90,88,80,0.12);color:var(--muted);border:0.5px solid var(--border2);}
+.med-stock{font-size:11px;font-family:var(--fm);}
+.med-stock.low{color:var(--r);}
+.med-stock.ok{color:var(--g);}
+.med-actions{display:flex;gap:4px;flex-shrink:0;align-items:flex-start;}
+.icon-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:4px 6px;opacity:0.3;transition:opacity 0.15s;color:var(--text);flex-shrink:0;}
+.icon-btn:hover{opacity:1;}
+.icon-btn.buy:hover{color:var(--b);}
+.icon-btn.del:hover{color:var(--r);}
+
+/* VISIT / EXAM CARDS */
+.visit-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:8px;}
+.visit-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.visit-body{flex:1;}
+.visit-date{font-family:var(--fh);font-size:18px;letter-spacing:0.3px;}
+.visit-motivo{font-size:13px;margin-top:2px;}
+.visit-meta{font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;}
+.visit-cost{font-family:var(--fh);font-size:18px;color:var(--y);flex-shrink:0;}
+.visit-upcoming{border-color:rgba(232,240,64,0.3);}
+
+/* RESULT BADGE */
+.result-badge{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-family:var(--fm);padding:3px 8px;border-radius:99px;border:0.5px solid;}
+.result-normal{background:rgba(48,216,128,0.1);color:var(--g);border-color:rgba(48,216,128,0.25);}
+.result-alterado{background:rgba(240,64,48,0.1);color:var(--r);border-color:rgba(240,64,48,0.25);}
+.result-pendiente{background:rgba(90,88,80,0.1);color:var(--muted);border-color:var(--border2);}
+
+/* GROWTH LOG */
+.growth-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:13px;}
+.growth-row:last-child{border-bottom:none;}
+.growth-date{color:var(--muted);font-family:var(--fm);font-size:11px;}
+.growth-val{font-family:var(--fh);font-size:18px;}
+.growth-diff{font-size:10px;font-family:var(--fm);padding:2px 6px;border-radius:99px;}
+.growth-up{background:rgba(48,216,128,0.1);color:var(--g);}
+.growth-down{background:rgba(240,64,48,0.1);color:var(--r);}
+.growth-eq{background:rgba(90,88,80,0.1);color:var(--muted);}
+
+/* EXPENSE CARDS */
+.expense-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.expense-body{flex:1;}
+.expense-concept{font-size:13px;font-weight:500;}
+.expense-meta{font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;}
+.expense-cat{font-size:9px;padding:2px 8px;border-radius:99px;font-family:var(--fm);}
+.expense-cat-medico{background:rgba(240,64,48,0.1);color:var(--r);border:0.5px solid rgba(240,64,48,0.25);}
+.expense-cat-farmacia{background:rgba(192,96,240,0.1);color:var(--p);border:0.5px solid rgba(192,96,240,0.25);}
+.expense-cat-colegio{background:rgba(48,168,240,0.1);color:var(--b);border:0.5px solid rgba(48,168,240,0.25);}
+.expense-cat-ropa{background:rgba(240,144,48,0.1);color:var(--o);border:0.5px solid rgba(240,144,48,0.25);}
+.expense-cat-actividad{background:rgba(48,216,128,0.1);color:var(--g);border:0.5px solid rgba(48,216,128,0.25);}
+.expense-cat-otro{background:rgba(90,88,80,0.12);color:var(--muted);border:0.5px solid var(--border2);}
+.expense-amount{font-family:var(--fh);font-size:22px;color:var(--y);flex-shrink:0;white-space:nowrap;}
+
+/* ADD PANELS */
+.add-panel{background:var(--bg2);border:0.5px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:14px;display:none;}
+.add-panel.open{display:block;animation:sd 0.15s ease;}
+@keyframes sd{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.ap-title{font-family:var(--fh);font-size:18px;letter-spacing:0.5px;margin-bottom:12px;}
+.field{margin-bottom:8px;}
+.field-label{font-size:9px;color:var(--muted);font-family:var(--fm);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.field-row{display:flex;gap:8px;flex-wrap:wrap;}
+.field-row>*{flex:1;min-width:100px;}
+input,select,textarea{width:100%;background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--fm);font-size:13px;padding:9px 12px;outline:none;transition:border-color 0.15s;}
+input:focus,select:focus,textarea:focus{border-color:var(--y);}
+select option{background:var(--bg2);}
+textarea{resize:vertical;min-height:60px;line-height:1.5;}
+
+/* BUTTONS */
+.btn{padding:9px 16px;font-size:12px;font-family:var(--fm);border:0.5px solid var(--border2);border-radius:8px;background:transparent;color:var(--text);cursor:pointer;transition:all 0.15s;flex-shrink:0;}
+.btn:hover{background:var(--bg3);}
+.btn-y{background:var(--y);color:#0a0a09;border-color:var(--y);font-weight:500;}
+.btn-b{background:rgba(48,168,240,0.1);color:var(--b);border-color:rgba(48,168,240,0.3);}
+.btn-r{color:var(--r);border-color:rgba(240,64,48,0.3);}
+.btn-sm{padding:5px 11px;font-size:11px;}
+
+/* EDIT FORM */
+.edit-form{background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;padding:12px;margin-top:10px;display:none;}
+.edit-form.open{display:block;}
+.ef-row{display:flex;gap:8px;margin-bottom:7px;flex-wrap:wrap;}
+.ef-row>*{flex:1;min-width:100px;}
+.ef-btns{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
+
+/* CONN BADGE */
+.conn-badge{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-family:var(--fm);padding:3px 8px;border-radius:99px;background:rgba(48,168,240,0.1);color:var(--b);border:0.5px solid rgba(48,168,240,0.25);}
+.conn-dot{width:5px;height:5px;border-radius:50%;background:var(--b);animation:pulse 2s ease infinite;}
+
+/* SUMMARY TOTALS */
+.summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;}
+.summary-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px;}
+.summary-label{font-size:9px;color:var(--muted);font-family:var(--fm);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:4px;}
+.summary-val{font-family:var(--fh);font-size:24px;line-height:1;}
+.summary-sub{font-size:10px;color:var(--muted);font-family:var(--fm);margin-top:2px;}
+
+/* DATA */
+.data-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:14px;margin-bottom:10px;}
+.fb{font-size:11px;margin-top:8px;display:none;font-family:var(--fm);}
+
+.empty{color:var(--muted);font-size:13px;text-align:center;padding:2.5rem 1rem;line-height:1.7;}
+.section-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:14px 0 8px;font-family:var(--fm);}
+.fab-area{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:600px;padding:12px 16px 24px;background:linear-gradient(to top,var(--bg) 60%,transparent);pointer-events:none;}
+.fab{pointer-events:all;width:100%;padding:13px;font-family:var(--fh);font-size:14px;background:var(--y);color:#0a0a09;border:none;border-radius:12px;cursor:pointer;letter-spacing:0.3px;}
+.fab:active{transform:scale(0.97);}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- NAV -->
+  <div class="wnav">
+    <a class="wnav-back" href="index.html"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
+    <div class="wnav-sep"></div>
+    <div class="wnav-title" id="wnav-title">NIÑOS</div>
+  </div>
+
+  <!-- KID SELECTOR -->
+  <div class="kid-bar" id="kid-bar"></div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('perfil',this)">Perfil</button>
+    <button class="tab" onclick="showTab('medicacion',this)">Medicación</button>
+    <button class="tab" onclick="showTab('medico',this)">Médico</button>
+    <button class="tab" onclick="showTab('examenes',this)">Exámenes</button>
+    <button class="tab" onclick="showTab('crecimiento',this)">Crecimiento</button>
+    <button class="tab" onclick="showTab('gastos',this)">Gastos</button>
+    <button class="tab" onclick="showTab('datos',this)">Datos</button>
+  </div>
+
+  <div class="content">
+
+    <!-- PERFIL -->
+    <div id="perfil" class="section active">
+      <div class="add-panel" id="add-kid-panel">
+        <div class="ap-title">Nuevo niño/a</div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Nombre</div><input type="text" id="fk-nombre" placeholder="Nombre del niño/a"></div>
+          <div class="field"><div class="field-label">Emoji / icono</div><input type="text" id="fk-emoji" placeholder="👦" maxlength="2" style="text-align:center;font-size:20px;"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Fecha de nacimiento</div><input type="date" id="fk-nacimiento"></div>
+          <div class="field"><div class="field-label">Sexo</div>
+            <select id="fk-sexo">
+              <option value="niño">👦 Niño</option>
+              <option value="niña">👧 Niña</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Colegio / guardería</div><input type="text" id="fk-colegio" placeholder="ej: CEIP San Marcos"></div>
+          <div class="field"><div class="field-label">Curso / nivel</div><input type="text" id="fk-curso" placeholder="ej: 3º Primaria"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Pediatra</div><input type="text" id="fk-pediatra" placeholder="Nombre del pediatra"></div>
+          <div class="field"><div class="field-label">Nº tarjeta sanitaria</div><input type="text" id="fk-tarjeta" placeholder="SIP / CIP…"></div>
+        </div>
+        <div class="field"><div class="field-label">Alergias (opcional)</div><input type="text" id="fk-alergias" placeholder="ej: Penicilina, frutos secos…"></div>
+        <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;">
+          <button class="btn btn-y" style="flex:1" onclick="addKid()">Añadir niño/a</button>
+          <button class="btn" onclick="closeAddKid()">Cancelar</button>
+        </div>
+      </div>
+      <div id="perfil-body"></div>
+    </div>
+
+    <!-- MEDICACIÓN -->
+    <div id="medicacion" class="section">
+      <div class="add-panel" id="add-med-panel">
+        <div class="ap-title">Nueva medicación</div>
+        <div class="field"><div class="field-label">Nombre del medicamento</div><input type="text" id="fm-nombre" placeholder="ej: Apiretal, Amoxicilina, Ventolin…"></div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Dosis</div><input type="text" id="fm-dosis" placeholder="ej: 5ml, 1 comprimido"></div>
+          <div class="field"><div class="field-label">Frecuencia</div>
+            <select id="fm-freq">
+              <option value="cada8h">Cada 8h</option>
+              <option value="cada12h">Cada 12h</option>
+              <option value="diario">Diario</option>
+              <option value="semanal">Semanal</option>
+              <option value="mensual">Mensual</option>
+              <option value="si_fiebre">Si fiebre</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Próxima dosis / fin tratamiento</div><input type="date" id="fm-proxima"></div>
+          <div class="field"><div class="field-label">Stock (unidades/ml)</div><input type="number" id="fm-stock" placeholder="0" min="0" step="1"></div>
+        </div>
+        <div class="field"><div class="field-label">Recetado por / indicaciones</div><input type="text" id="fm-notas" placeholder="Observaciones del médico…"></div>
+        <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;">
+          <button class="btn btn-y" style="flex:1" onclick="addMed()">Añadir medicación</button>
+          <button class="btn" onclick="document.getElementById('add-med-panel').classList.remove('open')">Cancelar</button>
+        </div>
+      </div>
+      <div id="medicacion-body"></div>
+    </div>
+
+    <!-- MÉDICO -->
+    <div id="medico" class="section">
+      <div class="add-panel" id="add-visit-panel">
+        <div class="ap-title">Nueva visita médica</div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Fecha</div><input type="date" id="fv-fecha"></div>
+          <div class="field"><div class="field-label">Médico / centro</div><input type="text" id="fv-medico" placeholder="Pediatra, urgencias…"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Tipo</div>
+            <select id="fv-tipo">
+              <option value="revision">Revisión rutinaria</option>
+              <option value="enfermedad">Enfermedad</option>
+              <option value="vacuna">Vacuna</option>
+              <option value="urgencias">Urgencias</option>
+              <option value="especialista">Especialista</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div class="field"><div class="field-label">Motivo / diagnóstico</div><input type="text" id="fv-motivo" placeholder="ej: Bronquitis, revisión 4 años…"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Coste €</div><input type="number" id="fv-coste" placeholder="0.00" step="0.01" min="0"></div>
+          <div class="field"><div class="field-label">Próxima visita (opcional)</div><input type="date" id="fv-proxima"></div>
+        </div>
+        <div class="field"><div class="field-label">Notas / tratamiento</div><textarea id="fv-notas" placeholder="Observaciones del médico, tratamiento indicado…"></textarea></div>
+        <div id="visit-add-expense-row" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;font-family:var(--fm);color:var(--muted);">
+          <input type="checkbox" id="fv-add-gasto" style="width:16px;height:16px;cursor:pointer;accent-color:var(--y);">
+          <label for="fv-add-gasto" style="cursor:pointer;color:var(--text);">Añadir coste a Gastos Diarios automáticamente</label>
+        </div>
+        <div id="visit-add-cal-row" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:12px;font-family:var(--fm);">
+          <input type="checkbox" id="fv-add-cal" style="width:16px;height:16px;cursor:pointer;accent-color:var(--y);">
+          <label for="fv-add-cal" style="cursor:pointer;color:var(--text);">Añadir próxima visita al Calendario</label>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-y" style="flex:1" onclick="addVisit()">Guardar visita</button>
+          <button class="btn" onclick="document.getElementById('add-visit-panel').classList.remove('open')">Cancelar</button>
+        </div>
+      </div>
+      <div id="medico-body"></div>
+    </div>
+
+    <!-- EXÁMENES / ANÁLISIS -->
+    <div id="examenes" class="section">
+      <div class="add-panel" id="add-exam-panel">
+        <div class="ap-title">Nuevo examen / análisis</div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Fecha</div><input type="date" id="fe-fecha"></div>
+          <div class="field"><div class="field-label">Tipo</div>
+            <select id="fe-tipo">
+              <option value="analitica">Analítica de sangre</option>
+              <option value="orina">Análisis de orina</option>
+              <option value="radiografia">Radiografía</option>
+              <option value="ecografia">Ecografía</option>
+              <option value="alergia">Test de alergia</option>
+              <option value="vision">Revisión visión</option>
+              <option value="auditivo">Test auditivo</option>
+              <option value="desarrollo">Test desarrollo</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Centro / laboratorio</div><input type="text" id="fe-centro" placeholder="Hospital, clínica…"></div>
+          <div class="field"><div class="field-label">Resultado</div>
+            <select id="fe-resultado">
+              <option value="normal">Normal</option>
+              <option value="alterado">Alterado</option>
+              <option value="pendiente">Pendiente</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Coste €</div><input type="number" id="fe-coste" placeholder="0.00" step="0.01" min="0"></div>
+          <div class="field"><div class="field-label">Próximo examen (opcional)</div><input type="date" id="fe-proximo"></div>
+        </div>
+        <div class="field"><div class="field-label">Valores / observaciones</div><textarea id="fe-notas" placeholder="Resultados, valores relevantes, recomendaciones…"></textarea></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:12px;font-family:var(--fm);">
+          <input type="checkbox" id="fe-add-gasto" style="width:16px;height:16px;cursor:pointer;accent-color:var(--y);">
+          <label for="fe-add-gasto" style="cursor:pointer;color:var(--text);">Añadir coste a Gastos Diarios</label>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-y" style="flex:1" onclick="addExam()">Guardar examen</button>
+          <button class="btn" onclick="document.getElementById('add-exam-panel').classList.remove('open')">Cancelar</button>
+        </div>
+      </div>
+      <div id="examenes-body"></div>
+    </div>
+
+    <!-- CRECIMIENTO -->
+    <div id="crecimiento" class="section">
+      <div class="add-panel open" id="add-crecimiento-panel" style="margin-bottom:14px;">
+        <div class="ap-title">Registrar medidas</div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Talla (cm)</div><input type="number" id="fg-talla" placeholder="85.5" step="0.5" min="0"></div>
+          <div class="field"><div class="field-label">Peso (kg)</div><input type="number" id="fg-peso" placeholder="12.3" step="0.1" min="0"></div>
+          <div class="field"><div class="field-label">Fecha</div><input type="date" id="fg-fecha"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Per. cefálico (cm, opcional)</div><input type="number" id="fg-cabeza" placeholder="48.0" step="0.5" min="0"></div>
+          <div class="field"><div class="field-label">Notas (opcional)</div><input type="text" id="fg-notas" placeholder="ej: Revisión 2 años"></div>
+        </div>
+        <button class="btn btn-y btn-sm" onclick="addGrowth()" style="margin-top:4px;">Guardar</button>
+      </div>
+      <div id="crecimiento-body"></div>
+    </div>
+
+    <!-- GASTOS -->
+    <div id="gastos" class="section">
+      <div class="add-panel" id="add-gasto-panel">
+        <div class="ap-title">Nuevo gasto</div>
+        <div class="field"><div class="field-label">Concepto</div><input type="text" id="fga-concepto" placeholder="ej: Consulta pediatra, ropa de invierno…"></div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Importe €</div><input type="number" id="fga-importe" placeholder="0.00" step="0.01" min="0"></div>
+          <div class="field"><div class="field-label">Fecha</div><input type="date" id="fga-fecha"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><div class="field-label">Categoría</div>
+            <select id="fga-cat">
+              <option value="medico">🏥 Médico</option>
+              <option value="farmacia">💊 Farmacia</option>
+              <option value="colegio">🎒 Colegio / guardería</option>
+              <option value="ropa">👕 Ropa y calzado</option>
+              <option value="actividad">⚽ Actividades extraesc.</option>
+              <option value="alimentacion">🍎 Alimentación especial</option>
+              <option value="otro">📦 Otro</option>
+            </select>
+          </div>
+          <div class="field"><div class="field-label">Notas</div><input type="text" id="fga-notas" placeholder="Opcional…"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:12px;font-family:var(--fm);">
+          <input type="checkbox" id="fga-add-gastos" style="width:16px;height:16px;cursor:pointer;accent-color:var(--y);">
+          <label for="fga-add-gastos" style="cursor:pointer;color:var(--text);">Añadir también a Gastos Diarios</label>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-y" style="flex:1" onclick="addGasto()">Guardar gasto</button>
+          <button class="btn" onclick="document.getElementById('add-gasto-panel').classList.remove('open')">Cancelar</button>
+        </div>
+      </div>
+      <div id="gastos-body"></div>
+    </div>
+
+    <!-- DATOS -->
+    <div id="datos" class="section">
+      <div class="data-card">
+        <div style="font-family:var(--fh);font-size:16px;margin-bottom:6px;">Conexiones activas</div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-family:var(--fm);color:var(--muted);margin-bottom:12px;line-height:1.7;">
+          <span><span class="conn-badge"><span class="conn-dot"></span>gastos_v1</span> Gastos Diarios — visitas, exámenes y gastos</span>
+          <span><span class="conn-badge"><span class="conn-dot"></span>compra_v2</span> Lista Compra — medicamentos con poco stock</span>
+          <span><span class="conn-badge"><span class="conn-dot"></span>semana_v2</span> Calendario — próximas visitas y medicaciones</span>
+        </div>
+        <div style="font-family:var(--fh);font-size:16px;margin-bottom:6px;">Exportar / Importar</div>
+        <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-bottom:10px;" id="datos-info"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-y btn-sm" style="flex:1" onclick="exportJSON()">↓ Exportar JSON</button>
+          <button class="btn btn-sm" style="flex:1" onclick="document.getElementById('fi').click()">↑ Importar JSON</button>
+          <input type="file" id="fi" accept=".json" style="display:none" onchange="importFile(event)">
+        </div>
+        <div id="datos-fb" class="fb"></div>
+      </div>
+      <div class="data-card">
+        <div style="font-family:var(--fh);font-size:16px;margin-bottom:8px;">Zona de peligro</div>
+        <div id="danger-zone"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="fab-area" id="fab-area">
+    <button class="fab" id="fab-btn" onclick="fabAction()">+ Añadir medicación</button>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+let state = loadState();
+let nid = state.nextId || 1;
+let activeKidId = null;
+let currentTab = 'perfil';
+let editKidId = null;
+let editMedId = null;
+
+function loadState() {
+  try { const r = localStorage.getItem('ninos_v1'); if (r) return JSON.parse(r); } catch(e) {}
+  return { kids: [], nextId: 1 };
+}
+function save() {
+  state.nextId = nid;
+  try { localStorage.setItem('ninos_v1', JSON.stringify(state)); } catch(e) {}
+}
+function nxtId() { return ++nid; }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt(n,d=2) { return Number(n||0).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d}); }
+function today() { const d=new Date(); return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`; }
+function p2(n) { return String(n).padStart(2,'0'); }
+function daysUntil(dateStr) { if(!dateStr) return null; return Math.ceil((new Date(dateStr)-new Date())/(1000*60*60*24)); }
+
+function calcAge(birthDate) {
+  if (!birthDate) return null;
+  const birth = new Date(birthDate);
+  const now = new Date();
+  let years = now.getFullYear() - birth.getFullYear();
+  let months = now.getMonth() - birth.getMonth();
+  if (months < 0) { years--; months += 12; }
+  if (years === 0) return `${months} mes${months !== 1 ? 'es' : ''}`;
+  if (years < 3) return `${years} año${years !== 1 ? 's' : ''} y ${months} mes${months !== 1 ? 'es' : ''}`;
+  return `${years} año${years !== 1 ? 's' : ''}`;
+}
+
+function activeKid() { return state.kids.find(k => k.id === activeKidId); }
+
+// ── INIT ──
+if (state.kids.length) activeKidId = state.kids[0].id;
+document.getElementById('fg-fecha').value = today();
+document.getElementById('fv-fecha').value = today();
+document.getElementById('fe-fecha').value = today();
+document.getElementById('fga-fecha').value = today();
+document.getElementById('fv-add-gasto').checked = true;
+document.getElementById('fv-add-cal').checked = true;
+document.getElementById('fe-add-gasto').checked = true;
+document.getElementById('fga-add-gastos').checked = false;
+
+// ── TABS ──
+function showTab(name, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  el.classList.add('active');
+  currentTab = name;
+  const fab = document.getElementById('fab-area');
+  const fabBtn = document.getElementById('fab-btn');
+  const fabLabels = {
+    perfil: null,
+    medicacion: '+ Añadir medicación',
+    medico: '+ Registrar visita',
+    examenes: '+ Añadir examen',
+    crecimiento: null,
+    gastos: '+ Registrar gasto',
+    datos: null
+  };
+  if (fabLabels[name]) { fabBtn.textContent = fabLabels[name]; fab.style.display = 'block'; }
+  else fab.style.display = 'none';
+  render();
+}
+
+function fabAction() {
+  if (currentTab === 'medicacion') document.getElementById('add-med-panel').classList.toggle('open');
+  if (currentTab === 'medico') document.getElementById('add-visit-panel').classList.toggle('open');
+  if (currentTab === 'examenes') document.getElementById('add-exam-panel').classList.toggle('open');
+  if (currentTab === 'gastos') document.getElementById('add-gasto-panel').classList.toggle('open');
+}
+
+// ── KID BAR ──
+function renderKidBar() {
+  const bar = document.getElementById('kid-bar');
+  bar.innerHTML = state.kids.map(k =>
+    `<button class="kid-chip ${k.id === activeKidId ? 'active' : ''}" onclick="selectKid(${k.id})">
+      <span class="kid-chip-emoji">${k.emoji || '👦'}</span>${esc(k.nombre)}
+    </button>`
+  ).join('') + `<button class="kid-add-btn" onclick="toggleAddKid()">+</button>`;
+  const kid = activeKid();
+  document.getElementById('wnav-title').textContent = kid ? kid.nombre.toUpperCase() : 'NIÑOS';
+}
+
+function selectKid(id) { activeKidId = id; render(); }
+function toggleAddKid() { document.getElementById('add-kid-panel').classList.toggle('open'); }
+function closeAddKid() { document.getElementById('add-kid-panel').classList.remove('open'); }
+
+// ── ADD KID ──
+function addKid() {
+  const nombre = document.getElementById('fk-nombre').value.trim();
+  if (!nombre) return;
+  const kid = {
+    id: nxtId(), nombre,
+    emoji: document.getElementById('fk-emoji').value.trim() || (document.getElementById('fk-sexo').value === 'niña' ? '👧' : '👦'),
+    sexo: document.getElementById('fk-sexo').value,
+    nacimiento: document.getElementById('fk-nacimiento').value,
+    colegio: document.getElementById('fk-colegio').value.trim(),
+    curso: document.getElementById('fk-curso').value.trim(),
+    pediatra: document.getElementById('fk-pediatra').value.trim(),
+    tarjeta: document.getElementById('fk-tarjeta').value.trim(),
+    alergias: document.getElementById('fk-alergias').value.trim(),
+    meds: [], visits: [], exams: [], growth: [], gastos: []
+  };
+  state.kids.push(kid);
+  activeKidId = kid.id;
+  ['fk-nombre','fk-emoji','fk-nacimiento','fk-colegio','fk-curso','fk-pediatra','fk-tarjeta','fk-alergias'].forEach(id => document.getElementById(id).value = '');
+  closeAddKid(); save(); render();
+}
+
+function delKid(id) {
+  if (!confirm('¿Eliminar este perfil y todos sus datos?')) return;
+  state.kids = state.kids.filter(k => k.id !== id);
+  activeKidId = state.kids[0]?.id || null;
+  save(); render();
+}
+
+// ── RENDER ──
+function render() {
+  renderKidBar();
+  if (currentTab === 'perfil') renderPerfil();
+  if (currentTab === 'medicacion') renderMedicacion();
+  if (currentTab === 'medico') renderMedico();
+  if (currentTab === 'examenes') renderExamenes();
+  if (currentTab === 'crecimiento') renderCrecimiento();
+  if (currentTab === 'gastos') renderGastos();
+  if (currentTab === 'datos') renderDatos();
+}
+
+// ── PERFIL ──
+function renderPerfil() {
+  const kid = activeKid();
+  if (!state.kids.length) {
+    document.getElementById('perfil-body').innerHTML = '<div class="empty">No tienes ningún niño/a registrado.<br>Pulsa el <strong>+</strong> de arriba para añadir el primero.</div>';
+    return;
+  }
+  if (!kid) return;
+
+  const age = calcAge(kid.nacimiento);
+  const lastGrowth = (kid.growth||[]).slice().sort((a,b) => b.fecha?.localeCompare(a.fecha))[0];
+  const upcomingMeds = (kid.meds||[]).filter(m => { const d = daysUntil(m.proxima); return d !== null && d <= 7 && d >= 0; });
+  const upcomingVisits = (kid.visits||[]).filter(v => { const d = daysUntil(v.fecha); return d !== null && d >= 0 && d <= 30; });
+  const pendingExams = (kid.exams||[]).filter(e => e.resultado === 'pendiente');
+  const alteredExams = (kid.exams||[]).filter(e => e.resultado === 'alterado');
+  const lowStock = (kid.meds||[]).filter(m => m.stock !== null && m.stock !== undefined && m.stock <= 2);
+
+  const totalGastos = (kid.gastos||[]).reduce((s,g) => s + (parseFloat(g.importe)||0), 0);
+  const gastosMes = (kid.gastos||[]).filter(g => g.fecha && g.fecha.startsWith(today().slice(0,7))).reduce((s,g) => s + (parseFloat(g.importe)||0), 0);
+
+  let html = '';
+
+  // Alerts
+  alteredExams.forEach(e => {
+    html += `<div class="alert-card"><div class="alert-dot"></div><div class="alert-text">⚠ Examen alterado: <strong>${esc(e.tipo)}</strong> (${e.fecha}) — ${esc(e.notas||'Ver resultados')}</div></div>`;
+  });
+  upcomingMeds.forEach(m => {
+    const d = daysUntil(m.proxima);
+    html += `<div class="alert-card warn"><div class="alert-dot"></div><div class="alert-text">💊 <strong>${esc(m.nombre)}</strong> — ${d === 0 ? 'toca hoy' : `en ${d} día${d !== 1 ? 's' : ''}`}</div></div>`;
+  });
+  lowStock.forEach(m => {
+    html += `<div class="alert-card"><div class="alert-dot"></div><div class="alert-text">⚠ Stock bajo: <strong>${esc(m.nombre)}</strong> — quedan ${m.stock} unidades. <button class="btn btn-b btn-sm" style="margin-left:8px;" onclick="addMedToShoppingList(${activeKidId},${m.id})">+ Compra</button></div></div>`;
+  });
+  upcomingVisits.forEach(v => {
+    const d = daysUntil(v.fecha);
+    html += `<div class="alert-card warn"><div class="alert-dot"></div><div class="alert-text">🏥 Visita ${d === 0 ? 'hoy' : `en ${d} día${d !== 1 ? 's' : ''}`}: ${esc(v.motivo||'revisión')} (${v.fecha})</div></div>`;
+  });
+  pendingExams.forEach(e => {
+    html += `<div class="alert-card info"><div class="alert-dot"></div><div class="alert-text">🔬 Resultado pendiente: <strong>${esc(e.tipo)}</strong> (${e.fecha})</div></div>`;
+  });
+  if (kid.alergias) {
+    html += `<div class="alert-card warn"><div class="alert-dot"></div><div class="alert-text">⚠ Alergias: <strong>${esc(kid.alergias)}</strong></div></div>`;
+  }
+
+  html += `<div class="kid-profile">
+    <button class="kid-edit-btn" onclick="toggleEditKid(${kid.id})">✎ editar</button>
+    <div class="kid-profile-top">
+      <div class="kid-avatar">${kid.emoji || '👦'}</div>
+      <div class="kid-info">
+        <div class="kid-name-display">${esc(kid.nombre)}</div>
+        <div class="kid-school">${esc(kid.colegio || '')}${kid.curso ? ' · '+esc(kid.curso) : ''}</div>
+        ${age ? `<div class="kid-age-badge">🎂 ${age}</div>` : ''}
+      </div>
+    </div>
+    <div class="kid-stats">
+      <div class="kid-stat"><div class="kid-stat-label">Talla</div><div class="kid-stat-val">${lastGrowth?.talla ? lastGrowth.talla+' cm' : '—'}</div></div>
+      <div class="kid-stat"><div class="kid-stat-label">Peso</div><div class="kid-stat-val">${lastGrowth?.peso ? lastGrowth.peso+' kg' : '—'}</div></div>
+      <div class="kid-stat"><div class="kid-stat-label">Visitas</div><div class="kid-stat-val">${(kid.visits||[]).length}</div></div>
+      <div class="kid-stat"><div class="kid-stat-label">Gasto mes</div><div class="kid-stat-val">${fmt(gastosMes,0)} €</div></div>
+    </div>
+    ${kid.pediatra ? `<div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:10px;">👨‍⚕️ Pediatra: ${esc(kid.pediatra)}</div>` : ''}
+    ${kid.tarjeta ? `<div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:4px;">🪪 Tarjeta sanitaria: ${esc(kid.tarjeta)}</div>` : ''}
+    ${kid.nacimiento ? `<div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:4px;">🎂 Nacimiento: ${kid.nacimiento}</div>` : ''}
+  </div>
+
+  <div class="edit-form ${editKidId === kid.id ? 'open' : ''}" id="ekf-${kid.id}">
+    <div class="ef-row">
+      <div><div class="field-label">Nombre</div><input type="text" id="ek-n-${kid.id}" value="${esc(kid.nombre)}"></div>
+      <div><div class="field-label">Emoji</div><input type="text" id="ek-e-${kid.id}" value="${esc(kid.emoji||'👦')}" style="text-align:center;font-size:18px;" maxlength="2"></div>
+    </div>
+    <div class="ef-row">
+      <div><div class="field-label">Colegio</div><input type="text" id="ek-co-${kid.id}" value="${esc(kid.colegio||'')}"></div>
+      <div><div class="field-label">Curso</div><input type="text" id="ek-cu-${kid.id}" value="${esc(kid.curso||'')}"></div>
+    </div>
+    <div class="ef-row">
+      <div><div class="field-label">Pediatra</div><input type="text" id="ek-p-${kid.id}" value="${esc(kid.pediatra||'')}"></div>
+      <div><div class="field-label">Tarjeta sanitaria</div><input type="text" id="ek-t-${kid.id}" value="${esc(kid.tarjeta||'')}"></div>
+    </div>
+    <div class="ef-row">
+      <div><div class="field-label">Alergias</div><input type="text" id="ek-a-${kid.id}" value="${esc(kid.alergias||'')}"></div>
+      <div><div class="field-label">Nacimiento</div><input type="date" id="ek-b-${kid.id}" value="${kid.nacimiento||''}"></div>
+    </div>
+    <div class="ef-btns">
+      <button class="btn btn-y btn-sm" style="flex:1" onclick="saveKidEdit(${kid.id})">Guardar</button>
+      <button class="btn btn-sm" onclick="editKidId=null;renderPerfil()">Cancelar</button>
+      <button class="btn btn-sm btn-r" onclick="delKid(${kid.id})">Eliminar perfil</button>
+    </div>
+  </div>`;
+
+  document.getElementById('perfil-body').innerHTML = html;
+}
+
+function toggleEditKid(id) { editKidId = (editKidId === id ? null : id); renderPerfil(); }
+function saveKidEdit(id) {
+  const k = state.kids.find(x => x.id === id); if (!k) return;
+  k.nombre = document.getElementById('ek-n-'+id).value.trim();
+  k.emoji = document.getElementById('ek-e-'+id).value.trim() || '👦';
+  k.colegio = document.getElementById('ek-co-'+id).value.trim();
+  k.curso = document.getElementById('ek-cu-'+id).value.trim();
+  k.pediatra = document.getElementById('ek-p-'+id).value.trim();
+  k.tarjeta = document.getElementById('ek-t-'+id).value.trim();
+  k.alergias = document.getElementById('ek-a-'+id).value.trim();
+  k.nacimiento = document.getElementById('ek-b-'+id).value;
+  editKidId = null; save(); render();
+}
+
+// ── MEDICACIÓN ──
+function addMed() {
+  const kid = activeKid(); if (!kid) return;
+  const nombre = document.getElementById('fm-nombre').value.trim(); if (!nombre) return;
+  if (!kid.meds) kid.meds = [];
+  kid.meds.push({
+    id: nxtId(), nombre,
+    dosis: document.getElementById('fm-dosis').value.trim(),
+    freq: document.getElementById('fm-freq').value,
+    proxima: document.getElementById('fm-proxima').value,
+    stock: parseInt(document.getElementById('fm-stock').value) || 0,
+    notas: document.getElementById('fm-notas').value.trim()
+  });
+  const proxima = kid.meds[kid.meds.length-1].proxima;
+  if (proxima) addToCalendar(`💊 ${nombre} (${kid.nombre})`, proxima, proxima, 'personal', '#30e8d0', document.getElementById('fm-dosis').value);
+  ['fm-nombre','fm-dosis','fm-proxima','fm-notas'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fm-stock').value = '0';
+  document.getElementById('add-med-panel').classList.remove('open');
+  save(); render();
+}
+
+function delMed(id) {
+  const kid = activeKid(); if (!kid) return;
+  if (!confirm('¿Eliminar esta medicación?')) return;
+  kid.meds = (kid.meds||[]).filter(m => m.id !== id);
+  save(); render();
+}
+
+function administerMed(kidId, medId) {
+  const kid = state.kids.find(k => k.id === kidId); if (!kid) return;
+  const med = (kid.meds||[]).find(m => m.id === medId); if (!med) return;
+  if (med.stock > 0) med.stock--;
+  if (med.proxima) {
+    const d = new Date(med.proxima);
+    const advances = { cada8h: 0, cada12h: 0, diario: 1, semanal: 7, mensual: 30, si_fiebre: 0 };
+    d.setDate(d.getDate() + (advances[med.freq] || 0));
+    med.proxima = `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;
+  }
+  if (med.stock <= 2) addMedToShoppingList(kidId, medId);
+  save(); render();
+}
+
+function addMedToShoppingList(kidId, medId) {
+  const kid = state.kids.find(k => k.id === kidId); if (!kid) return;
+  const med = (kid.meds||[]).find(m => m.id === medId); if (!med) return;
+  try {
+    const raw = localStorage.getItem('compra_v2');
+    const compra = raw ? JSON.parse(raw) : { lists: [], items: [], cats: [], stores: [], nextId: 1 };
+    const listId = compra.lists[0]?.id || 1;
+    const exists = compra.items.some(i => i.text === med.nombre && !i.done);
+    if (!exists) {
+      compra.items.push({ id: (compra.nextId||1)+1, listId, text: med.nombre, cat: 'higiene', qty: '1', done: false, store: '', notes: `Niño/a: ${kid.nombre}` });
+      compra.nextId = (compra.nextId||1)+2;
+      localStorage.setItem('compra_v2', JSON.stringify(compra));
+      showToast(`"${med.nombre}" añadido a la lista de la compra ✓`);
+    } else {
+      showToast(`"${med.nombre}" ya está en la lista de la compra`);
+    }
+  } catch(e) { showToast('No se pudo conectar con Lista de la Compra', true); }
+}
+
+function renderMedicacion() {
+  const kid = activeKid();
+  if (!kid) { document.getElementById('medicacion-body').innerHTML = '<div class="empty">Selecciona un niño/a primero.</div>'; return; }
+  const meds = kid.meds || [];
+  if (!meds.length) { document.getElementById('medicacion-body').innerHTML = '<div class="empty">Sin medicaciones registradas.<br>Pulsa + para añadir.</div>'; return; }
+
+  const sorted = [...meds].sort((a,b) => {
+    const da = daysUntil(a.proxima); const db = daysUntil(b.proxima);
+    if (da === null) return 1; if (db === null) return -1; return da - db;
+  });
+
+  const freqLabels = { cada8h:'Cada 8h', cada12h:'Cada 12h', diario:'Diario', semanal:'Semanal', mensual:'Mensual', si_fiebre:'Si fiebre', otro:'Otro' };
+  const freqClass = { diario:'med-freq-diario', semanal:'med-freq-semanal', mensual:'med-freq-mensual', cada8h:'med-freq-diario', cada12h:'med-freq-diario', si_fiebre:'med-freq-otro', otro:'med-freq-otro' };
+
+  let html = '';
+  sorted.forEach(m => {
+    const d = daysUntil(m.proxima);
+    const urgent = d !== null && d <= 3;
+    const isEd = editMedId === m.id;
+    html += `<div class="med-card" style="${urgent?'border-color:rgba(240,144,48,0.4)':''}">
+      <div class="med-top">
+        <div class="med-icon">💊</div>
+        <div class="med-body">
+          <div class="med-name">${esc(m.nombre)}</div>
+          <div class="med-meta">
+            ${m.dosis ? `<span class="med-dose">${esc(m.dosis)}</span>` : ''}
+            <span class="med-freq ${freqClass[m.freq]||'med-freq-otro'}">${freqLabels[m.freq]||m.freq}</span>
+            ${m.stock !== undefined ? `<span class="med-stock ${m.stock <= 2 ? 'low' : 'ok'}">${m.stock <= 2 ? '⚠' : '✓'} ${m.stock} uds.</span>` : ''}
+          </div>
+          ${m.proxima ? `<div style="font-size:11px;color:${urgent?'var(--o)':'var(--muted)'};font-family:var(--fm);margin-top:4px;">
+            Próxima dosis: ${m.proxima} ${d !== null ? `(${d === 0 ? 'hoy' : d > 0 ? 'en '+d+'d' : 'hace '+Math.abs(d)+'d'})` : ''}
+          </div>` : ''}
+          ${m.notas ? `<div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:3px;">${esc(m.notas)}</div>` : ''}
+        </div>
+        <div class="med-actions">
+          <button class="icon-btn buy" title="Añadir a la compra" onclick="addMedToShoppingList(${kid.id},${m.id})">🛒</button>
+          <button class="icon-btn" title="Administrar dosis" onclick="administerMed(${kid.id},${m.id})" style="color:var(--g)">✓</button>
+          <button class="icon-btn" title="Editar" onclick="startEditMed(${m.id})">✎</button>
+          <button class="icon-btn del" title="Eliminar" onclick="delMed(${m.id})">×</button>
+        </div>
+      </div>
+      <div class="edit-form ${isEd?'open':''}" id="em-${m.id}">
+        <div class="ef-row">
+          <div><div class="field-label">Nombre</div><input type="text" id="em-n-${m.id}" value="${esc(m.nombre)}"></div>
+          <div><div class="field-label">Dosis</div><input type="text" id="em-d-${m.id}" value="${esc(m.dosis||'')}"></div>
+        </div>
+        <div class="ef-row">
+          <div><div class="field-label">Frecuencia</div><select id="em-f-${m.id}">
+            ${['cada8h','cada12h','diario','semanal','mensual','si_fiebre','otro'].map(v=>`<option value="${v}"${v===m.freq?' selected':''}>${freqLabels[v]||v}</option>`).join('')}
+          </select></div>
+          <div><div class="field-label">Próxima dosis</div><input type="date" id="em-p-${m.id}" value="${m.proxima||''}"></div>
+        </div>
+        <div class="ef-row">
+          <div><div class="field-label">Stock (uds.)</div><input type="number" id="em-s-${m.id}" value="${m.stock||0}" min="0"></div>
+          <div><div class="field-label">Notas</div><input type="text" id="em-no-${m.id}" value="${esc(m.notas||'')}"></div>
+        </div>
+        <div class="ef-btns">
+          <button class="btn btn-y btn-sm" style="flex:1" onclick="saveMedEdit(${m.id})">Guardar</button>
+          <button class="btn btn-sm" onclick="editMedId=null;renderMedicacion()">Cancelar</button>
+        </div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('medicacion-body').innerHTML = html;
+}
+
+function startEditMed(id) { editMedId = (editMedId === id ? null : id); renderMedicacion(); }
+function saveMedEdit(id) {
+  const kid = activeKid(); if (!kid) return;
+  const m = (kid.meds||[]).find(x => x.id === id); if (!m) return;
+  m.nombre = document.getElementById('em-n-'+id).value.trim();
+  m.dosis = document.getElementById('em-d-'+id).value.trim();
+  m.freq = document.getElementById('em-f-'+id).value;
+  m.proxima = document.getElementById('em-p-'+id).value;
+  m.stock = parseInt(document.getElementById('em-s-'+id).value) || 0;
+  m.notas = document.getElementById('em-no-'+id).value.trim();
+  editMedId = null; save(); render();
+}
+
+// ── MÉDICO ──
+function addVisit() {
+  const kid = activeKid(); if (!kid) return;
+  const fecha = document.getElementById('fv-fecha').value; if (!fecha) return;
+  const coste = parseFloat(document.getElementById('fv-coste').value) || 0;
+  const motivo = document.getElementById('fv-motivo').value.trim();
+  const medico = document.getElementById('fv-medico').value.trim();
+  const tipo = document.getElementById('fv-tipo').value;
+  const notas = document.getElementById('fv-notas').value.trim();
+  const proxima = document.getElementById('fv-proxima').value;
+  const addGasto = document.getElementById('fv-add-gasto').checked;
+  const addCal = document.getElementById('fv-add-cal').checked;
+
+  if (!kid.visits) kid.visits = [];
+  kid.visits.push({ id: nxtId(), fecha, motivo, medico, tipo, coste, notas, proxima });
+
+  if (addGasto && coste > 0) {
+    try {
+      const raw = localStorage.getItem('gastos_v1');
+      const gastos = raw ? JSON.parse(raw) : { gastos: [], nextId: 1 };
+      gastos.gastos.push({ id: (gastos.nextId||1)+1, importe: coste, concepto: `Médico (${kid.nombre}): ${motivo||tipo}`, fecha, cat: 'salud', nota: medico });
+      gastos.nextId = (gastos.nextId||1)+2;
+      localStorage.setItem('gastos_v1', JSON.stringify(gastos));
+      showToast(`${fmt(coste)} € añadidos a Gastos Diarios ✓`);
+    } catch(e) {}
+  }
+  if (addCal && proxima) {
+    addToCalendar(`🏥 ${tipo==='vacuna'?'Vacuna':'Médico'}: ${motivo||'revisión'} (${kid.nombre})`, proxima, proxima, 'personal', '#30e8d0', medico);
+  }
+
+  ['fv-fecha','fv-medico','fv-motivo','fv-coste','fv-proxima','fv-notas'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fv-fecha').value = today();
+  document.getElementById('add-visit-panel').classList.remove('open');
+  save(); render();
+}
+
+const tipoLabels = { revision:'Revisión', enfermedad:'Enfermedad', vacuna:'Vacuna', urgencias:'Urgencias', especialista:'Especialista', otro:'Otro' };
+const tipoEmojis = { revision:'🔍', enfermedad:'🤒', vacuna:'💉', urgencias:'🚨', especialista:'👨‍⚕️', otro:'🏥' };
+
+function renderMedico() {
+  const kid = activeKid();
+  if (!kid) { document.getElementById('medico-body').innerHTML = '<div class="empty">Selecciona un niño/a primero.</div>'; return; }
+  const visits = (kid.visits||[]).sort((a,b) => b.fecha.localeCompare(a.fecha));
+  if (!visits.length) { document.getElementById('medico-body').innerHTML = '<div class="empty">Sin visitas registradas.<br>Pulsa + para añadir.</div>'; return; }
+
+  const upcoming = visits.filter(v => v.fecha >= today());
+  const past = visits.filter(v => v.fecha < today());
+  let html = '';
+  if (upcoming.length) {
+    html += `<div class="section-label">Próximas (${upcoming.length})</div>`;
+    upcoming.forEach(v => html += visitCard(v, true));
+  }
+  if (past.length) {
+    html += `<div class="section-label">Historial (${past.length})</div>`;
+    past.forEach(v => html += visitCard(v, false));
+  }
+  document.getElementById('medico-body').innerHTML = html;
+}
+
+function visitCard(v, upcoming) {
+  return `<div class="visit-card ${upcoming ? 'visit-upcoming' : ''}">
+    <div class="visit-top">
+      <div class="visit-body">
+        <div class="visit-date">${tipoEmojis[v.tipo]||'🏥'} ${v.fecha}</div>
+        <div class="visit-motivo">${esc(v.motivo||tipoLabels[v.tipo]||'Visita')}</div>
+        <div class="visit-meta">
+          ${v.medico ? `<span>👨‍⚕️ ${esc(v.medico)}</span>` : ''}
+          <span class="result-badge result-${v.tipo === 'vacuna' ? 'normal' : 'pendiente'}">${tipoLabels[v.tipo]||v.tipo}</span>
+          ${v.proxima ? `<span>Próxima: ${v.proxima}</span>` : ''}
+          ${v.notas ? `<span style="display:block;width:100%;margin-top:2px;">${esc(v.notas)}</span>` : ''}
+        </div>
+      </div>
+      <div style="text-align:right;">
+        ${v.coste ? `<div class="visit-cost">${fmt(v.coste)} €</div>` : ''}
+        <button class="icon-btn del" onclick="delVisit(${v.id})" style="margin-top:4px;">×</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function delVisit(id) {
+  const kid = activeKid(); if (!kid) return;
+  if (!confirm('¿Eliminar esta visita?')) return;
+  kid.visits = (kid.visits||[]).filter(v => v.id !== id);
+  save(); render();
+}
+
+// ── EXÁMENES ──
+function addExam() {
+  const kid = activeKid(); if (!kid) return;
+  const fecha = document.getElementById('fe-fecha').value; if (!fecha) return;
+  const coste = parseFloat(document.getElementById('fe-coste').value) || 0;
+  const tipo = document.getElementById('fe-tipo').value;
+  const centro = document.getElementById('fe-centro').value.trim();
+  const resultado = document.getElementById('fe-resultado').value;
+  const notas = document.getElementById('fe-notas').value.trim();
+  const proximo = document.getElementById('fe-proximo').value;
+  const addGasto = document.getElementById('fe-add-gasto').checked;
+
+  if (!kid.exams) kid.exams = [];
+  kid.exams.push({ id: nxtId(), fecha, tipo, centro, resultado, coste, notas, proximo });
+
+  if (addGasto && coste > 0) {
+    try {
+      const raw = localStorage.getItem('gastos_v1');
+      const gastos = raw ? JSON.parse(raw) : { gastos: [], nextId: 1 };
+      gastos.gastos.push({ id: (gastos.nextId||1)+1, importe: coste, concepto: `Examen (${kid.nombre}): ${tipoExamLabels[tipo]||tipo}`, fecha, cat: 'salud', nota: centro });
+      gastos.nextId = (gastos.nextId||1)+2;
+      localStorage.setItem('gastos_v1', JSON.stringify(gastos));
+      showToast(`${fmt(coste)} € añadidos a Gastos Diarios ✓`);
+    } catch(e) {}
+  }
+  if (proximo) addToCalendar(`🔬 Examen: ${tipoExamLabels[tipo]||tipo} (${kid.nombre})`, proximo, proximo, 'personal', '#30a8f0', centro);
+
+  ['fe-fecha','fe-centro','fe-coste','fe-proximo','fe-notas'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fe-fecha').value = today();
+  document.getElementById('fe-resultado').value = 'pendiente';
+  document.getElementById('add-exam-panel').classList.remove('open');
+  save(); render();
+}
+
+const tipoExamLabels = { analitica:'Analítica de sangre', orina:'Análisis de orina', radiografia:'Radiografía', ecografia:'Ecografía', alergia:'Test de alergia', vision:'Revisión visión', auditivo:'Test auditivo', desarrollo:'Test desarrollo', otro:'Otro' };
+const tipoExamEmojis = { analitica:'🩸', orina:'🧪', radiografia:'🦴', ecografia:'📡', alergia:'🌿', vision:'👁', auditivo:'👂', desarrollo:'🧠', otro:'🔬' };
+
+function renderExamenes() {
+  const kid = activeKid();
+  if (!kid) { document.getElementById('examenes-body').innerHTML = '<div class="empty">Selecciona un niño/a primero.</div>'; return; }
+  const exams = (kid.exams||[]).sort((a,b) => b.fecha.localeCompare(a.fecha));
+  if (!exams.length) { document.getElementById('examenes-body').innerHTML = '<div class="empty">Sin exámenes registrados.<br>Pulsa + para añadir.</div>'; return; }
+
+  let html = '';
+  const alterados = exams.filter(e => e.resultado === 'alterado');
+  const pendientes = exams.filter(e => e.resultado === 'pendiente');
+  const normales = exams.filter(e => e.resultado === 'normal');
+
+  if (alterados.length) {
+    html += `<div class="section-label">⚠ Alterados (${alterados.length})</div>`;
+    alterados.forEach(e => html += examCard(e));
+  }
+  if (pendientes.length) {
+    html += `<div class="section-label">Pendientes (${pendientes.length})</div>`;
+    pendientes.forEach(e => html += examCard(e));
+  }
+  if (normales.length) {
+    html += `<div class="section-label">Normales (${normales.length})</div>`;
+    normales.forEach(e => html += examCard(e));
+  }
+  document.getElementById('examenes-body').innerHTML = html;
+}
+
+function examCard(e) {
+  const resClass = { normal:'result-normal', alterado:'result-alterado', pendiente:'result-pendiente' }[e.resultado] || 'result-pendiente';
+  return `<div class="visit-card" style="${e.resultado==='alterado'?'border-color:rgba(240,64,48,0.4)':''}">
+    <div class="visit-top">
+      <div class="visit-body">
+        <div class="visit-date">${tipoExamEmojis[e.tipo]||'🔬'} ${e.fecha}</div>
+        <div class="visit-motivo">${tipoExamLabels[e.tipo]||e.tipo}</div>
+        <div class="visit-meta">
+          ${e.centro ? `<span>🏥 ${esc(e.centro)}</span>` : ''}
+          <span class="result-badge ${resClass}">${e.resultado}</span>
+          ${e.proximo ? `<span>Próximo: ${e.proximo}</span>` : ''}
+          ${e.notas ? `<span style="display:block;width:100%;margin-top:4px;color:var(--text);">${esc(e.notas)}</span>` : ''}
+        </div>
+      </div>
+      <div style="text-align:right;">
+        ${e.coste ? `<div class="visit-cost">${fmt(e.coste)} €</div>` : ''}
+        <button class="icon-btn del" onclick="delExam(${e.id})" style="margin-top:4px;">×</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function delExam(id) {
+  const kid = activeKid(); if (!kid) return;
+  if (!confirm('¿Eliminar este examen?')) return;
+  kid.exams = (kid.exams||[]).filter(e => e.id !== id);
+  save(); render();
+}
+
+// ── CRECIMIENTO ──
+function addGrowth() {
+  const kid = activeKid(); if (!kid) return;
+  const talla = parseFloat(document.getElementById('fg-talla').value) || null;
+  const peso = parseFloat(document.getElementById('fg-peso').value) || null;
+  if (!talla && !peso) return;
+  const fecha = document.getElementById('fg-fecha').value || today();
+  const cabeza = parseFloat(document.getElementById('fg-cabeza').value) || null;
+  if (!kid.growth) kid.growth = [];
+  kid.growth.push({ id: nxtId(), talla, peso, cabeza, fecha, notas: document.getElementById('fg-notas').value.trim() });
+  ['fg-talla','fg-peso','fg-cabeza','fg-notas'].forEach(id => document.getElementById(id).value = '');
+  save(); render();
+}
+
+function renderCrecimiento() {
+  const kid = activeKid();
+  if (!kid) { document.getElementById('crecimiento-body').innerHTML = '<div class="empty">Selecciona un niño/a primero.</div>'; return; }
+  const records = (kid.growth||[]).sort((a,b) => b.fecha.localeCompare(a.fecha));
+  if (!records.length) { document.getElementById('crecimiento-body').innerHTML = '<div class="empty">Sin registros de crecimiento todavía.</div>'; return; }
+
+  let html = `<div style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:10px;">
+    <div style="font-family:var(--fh);font-size:15px;margin-bottom:10px;">Historial de crecimiento</div>`;
+
+  records.forEach((r, i) => {
+    const prev = records[i+1];
+    let tallaDiff = '', pesoDiff = '';
+    if (prev && prev.talla && r.talla) {
+      const d = +(r.talla - prev.talla).toFixed(1);
+      if (d > 0) tallaDiff = `<span class="growth-diff growth-up">+${d} cm</span>`;
+    }
+    if (prev && prev.peso && r.peso) {
+      const d = +(r.peso - prev.peso).toFixed(2);
+      if (Math.abs(d) >= 0.1) pesoDiff = `<span class="growth-diff ${d > 0 ? 'growth-up' : 'growth-down'}">${d > 0 ? '+' : ''}${d} kg</span>`;
+    }
+    html += `<div class="growth-row">
+      <div>
+        <div class="growth-val" style="font-size:15px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          ${r.talla ? `<span>${r.talla} cm ${tallaDiff}</span>` : ''}
+          ${r.talla && r.peso ? '<span style="color:var(--muted);font-size:12px;">·</span>' : ''}
+          ${r.peso ? `<span>${r.peso} kg ${pesoDiff}</span>` : ''}
+          ${r.cabeza ? `<span style="font-size:12px;color:var(--muted);">⬤ ${r.cabeza} cm</span>` : ''}
+        </div>
+        ${r.notas ? `<div style="font-size:10px;color:var(--muted);font-family:var(--fm)">${esc(r.notas)}</div>` : ''}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="growth-date">${r.fecha}</div>
+        <button class="icon-btn del" onclick="delGrowth(${r.id})">×</button>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  document.getElementById('crecimiento-body').innerHTML = html;
+}
+
+function delGrowth(id) {
+  const kid = activeKid(); if (!kid) return;
+  kid.growth = (kid.growth||[]).filter(g => g.id !== id);
+  save(); render();
+}
+
+// ── GASTOS ──
+const catGastoEmojis = { medico:'🏥', farmacia:'💊', colegio:'🎒', ropa:'👕', actividad:'⚽', alimentacion:'🍎', otro:'📦' };
+const catGastoLabels = { medico:'Médico', farmacia:'Farmacia', colegio:'Colegio', ropa:'Ropa', actividad:'Actividad', alimentacion:'Alimentación', otro:'Otro' };
+
+function addGasto() {
+  const kid = activeKid(); if (!kid) return;
+  const importe = parseFloat(document.getElementById('fga-importe').value); if (!importe) return;
+  const concepto = document.getElementById('fga-concepto').value.trim(); if (!concepto) return;
+  const fecha = document.getElementById('fga-fecha').value || today();
+  const cat = document.getElementById('fga-cat').value;
+  const notas = document.getElementById('fga-notas').value.trim();
+  const addGD = document.getElementById('fga-add-gastos').checked;
+
+  if (!kid.gastos) kid.gastos = [];
+  kid.gastos.push({ id: nxtId(), importe, concepto, fecha, cat, notas });
+
+  if (addGD) {
+    try {
+      const raw = localStorage.getItem('gastos_v1');
+      const gastos = raw ? JSON.parse(raw) : { gastos: [], nextId: 1 };
+      gastos.gastos.push({ id: (gastos.nextId||1)+1, importe, concepto: `${kid.nombre}: ${concepto}`, fecha, cat: 'hogar', nota: notas });
+      gastos.nextId = (gastos.nextId||1)+2;
+      localStorage.setItem('gastos_v1', JSON.stringify(gastos));
+      showToast(`${fmt(importe)} € añadidos a Gastos Diarios ✓`);
+    } catch(e) {}
+  }
+
+  ['fga-concepto','fga-importe','fga-notas'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fga-fecha').value = today();
+  document.getElementById('add-gasto-panel').classList.remove('open');
+  save(); render();
+}
+
+function delGasto(id) {
+  const kid = activeKid(); if (!kid) return;
+  if (!confirm('¿Eliminar este gasto?')) return;
+  kid.gastos = (kid.gastos||[]).filter(g => g.id !== id);
+  save(); render();
+}
+
+function renderGastos() {
+  const kid = activeKid();
+  if (!kid) { document.getElementById('gastos-body').innerHTML = '<div class="empty">Selecciona un niño/a primero.</div>'; return; }
+  const gastos = (kid.gastos||[]).sort((a,b) => b.fecha.localeCompare(a.fecha));
+
+  const total = gastos.reduce((s,g) => s + (parseFloat(g.importe)||0), 0);
+  const mesActual = today().slice(0,7);
+  const totalMes = gastos.filter(g => g.fecha?.startsWith(mesActual)).reduce((s,g) => s + (parseFloat(g.importe)||0), 0);
+
+  // By category totals
+  const byCat = {};
+  gastos.forEach(g => { byCat[g.cat] = (byCat[g.cat]||0) + (parseFloat(g.importe)||0); });
+
+  let html = `<div class="summary-grid">
+    <div class="summary-card"><div class="summary-label">Total acumulado</div><div class="summary-val">${fmt(total,0)} €</div></div>
+    <div class="summary-card"><div class="summary-label">Este mes</div><div class="summary-val">${fmt(totalMes,0)} €</div></div>
+  </div>`;
+
+  // Category breakdown
+  if (Object.keys(byCat).length > 1) {
+    html += `<div style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:14px;">
+      <div style="font-family:var(--fh);font-size:14px;margin-bottom:8px;">Por categoría</div>
+      ${Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([cat,v])=>
+        `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid var(--border);font-size:12px;font-family:var(--fm);">
+          <span>${catGastoEmojis[cat]||'📦'} ${catGastoLabels[cat]||cat}</span>
+          <span style="color:var(--y);font-family:var(--fh);font-size:16px;">${fmt(v,0)} €</span>
+        </div>`
+      ).join('')}
+    </div>`;
+  }
+
+  if (!gastos.length) {
+    html += '<div class="empty">Sin gastos registrados.<br>Pulsa + para añadir.</div>';
+  } else {
+    html += `<div class="section-label">Todos los gastos (${gastos.length})</div>`;
+    gastos.forEach(g => {
+      html += `<div class="expense-card">
+        <div class="expense-body">
+          <div class="expense-concept">${esc(g.concepto)}</div>
+          <div class="expense-meta">
+            <span>${g.fecha}</span>
+            <span class="expense-cat expense-cat-${g.cat||'otro'}">${catGastoEmojis[g.cat]||'📦'} ${catGastoLabels[g.cat]||g.cat}</span>
+            ${g.notas ? `<span>${esc(g.notas)}</span>` : ''}
+          </div>
+        </div>
+        <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+          <div class="expense-amount">${fmt(g.importe)} €</div>
+          <button class="icon-btn del" onclick="delGasto(${g.id})">×</button>
+        </div>
+      </div>`;
+    });
+  }
+  document.getElementById('gastos-body').innerHTML = html;
+}
+
+// ── DATOS ──
+function renderDatos() {
+  const total = state.kids.length;
+  const meds = state.kids.reduce((s,k) => s+(k.meds||[]).length, 0);
+  const visits = state.kids.reduce((s,k) => s+(k.visits||[]).length, 0);
+  const exams = state.kids.reduce((s,k) => s+(k.exams||[]).length, 0);
+  const gastos = state.kids.reduce((s,k) => s+(k.gastos||[]).reduce((a,g) => a+(parseFloat(g.importe)||0), 0), 0);
+  document.getElementById('datos-info').textContent = `${total} niño${total!==1?'s':''} · ${meds} medicaciones · ${visits} visitas · ${exams} exámenes · ${fmt(gastos,0)} € en gastos`;
+  document.getElementById('danger-zone').innerHTML = state.kids.map(k =>
+    `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:13px;">
+      <span>${k.emoji||'👦'} ${esc(k.nombre)}</span>
+      <button class="btn btn-sm btn-r" onclick="delKid(${k.id})">Eliminar</button>
+    </div>`
+  ).join('') || '<div style="font-size:12px;color:var(--muted);font-family:var(--fm);">Sin niños registrados.</div>';
+}
+
+function exportJSON() {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));
+  a.download = `ninos-${today()}.json`; a.click();
+  showFB('Descargado ✓','var(--g)');
+}
+function importFile(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const p = JSON.parse(ev.target.result);
+      if (!p.kids) throw new Error('Formato inválido');
+      if (!confirm(`¿Importar ${p.kids.length} perfiles?`)) return;
+      state = p; nid = state.nextId||1;
+      activeKidId = state.kids[0]?.id || null;
+      save(); render(); showFB('Importado ✓','var(--g)');
+    } catch(err) { showFB('Error: '+err.message,'var(--r)'); }
+  }; r.readAsText(f);
+}
+function showFB(msg,color) { const el=document.getElementById('datos-fb');if(!el)return;el.textContent=msg;el.style.color=color;el.style.display='block';setTimeout(()=>el.style.display='none',2500); }
+
+// ── CROSS-APP HELPERS ──
+function addToCalendar(titulo, inicio, fin, tipo, color, notas) {
+  try {
+    const raw = localStorage.getItem('semana_v2');
+    const cal = raw ? JSON.parse(raw) : { tasks:{}, events:[], nextId:100 };
+    if (!cal.events) cal.events = [];
+    cal.events.push({ id: (cal.nextId||100)+1, titulo, inicio, fin: fin||inicio, tipo: tipo||'personal', color: color||'#30e8d0', notas: notas||'' });
+    cal.nextId = (cal.nextId||100)+2;
+    localStorage.setItem('semana_v2', JSON.stringify(cal));
+  } catch(e) {}
+}
+
+// ── TOAST ──
+function showToast(msg, isErr=false) {
+  let el = document.getElementById('toast-el');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'toast-el';
+    el.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;padding:10px 16px;font-size:12px;font-family:var(--fm);color:var(--text);z-index:999;max-width:320px;text-align:center;transition:opacity 0.3s;';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.color = isErr ? 'var(--r)' : 'var(--g)';
+  el.style.opacity = '1';
+  setTimeout(() => { el.style.opacity = '0'; }, 2500);
+}
+
+// ── INIT ──
+render();
+</script>
+</body>
+</html>
