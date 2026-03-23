@@ -1,12 +1,32 @@
-const CACHE = 'wapps-v3';
+const CACHE = 'wapps-v4';
 
 // Assets que se precachean al instalar — se sirven siempre desde caché
-// hasta que cambie la versión del SW (wapps-v4, v5...)
+// hasta que cambie la versión del SW (wapps-v5, v6...)
 const PRECACHE = [
   '/pwa-apps/manifest.json',
   '/pwa-apps/wapps-store.js',
   '/pwa-apps/wapps-firebase.js',
   '/pwa-apps/wapps-onboarding.js',
+  '/pwa-apps/index.html',
+  '/pwa-apps/backup.html',
+  '/pwa-apps/coches.html',
+  '/pwa-apps/compra.html',
+  '/pwa-apps/decisor.html',
+  '/pwa-apps/deseados.html',
+  '/pwa-apps/despensa.html',
+  '/pwa-apps/editor-categorias.html',
+  '/pwa-apps/finanzas.html',
+  '/pwa-apps/gastos-diarios.html',
+  '/pwa-apps/guia_factura_luz.html',
+  '/pwa-apps/instrumentos.html',
+  '/pwa-apps/mascotas.html',
+  '/pwa-apps/ninos.html',
+  '/pwa-apps/obra.html',
+  '/pwa-apps/semana.html',
+  '/pwa-apps/setlist.html',
+  '/pwa-apps/suministros.html',
+  '/pwa-apps/icons/icon-192.png',
+  '/pwa-apps/icons/icon-512.png',
 ];
 
 self.addEventListener('install', e => {
@@ -43,30 +63,29 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // NETWORK FIRST para HTML — siempre fresco, con fallback offline
+  // CACHE FIRST para HTML — offline-first, se actualiza en background
   if (
     e.request.mode === 'navigate' ||
     url.pathname.endsWith('.html') ||
     url.pathname.endsWith('/')
   ) {
     e.respondWith(
-      fetch(e.request)
-        .then(response => {
+      caches.match(e.request).then(cached => {
+        const networkFetch = fetch(e.request).then(response => {
           if (response.ok) {
             const clone = response.clone();
             caches.open(CACHE).then(cache => cache.put(e.request, clone));
           }
           return response;
-        })
-        .catch(() => {
-          return caches.match(e.request)
-            || caches.match('/pwa-apps/index.html');
-        })
+        }).catch(() => cached || caches.match('/pwa-apps/index.html'));
+        // Sirve caché inmediatamente, actualiza en background
+        return cached || networkFetch;
+      })
     );
     return;
   }
 
-  // CACHE FIRST para JS y assets estáticos — rápido, se invalida al subir versión SW
+  // CACHE FIRST para JS y assets estáticos
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;
