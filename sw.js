@@ -1,4 +1,4 @@
-const CACHE = 'wapps-v5';
+const CACHE = 'wapps-v6';
 
 const PRECACHE = [
   '/pwa-apps/manifest.json',
@@ -6,6 +6,7 @@ const PRECACHE = [
   '/pwa-apps/wapps-firebase.js',
   '/pwa-apps/wapps-onboarding.js',
   '/pwa-apps/offline.html',
+  '/pwa-apps/404.html',
   '/pwa-apps/index.html',
   '/pwa-apps/backup.html',
   '/pwa-apps/coches.html',
@@ -100,7 +101,10 @@ self.addEventListener('fetch', e => {
         return response;
       }).catch(() => {
         if (e.request.mode === 'navigate') {
-          return caches.match('/pwa-apps/offline.html');
+          // Try specific page first, then 404, then offline
+          return caches.match(e.request)
+            || caches.match('/pwa-apps/404.html')
+            || caches.match('/pwa-apps/offline.html');
         }
       });
     })

@@ -41,6 +41,8 @@ const WStore = (() => {
     'obra.data':           'miobra_v2',
     'instrumentos.data':   'instrumentos_v1',
     'setlist.data':        'setlist_v1',
+    'coches.data':         'coches_v1',
+    'ninos.data':          'ninos_v1',
   };
 
   function storageKey(app, key) {

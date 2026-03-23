@@ -126,6 +126,18 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 
 ## Changelog
 
+### v2.5.0
+- Firebase SDK actualizado de 9.23.0 a 11.6.0 en index, backup y editor-categorias
+- `404.html` — página de error con accesos directos a las apps principales
+- SW v6: 404.html en precaché, usado como fallback para URLs desconocidas
+- Botones de acción primaria (btn-y) cambiados a fuente Bebas Neue para mayor visibilidad
+- Flecha de volver con stroke explícito amarillo en todos los archivos
+
+### v2.4.0
+- Indicador de sync (ONLINE/OFFLINE/SINCRONIZANDO + pendientes) en despensa, compra, obra y backup
+- `coches.html` y `ninos.html` conectados a WStore y Firebase — sus datos ya se sincronizan
+- `coches_v1` y `ninos_v1` añadidos a LEGACY_KEYS y WSTORE_KEYS
+
 ### v2.3.0
 - Offline completo: todas las páginas HTML en precaché del SW
 - `offline.html` como fallback con redirección automática al recuperar red

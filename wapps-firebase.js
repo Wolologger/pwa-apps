@@ -183,6 +183,8 @@ const WSync = (() => {
     'instrumentos.data',
     'setlist.data',
     'mascotas.data',
+    'coches.data',
+    'ninos.data',
   ];
 
   // ── Pendientes ────────────────────────────────────────────────────
