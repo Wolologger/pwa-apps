@@ -575,63 +575,200 @@ const WTransition = (() => {
 
 
 // ═══════════════════════════════════════════════════════════════
-// WTHEME — dark / light mode
+// ═══════════════════════════════════════════════════════════════
+// WTHEME — sistema de temas completo
+// Controla: modo (dark/light), color de acento, tamaño de fuente
+// Se aplica via <style> inyectado en <head> para cubrir inline styles
 // ═══════════════════════════════════════════════════════════════
 const WTheme = (() => {
-  const KEY = 'wapps.theme'; // 'dark' | 'light'
 
-  const DARK = {
-    '--bg':'#0a0a09','--bg2':'#141412','--bg3':'#1e1e1b',
-    '--text':'#f0ebe0','--muted':'#5a5850','--dim':'#2a2a26',
-    '--border':'rgba(255,255,255,0.07)','--border2':'rgba(255,255,255,0.13)',
-    '--line':'rgba(255,255,255,0.06)','--line2':'rgba(255,255,255,0.12)',
+  const KEY = 'wapps.theme.prefs';
+
+  // Paletas de acento disponibles
+  const ACCENTS = {
+    yellow:  { label:'Amarillo', '--y':'#e8f040', '--y-text':'#0a0a09', '--y-rgb':'232,240,64'  },
+    blue:    { label:'Azul',     '--y':'#30a8f0', '--y-text':'#ffffff', '--y-rgb':'48,168,240'  },
+    green:   { label:'Verde',    '--y':'#30d880', '--y-text':'#0a0a09', '--y-rgb':'48,216,128'  },
+    orange:  { label:'Naranja',  '--y':'#f09030', '--y-text':'#ffffff', '--y-rgb':'240,144,48'  },
+    pink:    { label:'Rosa',     '--y':'#f060c0', '--y-text':'#ffffff', '--y-rgb':'240,96,192'  },
+    white:   { label:'Blanco',   '--y':'#f0ebe0', '--y-text':'#0a0a09', '--y-rgb':'240,235,224' },
   };
 
-  const LIGHT = {
-    '--bg':'#f5f4f0','--bg2':'#ffffff','--bg3':'#ebebе8',
-    '--text':'#1a1a18','--muted':'#8a8880','--dim':'#d0d0cc',
-    '--border':'rgba(0,0,0,0.07)','--border2':'rgba(0,0,0,0.13)',
-    '--line':'rgba(0,0,0,0.06)','--line2':'rgba(0,0,0,0.12)',
+  // Tamaños de fuente base
+  const FONT_SIZES = {
+    small:  { label:'Pequeña', base:'11px', body:'12px' },
+    medium: { label:'Normal',  base:'13px', body:'14px' },
+    large:  { label:'Grande',  base:'15px', body:'16px' },
   };
 
-  function get() {
-    return localStorage.getItem(KEY) || 'dark';
+  const DEFAULTS = { mode:'dark', accent:'yellow', fontSize:'medium' };
+
+  function getPrefs() {
+    try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) || '{}') }; }
+    catch(e) { return { ...DEFAULTS }; }
   }
 
-  function apply(mode) {
-    const vars = mode === 'light' ? LIGHT : DARK;
-    const root = document.documentElement;
-    for (const [k, v] of Object.entries(vars)) {
-      root.style.setProperty(k, v);
+  function savePrefs(prefs) {
+    localStorage.setItem(KEY, JSON.stringify(prefs));
+  }
+
+  // Genera el bloque CSS completo que sobreescribe hardcodes inline
+  function _buildCSS(prefs) {
+    const isDark = prefs.mode === 'dark';
+    const accent = ACCENTS[prefs.accent] || ACCENTS.yellow;
+    const fs = FONT_SIZES[prefs.fontSize] || FONT_SIZES.medium;
+
+    // Colores base según modo
+    const bg    = isDark ? '#0a0a09' : '#f5f4f0';
+    const bg2   = isDark ? '#141412' : '#ffffff';
+    const bg3   = isDark ? '#1e1e1b' : '#e8e6e0';
+    const text  = isDark ? '#f0ebe0' : '#1a1a18';
+    const muted = isDark ? '#5a5850' : '#7a7870';
+    const dim   = isDark ? '#2a2a26' : '#c8c6c0';
+    const bdr   = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)';
+    const bdr2  = isDark ? 'rgba(255,255,255,0.13)' : 'rgba(0,0,0,0.15)';
+    const line  = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+    const line2 = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)';
+    const grid  = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
+
+    // Contraste del botón: en modo claro el fondo oscuro del btn-y queda mal
+    const btnBg = isDark ? bg : bg2;
+
+    return `
+:root {
+  --bg:${bg}; --bg2:${bg2}; --bg3:${bg3};
+  --text:${text}; --muted:${muted}; --dim:${dim};
+  --border:${bdr}; --border2:${bdr2};
+  --line:${line}; --line2:${line2};
+  --y:${accent['--y']}; --y-text:${accent['--y-text']};
+  --y-rgb:${accent['--y-rgb']};
+  --r:#f04030; --g:#30d880; --b:#30a8f0; --o:#f09030;
+  --fh:'Bebas Neue',sans-serif; --fm:'DM Mono',monospace; --fs:'DM Sans',sans-serif;
+  --base-size:${fs.base}; --body-size:${fs.body};
+}
+
+/* Fondo y texto global */
+html, body { background:${bg} !important; color:${text} !important; font-size:${fs.body}; }
+
+/* Inputs y selects */
+input, select, textarea {
+  background:${bg3} !important;
+  color:${text} !important;
+  border-color:${bdr2} !important;
+}
+
+/* Botón primario — acento con texto correcto */
+.btn-y {
+  background:var(--y) !important;
+  color:var(--y-text) !important;
+  border-color:var(--y) !important;
+}
+.btn-y:hover { opacity:0.88 !important; }
+
+/* Botón secundario — contraste mejorado en modo claro */
+.btn:not(.btn-y):not(.btn-r) {
+  background:${bg3} !important;
+  color:${text} !important;
+  border-color:${bdr2} !important;
+}
+.btn:not(.btn-y):not(.btn-r):hover {
+  background:${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'} !important;
+}
+
+/* Nav back */
+.wnav-back {
+  border-color:var(--y) !important;
+  background:rgba(var(--y-rgb),0.08) !important;
+  color:var(--y) !important;
+}
+.wnav-back:hover { background:rgba(var(--y-rgb),0.18) !important; }
+
+/* Cards y contenedores */
+.wnav, .sync-bar, .tabs, .tab-bar {
+  background:${bg} !important;
+  border-color:${bdr2} !important;
+}
+.section-card, .card, .ap-panel, .add-panel, .modal, .block, .hero {
+  background:${bg2} !important;
+  border-color:${bdr2} !important;
+}
+
+/* Tabs activos */
+.tab.active { color:var(--y) !important; border-bottom-color:var(--y) !important; }
+
+/* Grid de fondo */
+.grid-bg {
+  background-image:
+    linear-gradient(${grid} 1px, transparent 1px),
+    linear-gradient(90deg, ${grid} 1px, transparent 1px) !important;
+}
+
+/* Loading overlay */
+.wapp-loading { background:${bg}e6 !important; }
+
+/* Spinner de carga */
+.wapp-spinner { border-top-color:var(--y) !important; }
+
+/* Logo */
+.wnav-logo a span, .logo span, .logo-slash { color:var(--y) !important; }
+
+/* Sync bar dots */
+.sync-dot.online { background:var(--g) !important; }
+.sync-dot.offline { background:var(--r) !important; }
+.sync-dot.syncing { background:var(--y) !important; }
+
+/* Font size scaling */
+body, .fm, input, select, button { font-size:${fs.body}; }
+.fh, h1, h2, h3 { font-size:calc(${fs.base} * 1.4); }
+    `.trim();
+  }
+
+  let _styleEl = null;
+  function _injectStyle(css) {
+    if (!_styleEl) {
+      _styleEl = document.createElement('style');
+      _styleEl.id = 'wapps-theme';
+      document.head.appendChild(_styleEl);
     }
-    document.documentElement.setAttribute('data-theme', mode);
-    // Update meta theme-color
+    _styleEl.textContent = css;
+  }
+
+  function apply(prefs) {
+    _injectStyle(_buildCSS(prefs));
+    document.documentElement.setAttribute('data-theme', prefs.mode);
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.content = mode === 'light' ? '#f5f4f0' : '#0a0a09';
+    if (meta) meta.content = prefs.mode === 'light' ? '#f5f4f0' : '#0a0a09';
+    window.dispatchEvent(new CustomEvent('wapps:theme-change', { detail: prefs }));
   }
 
-  function set(mode) {
-    localStorage.setItem(KEY, mode);
-    apply(mode);
-    window.dispatchEvent(new CustomEvent('wapps:theme-change', { detail: { mode } }));
+  function setMode(mode) {
+    const p = { ...getPrefs(), mode };
+    savePrefs(p); apply(p);
   }
 
-  function toggle() {
-    set(get() === 'dark' ? 'light' : 'dark');
+  function setAccent(accent) {
+    const p = { ...getPrefs(), accent };
+    savePrefs(p); apply(p);
   }
 
-  // Apply on load immediately to avoid flash
+  function setFontSize(fontSize) {
+    const p = { ...getPrefs(), fontSize };
+    savePrefs(p); apply(p);
+  }
+
+  function get() { return getPrefs().mode; }
+  function getAll() { return getPrefs(); }
+
+  // Aplicar inmediatamente al cargar — antes del DOMContentLoaded para evitar flash
+  const _initPrefs = getPrefs();
   if (document.readyState === 'loading') {
-    // Apply inline before DOMContentLoaded to avoid flash
-    const saved = localStorage.getItem(KEY) || 'dark';
-    if (saved === 'light') {
-      document.addEventListener('DOMContentLoaded', () => apply('light'));
-    }
+    // Inyectar en <head> tan pronto como sea posible
+    document.addEventListener('DOMContentLoaded', () => apply(_initPrefs));
   } else {
-    apply(get());
+    apply(_initPrefs);
   }
 
-  return { get, set, toggle, apply };
+  return { get, getAll, setMode, setAccent, setFontSize, apply, ACCENTS, FONT_SIZES };
 })();
 
 

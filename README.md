@@ -131,6 +131,12 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 
 ## Changelog
 
+### v3.3.0
+- `WTheme` reescrito — sistema de temas completo: modo dark/light, 6 colores de acento, 3 tamaños de fuente
+- Los cambios de tema se aplican via `<style>` inyectado que cubre también inline styles
+- Anti-flash en páginas sin wapps-store: tema aplicado antes del primer render
+- `ajustes.html` — panel de apariencia completo con selector de acento y botones de fuente
+
 ### v3.2.0
 - `WTheme` — dark/light mode toggle en ajustes, persistido en localStorage
 - `WSkeleton` — skeleton loaders y empty states con botón de acción

@@ -143,18 +143,37 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var
         <span class="section-title">Apariencia</span>
       </div>
       <div class="section-body">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;">
+
+        <!-- Modo oscuro/claro -->
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border);">
           <div>
             <div style="font-size:12px;color:var(--text);">Modo claro</div>
             <div style="font-size:10px;color:var(--muted);margin-top:2px;">Fondo blanco, texto oscuro</div>
           </div>
           <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
-            <input type="checkbox" id="theme-toggle" onchange="toggleTheme(this.checked)"
+            <input type="checkbox" id="theme-mode-toggle" onchange="setThemeMode(this.checked)"
               style="opacity:0;width:0;height:0;position:absolute;">
-            <span id="theme-track" style="position:absolute;inset:0;border-radius:24px;transition:0.2s;background:var(--dim);"></span>
-            <span id="theme-thumb" style="position:absolute;top:4px;left:4px;width:16px;height:16px;background:var(--muted);border-radius:50%;transition:0.2s;"></span>
+            <span id="theme-mode-track" style="position:absolute;inset:0;border-radius:24px;transition:0.2s;background:var(--dim);"></span>
+            <span id="theme-mode-thumb" style="position:absolute;top:4px;left:4px;width:16px;height:16px;background:var(--muted);border-radius:50%;transition:0.2s;"></span>
           </label>
         </div>
+
+        <!-- Color de acento -->
+        <div style="padding:12px 0;border-bottom:0.5px solid var(--border);">
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Color de acento</div>
+          <div id="accent-picker" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+        </div>
+
+        <!-- Tamaño de fuente -->
+        <div style="padding:12px 0;">
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Tamaño de fuente</div>
+          <div style="display:flex;gap:8px;">
+            <button onclick="setFontSize('small')"  id="fs-small"  style="flex:1;padding:8px;border-radius:8px;cursor:pointer;font-family:var(--fm);font-size:10px;transition:all 0.15s;">A</button>
+            <button onclick="setFontSize('medium')" id="fs-medium" style="flex:1;padding:8px;border-radius:8px;cursor:pointer;font-family:var(--fm);font-size:13px;transition:all 0.15s;">A</button>
+            <button onclick="setFontSize('large')"  id="fs-large"  style="flex:1;padding:8px;border-radius:8px;cursor:pointer;font-family:var(--fm);font-size:16px;transition:all 0.15s;">A</button>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -367,24 +386,54 @@ async function clearCache() {
 }
 
 // ── Theme ──────────────────────────────────────────────────────
-function toggleTheme(isLight) {
-  if (typeof WTheme !== 'undefined') {
-    WTheme.set(isLight ? 'light' : 'dark');
-  }
-  updateThemeToggle();
+function setThemeMode(isLight) {
+  if (typeof WTheme !== 'undefined') WTheme.setMode(isLight ? 'light' : 'dark');
+  updateThemeUI();
 }
-function updateThemeToggle() {
-  const mode = typeof WTheme !== 'undefined' ? WTheme.get() : 'dark';
-  const isLight = mode === 'light';
-  const cb = document.getElementById('theme-toggle');
-  const track = document.getElementById('theme-track');
-  const thumb = document.getElementById('theme-thumb');
+function setAccent(accent) {
+  if (typeof WTheme !== 'undefined') WTheme.setAccent(accent);
+  updateThemeUI();
+}
+function setFontSize(size) {
+  if (typeof WTheme !== 'undefined') WTheme.setFontSize(size);
+  updateThemeUI();
+}
+
+function updateThemeUI() {
+  if (typeof WTheme === 'undefined') return;
+  const prefs = WTheme.getAll();
+
+  // Mode toggle
+  const isLight = prefs.mode === 'light';
+  const cb    = document.getElementById('theme-mode-toggle');
+  const track = document.getElementById('theme-mode-track');
+  const thumb = document.getElementById('theme-mode-thumb');
   if (cb) cb.checked = isLight;
   if (track) track.style.background = isLight ? 'var(--y)' : 'var(--dim)';
-  if (thumb) {
-    thumb.style.left = isLight ? '24px' : '4px';
-    thumb.style.background = isLight ? '#0a0a09' : 'var(--muted)';
+  if (thumb) { thumb.style.left = isLight ? '24px' : '4px'; thumb.style.background = isLight ? 'var(--y-text,#0a0a09)' : 'var(--muted)'; }
+
+  // Accent picker
+  const picker = document.getElementById('accent-picker');
+  if (picker && WTheme.ACCENTS) {
+    picker.innerHTML = Object.entries(WTheme.ACCENTS).map(([key, val]) => `
+      <div onclick="setAccent('${key}')" title="${val.label}" style="
+        width:32px;height:32px;border-radius:50%;background:${val['--y']};cursor:pointer;
+        border:2px solid ${prefs.accent===key ? '#fff' : 'transparent'};
+        box-shadow:${prefs.accent===key ? '0 0 0 2px '+val['--y'] : 'none'};
+        transition:all 0.15s;flex-shrink:0;
+      "></div>`).join('');
   }
+
+  // Font size buttons
+  ['small','medium','large'].forEach(size => {
+    const btn = document.getElementById('fs-'+size);
+    if (!btn) return;
+    const active = prefs.fontSize === size;
+    btn.style.background = active ? 'var(--y)' : 'var(--bg3)';
+    btn.style.color       = active ? 'var(--y-text,#0a0a09)' : 'var(--muted)';
+    btn.style.border      = active ? '1.5px solid var(--y)' : '0.5px solid var(--border2)';
+    btn.style.fontWeight  = active ? '700' : '400';
+  });
 }
 
 // ── Init ───────────────────────────────────────────────────────────
@@ -392,7 +441,7 @@ if (typeof WNotify !== 'undefined') {
   WNotify.renderConfigPanel('notif-config-ajustes');
 }
 renderStorageStats();
-updateThemeToggle();
+updateThemeUI();
 // Firebase puede no estar listo aún — esperamos al evento auth-change
 // Si ya hay usuario cacheado lo mostramos de inmediato como fallback
 // Espera a que Firebase esté listo — limpia el intervalo al salir

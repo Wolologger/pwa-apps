@@ -1,6 +1,43 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<script>
+// Anti-flash: aplica tema guardado antes del primer render
+(function(){
+  try {
+    var p = JSON.parse(localStorage.getItem('wapps.theme.prefs')||'{}');
+    var mode = p.mode || 'dark';
+    var accent = p.accent || 'yellow';
+    var ACCENTS = {
+      yellow:'#e8f040', blue:'#30a8f0', green:'#30d880',
+      orange:'#f09030', pink:'#f060c0', white:'#f0ebe0'
+    };
+    var ACCENT_TEXT = {
+      yellow:'#0a0a09', blue:'#ffffff', green:'#0a0a09',
+      orange:'#ffffff', pink:'#ffffff', white:'#0a0a09'
+    };
+    var y = ACCENTS[accent] || '#e8f040';
+    var yt = ACCENT_TEXT[accent] || '#0a0a09';
+    var isDark = mode !== 'light';
+    var fs = {small:'12px',medium:'14px',large:'16px'}[p.fontSize||'medium'];
+    var r = document.documentElement.style;
+    r.setProperty('--bg',    isDark?'#0a0a09':'#f5f4f0');
+    r.setProperty('--bg2',   isDark?'#141412':'#ffffff');
+    r.setProperty('--bg3',   isDark?'#1e1e1b':'#e8e6e0');
+    r.setProperty('--text',  isDark?'#f0ebe0':'#1a1a18');
+    r.setProperty('--muted', isDark?'#5a5850':'#7a7870');
+    r.setProperty('--dim',   isDark?'#2a2a26':'#c8c6c0');
+    r.setProperty('--border', isDark?'rgba(255,255,255,0.07)':'rgba(0,0,0,0.08)');
+    r.setProperty('--border2',isDark?'rgba(255,255,255,0.13)':'rgba(0,0,0,0.15)');
+    r.setProperty('--line',  isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)');
+    r.setProperty('--line2', isDark?'rgba(255,255,255,0.12)':'rgba(0,0,0,0.12)');
+    r.setProperty('--y', y); r.setProperty('--y-text', yt);
+    document.documentElement.setAttribute('data-theme', mode);
+    document.documentElement.style.fontSize = fs;
+    document.body && (document.body.style.background = isDark?'#0a0a09':'#f5f4f0');
+  } catch(e) {}
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
