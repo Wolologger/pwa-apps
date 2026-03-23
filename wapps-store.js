@@ -508,3 +508,50 @@ window.addEventListener('DOMContentLoaded', () => {
   // Pequeño delay para no bloquear el render inicial
   setTimeout(() => WNotify.check(), 2000);
 });
+
+
+// ═══════════════════════════════════════════════════════════════
+// WTRANSITION — fade-out/in entre páginas
+// ═══════════════════════════════════════════════════════════════
+const WTransition = (() => {
+  const DURATION = 160; // ms
+
+  function go(url) {
+    document.body.style.transition = `opacity ${DURATION}ms ease`;
+    document.body.style.opacity = '0';
+    setTimeout(() => { window.location.href = url; }, DURATION);
+  }
+
+  // Intercepta todos los <a href="*.html"> automáticamente
+  function _intercept() {
+    document.addEventListener('click', e => {
+      const a = e.target.closest('a[href]');
+      if (!a) return;
+      const href = a.getAttribute('href');
+      // Solo links internos .html sin target externo
+      if (!href || !href.endsWith('.html') || href.startsWith('http') || a.target) return;
+      e.preventDefault();
+      go(href);
+    }, true);
+  }
+
+  // Fade-in al cargar
+  function _fadeIn() {
+    document.body.style.opacity = '0';
+    document.body.style.transition = 'none';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.body.style.transition = `opacity ${DURATION}ms ease`;
+        document.body.style.opacity = '1';
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => { _intercept(); _fadeIn(); });
+  } else {
+    _intercept(); _fadeIn();
+  }
+
+  return { go };
+})();

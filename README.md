@@ -126,6 +126,11 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 
 ## Changelog
 
+### v2.9.0
+- `WTransition` — fade-out/in de 160ms entre todas las páginas, sin parpadeo blanco
+- Integrado en `wapps-store.js` para páginas con el módulo, inline para el resto
+- Intercepta automáticamente todos los `<a href="*.html">` sin modificar los links
+
 ### v2.8.0
 - `ajustes.html` — página central de ajustes con cuenta Firebase, notificaciones y estadísticas de datos
 - `index.html` — botón de ajustes redirige a `ajustes.html` en lugar de `editor-categorias.html`
