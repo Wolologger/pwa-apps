@@ -357,23 +357,10 @@ function loadState() {
 
 function defaultProject() {
   return {
-    id: 1, name: 'Mi Obra', desc: 'Obra principal', color: '#d4f060',
-    presupuesto: 7500,
-    tasks: [
-      {id:1,cat:'Electricidad',text:'Revisión completa instalación',done:true,prio:'high'},
-      {id:2,cat:'Electricidad',text:'Mecanismos instalados',done:true,prio:'high'},
-      {id:3,cat:'Acabados',text:'Pintura blanca en toda la vivienda',done:true,prio:'high'},
-      {id:4,cat:'Calefacción/Gas',text:'Instalar radiadores',done:false,prio:'high'},
-      {id:5,cat:'Calefacción/Gas',text:'Alta gas y puesta en marcha caldera',done:false,prio:'high'},
-      {id:6,cat:'Fontanería',text:'Pegar sanitarios del baño',done:false,prio:'high'},
-      {id:7,cat:'Cocina',text:'Montar la cocina',done:false,prio:'high'},
-      {id:8,cat:'Acabados',text:'Limpieza final de obra',done:false,prio:'high'},
-    ],
-    gastos: [
-      {id:101,concepto:'Cocina',importe:4256.57,cat:'Cocina'},
-      {id:102,concepto:'Fontanero',importe:850,cat:'Fontanería'},
-      {id:103,concepto:'Electricista',importe:300,cat:'Electricidad'},
-    ],
+    id: 1, name: 'Mi Obra', desc: '', color: '#d4f060',
+    presupuesto: 0,
+    tasks: [],
+    gastos: [],
     archived: false,
     createdAt: new Date().toISOString().slice(0,10)
   };
@@ -735,7 +722,7 @@ function renderDatos() {
     </div>`;
   // JSON viewer injected safely
   const viewer = document.createElement('div');
-  viewer.innerHTML = `<div class="section-label">Visor JSON</div><div class="json-viewer" id="json-hl"></div>`;
+  viewer.innerHTML = `<div class="section-label">Visor JSON</div><div class="json-viewer" id="json-hl"></div><div style="margin-top:12px;"><button onclick="exportPDF()" style="width:100%;padding:10px;background:transparent;border:0.5px solid var(--border2);border-radius:8px;color:var(--muted);font-family:var(--fm);font-size:11px;cursor:pointer;" onmouseover="this.style.borderColor='var(--y)';this.style.color='var(--y)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">↓ Exportar PDF del proyecto</button></div>`;
   document.getElementById('datos-body').appendChild(viewer);
   document.getElementById('json-hl').innerHTML = syntaxHL(json);
 }
@@ -1010,6 +997,29 @@ window.addEventListener('wapps:pending-change', e => {
   updateSyncUI(state, e.detail.pending.length);
 });
 updateSyncUI(navigator.onLine ? 'online' : 'offline', 0);
+
+async function exportPDF() {
+  const proj = activeProject();
+  if (!proj) return;
+  const tasks = proj.tasks || [];
+  const gastos = proj.gastos || [];
+  const total = gastos.reduce((s,g) => s+(g.importe||0), 0);
+  await WPDF.export(
+    `Obra: ${proj.name}`,
+    [
+      {
+        title: `Tareas (${tasks.length})`,
+        headers: ['Estado','Categoría','Descripción','Prioridad'],
+        rows: tasks.map(t => [t.done?'✓ Hecho':'Pendiente', t.cat||'—', t.text||'—', t.prio||'—'])
+      },
+      {
+        title: `Gastos (${gastos.length}) · Total ${total.toLocaleString('es-ES',{minimumFractionDigits:2})} €`,
+        headers: ['Concepto','Categoría','Importe'],
+        rows: gastos.map(g => [g.concepto||'—', g.cat||'—', `${(g.importe||0).toLocaleString('es-ES',{minimumFractionDigits:2})} €`])
+      }
+    ]
+  );
+}
 </script>
 </body>
 </html>

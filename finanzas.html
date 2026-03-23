@@ -188,11 +188,18 @@ function toMonthly(item){return item.importe/(FREQ_M[item.freq]||1);}
 
 // ── READ FROM OTHER APPS ──
 function readSuministros(){
-  /* Reads suministros_v1 localStorage, returns avg monthly per tipo */
+  /* Reads suministros data via WStore, falls back to legacy key */
   try{
-    const raw=localStorage.getItem('suministros_v1');
-    if(!raw)return null;
-    const data=JSON.parse(raw);
+    let data = null;
+    if(typeof WStore !== 'undefined') {
+      const d = WStore.get('suministros','data');
+      if(d?.facturas?.length) data = d;
+    }
+    if(!data){
+      const raw=localStorage.getItem('wapps.suministros.data')||localStorage.getItem('suministros_v1');
+      if(!raw)return null;
+      data=JSON.parse(raw);
+    }
     if(!data.facturas||!data.facturas.length)return null;
     const result={};
     ['luz','gas','agua'].forEach(tipo=>{

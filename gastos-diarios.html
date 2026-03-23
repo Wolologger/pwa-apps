@@ -155,6 +155,21 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .wnav-logo a:hover{color:#f0ebe0;}
 .wnav-sep{width:1px;height:16px;background:rgba(255,255,255,0.1);flex-shrink:0;}
 .wnav-title{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#5a5850;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+.sync-bar{display:flex;align-items:center;justify-content:space-between;padding:7px 16px;border-bottom:1px solid rgba(255,255,255,0.06);background:var(--bg2,#141412);min-height:34px;}
+.sync-status{display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:1px;}
+.sync-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.sync-dot.online{background:var(--g,#30d880);}
+.sync-dot.offline{background:var(--r,#f04030);}
+.sync-dot.syncing{background:var(--y,#e8f040);animation:pulse 0.8s ease-in-out infinite;}
+.sync-label{color:var(--muted,#5a5850);}
+.sync-label.online{color:var(--g,#30d880);}
+.sync-label.offline{color:var(--r,#f04030);}
+.sync-label.syncing{color:var(--y,#e8f040);}
+.sync-pending{font-size:9px;color:var(--y,#e8f040);letter-spacing:0.5px;}
+.sync-btn{background:transparent;border:0.5px solid var(--dim,#2a2a26);color:var(--muted,#5a5850);font-family:var(--fm);font-size:9px;letter-spacing:1px;padding:3px 9px;cursor:pointer;transition:all 0.15s;}
+.sync-btn:hover:not(:disabled){border-color:var(--y,#e8f040);color:var(--y,#e8f040);}
+.sync-btn:disabled{opacity:0.35;cursor:default;}
 </style>
 </head>
 <body>
@@ -162,12 +177,20 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 <!-- ═══ W//NAV ═══ -->
 <div class="wnav">
   <a class="wnav-back" href="index.html" title="Inicio">
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="var(--y)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </a>
   <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
   <div class="wnav-sep"></div>
   <div class="wnav-title">GASTOS DIARIOS</div>
 </div>
+  <div class="sync-bar" id="sync-bar">
+    <div class="sync-status">
+      <div class="sync-dot offline" id="sync-dot"></div>
+      <span class="sync-label offline" id="sync-label">OFFLINE</span>
+      <span class="sync-pending" id="sync-pending"></span>
+    </div>
+    <button class="sync-btn" id="sync-btn" onclick="manualSync()" disabled>↑ SYNC</button>
+  </div>
 
 
   <!-- HERO -->
@@ -449,7 +472,7 @@ function renderStats(){
     </div>`;
   });
 
-  document.getElementById('panel-stats').innerHTML=html;
+  document.getElementById('panel-stats').innerHTML=html+`<div style="margin-top:16px;"><button onclick="exportPDF()" style="width:100%;padding:10px;background:transparent;border:0.5px solid var(--line2);border-radius:8px;color:var(--muted);font-family:var(--fm);font-size:11px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--y)';this.style.color='var(--y)'" onmouseout="this.style.borderColor='var(--line2)';this.style.color='var(--muted)'">↓ Exportar PDF del mes</button></div>`;
 }
 
 function renderAjustes(){
@@ -613,6 +636,60 @@ initCatPicker();
 render();
 // Focus amount on load
 setTimeout(()=>document.getElementById('qa-imp').focus(),300);
+</script>
+<script>
+// WTransition inline (página sin wapps-store.js)
+(function(){
+  const D=160;
+  function go(url){document.body.style.transition='opacity '+D+'ms ease';document.body.style.opacity='0';setTimeout(()=>{window.location.href=url;},D);}
+  function intercept(){document.addEventListener('click',e=>{const a=e.target.closest('a[href]');if(!a)return;const h=a.getAttribute('href');if(!h||!h.endsWith('.html')||h.startsWith('http')||a.target)return;e.preventDefault();go(h);},true);}
+  function fadeIn(){document.body.style.opacity='0';document.body.style.transition='none';requestAnimationFrame(()=>{requestAnimationFrame(()=>{document.body.style.transition='opacity '+D+'ms ease';document.body.style.opacity='1';});});}
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',()=>{intercept();fadeIn();});}else{intercept();fadeIn();}
+  window.WTransition={go};
+})();
+
+function _fb()   { return (typeof WFirebase !== 'undefined') ? WFirebase : null; }
+function _sync() { return (typeof WSync     !== 'undefined') ? WSync     : null; }
+function updateSyncUI(state, pendingCount) {
+  const dot=document.getElementById('sync-dot'),label=document.getElementById('sync-label'),btn=document.getElementById('sync-btn'),pend=document.getElementById('sync-pending');
+  if(!dot)return;
+  dot.className='sync-dot '+state; label.className='sync-label '+state;
+  const labels={online:'ONLINE',offline:'OFFLINE',syncing:'SINCRONIZANDO...'};
+  label.textContent=labels[state]||state.toUpperCase();
+  pend.textContent=pendingCount>0?'· '+pendingCount+' PENDIENTE'+(pendingCount>1?'S':''):'';
+  btn.disabled=!(state==='online'&&_fb()&&_fb().getUser()&&pendingCount>0);
+}
+async function manualSync(){
+  const fb=_fb(),sync=_sync();if(!fb||!sync)return;
+  const user=fb.getUser();if(!user||!fb.isOnline())return;
+  updateSyncUI('syncing',sync.getPending().length);
+  document.getElementById('sync-btn').disabled=true;
+  await sync.syncAll(user.uid);
+  updateSyncUI(fb.isOnline()?'online':'offline',sync.getPending().length);
+}
+window.addEventListener('wapps:online',()=>updateSyncUI('online',_sync()?.getPending().length??0));
+window.addEventListener('wapps:offline',()=>updateSyncUI('offline',_sync()?.getPending().length??0));
+window.addEventListener('wapps:sync-start',()=>updateSyncUI('syncing',_sync()?.getPending().length??0));
+window.addEventListener('wapps:sync-done',()=>{const fb=_fb();updateSyncUI(fb?(fb.isOnline()?'online':'offline'):'offline',_sync()?.getPending().length??0);});
+window.addEventListener('wapps:pending-change',e=>{const fb=_fb(),label=document.getElementById('sync-label');const isSyncing=label?.className?.includes('syncing');updateSyncUI(isSyncing?'syncing':(fb?(fb.isOnline()?'online':'offline'):'offline'),e.detail.pending.length);});
+updateSyncUI(navigator.onLine?'online':'offline',0);
+
+async function exportPDF() {
+  const gastos = state.gastos.filter(g => {
+    const prefix = `${vy}-${String(vm+1).padStart(2,'0')}`;
+    return g.fecha?.startsWith(prefix);
+  });
+  if (!gastos.length) { alert('Sin gastos este mes para exportar.'); return; }
+  const total = gastos.reduce((s,g) => s+(g.importe||0), 0);
+  await WPDF.export(
+    `Gastos ${MONTHS[vm]} ${vy}`,
+    [{
+      title: `${gastos.length} gastos · Total ${total.toLocaleString('es-ES',{minimumFractionDigits:2})} €`,
+      headers: ['Fecha','Concepto','Categoría','Importe'],
+      rows: gastos.map(g => [g.fecha, g.concepto||'—', g.cat||'—', `${(g.importe||0).toLocaleString('es-ES',{minimumFractionDigits:2})} €`])
+    }]
+  );
+}
 </script>
 </body>
 </html>

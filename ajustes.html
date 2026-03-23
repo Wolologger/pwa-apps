@@ -136,6 +136,28 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var
       </div>
     </div>
 
+    <!-- APARIENCIA -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-icon">🎨</span>
+        <span class="section-title">Apariencia</span>
+      </div>
+      <div class="section-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;">
+          <div>
+            <div style="font-size:12px;color:var(--text);">Modo claro</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px;">Fondo blanco, texto oscuro</div>
+          </div>
+          <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
+            <input type="checkbox" id="theme-toggle" onchange="toggleTheme(this.checked)"
+              style="opacity:0;width:0;height:0;position:absolute;">
+            <span id="theme-track" style="position:absolute;inset:0;border-radius:24px;transition:0.2s;background:var(--dim);"></span>
+            <span id="theme-thumb" style="position:absolute;top:4px;left:4px;width:16px;height:16px;background:var(--muted);border-radius:50%;transition:0.2s;"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
     <!-- NOTIFICACIONES -->
     <div class="section-card">
       <div class="section-header">
@@ -344,11 +366,33 @@ async function clearCache() {
   setTimeout(() => window.location.reload(true), 1000);
 }
 
+// ── Theme ──────────────────────────────────────────────────────
+function toggleTheme(isLight) {
+  if (typeof WTheme !== 'undefined') {
+    WTheme.set(isLight ? 'light' : 'dark');
+  }
+  updateThemeToggle();
+}
+function updateThemeToggle() {
+  const mode = typeof WTheme !== 'undefined' ? WTheme.get() : 'dark';
+  const isLight = mode === 'light';
+  const cb = document.getElementById('theme-toggle');
+  const track = document.getElementById('theme-track');
+  const thumb = document.getElementById('theme-thumb');
+  if (cb) cb.checked = isLight;
+  if (track) track.style.background = isLight ? 'var(--y)' : 'var(--dim)';
+  if (thumb) {
+    thumb.style.left = isLight ? '24px' : '4px';
+    thumb.style.background = isLight ? '#0a0a09' : 'var(--muted)';
+  }
+}
+
 // ── Init ───────────────────────────────────────────────────────────
 if (typeof WNotify !== 'undefined') {
   WNotify.renderConfigPanel('notif-config-ajustes');
 }
 renderStorageStats();
+updateThemeToggle();
 // Firebase puede no estar listo aún — esperamos al evento auth-change
 // Si ya hay usuario cacheado lo mostramos de inmediato como fallback
 // Espera a que Firebase esté listo — limpia el intervalo al salir

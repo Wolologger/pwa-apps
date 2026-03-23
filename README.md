@@ -131,6 +131,14 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 
 ## Changelog
 
+### v3.2.0
+- `WTheme` — dark/light mode toggle en ajustes, persistido en localStorage
+- `WSkeleton` — skeleton loaders y empty states con botón de acción
+- `WPDF` — exportación a PDF en gastos-diarios, obra y suministros (jsPDF)
+- `sw.js` — precaché tolerante a fallos con `Promise.allSettled`
+- `finanzas.html` — bridge suministros usa WStore en lugar de clave legacy
+- Empty states mejorados con botón de acción en coches, mascotas, instrumentos, deseados, setlist, suministros
+
 ### v3.1.0
 - `mascotas.html`, `deseados.html` y `finanzas.html` conectados a WStore y Firebase
 - `mascotas_v1` y `deseados_v2` añadidos al mapa de migración legacy

@@ -31,9 +31,22 @@ const PRECACHE = [
   '/pwa-apps/icons/icon-512.png',
 ];
 
+// Precache individual con tolerancia a fallos — un archivo roto no bloquea la instalación
+async function precacheAll(cache) {
+  const results = await Promise.allSettled(
+    PRECACHE.map(url =>
+      cache.add(url).catch(err => {
+        console.warn(`[SW] No se pudo cachear ${url}:`, err.message);
+      })
+    )
+  );
+  const failed = results.filter(r => r.status === 'rejected').length;
+  if (failed > 0) console.warn(`[SW] ${failed} archivo(s) no cacheados — la app puede funcionar parcialmente offline`);
+}
+
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(PRECACHE))
+    caches.open(CACHE).then(cache => precacheAll(cache))
   );
   self.skipWaiting();
 });
@@ -103,10 +116,9 @@ self.addEventListener('fetch', e => {
         return response;
       }).catch(() => {
         if (e.request.mode === 'navigate') {
-          // Try specific page first, then 404, then offline
-          return caches.match(e.request)
-            || caches.match('/pwa-apps/404.html')
-            || caches.match('/pwa-apps/offline.html');
+          return caches.match(e.request) ||
+            caches.match('/pwa-apps/404.html') ||
+            caches.match('/pwa-apps/offline.html');
         }
       });
     })

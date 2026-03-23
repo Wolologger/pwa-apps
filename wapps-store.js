@@ -49,23 +49,40 @@ const WStore = (() => {
   // Migración one-shot: copia datos legacy a claves nuevas si no existen,
   // luego borra las claves legacy. Se ejecuta una sola vez al arrancar.
   function migrateLegacy() {
-    const DONE_KEY = 'wapps._migrated_v1';
+    const DONE_KEY = 'wapps._migrated_v2'; // v2 — rehace la migración de forma segura
     try {
-      if (localStorage.getItem(DONE_KEY)) return; // ya migrado
+      if (localStorage.getItem(DONE_KEY)) return;
       let migrated = 0;
       for (const [newKey, oldKey] of Object.entries(MIGRATE_MAP)) {
         const oldRaw = localStorage.getItem(oldKey);
         if (!oldRaw) continue;
         const newRaw = localStorage.getItem(newKey);
-        // Solo migrar si la clave nueva no existe o no tiene _updatedAt
         if (!newRaw) {
+          // Clave nueva vacía — copiar legacy
           localStorage.setItem(newKey, oldRaw);
           migrated++;
+          localStorage.removeItem(oldKey);
+        } else {
+          // Ambas existen — gana la más reciente por _updatedAt
+          try {
+            const oldData = JSON.parse(oldRaw);
+            const newData = JSON.parse(newRaw);
+            const oldTs = new Date(oldData._updatedAt || 0).getTime();
+            const newTs = new Date(newData._updatedAt || 0).getTime();
+            if (oldTs > newTs) {
+              // Legacy es más reciente — sobrescribir nueva
+              localStorage.setItem(newKey, oldRaw);
+              migrated++;
+            }
+            // En cualquier caso borrar legacy
+            localStorage.removeItem(oldKey);
+          } catch(e) {
+            // Si no se puede parsear, conservar legacy por seguridad
+          }
         }
-        localStorage.removeItem(oldKey); // borrar legacy siempre
       }
       localStorage.setItem(DONE_KEY, '1');
-      if (migrated > 0) console.info(`[WStore] Migración legacy: ${migrated} claves migradas.`);
+      if (migrated > 0) console.info(`[WStore] Migración legacy v2: ${migrated} claves migradas.`);
     } catch(e) {
       console.warn('[WStore] migrateLegacy error:', e);
     }
@@ -554,4 +571,209 @@ const WTransition = (() => {
   }
 
   return { go };
+})();
+
+
+// ═══════════════════════════════════════════════════════════════
+// WTHEME — dark / light mode
+// ═══════════════════════════════════════════════════════════════
+const WTheme = (() => {
+  const KEY = 'wapps.theme'; // 'dark' | 'light'
+
+  const DARK = {
+    '--bg':'#0a0a09','--bg2':'#141412','--bg3':'#1e1e1b',
+    '--text':'#f0ebe0','--muted':'#5a5850','--dim':'#2a2a26',
+    '--border':'rgba(255,255,255,0.07)','--border2':'rgba(255,255,255,0.13)',
+    '--line':'rgba(255,255,255,0.06)','--line2':'rgba(255,255,255,0.12)',
+  };
+
+  const LIGHT = {
+    '--bg':'#f5f4f0','--bg2':'#ffffff','--bg3':'#ebebе8',
+    '--text':'#1a1a18','--muted':'#8a8880','--dim':'#d0d0cc',
+    '--border':'rgba(0,0,0,0.07)','--border2':'rgba(0,0,0,0.13)',
+    '--line':'rgba(0,0,0,0.06)','--line2':'rgba(0,0,0,0.12)',
+  };
+
+  function get() {
+    return localStorage.getItem(KEY) || 'dark';
+  }
+
+  function apply(mode) {
+    const vars = mode === 'light' ? LIGHT : DARK;
+    const root = document.documentElement;
+    for (const [k, v] of Object.entries(vars)) {
+      root.style.setProperty(k, v);
+    }
+    document.documentElement.setAttribute('data-theme', mode);
+    // Update meta theme-color
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = mode === 'light' ? '#f5f4f0' : '#0a0a09';
+  }
+
+  function set(mode) {
+    localStorage.setItem(KEY, mode);
+    apply(mode);
+    window.dispatchEvent(new CustomEvent('wapps:theme-change', { detail: { mode } }));
+  }
+
+  function toggle() {
+    set(get() === 'dark' ? 'light' : 'dark');
+  }
+
+  // Apply on load immediately to avoid flash
+  if (document.readyState === 'loading') {
+    // Apply inline before DOMContentLoaded to avoid flash
+    const saved = localStorage.getItem(KEY) || 'dark';
+    if (saved === 'light') {
+      document.addEventListener('DOMContentLoaded', () => apply('light'));
+    }
+  } else {
+    apply(get());
+  }
+
+  return { get, set, toggle, apply };
+})();
+
+
+// ═══════════════════════════════════════════════════════════════
+// WSKELETON — skeleton loaders para contenido en carga
+// ═══════════════════════════════════════════════════════════════
+const WSkeleton = (() => {
+
+  // CSS inyectado una sola vez
+  const CSS = `
+    .sk-line{height:12px;border-radius:4px;background:linear-gradient(90deg,var(--bg3,#1e1e1b) 25%,var(--bg2,#141412) 50%,var(--bg3,#1e1e1b) 75%);background-size:200% 100%;animation:sk-shimmer 1.4s infinite;}
+    .sk-card{background:var(--bg2,#141412);border:0.5px solid var(--border2,rgba(255,255,255,0.13));border-radius:12px;padding:16px;margin-bottom:10px;}
+    @keyframes sk-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  `;
+
+  let _injected = false;
+  function injectCSS() {
+    if (_injected) return;
+    const style = document.createElement('style');
+    style.textContent = CSS;
+    document.head.appendChild(style);
+    _injected = true;
+  }
+
+  // Genera N tarjetas skeleton con líneas de anchos variados
+  function cards(n = 3, lines = [80, 50, 65]) {
+    injectCSS();
+    return Array.from({ length: n }, () => `
+      <div class="sk-card">
+        ${lines.map(w => `<div class="sk-line" style="width:${w}%;margin-bottom:8px;"></div>`).join('')}
+      </div>`).join('');
+  }
+
+  // Empty state con mensaje y botón de acción opcional
+  function empty(msg, actionLabel, actionFn) {
+    const btn = actionLabel
+      ? `<button onclick="${actionFn}" style="margin-top:14px;padding:10px 20px;background:var(--y,#e8f040);color:#0a0a09;border:none;border-radius:8px;font-family:var(--fh,'Bebas Neue',sans-serif);font-size:15px;letter-spacing:1px;cursor:pointer;">${actionLabel}</button>`
+      : '';
+    return `<div style="text-align:center;padding:3rem 1.5rem;color:var(--muted,#5a5850);font-size:13px;line-height:1.8;">${msg}${btn}</div>`;
+  }
+
+  return { cards, empty, injectCSS };
+})();
+
+
+// ═══════════════════════════════════════════════════════════════
+// WPDF — exportación a PDF con jsPDF
+// Uso: await WPDF.export(title, sections)
+// sections: [{ title, rows: [[col1, col2, ...]], headers: [...] }]
+// ═══════════════════════════════════════════════════════════════
+const WPDF = (() => {
+
+  async function _loadjsPDF() {
+    if (window.jspdf) return window.jspdf.jsPDF;
+    return new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      s.onload = () => resolve(window.jspdf.jsPDF);
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+
+  async function exportDoc(title, sections) {
+    const jsPDF = await _loadjsPDF();
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    const W = 210, MARGIN = 14;
+    let y = 20;
+
+    // Header
+    doc.setFillColor(10, 10, 9);
+    doc.rect(0, 0, W, 18, 'F');
+    doc.setTextColor(232, 240, 64);
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('W//APPS', MARGIN, 12);
+    doc.setTextColor(180, 175, 165);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text(new Date().toLocaleDateString('es-ES', { day:'2-digit', month:'long', year:'numeric' }), W - MARGIN, 12, { align: 'right' });
+
+    y = 28;
+    doc.setTextColor(30, 30, 27);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text(title, MARGIN, y);
+    y += 10;
+
+    for (const section of sections) {
+      if (y > 260) { doc.addPage(); y = 20; }
+
+      // Section title
+      doc.setFillColor(232, 240, 64);
+      doc.rect(MARGIN, y, W - MARGIN * 2, 7, 'F');
+      doc.setTextColor(10, 10, 9);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.text(section.title.toUpperCase(), MARGIN + 3, y + 5);
+      y += 10;
+
+      // Headers
+      if (section.headers?.length) {
+        const colW = (W - MARGIN * 2) / section.headers.length;
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(90, 88, 80);
+        section.headers.forEach((h, i) => doc.text(String(h), MARGIN + i * colW + 2, y));
+        y += 6;
+        doc.setDrawColor(200, 200, 195);
+        doc.line(MARGIN, y, W - MARGIN, y);
+        y += 3;
+      }
+
+      // Rows
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      for (const row of section.rows) {
+        if (y > 270) { doc.addPage(); y = 20; }
+        const colW = (W - MARGIN * 2) / row.length;
+        doc.setTextColor(30, 30, 27);
+        row.forEach((cell, i) => {
+          const text = String(cell ?? '').substring(0, 40);
+          doc.text(text, MARGIN + i * colW + 2, y);
+        });
+        y += 6;
+      }
+      y += 6;
+    }
+
+    // Footer
+    const pages = doc.getNumberOfPages();
+    for (let i = 1; i <= pages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(7);
+      doc.setTextColor(150, 148, 140);
+      doc.text(`Página ${i} de ${pages} — Exportado desde W//APPS`, W / 2, 290, { align: 'center' });
+    }
+
+    const safeName = title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    doc.save(`wapps_${safeName}_${new Date().toISOString().slice(0,10)}.pdf`);
+  }
+
+  return { export: exportDoc };
 })();

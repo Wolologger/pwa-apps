@@ -1087,7 +1087,7 @@ function renderFacturas() {
     </select>
     ${(filterAnio||filterTrimestre)?`<button class="filter-clear" onclick="filterAnio='';filterTrimestre='';render()">✕ Limpiar</button>`:''}`;
   if (!facts.length) {
-    document.getElementById('facturas-body').innerHTML = '<div class="empty">Sin facturas registradas.<br>Pulsa + para añadir la primera.</div>';
+    document.getElementById('facturas-body').innerHTML = typeof WSkeleton!=='undefined'?WSkeleton.empty('Sin facturas registradas.','+ Añadir factura',"document.getElementById('add-panel').classList.add('open')"):'<div class="empty">Sin facturas registradas.<br>Pulsa + para añadir la primera.</div>';
     return;
   }
   const prevMap = {};
@@ -1143,7 +1143,7 @@ function renderFacturas() {
       </div>
     </div>`;
   });
-  document.getElementById('facturas-body').innerHTML = html;
+  document.getElementById('facturas-body').innerHTML = html + `<div style="margin-top:12px;"><button onclick="exportPDF()" style="width:100%;padding:10px;background:transparent;border:0.5px solid var(--border2);border-radius:8px;color:var(--muted);font-family:var(--fm);font-size:11px;cursor:pointer;" onmouseover="this.style.borderColor='var(--y)';this.style.color='var(--y)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted)'">↓ Exportar PDF</button></div>`;
 }
 
 function startEdit(id) { editId = (editId===id?null:id); renderFacturas(); }
@@ -1411,6 +1411,19 @@ window.addEventListener('wapps:sync-start',()=>updateSyncUI('syncing',_sync()?.g
 window.addEventListener('wapps:sync-done',()=>{const fb=_fb();updateSyncUI(fb?(fb.isOnline()?'online':'offline'):'offline',_sync()?.getPending().length??0);});
 window.addEventListener('wapps:pending-change',e=>{const fb=_fb(),label=document.getElementById('sync-label');const isSyncing=label?.className?.includes('syncing');updateSyncUI(isSyncing?'syncing':(fb?(fb.isOnline()?'online':'offline'):'offline'),e.detail.pending.length);});
 updateSyncUI(navigator.onLine?'online':'offline',0);
+
+async function exportPDF() {
+  const facturas = state.facturas || [];
+  if (!facturas.length) { alert('Sin facturas para exportar.'); return; }
+  await WPDF.export(
+    'Suministros',
+    [{
+      title: `${facturas.length} facturas registradas`,
+      headers: ['Tipo','Período','Importe','Empresa'],
+      rows: facturas.map(f => [f.tipo||'—', `${f.inicio||'—'} → ${f.fin||'—'}`, `${(f.importe||0).toLocaleString('es-ES',{minimumFractionDigits:2})} €`, f.empresa||'—'])
+    }]
+  );
+}
 </script>
 </body>
 </html>
