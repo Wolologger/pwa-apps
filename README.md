@@ -126,6 +126,11 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 
 ## Changelog
 
+### v2.7.0
+- Eliminadas claves legacy de `wapps-store.js` (`LEGACY_KEYS`, escritura doble en `set()` y `syncOnLoad()`)
+- Añadida `migrateLegacy()` — migración one-shot al arrancar que copia datos al nuevo esquema y borra los duplicados
+- `get()` simplificado — ya no tiene fallback legacy
+
 ### v2.6.0
 - `semana.html`, `instrumentos.html` y `setlist.html` conectados a WStore y Firebase
 - Corregidas las claves legacy `semana_v1→v2` e `instrumentos_v1→v2` en LEGACY_KEYS

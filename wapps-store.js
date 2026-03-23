@@ -29,21 +29,47 @@
 const WStore = (() => {
   const PREFIX = 'wapps.';
 
-  // Claves legacy que ya existían antes del bus
-  const LEGACY_KEYS = {
-    'despensa.items':      'despensa_v1',
-    'finanzas.data':       'finanzas_v1',
-    'suministros.data':    'suministros_v1',
-    'gastos.data':         'gastos_v1',
-    'compra.data':         'compra_v1',
-    'semana.data':         'semana_v2',
-    'deseados.data':       'deseados_v1',
-    'obra.data':           'miobra_v2',
-    'instrumentos.data':   'instrumentos_v2',
-    'setlist.data':        'setlist_v1',
-    'coches.data':         'coches_v1',
-    'ninos.data':          'ninos_v1',
+  // Mapa de migración: clave nueva → clave legacy antigua
+  // Solo se usa UNA VEZ al arrancar para migrar datos al nuevo esquema.
+  const MIGRATE_MAP = {
+    'wapps.despensa.items':    'despensa_v1',
+    'wapps.finanzas.data':     'finanzas_v1',
+    'wapps.suministros.data':  'suministros_v1',
+    'wapps.gastos.data':       'gastos_v1',
+    'wapps.compra.data':       'compra_v1',
+    'wapps.semana.data':       'semana_v2',
+    'wapps.deseados.data':     'deseados_v1',
+    'wapps.obra.data':         'miobra_v2',
+    'wapps.instrumentos.data': 'instrumentos_v2',
+    'wapps.setlist.data':      'setlist_v1',
+    'wapps.coches.data':       'coches_v1',
+    'wapps.ninos.data':        'ninos_v1',
   };
+
+  // Migración one-shot: copia datos legacy a claves nuevas si no existen,
+  // luego borra las claves legacy. Se ejecuta una sola vez al arrancar.
+  function migrateLegacy() {
+    const DONE_KEY = 'wapps._migrated_v1';
+    try {
+      if (localStorage.getItem(DONE_KEY)) return; // ya migrado
+      let migrated = 0;
+      for (const [newKey, oldKey] of Object.entries(MIGRATE_MAP)) {
+        const oldRaw = localStorage.getItem(oldKey);
+        if (!oldRaw) continue;
+        const newRaw = localStorage.getItem(newKey);
+        // Solo migrar si la clave nueva no existe o no tiene _updatedAt
+        if (!newRaw) {
+          localStorage.setItem(newKey, oldRaw);
+          migrated++;
+        }
+        localStorage.removeItem(oldKey); // borrar legacy siempre
+      }
+      localStorage.setItem(DONE_KEY, '1');
+      if (migrated > 0) console.info(`[WStore] Migración legacy: ${migrated} claves migradas.`);
+    } catch(e) {
+      console.warn('[WStore] migrateLegacy error:', e);
+    }
+  }
 
   function storageKey(app, key) {
     return `${PREFIX}${app}.${key}`;
@@ -51,16 +77,9 @@ const WStore = (() => {
 
   function get(app, key) {
     const sk = storageKey(app, key);
-    // Intenta clave nueva primero, luego legacy
     try {
       const v = localStorage.getItem(sk);
-      if (v !== null) return JSON.parse(v);
-      // fallback a clave legacy
-      const lk = LEGACY_KEYS[`${app}.${key}`];
-      if (lk) {
-        const lv = localStorage.getItem(lk);
-        return lv ? JSON.parse(lv) : null;
-      }
+      return v !== null ? JSON.parse(v) : null;
     } catch(e) {}
     return null;
   }
@@ -74,10 +93,6 @@ const WStore = (() => {
         : value;
 
       localStorage.setItem(sk, JSON.stringify(payload));
-
-      // Mantener clave legacy en sync para compatibilidad hacia atrás
-      const lk = LEGACY_KEYS[`${app}.${key}`];
-      if (lk) localStorage.setItem(lk, JSON.stringify(payload));
 
       // Emitir evento personalizado para listeners en la misma pestaña
       window.dispatchEvent(new CustomEvent('wapps:change', {
@@ -227,10 +242,6 @@ const WStore = (() => {
         const sk = storageKey(app, key);
         localStorage.setItem(sk, JSON.stringify(clean));
 
-        // Sync clave legacy si existe
-        const lk = LEGACY_KEYS[`${app}.${key}`];
-        if (lk) localStorage.setItem(lk, JSON.stringify(clean));
-
         // Notificar a la app
         if (typeof onUpdate === 'function') onUpdate(clean);
 
@@ -256,6 +267,9 @@ const WStore = (() => {
       console.warn('[WStore.syncAllOnLoad]', e);
     }
   }
+
+  // Ejecutar migración al arrancar
+  migrateLegacy();
 
   return { get, set, on, bridge, syncOnLoad, syncAllOnLoad };
 })();
