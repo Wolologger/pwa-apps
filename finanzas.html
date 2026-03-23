@@ -179,11 +179,7 @@ let state=loadState(),currentTab='resumen';
 
 function loadState(){
   try{const r=localStorage.getItem('finanzas_v1');if(r)return JSON.parse(r);}catch(e){}
-  return{ingresos:[{id:1,nombre:'Nómina',importe:0,freq:'mensual'}],gastos:[
-    {id:2,nombre:'Alquiler / Hipoteca',importe:0,cat:'vivienda',freq:'mensual'},
-    {id:3,nombre:'Internet',importe:0,cat:'suministros',freq:'mensual'},
-    {id:4,nombre:'Móvil',importe:0,cat:'suscripciones',freq:'mensual'},
-  ],nextId:10};}
+  return{ingresos:[],gastos:[],nextId:1};}
 function save(){try{localStorage.setItem('finanzas_v1',JSON.stringify(state));if(typeof WStore!=='undefined')WStore.set('finanzas','data',state);}catch(e){}}
 function nxtId(){return++state.nextId;}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}

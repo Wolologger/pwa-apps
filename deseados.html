@@ -260,17 +260,7 @@ function loadState(){
   try{const r=localStorage.getItem('deseados_v2');if(r)return JSON.parse(r);}catch(e){}
   // Try migrating from v1
   try{const r=localStorage.getItem('deseados_v1');if(r){const s=JSON.parse(r);s.items.forEach(i=>{if(!i.prio)i.prio='media';});return s;}}catch(e){}
-  return{items:[
-    {id:1,nombre:'Cables Magnético C',precio:15,cat:'recurrente',prio:'alta',url:'',notas:'',comprado:false},
-    {id:2,nombre:'Cuerdas Guitarra (Elixir) & Bajo',precio:140,cat:'recurrente',prio:'alta',url:'',notas:'Variadas, Extremoduro',comprado:false},
-    {id:3,nombre:'Vinilos',precio:20,cat:'coleccion',prio:'baja',url:'',notas:'Variadas',comprado:false},
-    {id:4,nombre:'Amplificador grande para Bajo',precio:800,cat:'musica',prio:'media',url:'',notas:'',comprado:false},
-    {id:5,nombre:'Monitores Sonido (altavoces)',precio:160,cat:'musica',prio:'media',url:'',notas:'',comprado:false},
-    {id:6,nombre:'Pedalera Helix',precio:500,cat:'musica',prio:'alta',url:'',notas:'',comprado:false},
-    {id:7,nombre:'Actualización PC',precio:750,cat:'tech',prio:'media',url:'',notas:'',comprado:false},
-    {id:8,nombre:'NAS Synology',precio:400,cat:'tech',prio:'baja',url:'',notas:'',comprado:false},
-    {id:9,nombre:'Impresora 3D filamento',precio:200,cat:'tech',prio:'baja',url:'',notas:'',comprado:false},
-  ],nextId:20};}
+  return{items:[],nextId:1};}
 
 function save(){state.nextId=nid;try{localStorage.setItem('deseados_v2',JSON.stringify(state));if(typeof WStore!=='undefined')WStore.set('deseados','data',state);}catch(e){}}
 function nxtId(){return++nid;}
