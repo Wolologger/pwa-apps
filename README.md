@@ -98,6 +98,11 @@ users/
 
 ### Reglas de seguridad recomendadas
 
+**Configuración:**
+1. Copia `wapps-config.example.js` → `wapps-config.js`
+2. Rellena tus credenciales Firebase
+3. `wapps-config.js` está en `.gitignore` — nunca se sube al repo
+
 ```js
 rules_version = '2';
 service cloud.firestore {
@@ -125,6 +130,13 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 ---
 
 ## Changelog
+
+### v2.10.0
+- `wapps-config.js` — credenciales Firebase separadas del código fuente
+- `wapps-config.example.js` — plantilla para nuevos desarrolladores
+- `.gitignore` — `wapps-config.js` excluido del repo
+- `wapps-firebase.js` — lee config desde `window.WAPPS_CONFIG` con aviso claro si falta
+- SW v8: `wapps-config.js` en precaché
 
 ### v2.9.0
 - `WTransition` — fade-out/in de 160ms entre todas las páginas, sin parpadeo blanco

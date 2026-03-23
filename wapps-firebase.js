@@ -26,14 +26,16 @@
 
 const WFirebase = (() => {
 
-  const FIREBASE_CONFIG = {
-    apiKey:            "AIzaSyAk60T2WIV_oh-egSt0f0837heKc5XvKG4",
-    authDomain:        "pwa-apps-b3857.firebaseapp.com",
-    projectId:         "pwa-apps-b3857",
-    storageBucket:     "pwa-apps-b3857.firebasestorage.app",
-    messagingSenderId: "867420086486",
-    appId:             "1:867420086486:web:1044d13359f2c8f6266977"
-  };
+  // Config cargada desde wapps-config.js (excluido del repo via .gitignore)
+  // Si no existe, muestra un aviso claro en consola.
+  const FIREBASE_CONFIG = (() => {
+    if (window.WAPPS_CONFIG) return window.WAPPS_CONFIG;
+    console.error(
+      '[WFirebase] No se encontró wapps-config.js.\n' +
+      'Copia wapps-config.example.js → wapps-config.js y añade tus credenciales Firebase.'
+    );
+    return null;
+  })();
 
   let _auth  = null;
   let _db    = null;
@@ -44,6 +46,7 @@ const WFirebase = (() => {
   // ── Init ─────────────────────────────────────────────────────────
   function _init() {
     try {
+      if (!FIREBASE_CONFIG) return;
       firebase.initializeApp(FIREBASE_CONFIG);
       _auth  = firebase.auth();
       _db    = firebase.firestore();
