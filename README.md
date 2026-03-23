@@ -131,6 +131,11 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 
 ## Changelog
 
+### v3.0.0
+- Versión mayor — consolidación de todas las mejoras desde v2.2.0
+- `offline.html`, `404.html` y `ajustes.html` excluidos del grid de apps
+- `ajustes.html` accesible desde el botón ⚙️ del panel principal
+
 ### v2.10.0
 - `wapps-config.js` — credenciales Firebase separadas del código fuente
 - `wapps-config.example.js` — plantilla para nuevos desarrolladores

@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0a0a09">
 <link rel="manifest" href="manifest.json">
 <title>W // APPS</title>
-<!-- version: 2.2.0 -->
+<!-- version: 3.0.0 -->
 <!-- Firebase SDK v9 compat -->
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
@@ -679,7 +679,7 @@ async function loadApps(){
     const res=await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/`);
     if(!res.ok)throw new Error(`API ${res.status}`);
     const files=await res.json();
-    allFiles=files.filter(f=>f.type==='file'&&f.name.endsWith('.html')&&f.name!=='index.html'&&f.name!=='editor-categorias.html'&&f.name!=='guia_factura_luz.html').sort((a,b)=>a.name.localeCompare(b.name));
+    allFiles=files.filter(f=>f.type==='file'&&f.name.endsWith('.html')&&!['index.html','editor-categorias.html','guia_factura_luz.html','offline.html','404.html','ajustes.html'].includes(f.name)).sort((a,b)=>a.name.localeCompare(b.name));
     document.getElementById('updated-at').textContent=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
     renderLauncher();
     initCmdPalette();
