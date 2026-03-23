@@ -109,7 +109,7 @@ input:focus,select:focus{border-color:var(--y);}
 select option{background:var(--bg2);}
 .btn{padding:9px 16px;font-size:12px;font-family:var(--fm);border:0.5px solid var(--border2);border-radius:8px;background:transparent;color:var(--text);cursor:pointer;transition:all 0.15s;flex-shrink:0;}
 .btn:hover{background:var(--bg3);}
-.btn-y{background:var(--y);color:#0a0a09;border-color:var(--y);font-weight:500;}
+.btn-y{background:var(--y);color:#0a0a09;border-color:var(--y);font-family:var(--fh);font-size:15px;letter-spacing:1px;}
 .btn-r{background:var(--r);color:#fff;border-color:var(--r);font-weight:500;}
 .btn-sm{padding:5px 11px;font-size:11px;}
 
@@ -140,7 +140,7 @@ select option{background:var(--bg2);}
 </div>
 <div class="shell">
   <div class="wnav">
-    <a class="wnav-back" href="index.html"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="wnav-back" href="index.html"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="var(--y)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
     <div class="wnav-sep"></div>
     <div class="wnav-title" id="wnav-title">SEMANA</div>
@@ -246,7 +246,7 @@ function loadState(){
   try{const r=localStorage.getItem('semana_v1');if(r){const s=JSON.parse(r);return{tasks:s.tasks||{},events:[],nextId:100};}}catch(e){}
   return{tasks:{},events:[],recurring:[],nextId:100};
 }
-function save(){try{localStorage.setItem('semana_v2',JSON.stringify(state));}catch(e){}}
+function save(){try{localStorage.setItem('semana_v2',JSON.stringify(state));if(typeof WStore!=='undefined')WStore.set('semana','data',state);}catch(e){}}
 function nxtId(){return++(state.nextId);}
 function p2(n){return String(n).padStart(2,'0');}
 function dateKey(d){return`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;}

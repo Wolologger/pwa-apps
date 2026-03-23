@@ -126,6 +126,10 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 
 ## Changelog
 
+### v2.6.0
+- `semana.html`, `instrumentos.html` y `setlist.html` conectados a WStore y Firebase
+- Corregidas las claves legacy `semana_v1→v2` e `instrumentos_v1→v2` en LEGACY_KEYS
+
 ### v2.5.0
 - Firebase SDK actualizado de 9.23.0 a 11.6.0 en index, backup y editor-categorias
 - `404.html` — página de error con accesos directos a las apps principales

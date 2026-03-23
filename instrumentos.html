@@ -45,7 +45,7 @@ select option{background:var(--bg2);}
 textarea{resize:vertical;min-height:60px;line-height:1.5;}
 .btn{padding:9px 16px;font-size:12px;font-family:var(--fm);border:0.5px solid var(--border2);border-radius:8px;background:transparent;color:var(--text);cursor:pointer;transition:all 0.15s;flex-shrink:0;}
 .btn:hover{background:var(--bg3);}
-.btn-y{background:var(--y);color:#0a0a09;border-color:var(--y);font-weight:500;}
+.btn-y{background:var(--y);color:#0a0a09;border-color:var(--y);font-family:var(--fh);font-size:15px;letter-spacing:1px;}
 .btn-r{background:var(--r);color:#fff;border-color:var(--r);font-weight:500;}
 .btn-sm{padding:5px 11px;font-size:11px;}
 .inst-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:10px;}
@@ -83,7 +83,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
 <body>
 <div class="shell">
   <div class="wnav">
-    <a class="wnav-back" href="index.html"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="wnav-back" href="index.html"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="var(--y)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
     <div class="wnav-sep"></div>
     <div class="wnav-title">INSTRUMENTOS</div>
@@ -152,7 +152,7 @@ function loadState(){
   try{const r=localStorage.getItem('instrumentos_v1');if(r)return JSON.parse(r);}catch(e){}
   return{items:[],nextId:1};
 }
-function save(){state.nextId=nid;try{localStorage.setItem('instrumentos_v2',JSON.stringify(state));}catch(e){}}
+function save(){state.nextId=nid;try{localStorage.setItem('instrumentos_v2',JSON.stringify(state));if(typeof WStore!=='undefined')WStore.set('instrumentos','data',state);}catch(e){}}
 function nxtId(){return++nid;}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function today(){const d=new Date();return`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;}
