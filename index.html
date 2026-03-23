@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0a0a09">
 <link rel="manifest" href="manifest.json">
 <title>W // APPS</title>
-<!-- version: 3.0.0 -->
+<!-- version: 3.1.0 -->
 <!-- Firebase SDK v9 compat -->
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
@@ -375,6 +375,25 @@ const APP_VERSION = 'v3.1.0';
 const CHANGELOG = [
   {
     version: 'v3.1.0',
+    date: 'Marzo 2026',
+    items: [
+      { type: 'new', text: 'ajustes.html — página central: cuenta Firebase, notificaciones y estadísticas de datos' },
+      { type: 'new', text: 'offline.html — página de fallback offline con redirección automática al recuperar red' },
+      { type: 'new', text: '404.html — página de error con accesos directos a las apps principales' },
+      { type: 'new', text: 'wapps-config.js — credenciales Firebase separadas del código fuente (.gitignore)' },
+      { type: 'new', text: 'WTransition — fade-out/in de 160ms entre todas las páginas, sin parpadeo blanco' },
+      { type: 'imp', text: 'sw.js — offline completo: todas las páginas en precaché, estrategia cache-first' },
+      { type: 'imp', text: 'Barra sync ONLINE/OFFLINE/SINCRONIZANDO extendida a todas las páginas' },
+      { type: 'imp', text: 'Botones primarios (btn-y) en Bebas Neue · flecha volver en amarillo en todos los archivos' },
+      { type: 'imp', text: 'Firebase SDK actualizado de 9.23.0 a 11.6.0' },
+      { type: 'imp', text: 'semana, instrumentos, setlist, mascotas, deseados, finanzas, coches, ninos conectados a WStore y Firebase' },
+      { type: 'imp', text: 'wapps-store.js — migrateLegacy() one-shot al arrancar, elimina claves duplicadas' },
+      { type: 'fix', text: 'ajustes.html — timing auth Firebase, orden de scripts, limpieza de intervalo al navegar' },
+      { type: 'fix', text: 'index.html — versión badge actualizada a v3.1.0' },
+    ]
+  },
+  {
+    version: 'v2.2.0',
     date: 'Marzo 2026',
     items: [
       { type: 'new', text: 'coches.html — nueva app: perfil · mantenimiento con progreso km · historial servicios · combustible (L/100km) · documentos · ITV/seguro → Calendario' },
