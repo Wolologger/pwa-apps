@@ -1,12 +1,11 @@
-const CACHE = 'wapps-v4';
+const CACHE = 'wapps-v5';
 
-// Assets que se precachean al instalar — se sirven siempre desde caché
-// hasta que cambie la versión del SW (wapps-v5, v6...)
 const PRECACHE = [
   '/pwa-apps/manifest.json',
   '/pwa-apps/wapps-store.js',
   '/pwa-apps/wapps-firebase.js',
   '/pwa-apps/wapps-onboarding.js',
+  '/pwa-apps/offline.html',
   '/pwa-apps/index.html',
   '/pwa-apps/backup.html',
   '/pwa-apps/coches.html',
@@ -63,7 +62,7 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // CACHE FIRST para HTML — offline-first, se actualiza en background
+  // CACHE FIRST para HTML — offline-first, actualiza en background
   if (
     e.request.mode === 'navigate' ||
     url.pathname.endsWith('.html') ||
@@ -77,8 +76,7 @@ self.addEventListener('fetch', e => {
             caches.open(CACHE).then(cache => cache.put(e.request, clone));
           }
           return response;
-        }).catch(() => cached || caches.match('/pwa-apps/index.html'));
-        // Sirve caché inmediatamente, actualiza en background
+        }).catch(() => cached || caches.match('/pwa-apps/offline.html'));
         return cached || networkFetch;
       })
     );
@@ -102,7 +100,7 @@ self.addEventListener('fetch', e => {
         return response;
       }).catch(() => {
         if (e.request.mode === 'navigate') {
-          return caches.match('/pwa-apps/index.html');
+          return caches.match('/pwa-apps/offline.html');
         }
       });
     })

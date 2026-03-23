@@ -258,7 +258,7 @@ select option{background:var(--bg2);}
       </div>
       <div id="gastos-body"></div>
     </div>
-    <div id="datos" class="section"><div id="datos-body"></div></div>
+    <div id="datos" class="section"><div id="datos-body"></div><div style="margin-top:20px;"><div class="section-label">Notificaciones</div><div id="notif-config-obra"></div></div></div>
   </div>
 
 </div>
@@ -941,6 +941,12 @@ render();
 // Hide spinner
 const _loadEl = document.getElementById('wapp-loading');
 if(_loadEl){ _loadEl.classList.add('fade'); setTimeout(()=>_loadEl.remove(), 350); }
+
+// Notificaciones
+if(typeof WNotify !== 'undefined'){
+  WNotify.renderConfigPanel('notif-config-obra');
+  WNotify.check();
+}
 </script>
 </body>
 </html>
