@@ -12,6 +12,7 @@
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-store.js"></script>
+<script src="wapps-config.js"></script>
 <script src="wapps-firebase.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -348,7 +349,21 @@ if (typeof WNotify !== 'undefined') {
   WNotify.renderConfigPanel('notif-config-ajustes');
 }
 renderStorageStats();
-renderUser(_fb() ? _fb().getUser() : null);
+// Firebase puede no estar listo aún — esperamos al evento auth-change
+// Si ya hay usuario cacheado lo mostramos de inmediato como fallback
+if (typeof WFirebase !== 'undefined' && WFirebase.getUser()) {
+  renderUser(WFirebase.getUser());
+} else {
+  // Reintentamos cuando Firebase complete su init (normalmente < 1s)
+  const _authCheck = setInterval(() => {
+    const fb = _fb();
+    if (!fb) return;
+    clearInterval(_authCheck);
+    renderUser(fb.getUser());
+  }, 200);
+  // Timeout de seguridad: si en 5s no hay respuesta, mostramos sin sesión
+  setTimeout(() => clearInterval(_authCheck), 5000);
+}
 </script>
 </body>
 </html>
