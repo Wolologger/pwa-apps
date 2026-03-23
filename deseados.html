@@ -63,7 +63,7 @@ select option{background:var(--bg2);}
 /* BUTTONS */
 .btn{padding:9px 16px;font-size:12px;font-family:var(--fm);border:0.5px solid var(--border2);border-radius:8px;background:transparent;color:var(--text);cursor:pointer;transition:all 0.15s;flex-shrink:0;}
 .btn:hover{background:var(--bg3);}
-.btn-y{background:var(--y);color:#0a0a09;border-color:var(--y);font-weight:500;}
+.btn-y{background:var(--y);color:#0a0a09;border-color:var(--y);font-family:var(--fh);font-size:15px;letter-spacing:1px;}
 .btn-r{background:var(--r);color:#fff;border-color:var(--r);font-weight:500;}
 .btn-sm{padding:5px 11px;font-size:11px;}
 
@@ -132,6 +132,21 @@ select option{background:var(--bg2);}
 .wapp-spinner{width:28px;height:28px;border:2px solid rgba(232,240,64,0.2);border-top-color:#e8f040;border-radius:50%;animation:wapp-spin 0.65s linear infinite;}
 @keyframes wapp-spin{to{transform:rotate(360deg)}}
 .wapp-loading-text{font-family:'DM Mono',monospace;font-size:11px;color:#5a5850;letter-spacing:1px;}
+
+.sync-bar{display:flex;align-items:center;justify-content:space-between;padding:7px 16px;border-bottom:1px solid rgba(255,255,255,0.06);background:var(--bg2,#141412);min-height:34px;}
+.sync-status{display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:1px;}
+.sync-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.sync-dot.online{background:var(--g,#30d880);}
+.sync-dot.offline{background:var(--r,#f04030);}
+.sync-dot.syncing{background:var(--y,#e8f040);animation:pulse 0.8s ease-in-out infinite;}
+.sync-label{color:var(--muted,#5a5850);}
+.sync-label.online{color:var(--g,#30d880);}
+.sync-label.offline{color:var(--r,#f04030);}
+.sync-label.syncing{color:var(--y,#e8f040);}
+.sync-pending{font-size:9px;color:var(--y,#e8f040);letter-spacing:0.5px;}
+.sync-btn{background:transparent;border:0.5px solid var(--dim,#2a2a26);color:var(--muted,#5a5850);font-family:var(--fm);font-size:9px;letter-spacing:1px;padding:3px 9px;cursor:pointer;transition:all 0.15s;}
+.sync-btn:hover:not(:disabled){border-color:var(--y,#e8f040);color:var(--y,#e8f040);}
+.sync-btn:disabled{opacity:0.35;cursor:default;}
 </style>
 </head>
 <body>
@@ -141,9 +156,17 @@ select option{background:var(--bg2);}
   <div class="wapp-spinner"></div>
   <div class="wapp-loading-text">CARGANDO…</div>
 </div>
+  <div class="sync-bar" id="sync-bar">
+    <div class="sync-status">
+      <div class="sync-dot offline" id="sync-dot"></div>
+      <span class="sync-label offline" id="sync-label">OFFLINE</span>
+      <span class="sync-pending" id="sync-pending"></span>
+    </div>
+    <button class="sync-btn" id="sync-btn" onclick="manualSync()" disabled>↑ SYNC</button>
+  </div>
 <div class="shell">
   <div class="wnav">
-    <a class="wnav-back" href="index.html"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="wnav-back" href="index.html"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="var(--y)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
     <div class="wnav-sep"></div>
     <div class="wnav-title">LISTA DE DESEADOS</div>
@@ -249,7 +272,7 @@ function loadState(){
     {id:9,nombre:'Impresora 3D filamento',precio:200,cat:'tech',prio:'baja',url:'',notas:'',comprado:false},
   ],nextId:20};}
 
-function save(){state.nextId=nid;try{localStorage.setItem('deseados_v2',JSON.stringify(state));}catch(e){}}
+function save(){state.nextId=nid;try{localStorage.setItem('deseados_v2',JSON.stringify(state));if(typeof WStore!=='undefined')WStore.set('deseados','data',state);}catch(e){}}
 function nxtId(){return++nid;}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function fmt(n){return Number(n||0).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2});}
@@ -530,6 +553,43 @@ if (_loadEl) {
   _loadEl.classList.add('fade');
   setTimeout(() => { _loadEl.style.display = 'none'; _loadEl.remove(); }, 300);
 }
+</script>
+<script>
+// WTransition inline (página sin wapps-store.js)
+(function(){
+  const D=160;
+  function go(url){document.body.style.transition='opacity '+D+'ms ease';document.body.style.opacity='0';setTimeout(()=>{window.location.href=url;},D);}
+  function intercept(){document.addEventListener('click',e=>{const a=e.target.closest('a[href]');if(!a)return;const h=a.getAttribute('href');if(!h||!h.endsWith('.html')||h.startsWith('http')||a.target)return;e.preventDefault();go(h);},true);}
+  function fadeIn(){document.body.style.opacity='0';document.body.style.transition='none';requestAnimationFrame(()=>{requestAnimationFrame(()=>{document.body.style.transition='opacity '+D+'ms ease';document.body.style.opacity='1';});});}
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',()=>{intercept();fadeIn();});}else{intercept();fadeIn();}
+  window.WTransition={go};
+})();
+
+function _fb()   { return (typeof WFirebase !== 'undefined') ? WFirebase : null; }
+function _sync() { return (typeof WSync     !== 'undefined') ? WSync     : null; }
+function updateSyncUI(state, pendingCount) {
+  const dot=document.getElementById('sync-dot'),label=document.getElementById('sync-label'),btn=document.getElementById('sync-btn'),pend=document.getElementById('sync-pending');
+  if(!dot)return;
+  dot.className='sync-dot '+state; label.className='sync-label '+state;
+  const labels={online:'ONLINE',offline:'OFFLINE',syncing:'SINCRONIZANDO...'};
+  label.textContent=labels[state]||state.toUpperCase();
+  pend.textContent=pendingCount>0?'· '+pendingCount+' PENDIENTE'+(pendingCount>1?'S':''):'';
+  btn.disabled=!(state==='online'&&_fb()&&_fb().getUser()&&pendingCount>0);
+}
+async function manualSync(){
+  const fb=_fb(),sync=_sync();if(!fb||!sync)return;
+  const user=fb.getUser();if(!user||!fb.isOnline())return;
+  updateSyncUI('syncing',sync.getPending().length);
+  document.getElementById('sync-btn').disabled=true;
+  await sync.syncAll(user.uid);
+  updateSyncUI(fb.isOnline()?'online':'offline',sync.getPending().length);
+}
+window.addEventListener('wapps:online',()=>updateSyncUI('online',_sync()?.getPending().length??0));
+window.addEventListener('wapps:offline',()=>updateSyncUI('offline',_sync()?.getPending().length??0));
+window.addEventListener('wapps:sync-start',()=>updateSyncUI('syncing',_sync()?.getPending().length??0));
+window.addEventListener('wapps:sync-done',()=>{const fb=_fb();updateSyncUI(fb?(fb.isOnline()?'online':'offline'):'offline',_sync()?.getPending().length??0);});
+window.addEventListener('wapps:pending-change',e=>{const fb=_fb(),label=document.getElementById('sync-label');const isSyncing=label?.className?.includes('syncing');updateSyncUI(isSyncing?'syncing':(fb?(fb.isOnline()?'online':'offline'):'offline'),e.detail.pending.length);});
+updateSyncUI(navigator.onLine?'online':'offline',0);
 </script>
 </body>
 </html>

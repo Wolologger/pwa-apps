@@ -112,7 +112,7 @@ select option{background:var(--bg2);}
 /* BUTTONS */
 .btn{padding:9px 16px;font-size:12px;font-family:var(--fm);border:0.5px solid var(--border2);border-radius:8px;background:transparent;color:var(--text);cursor:pointer;transition:all 0.15s;flex-shrink:0;}
 .btn:hover{background:var(--bg3);}
-.btn-y{background:var(--y);color:#0a0a09;border-color:var(--y);font-weight:500;}
+.btn-y{background:var(--y);color:#0a0a09;border-color:var(--y);font-family:var(--fh);font-size:15px;letter-spacing:1px;}
 .btn-y:hover{opacity:0.9;background:var(--y);}
 .btn-r{background:var(--r);color:#fff;border-color:var(--r);font-weight:500;}
 .btn-sm{padding:5px 11px;font-size:11px;}
@@ -233,6 +233,21 @@ select option{background:var(--bg2);}
 /* back to list */
 .guias-back-btn{display:inline-flex;align-items:center;gap:6px;background:transparent;border:0.5px solid var(--border2);color:var(--muted);font-family:var(--fm);font-size:11px;padding:7px 12px;border-radius:8px;cursor:pointer;margin-bottom:16px;transition:all 0.15s;}
 .guias-back-btn:hover{color:var(--text);border-color:var(--y);}
+
+.sync-bar{display:flex;align-items:center;justify-content:space-between;padding:7px 16px;border-bottom:1px solid rgba(255,255,255,0.06);background:var(--bg2,#141412);min-height:34px;}
+.sync-status{display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:1px;}
+.sync-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.sync-dot.online{background:var(--g,#30d880);}
+.sync-dot.offline{background:var(--r,#f04030);}
+.sync-dot.syncing{background:var(--y,#e8f040);animation:pulse 0.8s ease-in-out infinite;}
+.sync-label{color:var(--muted,#5a5850);}
+.sync-label.online{color:var(--g,#30d880);}
+.sync-label.offline{color:var(--r,#f04030);}
+.sync-label.syncing{color:var(--y,#e8f040);}
+.sync-pending{font-size:9px;color:var(--y,#e8f040);letter-spacing:0.5px;}
+.sync-btn{background:transparent;border:0.5px solid var(--dim,#2a2a26);color:var(--muted,#5a5850);font-family:var(--fm);font-size:9px;letter-spacing:1px;padding:3px 9px;cursor:pointer;transition:all 0.15s;}
+.sync-btn:hover:not(:disabled){border-color:var(--y,#e8f040);color:var(--y,#e8f040);}
+.sync-btn:disabled{opacity:0.35;cursor:default;}
 </style>
 </head>
 <body>
@@ -241,12 +256,20 @@ select option{background:var(--bg2);}
   <!-- NAV -->
   <div class="wnav">
     <a class="wnav-back" href="index.html">
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="var(--y)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </a>
     <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
     <div class="wnav-sep"></div>
     <div class="wnav-title">SUMINISTROS</div>
     <div class="wnav-version">v1.2</div>
+  </div>
+  <div class="sync-bar" id="sync-bar">
+    <div class="sync-status">
+      <div class="sync-dot offline" id="sync-dot"></div>
+      <span class="sync-label offline" id="sync-label">OFFLINE</span>
+      <span class="sync-pending" id="sync-pending"></span>
+    </div>
+    <button class="sync-btn" id="sync-btn" onclick="manualSync()" disabled>↑ SYNC</button>
   </div>
 
   <!-- TIPO SELECTOR -->
@@ -1351,6 +1374,43 @@ function nextQuiz(tipo) { quizState[tipo].current++; renderQuizFor(tipo); }
 // ── INIT ──
 setTipo('todos');
 render();
+</script>
+<script>
+// WTransition inline (página sin wapps-store.js)
+(function(){
+  const D=160;
+  function go(url){document.body.style.transition='opacity '+D+'ms ease';document.body.style.opacity='0';setTimeout(()=>{window.location.href=url;},D);}
+  function intercept(){document.addEventListener('click',e=>{const a=e.target.closest('a[href]');if(!a)return;const h=a.getAttribute('href');if(!h||!h.endsWith('.html')||h.startsWith('http')||a.target)return;e.preventDefault();go(h);},true);}
+  function fadeIn(){document.body.style.opacity='0';document.body.style.transition='none';requestAnimationFrame(()=>{requestAnimationFrame(()=>{document.body.style.transition='opacity '+D+'ms ease';document.body.style.opacity='1';});});}
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',()=>{intercept();fadeIn();});}else{intercept();fadeIn();}
+  window.WTransition={go};
+})();
+
+function _fb()   { return (typeof WFirebase !== 'undefined') ? WFirebase : null; }
+function _sync() { return (typeof WSync     !== 'undefined') ? WSync     : null; }
+function updateSyncUI(state, pendingCount) {
+  const dot=document.getElementById('sync-dot'),label=document.getElementById('sync-label'),btn=document.getElementById('sync-btn'),pend=document.getElementById('sync-pending');
+  if(!dot)return;
+  dot.className='sync-dot '+state; label.className='sync-label '+state;
+  const labels={online:'ONLINE',offline:'OFFLINE',syncing:'SINCRONIZANDO...'};
+  label.textContent=labels[state]||state.toUpperCase();
+  pend.textContent=pendingCount>0?'· '+pendingCount+' PENDIENTE'+(pendingCount>1?'S':''):'';
+  btn.disabled=!(state==='online'&&_fb()&&_fb().getUser()&&pendingCount>0);
+}
+async function manualSync(){
+  const fb=_fb(),sync=_sync();if(!fb||!sync)return;
+  const user=fb.getUser();if(!user||!fb.isOnline())return;
+  updateSyncUI('syncing',sync.getPending().length);
+  document.getElementById('sync-btn').disabled=true;
+  await sync.syncAll(user.uid);
+  updateSyncUI(fb.isOnline()?'online':'offline',sync.getPending().length);
+}
+window.addEventListener('wapps:online',()=>updateSyncUI('online',_sync()?.getPending().length??0));
+window.addEventListener('wapps:offline',()=>updateSyncUI('offline',_sync()?.getPending().length??0));
+window.addEventListener('wapps:sync-start',()=>updateSyncUI('syncing',_sync()?.getPending().length??0));
+window.addEventListener('wapps:sync-done',()=>{const fb=_fb();updateSyncUI(fb?(fb.isOnline()?'online':'offline'):'offline',_sync()?.getPending().length??0);});
+window.addEventListener('wapps:pending-change',e=>{const fb=_fb(),label=document.getElementById('sync-label');const isSyncing=label?.className?.includes('syncing');updateSyncUI(isSyncing?'syncing':(fb?(fb.isOnline()?'online':'offline'):'offline'),e.detail.pending.length);});
+updateSyncUI(navigator.onLine?'online':'offline',0);
 </script>
 </body>
 </html>

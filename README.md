@@ -131,6 +131,11 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 
 ## Changelog
 
+### v3.1.0
+- `mascotas.html`, `deseados.html` y `finanzas.html` conectados a WStore y Firebase
+- `mascotas_v1` y `deseados_v2` añadidos al mapa de migración legacy
+- Barra de sync (ONLINE/OFFLINE/SINCRONIZANDO) extendida a todas las páginas restantes
+
 ### v3.0.0
 - Versión mayor — consolidación de todas las mejoras desde v2.2.0
 - `offline.html`, `404.html` y `ajustes.html` excluidos del grid de apps
