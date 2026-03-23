@@ -1,4 +1,4 @@
-const CACHE = 'wapps-v6';
+const CACHE = 'wapps-v7';
 
 const PRECACHE = [
   '/pwa-apps/manifest.json',
@@ -7,6 +7,7 @@ const PRECACHE = [
   '/pwa-apps/wapps-onboarding.js',
   '/pwa-apps/offline.html',
   '/pwa-apps/404.html',
+  '/pwa-apps/ajustes.html',
   '/pwa-apps/index.html',
   '/pwa-apps/backup.html',
   '/pwa-apps/coches.html',

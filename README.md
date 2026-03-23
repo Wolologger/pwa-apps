@@ -126,6 +126,11 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 
 ## Changelog
 
+### v2.8.0
+- `ajustes.html` — página central de ajustes con cuenta Firebase, notificaciones y estadísticas de datos
+- `index.html` — botón de ajustes redirige a `ajustes.html` en lugar de `editor-categorias.html`
+- SW v7: `ajustes.html` en precaché
+
 ### v2.7.0
 - Eliminadas claves legacy de `wapps-store.js` (`LEGACY_KEYS`, escritura doble en `set()` y `syncOnLoad()`)
 - Añadida `migrateLegacy()` — migración one-shot al arrancar que copia datos al nuevo esquema y borra los duplicados

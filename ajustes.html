@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a09">
+<link rel="manifest" href="manifest.json">
+<title>Ajustes — W//APPS</title>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
+<script src="wapps-store.js"></script>
+<script src="wapps-firebase.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;
+  --y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;
+  --fh:'Bebas Neue',sans-serif;--fm:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm);overflow-x:hidden;}
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;}
+.shell{position:relative;z-index:1;max-width:520px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;padding:0 0 60px;}
+
+/* NAV */
+.wnav{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:100;flex-shrink:0;}
+.wnav-back{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;border:1.5px solid var(--y);background:rgba(232,240,64,0.08);color:var(--y);text-decoration:none;transition:all 0.15s;flex-shrink:0;}
+.wnav-back:hover{background:rgba(232,240,64,0.18);}
+.wnav-back:active{transform:scale(0.94);}
+.wnav-logo{font-family:var(--fh);font-size:16px;letter-spacing:2px;flex-shrink:0;}
+.wnav-logo a{color:var(--muted);text-decoration:none;}
+.wnav-logo a span{color:var(--y);}
+.wnav-sep{width:1px;height:16px;background:var(--border2);flex-shrink:0;}
+.wnav-title{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);flex:1;}
+
+/* SYNC BAR */
+.sync-bar{display:flex;align-items:center;justify-content:space-between;padding:7px 16px;border-bottom:1px solid rgba(255,255,255,0.06);background:var(--bg2);min-height:34px;}
+.sync-status{display:flex;align-items:center;gap:6px;font-size:9px;letter-spacing:1px;}
+.sync-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.sync-dot.online{background:var(--g);}
+.sync-dot.offline{background:var(--r);}
+.sync-dot.syncing{background:var(--y);animation:pulse 0.8s ease-in-out infinite;}
+.sync-label{color:var(--muted);}
+.sync-label.online{color:var(--g);}
+.sync-label.offline{color:var(--r);}
+.sync-label.syncing{color:var(--y);}
+.sync-pending{font-size:9px;color:var(--y);letter-spacing:0.5px;}
+.sync-btn{background:transparent;border:0.5px solid var(--dim);color:var(--muted);font-family:var(--fm);font-size:9px;letter-spacing:1px;padding:3px 9px;cursor:pointer;transition:all 0.15s;}
+.sync-btn:hover:not(:disabled){border-color:var(--y);color:var(--y);}
+.sync-btn:disabled{opacity:0.35;cursor:default;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+/* CONTENT */
+.content{padding:20px 16px;display:flex;flex-direction:column;gap:20px;}
+.section-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:14px;overflow:hidden;}
+.section-header{padding:14px 16px;border-bottom:0.5px solid var(--border2);display:flex;align-items:center;gap:10px;}
+.section-icon{font-size:18px;flex-shrink:0;}
+.section-title{font-family:var(--fh);font-size:18px;letter-spacing:1px;flex:1;}
+.section-body{padding:16px;}
+
+/* CUENTA */
+.user-row{display:flex;align-items:center;gap:14px;padding:4px 0 16px;}
+.user-avatar{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0;object-fit:cover;}
+.user-avatar-placeholder{width:44px;height:44px;border-radius:50%;background:var(--bg3);border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.user-name{font-size:13px;font-weight:500;line-height:1.3;}
+.user-email{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:0.3px;}
+.user-empty{font-size:12px;color:var(--muted);padding:4px 0 16px;}
+.btn{padding:10px 16px;font-size:12px;font-family:var(--fm);border:0.5px solid var(--border2);border-radius:8px;background:transparent;color:var(--text);cursor:pointer;transition:all 0.15s;flex-shrink:0;width:100%;text-align:center;}
+.btn:hover{background:var(--bg3);}
+.btn-y{background:var(--y);color:#0a0a09;border-color:var(--y);font-family:var(--fh);font-size:15px;letter-spacing:1px;}
+.btn-y:hover{opacity:0.9;background:var(--y);}
+.btn-r{background:var(--r);color:#fff;border-color:var(--r);font-weight:500;}
+.btn-r:hover{opacity:0.9;}
+
+/* DATOS */
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:0.5px solid var(--border);font-size:12px;}
+.stat-row:last-child{border-bottom:none;padding-bottom:0;}
+.stat-label{color:var(--muted);}
+.stat-val{font-family:var(--fh);font-size:15px;letter-spacing:0.5px;}
+.stat-val.green{color:var(--g);}
+.stat-val.yellow{color:var(--y);}
+.divider{height:0.5px;background:var(--border2);margin:14px 0;}
+.link-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;text-decoration:none;color:var(--text);font-size:12px;border-bottom:0.5px solid var(--border);transition:color 0.15s;cursor:pointer;background:none;border-left:none;border-right:none;border-top:none;border-radius:0;width:100%;text-align:left;font-family:var(--fm);}
+.link-row:last-child{border-bottom:none;padding-bottom:0;}
+.link-row:hover{color:var(--y);}
+.link-arrow{color:var(--muted);font-size:11px;transition:color 0.15s;}
+.link-row:hover .link-arrow{color:var(--y);}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;padding:10px 18px;font-size:12px;color:var(--text);z-index:999;opacity:0;transition:opacity 0.25s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="shell">
+
+  <!-- NAV -->
+  <div class="wnav">
+    <a class="wnav-back" href="index.html">
+      <svg width="16" height="16" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="var(--y)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
+    <div class="wnav-sep"></div>
+    <div class="wnav-title">AJUSTES</div>
+  </div>
+
+  <!-- SYNC BAR -->
+  <div class="sync-bar" id="sync-bar">
+    <div class="sync-status">
+      <div class="sync-dot offline" id="sync-dot"></div>
+      <span class="sync-label offline" id="sync-label">OFFLINE</span>
+      <span class="sync-pending" id="sync-pending"></span>
+    </div>
+    <button class="sync-btn" id="sync-btn" onclick="manualSync()" disabled>↑ SYNC</button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- CUENTA -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-icon">👤</span>
+        <span class="section-title">Cuenta</span>
+      </div>
+      <div class="section-body">
+        <div id="user-area"></div>
+        <button class="btn btn-y" id="auth-btn" onclick="handleAuth()">ENTRAR CON GOOGLE</button>
+      </div>
+    </div>
+
+    <!-- NOTIFICACIONES -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-icon">🔔</span>
+        <span class="section-title">Notificaciones</span>
+      </div>
+      <div class="section-body">
+        <div id="notif-config-ajustes"></div>
+      </div>
+    </div>
+
+    <!-- DATOS -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-icon">💾</span>
+        <span class="section-title">Datos</span>
+      </div>
+      <div class="section-body">
+        <div id="storage-stats"></div>
+        <div class="divider"></div>
+        <a class="link-row" href="backup.html">
+          Backup y restauración
+          <span class="link-arrow">→</span>
+        </a>
+        <a class="link-row" href="editor-categorias.html">
+          Editor de categorías
+          <span class="link-arrow">→</span>
+        </a>
+        <button class="link-row" onclick="clearCache()">
+          Limpiar caché del navegador
+          <span class="link-arrow" style="color:var(--r);">→</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Helpers ────────────────────────────────────────────────────────
+function _fb()   { return (typeof WFirebase !== 'undefined') ? WFirebase : null; }
+function _sync() { return (typeof WSync     !== 'undefined') ? WSync     : null; }
+
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.borderColor = color || '';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── Sync bar ───────────────────────────────────────────────────────
+function updateSyncUI(state, pendingCount) {
+  const dot   = document.getElementById('sync-dot');
+  const label = document.getElementById('sync-label');
+  const btn   = document.getElementById('sync-btn');
+  const pend  = document.getElementById('sync-pending');
+  if (!dot) return;
+  dot.className   = 'sync-dot ' + state;
+  label.className = 'sync-label ' + state;
+  const labels = { online:'ONLINE', offline:'OFFLINE', syncing:'SINCRONIZANDO...' };
+  label.textContent = labels[state] || state.toUpperCase();
+  pend.textContent  = pendingCount > 0 ? '· ' + pendingCount + ' PENDIENTE' + (pendingCount > 1 ? 'S' : '') : '';
+  const fb = _fb();
+  btn.disabled = !(state === 'online' && fb && fb.getUser() && pendingCount > 0);
+}
+async function manualSync() {
+  const fb = _fb(), sync = _sync();
+  if (!fb || !sync) return;
+  const user = fb.getUser();
+  if (!user || !fb.isOnline()) return;
+  updateSyncUI('syncing', sync.getPending().length);
+  document.getElementById('sync-btn').disabled = true;
+  await sync.syncAll(user.uid);
+  updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
+}
+window.addEventListener('wapps:online',         () => updateSyncUI('online',  _sync()?.getPending().length ?? 0));
+window.addEventListener('wapps:offline',        () => updateSyncUI('offline', _sync()?.getPending().length ?? 0));
+window.addEventListener('wapps:sync-start',     () => updateSyncUI('syncing', _sync()?.getPending().length ?? 0));
+window.addEventListener('wapps:sync-done',      () => { const fb=_fb(); updateSyncUI(fb?(fb.isOnline()?'online':'offline'):'offline', _sync()?.getPending().length??0); });
+window.addEventListener('wapps:pending-change', e => {
+  const fb=_fb(), label=document.getElementById('sync-label');
+  const isSyncing = label?.className?.includes('syncing');
+  updateSyncUI(isSyncing?'syncing':(fb?(fb.isOnline()?'online':'offline'):'offline'), e.detail.pending.length);
+});
+updateSyncUI(navigator.onLine ? 'online' : 'offline', 0);
+
+// ── Cuenta ─────────────────────────────────────────────────────────
+function renderUser(user) {
+  const area = document.getElementById('user-area');
+  const btn  = document.getElementById('auth-btn');
+  if (user) {
+    area.innerHTML = `
+      <div class="user-row">
+        ${user.photoURL
+          ? `<img class="user-avatar" src="${user.photoURL}" alt="${user.displayName}">`
+          : `<div class="user-avatar-placeholder">👤</div>`}
+        <div>
+          <div class="user-name">${user.displayName || 'Usuario'}</div>
+          <div class="user-email">${user.email || ''}</div>
+        </div>
+      </div>`;
+    btn.textContent = 'CERRAR SESIÓN';
+    btn.className   = 'btn btn-r';
+  } else {
+    area.innerHTML  = `<div class="user-empty">No has iniciado sesión.<br>Inicia sesión para sincronizar tus datos entre dispositivos.</div>`;
+    btn.textContent = 'ENTRAR CON GOOGLE';
+    btn.className   = 'btn btn-y';
+  }
+}
+
+async function handleAuth() {
+  const fb   = _fb();
+  const user = fb ? fb.getUser() : null;
+  if (user) {
+    if (confirm(`¿Cerrar sesión de ${user.displayName}?`)) {
+      await fb.logout();
+      showToast('Sesión cerrada');
+    }
+  } else {
+    if (fb) await fb.login();
+  }
+}
+
+window.addEventListener('wapps:auth-change', e => renderUser(e.detail.user));
+
+// ── Storage stats ──────────────────────────────────────────────────
+function fmtSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+}
+
+function renderStorageStats() {
+  const el = document.getElementById('storage-stats');
+  if (!el) return;
+
+  const WAPPS_KEYS = [
+    'despensa.items','compra.data','suministros.data','finanzas.data',
+    'gastos.data','semana.data','deseados.data','obra.data',
+    'instrumentos.data','setlist.data','mascotas.data','coches.data','ninos.data'
+  ];
+
+  let totalBytes = 0;
+  let usedApps   = 0;
+  const rows     = [];
+
+  for (const k of WAPPS_KEYS) {
+    const raw = localStorage.getItem('wapps.' + k);
+    if (!raw) continue;
+    const bytes = new Blob([raw]).size;
+    totalBytes += bytes;
+    usedApps++;
+    const appName = k.split('.')[0].charAt(0).toUpperCase() + k.split('.')[0].slice(1);
+    rows.push({ name: appName, bytes });
+  }
+
+  // Total localStorage
+  let lsTotal = 0;
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const v = localStorage.getItem(localStorage.key(i)) || '';
+      lsTotal += new Blob([v]).size;
+    }
+  } catch(e) {}
+
+  const pct = lsTotal > 0 ? Math.round((totalBytes / (5 * 1024 * 1024)) * 100) : 0;
+  const color = pct > 70 ? 'var(--r)' : pct > 40 ? 'var(--y)' : 'var(--g)';
+
+  el.innerHTML = `
+    <div class="stat-row">
+      <span class="stat-label">Apps con datos</span>
+      <span class="stat-val green">${usedApps}</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Datos W//APPS</span>
+      <span class="stat-val yellow">${fmtSize(totalBytes)}</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Total localStorage</span>
+      <span class="stat-val">${fmtSize(lsTotal)}</span>
+    </div>
+    <div class="stat-row" style="flex-direction:column;align-items:flex-start;gap:6px;">
+      <span class="stat-label">Uso estimado (límite 5 MB)</span>
+      <div style="width:100%;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;">
+        <div style="height:100%;width:${Math.min(pct,100)}%;background:${color};border-radius:2px;transition:width 0.4s;"></div>
+      </div>
+      <span style="font-size:10px;color:${color};">${pct}%</span>
+    </div>`;
+}
+
+// ── Cache clear ────────────────────────────────────────────────────
+async function clearCache() {
+  if (!confirm('¿Borrar la caché del navegador? La app se recargará.')) return;
+  if ('caches' in window) {
+    const keys = await caches.keys();
+    await Promise.all(keys.map(k => caches.delete(k)));
+  }
+  if ('serviceWorker' in navigator) {
+    const regs = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(regs.map(r => r.unregister()));
+  }
+  showToast('Caché limpiada — recargando…');
+  setTimeout(() => window.location.reload(true), 1000);
+}
+
+// ── Init ───────────────────────────────────────────────────────────
+if (typeof WNotify !== 'undefined') {
+  WNotify.renderConfigPanel('notif-config-ajustes');
+}
+renderStorageStats();
+renderUser(_fb() ? _fb().getUser() : null);
+</script>
+</body>
+</html>
