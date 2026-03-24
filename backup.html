@@ -283,13 +283,26 @@ function readApp(app) {
 }
 
 function writeApp(app, data) {
+  // Forzar _updatedAt reciente para que este restore gane siempre
+  // frente a cualquier dato en Firestore (pullAll/syncOnLoad usan remoteTs >= localTs).
+  const now = new Date().toISOString();
+  const dataWithTs = (data && typeof data === 'object' && !Array.isArray(data))
+    ? { ...data, _updatedAt: now }
+    : data;
+
   if (app.wkey && typeof WStore !== 'undefined') {
-    WStore.set(app.wkey[0], app.wkey[1], data);
+    // Escribir directo en localStorage (no via WStore.set) para controlar
+    // el timestamp exacto que quedará en ambas claves.
+    const sk = `wapps.${app.wkey[0]}.${app.wkey[1]}`;
+    try { localStorage.setItem(sk, JSON.stringify(dataWithTs)); } catch(e) {}
+    // Marcar pending para que se suba a Firestore con este timestamp
+    if (typeof WSync !== 'undefined') {
+      WSync.markPending(`${app.wkey[0]}.${app.wkey[1]}`);
+    }
   }
-  // Escribir siempre también en la clave legacy para que la app la encuentre
-  // al arrancar aunque WStore no esté disponible o no haya sincronizado aún.
-  // Esto replica lo que hace save() en cada app individual.
-  try { localStorage.setItem(app.key, JSON.stringify(data)); } catch(e) {}
+  // Escribir siempre en la clave legacy — mismo timestamp para que
+  // syncOnLoad no pueda ganarle comparando _updatedAt.
+  try { localStorage.setItem(app.key, JSON.stringify(dataWithTs)); } catch(e) {}
 }
 
 function byteSize(obj) {
