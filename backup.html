@@ -285,9 +285,11 @@ function readApp(app) {
 function writeApp(app, data) {
   if (app.wkey && typeof WStore !== 'undefined') {
     WStore.set(app.wkey[0], app.wkey[1], data);
-  } else {
-    try { localStorage.setItem(app.key, JSON.stringify(data)); } catch(e) {}
   }
+  // Escribir siempre también en la clave legacy para que la app la encuentre
+  // al arrancar aunque WStore no esté disponible o no haya sincronizado aún.
+  // Esto replica lo que hace save() en cada app individual.
+  try { localStorage.setItem(app.key, JSON.stringify(data)); } catch(e) {}
 }
 
 function byteSize(obj) {
