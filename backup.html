@@ -488,6 +488,15 @@ function doRestore(all) {
   document.getElementById('restore-preview').style.display = 'none';
   showToast(`${ok} app${ok!==1?'s':''} restauradas ✓`);
   render();
+
+  // Subir a Firestore inmediatamente para que pullAll en index.html
+  // no machaque el restore con datos más antiguos de Firestore.
+  if (typeof WFirebase !== 'undefined' && typeof WSync !== 'undefined') {
+    const user = WFirebase.getUser();
+    if (user && WFirebase.isOnline()) {
+      WSync.syncAll(user.uid).catch(() => {});
+    }
+  }
 }
 
 // ── WIPE ──

@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0a0a09">
 <link rel="manifest" href="manifest.json">
 <title>W // APPS</title>
-<!-- version: 3.1.0 -->
+<!-- version: 3.1.1 -->
 <!-- Firebase SDK v9 compat -->
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
@@ -284,7 +284,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
     <div class="topbar-right">
       <button class="version-badge" onclick="openChangelog()" title="Ver changelog">
         <span class="version-dot"></span>
-        <span id="version-display">v3.1.0</span>
+        <span id="version-display">v3.1.1</span>
       </button>
       <div class="clock" id="clock">--:--</div>
       <button class="auth-btn" id="auth-btn" onclick="handleAuth()" title="Login con Google">
@@ -356,7 +356,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
     <div class="cl-modal">
       <div class="cl-handle"></div>
       <div class="cl-header">
-        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v3.1.0</span></div>
+        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v3.1.1</span></div>
         <button class="cl-close" onclick="closeChangelog()">✕</button>
       </div>
       <div class="cl-body" id="cl-body"></div>
@@ -369,12 +369,12 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
 const GITHUB_USER='Wolologger';
 const GITHUB_REPO='pwa-apps';
 
-const APP_VERSION = 'v3.1.0';
+const APP_VERSION = 'v3.1.1';
 
 // ── CHANGELOG ──────────────────────────────────────────────────────
 const CHANGELOG = [
   {
-    version: 'v3.1.0',
+    version: 'v3.1.1',
     date: 'Marzo 2026',
     items: [
       { type: 'new', text: 'ajustes.html — página central: cuenta Firebase, notificaciones y estadísticas de datos' },
@@ -389,7 +389,10 @@ const CHANGELOG = [
       { type: 'imp', text: 'semana, instrumentos, setlist, mascotas, deseados, finanzas, coches, ninos conectados a WStore y Firebase' },
       { type: 'imp', text: 'wapps-store.js — migrateLegacy() one-shot al arrancar, elimina claves duplicadas' },
       { type: 'fix', text: 'ajustes.html — timing auth Firebase, orden de scripts, limpieza de intervalo al navegar' },
-      { type: 'fix', text: 'index.html — versión badge actualizada a v3.1.0' },
+      { type: 'fix', text: 'index.html — versión badge actualizada a v3.1.1' },
+      { type: 'fix', text: 'backup.html — writeApp escribe en WStore y clave legacy simultáneamente' },
+      { type: 'fix', text: 'backup.html — doRestore sube a Firestore inmediatamente tras restaurar' },
+      { type: 'fix', text: 'wapps-firebase.js — pullAll usa > en vez de >= para no machacar restore' },
     ]
   },
   {

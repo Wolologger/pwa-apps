@@ -259,11 +259,11 @@ const WSync = (() => {
         const localRaw = localStorage.getItem(localKey);
         const local    = localRaw ? JSON.parse(localRaw) : null;
 
-        // Gana el más reciente
+        // Gana el más reciente. En empate gana el local (evita machacar un restore reciente).
         const remoteTs = new Date(data._updatedAt || 0).getTime();
         const localTs  = new Date(local?._updatedAt || 0).getTime();
 
-        if (!local || remoteTs >= localTs) {
+        if (!local || remoteTs > localTs) {
           const clean = { ...data };
           delete clean._updatedAt;
           localStorage.setItem(localKey, JSON.stringify(clean));
