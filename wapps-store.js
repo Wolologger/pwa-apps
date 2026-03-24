@@ -49,7 +49,7 @@ const WStore = (() => {
   // Migración one-shot: copia datos legacy a claves nuevas si no existen,
   // luego borra las claves legacy. Se ejecuta una sola vez al arrancar.
   function migrateLegacy() {
-    const DONE_KEY = 'wapps._migrated_v2'; // v2 — rehace la migración de forma segura
+    const DONE_KEY = 'wapps._migrated_v2';
     try {
       if (localStorage.getItem(DONE_KEY)) return;
       let migrated = 0;
@@ -58,33 +58,62 @@ const WStore = (() => {
         if (!oldRaw) continue;
         const newRaw = localStorage.getItem(newKey);
         if (!newRaw) {
-          // Clave nueva vacía — copiar legacy
           localStorage.setItem(newKey, oldRaw);
           migrated++;
           localStorage.removeItem(oldKey);
         } else {
-          // Ambas existen — gana la más reciente por _updatedAt
           try {
             const oldData = JSON.parse(oldRaw);
             const newData = JSON.parse(newRaw);
             const oldTs = new Date(oldData._updatedAt || 0).getTime();
             const newTs = new Date(newData._updatedAt || 0).getTime();
             if (oldTs > newTs) {
-              // Legacy es más reciente — sobrescribir nueva
               localStorage.setItem(newKey, oldRaw);
               migrated++;
             }
-            // En cualquier caso borrar legacy
             localStorage.removeItem(oldKey);
-          } catch(e) {
-            // Si no se puede parsear, conservar legacy por seguridad
-          }
+          } catch(e) {}
         }
       }
       localStorage.setItem(DONE_KEY, '1');
       if (migrated > 0) console.info(`[WStore] Migración legacy v2: ${migrated} claves migradas.`);
     } catch(e) {
       console.warn('[WStore] migrateLegacy error:', e);
+    }
+  }
+
+  // ── Detectar localStorage vacío tras wipe del SW y recuperar Firestore ──
+  // Si no hay NINGUNA clave wapps.* de datos, probablemente el navegador
+  // purgó el localStorage (iOS/Safari, reinstalación, etc.). En ese caso
+  // lanzamos un pull completo en cuanto haya usuario autenticado.
+  function checkAndRecoverFromFirestore() {
+    const hasData = Object.keys(MIGRATE_MAP).some(k => localStorage.getItem(k) !== null);
+    if (hasData) return; // localStorage intacto, nada que hacer
+
+    // Sin datos locales — esperar a que Firebase confirme usuario y tirar pull
+    const doRecover = async () => {
+      try {
+        if (typeof WFirebase === 'undefined' || typeof WSync === 'undefined') return;
+        const user = WFirebase.getUser();
+        if (!user || !WFirebase.isOnline()) return;
+        console.info('[WStore] localStorage vacío detectado — recuperando desde Firestore…');
+        const ok = await WSync.pullAll(user.uid);
+        if (ok) {
+          console.info('[WStore] Datos recuperados desde Firestore ✓');
+          // Emitir evento global para que las apps que ya cargaron se re-rendericen
+          window.dispatchEvent(new CustomEvent('wapps:recovered', { detail: { source: 'firestore' } }));
+        }
+      } catch(e) {
+        console.warn('[WStore] checkAndRecoverFromFirestore error:', e);
+      }
+    };
+
+    // Si Firebase ya tiene usuario, recuperar ahora; si no, esperar auth-change
+    if (typeof WFirebase !== 'undefined' && WFirebase.getUser()) {
+      doRecover();
+    } else {
+      const handler = () => { doRecover(); window.removeEventListener('wapps:auth-change', handler); };
+      window.addEventListener('wapps:auth-change', handler);
     }
   }
 
@@ -287,6 +316,8 @@ const WStore = (() => {
 
   // Ejecutar migración al arrancar
   migrateLegacy();
+  // Detectar wipe de localStorage (iOS/Safari/SW) y recuperar desde Firestore
+  checkAndRecoverFromFirestore();
 
   return { get, set, on, bridge, syncOnLoad, syncAllOnLoad };
 })();

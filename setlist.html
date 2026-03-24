@@ -305,14 +305,22 @@ let perfIdx = 0;
 const BAND_COLORS_DEFAULT = ['#e8f040','#f04030','#30d880','#30a8f0','#f09030','#c060f0','#f060c0'];
 
 function loadState() {
+  // 1. WStore (clave nueva — usada por backup/restore y Firebase sync)
+  if (typeof WStore !== 'undefined') {
+    const v = WStore.get('setlist', 'data');
+    if (v && (v.bands || v.songs)) return v;
+  }
+  // 2. localStorage legacy
   try { const r = localStorage.getItem('setlist_v1'); if (r) return JSON.parse(r); } catch(e) {}
-  return {
-    bands: [],
-    songs: [],
-    nextId: 1
-  };
+  return { bands: [], songs: [], nextId: 1 };
 }
-function save() { state.nextId = nid; try { localStorage.setItem('setlist_v1', JSON.stringify(state)); if(typeof WStore!=='undefined') WStore.set('setlist','data',state); } catch(e) {} }
+function save() {
+  state.nextId = nid;
+  if (typeof WStore !== 'undefined') {
+    WStore.set('setlist', 'data', state);
+  }
+  try { localStorage.setItem('setlist_v1', JSON.stringify(state)); } catch(e) {}
+}
 function nxtId() { return ++nid; }
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
@@ -707,6 +715,15 @@ function delBand(id) {
 
 // ── INIT ──
 render();
+// Si localStorage estaba vacío, recuperar desde Firestore en background
+if (typeof WStore !== 'undefined') {
+  WStore.syncOnLoad('setlist', 'data', fresh => { state = fresh; nid = state.nextId || 1; render(); });
+  // Recuperación tras wipe total de localStorage (iOS/SW)
+  window.addEventListener('wapps:recovered', () => {
+    const fresh = WStore.get('setlist','data');
+    if (fresh && (fresh.bands || fresh.songs)) { state = fresh; nid = state.nextId || 1; render(); }
+  });
+}
 </script>
 <script>
 // WTransition inline (página sin wapps-store.js)

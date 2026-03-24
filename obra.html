@@ -12,9 +12,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="wapps-store.js"></script>
 <style>
-:root{--bg:#1a1a18;--bg2:#222220;--bg3:#2c2c29;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);--text:#f0ede6;--muted:#8a8880;--accent:#d4f060;--accent2:#60c0f0;--warn:#f0b060;--danger:#f06060;--ok:#60d490;--radius:12px;--font-head:'Syne',sans-serif;--font-mono:'DM Mono',monospace;}
+:root{
+  --bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;
+  --y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;--o:#f09030;
+  --fh:'Bebas Neue',sans-serif;--fm:'DM Mono',monospace;--fs:'DM Sans',sans-serif;
+  /* aliases para compatibilidad interna de obra */
+  --accent:var(--y);--accent2:var(--b);--warn:var(--o);--danger:var(--r);--ok:var(--g);
+  --font-head:var(--fh);--font-mono:var(--fm);
+}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-mono);overflow:hidden;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--fm);overflow:hidden;}
 .shell{display:flex;flex-direction:column;height:100dvh;max-width:480px;margin:0 auto;}
 
 /* SPINNER */
@@ -951,6 +960,16 @@ render();
 // Hide spinner
 const _loadEl = document.getElementById('wapp-loading');
 if(_loadEl){ _loadEl.classList.add('fade'); setTimeout(()=>_loadEl.remove(), 350); }
+// Si localStorage estaba vacío, recuperar desde Firestore en background
+if (typeof WStore !== 'undefined') {
+  WStore.syncOnLoad('obra', 'data', fresh => {
+    if (fresh?.proyectos) {
+      state = fresh; nid = state.nextId || 200;
+      activeProjectId = state.proyectos.find(p=>!p.archived)?.id || state.proyectos[0]?.id || null;
+      render();
+    }
+  });
+}
 
 // Notificaciones
 if(typeof WNotify !== 'undefined'){

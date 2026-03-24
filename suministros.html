@@ -927,12 +927,41 @@ const TIPO_UNIT  = { luz: 'kWh', gas: 'm³', agua: 'm³' };
 const TIPO_EMOJI = { luz: '⚡', gas: '🔥', agua: '💧' };
 
 function loadState() {
+  // 1. WStore (clave nueva, usada por backup/restore y Firebase sync)
+  if (typeof WStore !== 'undefined') {
+    const v = WStore.get('suministros', 'data');
+    if (v && v.facturas) return v;
+  }
+  // 2. localStorage legacy
   try { const r = localStorage.getItem('suministros_v1'); if (r) return JSON.parse(r); } catch(e) {}
   return { facturas: [], nextId: 1 };
 }
 function save() {
   state.nextId = nid;
+  // Guardar en WStore (sync Firebase) y en clave legacy por compatibilidad
+  if (typeof WStore !== 'undefined') {
+    WStore.set('suministros', 'data', state);
+  } else {
+    try { localStorage.setItem('suministros_v1', JSON.stringify(state)); } catch(e) {}
+  }
   try { localStorage.setItem('suministros_v1', JSON.stringify(state)); } catch(e) {}
+}
+
+// ── TOAST ──
+let _toastTimer = null;
+function showToast(msg, isErr = false) {
+  let el = document.getElementById('toast-sui');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'toast-sui';
+    el.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;padding:10px 18px;font-size:12px;font-family:var(--fm);color:var(--text);z-index:9999;max-width:320px;text-align:center;opacity:0;transition:opacity 0.25s;pointer-events:none;';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.color = isErr ? 'var(--r)' : 'var(--g)';
+  el.style.opacity = '1';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { el.style.opacity = '0'; }, 2800);
 }
 function nxtId() { return ++nid; }
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -982,9 +1011,28 @@ function addFactura() {
   const inicio = document.getElementById('f-inicio').value;
   const fin = document.getElementById('f-fin').value;
   const notas = document.getElementById('f-notas').value.trim();
-  if (!empresa || isNaN(importe) || !inicio) return;
+
+  // Validación con mensaje de campos faltantes
+  const faltantes = [];
+  if (!empresa) faltantes.push('empresa/comercializadora');
+  if (isNaN(importe) || importe <= 0) faltantes.push('importe');
+  if (!inicio) faltantes.push('fecha de inicio');
+  if (faltantes.length) {
+    showToast('⚠ Faltan: ' + faltantes.join(', '), true);
+    // Marcar campos vacíos visualmente
+    document.getElementById('f-empresa').style.borderColor = !empresa ? 'var(--r)' : '';
+    document.getElementById('f-importe').style.borderColor = (isNaN(importe) || importe <= 0) ? 'var(--r)' : '';
+    document.getElementById('f-inicio').style.borderColor = !inicio ? 'var(--r)' : '';
+    return;
+  }
+  // Limpiar bordes de error
+  ['f-empresa','f-importe','f-inicio'].forEach(id => document.getElementById(id).style.borderColor = '');
+
   state.facturas.push({ id: nxtId(), tipo, num, empresa, importe, consumo, inicio, fin, notas });
   ['f-empresa','f-num','f-importe','f-consumo','f-inicio','f-fin','f-notas'].forEach(id => document.getElementById(id).value = '');
+  closeAdd(); save(); render();
+  showToast('Factura añadida ✓');
+}
   closeAdd(); save(); render();
 }
 
@@ -1374,6 +1422,14 @@ function nextQuiz(tipo) { quizState[tipo].current++; renderQuizFor(tipo); }
 // ── INIT ──
 setTipo('todos');
 render();
+// Si localStorage estaba vacío, recuperar desde Firestore en background
+if (typeof WStore !== 'undefined') {
+  WStore.syncOnLoad('suministros', 'data', fresh => { state = fresh; nid = state.nextId || 1; render(); });
+  window.addEventListener('wapps:recovered', () => {
+    const fresh = WStore.get('suministros','data');
+    if (fresh && fresh.facturas) { state = fresh; nid = state.nextId || 1; render(); }
+  });
+}
 </script>
 <script>
 // WTransition inline (página sin wapps-store.js)

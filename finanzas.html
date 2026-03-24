@@ -178,9 +178,16 @@ const GASTO_CATS={vivienda:'🏠 Vivienda',suministros:'💡 Suministros',transp
 let state=loadState(),currentTab='resumen';
 
 function loadState(){
+  // 1. WStore (clave nueva — usada por backup/restore y Firebase sync)
+  if(typeof WStore!=='undefined'){const v=WStore.get('finanzas','data');if(v&&(v.ingresos||v.gastos))return v;}
+  // 2. localStorage legacy
   try{const r=localStorage.getItem('finanzas_v1');if(r)return JSON.parse(r);}catch(e){}
-  return{ingresos:[],gastos:[],nextId:1};}
-function save(){try{localStorage.setItem('finanzas_v1',JSON.stringify(state));if(typeof WStore!=='undefined')WStore.set('finanzas','data',state);}catch(e){}}
+  return{ingresos:[],gastos:[],nextId:1};
+}
+function save(){
+  if(typeof WStore!=='undefined'){WStore.set('finanzas','data',state);}
+  try{localStorage.setItem('finanzas_v1',JSON.stringify(state));}catch(e){}
+}
 function nxtId(){return++state.nextId;}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function fmt(n,d=2){return Number(n||0).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d});}
@@ -521,6 +528,14 @@ function showFB(msg,color){
 }
 
 render();
+// Si localStorage estaba vacío, recuperar desde Firestore en background
+if (typeof WStore !== 'undefined') {
+  WStore.syncOnLoad('finanzas', 'data', fresh => { state = fresh; render(); });
+  window.addEventListener('wapps:recovered', () => {
+    const fresh = WStore.get('finanzas','data');
+    if (fresh && (fresh.ingresos || fresh.gastos)) { state = fresh; render(); }
+  });
+}
 </script>
 <script>
 // WTransition inline (página sin wapps-store.js)
