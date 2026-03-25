@@ -37,10 +37,12 @@ localStorage (siempre)
                             └── onSnapshot (tiempo real → WStore.watchRealtime)
 ```
 
-- **Sin conexión**: todo funciona con `localStorage`. Los cambios se marcan como pendientes.
-- **Con conexión y sesión**: los datos se suben a Firestore automáticamente. Gana siempre el más reciente por `_updatedAt`.
-- **Tiempo real**: `WStore.watchRealtime` mantiene un listener `onSnapshot` activo. Cualquier cambio en otro dispositivo llega en segundos, sin necesidad de recargar.
-- **Service Worker** (`sw.js`): estrategia stale-while-revalidate para HTML. La app carga instantáneamente aunque no haya red. Si se despliega una versión nueva, aparece un banner para recargar.
+- **Sin conexión**: todo funciona con `localStorage`. Los cambios se marcan como pendientes en `wapps.pending` (persiste entre sesiones).
+- **Con conexión y sesión**: los datos se suben a Firestore automáticamente. Gana siempre el más reciente por `_updatedAt`. Al cerrar la pestaña, `WSync` hace un flush de pendientes vía `visibilitychange`/`pagehide`.
+- **Tiempo real**: `WStore.watchRealtime` mantiene un listener `onSnapshot` activo con merge campo a campo. Los listeners se limpian solos en `pagehide`. Un toast sutil confirma cada actualización remota.
+- **Service Worker** (`sw.js` v8.2): precaché reducido al núcleo; el resto se cachea al visitar (lazy). Estrategia stale-while-revalidate para HTML con banner de actualización no intrusivo.
+- **Seguridad**: sesión expira tras 8 h de inactividad (configurable). Credenciales placeholder en `wapps-config.js` se detectan al arrancar.
+- **Resiliencia**: `QuotaExceededError` de localStorage muestra banner de alerta en lugar de fallar silenciosamente.
 
 ---
 
@@ -160,6 +162,18 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 ---
 
 ## Changelog
+
+### v3.3.2
+- `wapps-store.js` — `WStore.set()` captura `QuotaExceededError` y muestra banner de alerta en lugar de fallar silenciosamente
+- `wapps-store.js` — `_mergeByField()`: merge campo a campo en sincronización en tiempo real — ediciones simultáneas en campos distintos ya no se pierden
+- `wapps-store.js` — `_realtimeRegistry`: todos los listeners `onSnapshot` se registran y se limpian automáticamente en `pagehide` — sin conexiones Firestore huérfanas
+- `wapps-store.js` — `_showRealtimeToast()`: toast verde sutil cuando llega una actualización desde otro dispositivo
+- `wapps-store.js` — `WUpdate.dismiss()` persiste en `sessionStorage` — el banner reaparece al navegar a otra página si no se ha recargado
+- `wapps-firebase.js` — detección de credenciales placeholder en `wapps-config.js` — aviso claro en consola y modo local en lugar de inicializar Firebase con valores de ejemplo
+- `wapps-firebase.js` — expiración de sesión por inactividad (8 h por defecto, configurable con `sessionTimeoutHours` en `wapps-config.js`) — cierre automático en dispositivos compartidos
+- `wapps-firebase.js` — `WSync` hace flush de pendientes en `visibilitychange` y `pagehide` — los cambios offline se suben al cerrar la pestaña si hay red
+- `wapps-firebase.js` — `WSync` reintenta pendientes al autenticar (por si había cambios antes del login)
+- `sw.js` v8.2 — precaché reducido al núcleo (módulos JS + `index.html` + fallbacks). El resto de páginas se cachean la primera vez que se visitan (lazy cache) — instalación más rápida y menos consumo de datos
 
 ### v3.3.1
 - `sw.js` — estrategia stale-while-revalidate para HTML (antes cache-first puro). El SW ya no bloquea la activación con `skipWaiting`; espera a que el usuario confirme

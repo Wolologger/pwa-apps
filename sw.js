@@ -1,6 +1,9 @@
-const CACHE = 'wapps-v8.1';
+const CACHE = 'wapps-v8.2';
 
-const PRECACHE = [
+// Núcleo: solo lo imprescindible para arrancar offline y mostrar fallbacks.
+// El resto de páginas HTML se cachean la primera vez que el usuario las visita (lazy cache).
+// Esto reduce el tiempo de instalación y el consumo de datos en la primera carga.
+const PRECACHE_CORE = [
   '/pwa-apps/manifest.json',
   '/pwa-apps/wapps-config.js',
   '/pwa-apps/wapps-store.js',
@@ -8,28 +11,13 @@ const PRECACHE = [
   '/pwa-apps/wapps-onboarding.js',
   '/pwa-apps/offline.html',
   '/pwa-apps/404.html',
-  '/pwa-apps/ajustes.html',
   '/pwa-apps/index.html',
-  '/pwa-apps/backup.html',
-  '/pwa-apps/coches.html',
-  '/pwa-apps/compra.html',
-  '/pwa-apps/decisor.html',
-  '/pwa-apps/deseados.html',
-  '/pwa-apps/despensa.html',
-  '/pwa-apps/editor-categorias.html',
-  '/pwa-apps/finanzas.html',
-  '/pwa-apps/gastos-diarios.html',
-  '/pwa-apps/guia_factura_luz.html',
-  '/pwa-apps/instrumentos.html',
-  '/pwa-apps/mascotas.html',
-  '/pwa-apps/ninos.html',
-  '/pwa-apps/obra.html',
-  '/pwa-apps/semana.html',
-  '/pwa-apps/setlist.html',
-  '/pwa-apps/suministros.html',
   '/pwa-apps/icons/icon-192.png',
   '/pwa-apps/icons/icon-512.png',
 ];
+
+// Alias por compatibilidad con precacheAll
+const PRECACHE = PRECACHE_CORE;
 
 // Precache individual con tolerancia a fallos
 async function precacheAll(cache) {

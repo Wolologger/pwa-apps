@@ -29,12 +29,28 @@ const WFirebase = (() => {
   // Config cargada desde wapps-config.js (excluido del repo via .gitignore)
   // Si no existe, muestra un aviso claro en consola.
   const FIREBASE_CONFIG = (() => {
-    if (window.WAPPS_CONFIG) return window.WAPPS_CONFIG;
-    console.error(
-      '[WFirebase] No se encontró wapps-config.js.\n' +
-      'Copia wapps-config.example.js → wapps-config.js y añade tus credenciales Firebase.'
+    if (!window.WAPPS_CONFIG) {
+      console.error(
+        '[WFirebase] No se encontró wapps-config.js.\n' +
+        'Copia wapps-config.example.js → wapps-config.js y añade tus credenciales Firebase.'
+      );
+      return null;
+    }
+    // Detectar credenciales de ejemplo sin rellenar — evita inicializar Firebase con placeholders
+    const cfg = window.WAPPS_CONFIG;
+    const placeholders = ['TU_API_KEY', 'TU_PROYECTO', 'TU_SENDER_ID', 'TU_APP_ID'];
+    const hasPlaceholder = Object.values(cfg).some(v =>
+      placeholders.some(p => String(v).includes(p))
     );
-    return null;
+    if (hasPlaceholder) {
+      console.warn(
+        '[WFirebase] wapps-config.js contiene valores de ejemplo sin rellenar.\n' +
+        'Edita wapps-config.js con tus credenciales reales de Firebase.\n' +
+        'La app funcionará en modo local (sin sync).'
+      );
+      return null;
+    }
+    return cfg;
   })();
 
   let _auth  = null;
@@ -55,12 +71,48 @@ const WFirebase = (() => {
       // Observer de auth persistente
       _auth.onAuthStateChanged(user => {
         _user = user;
+        if (user) {
+          _resetInactivityTimer();
+        } else {
+          _clearInactivityTimer();
+        }
         window.dispatchEvent(new CustomEvent('wapps:auth-change', { detail: { user } }));
       });
     } catch(e) {
       console.error('[WFirebase] Error init:', e);
     }
   }
+
+  // ── Expiración de sesión por inactividad ────────────────────────
+  // Cierra sesión automáticamente si el usuario no interactúa durante
+  // SESSION_TIMEOUT_MS. El timer se reinicia con cualquier interacción.
+  // Por defecto: 8 horas. Configurable via window.WAPPS_CONFIG.sessionTimeoutHours.
+  const SESSION_TIMEOUT_MS = (() => {
+    const h = window.WAPPS_CONFIG?.sessionTimeoutHours;
+    return (typeof h === 'number' && h > 0) ? h * 3600000 : 8 * 3600000;
+  })();
+
+  let _inactivityTimer = null;
+
+  function _resetInactivityTimer() {
+    _clearInactivityTimer();
+    _inactivityTimer = setTimeout(async () => {
+      if (_user) {
+        console.info('[WFirebase] Sesión expirada por inactividad — cerrando sesión.');
+        window.dispatchEvent(new CustomEvent('wapps:session-expired'));
+        await logout();
+      }
+    }, SESSION_TIMEOUT_MS);
+  }
+
+  function _clearInactivityTimer() {
+    if (_inactivityTimer) { clearTimeout(_inactivityTimer); _inactivityTimer = null; }
+  }
+
+  // Reiniciar el timer ante cualquier interacción del usuario
+  ['click', 'keydown', 'touchstart', 'scroll', 'mousemove'].forEach(evt => {
+    window.addEventListener(evt, () => { if (_user) _resetInactivityTimer(); }, { passive: true });
+  });
 
   function _waitForSDK(retries = 30) {
     if (typeof firebase !== 'undefined' && firebase.app) {
@@ -311,6 +363,32 @@ const WSync = (() => {
       await syncAll(user.uid);
     }
   });
+
+  // ── Auto-sync al autenticar (por si había pendientes antes del login) ──
+  window.addEventListener('wapps:auth-change', async e => {
+    const user = e.detail?.user;
+    if (user && WFirebase.isOnline() && getPending().length > 0) {
+      await syncAll(user.uid);
+    }
+  });
+
+  // ── Flush de pendientes al abandonar la página (best-effort) ─────
+  // visibilitychange + pagehide dan una última oportunidad de subir
+  // cambios antes de que el navegador cierre la pestaña.
+  // Se usa sendBeacon si está disponible para no bloquear el cierre.
+  async function _flushOnExit() {
+    const user = WFirebase.getUser();
+    if (!user || !WFirebase.isOnline()) return;
+    const pending = getPending();
+    if (!pending.length) return;
+    // Intento best-effort — no bloqueamos con await en pagehide
+    syncAll(user.uid).catch(() => {});
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') _flushOnExit();
+  });
+  window.addEventListener('pagehide', _flushOnExit);
 
   return { markPending, clearPending, clearAllPending, getPending, syncAll, pullAll, WSTORE_KEYS };
 
