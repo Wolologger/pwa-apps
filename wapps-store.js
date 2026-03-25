@@ -314,12 +314,61 @@ const WStore = (() => {
     }
   }
 
+  // ── watchRealtime — sincronización en tiempo real con Firestore ──────
+  // Suscribe a cambios en vivo de un documento Firestore mediante onSnapshot.
+  // Actualiza localStorage y emite wapps:change cuando llega un cambio remoto.
+  //
+  // Devuelve una función unsubscribe para detener el listener.
+  // Uso: const unsub = WStore.watchRealtime('despensa', 'items', data => render(data));
+  //
+  function watchRealtime(app, key, onUpdate) {
+    if (typeof WFirebase === 'undefined' || typeof WFirebase.watchDocument !== 'function') return () => {};
+    const user = WFirebase.getUser();
+    if (!user) {
+      // Usuario aún no autenticado — esperar auth-change
+      let unsub = () => {};
+      const handler = () => {
+        const u = WFirebase.getUser();
+        if (!u) return;
+        window.removeEventListener('wapps:auth-change', handler);
+        unsub = WFirebase.watchDocument(u.uid, `${app}_${key}`, remote => {
+          _applyRemoteIfNewer(app, key, remote, onUpdate);
+        });
+      };
+      window.addEventListener('wapps:auth-change', handler);
+      return () => { unsub(); window.removeEventListener('wapps:auth-change', handler); };
+    }
+    return WFirebase.watchDocument(user.uid, `${app}_${key}`, remote => {
+      _applyRemoteIfNewer(app, key, remote, onUpdate);
+    });
+  }
+
+  // Compara timestamps; aplica el dato remoto solo si es más reciente que el local.
+  function _applyRemoteIfNewer(app, key, remote, onUpdate) {
+    try {
+      if (!remote) return;
+      const localRaw = localStorage.getItem(storageKey(app, key));
+      const local    = localRaw ? JSON.parse(localRaw) : null;
+      const remoteTs = new Date(remote._updatedAt || 0).getTime();
+      const localTs  = new Date(local?._updatedAt  || 0).getTime();
+      if (remoteTs <= localTs) return; // local ya es igual o más reciente
+      localStorage.setItem(storageKey(app, key), JSON.stringify(remote));
+      if (typeof onUpdate === 'function') onUpdate(remote);
+      window.dispatchEvent(new CustomEvent('wapps:change', {
+        detail: { app, key, value: remote, source: 'realtime' }
+      }));
+      console.info(`[WStore.watchRealtime] ${app}.${key} actualizado en tiempo real ✓`);
+    } catch(e) {
+      console.warn(`[WStore._applyRemoteIfNewer] ${app}.${key}:`, e);
+    }
+  }
+
   // Ejecutar migración al arrancar
   migrateLegacy();
   // Detectar wipe de localStorage (iOS/Safari/SW) y recuperar desde Firestore
   checkAndRecoverFromFirestore();
 
-  return { get, set, on, bridge, syncOnLoad, syncAllOnLoad };
+  return { get, set, on, bridge, syncOnLoad, syncAllOnLoad, watchRealtime };
 })();
 
 
@@ -944,4 +993,157 @@ const WPDF = (() => {
   }
 
   return { export: exportDoc };
+})();
+
+
+// ═══════════════════════════════════════════════════════════════
+// WUPDATE — Banner de actualización disponible
+// Escucha mensajes del Service Worker y muestra un banner no intrusivo
+// cuando hay una nueva versión desplegada. El usuario puede recargar
+// en ese momento o ignorarlo; la app nunca se recarga sola.
+// ═══════════════════════════════════════════════════════════════
+const WUpdate = (() => {
+
+  const BANNER_ID = 'wapps-update-banner';
+
+  function _injectStyles() {
+    if (document.getElementById('wapps-update-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'wapps-update-styles';
+    style.textContent = `
+      #${BANNER_ID} {
+        position: fixed;
+        bottom: 16px;
+        left: 50%;
+        transform: translateX(-50%) translateY(120%);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        background: var(--bg2, #141412);
+        border: 0.5px solid var(--y, #e8f040);
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+        font-family: var(--fm, 'DM Mono', monospace);
+        font-size: 12px;
+        color: var(--text, #f0ebe0);
+        white-space: nowrap;
+        transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        max-width: calc(100vw - 32px);
+      }
+      #${BANNER_ID}.visible {
+        transform: translateX(-50%) translateY(0);
+      }
+      #${BANNER_ID} .wu-msg {
+        flex: 1;
+        white-space: normal;
+        line-height: 1.4;
+      }
+      #${BANNER_ID} .wu-reload {
+        padding: 7px 14px;
+        background: var(--y, #e8f040);
+        color: var(--y-text, #0a0a09);
+        border: none;
+        border-radius: 7px;
+        font-family: var(--fm, 'DM Mono', monospace);
+        font-size: 11px;
+        font-weight: bold;
+        cursor: pointer;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      #${BANNER_ID} .wu-dismiss {
+        background: none;
+        border: none;
+        color: var(--muted, #5a5850);
+        font-size: 16px;
+        cursor: pointer;
+        padding: 0 2px;
+        line-height: 1;
+        flex-shrink: 0;
+      }
+      #${BANNER_ID} .wu-dismiss:hover { color: var(--text, #f0ebe0); }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function _show() {
+    _injectStyles();
+    if (document.getElementById(BANNER_ID)) return; // ya visible
+
+    const banner = document.createElement('div');
+    banner.id = BANNER_ID;
+    banner.innerHTML = `
+      <span class="wu-msg">⚡ Hay una actualización disponible</span>
+      <button class="wu-reload" onclick="WUpdate.reload()">Recargar</button>
+      <button class="wu-dismiss" onclick="WUpdate.dismiss()" title="Ignorar">✕</button>
+    `;
+    document.body.appendChild(banner);
+
+    // Forzar reflow antes de añadir clase para que la transición funcione
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => banner.classList.add('visible'));
+    });
+  }
+
+  function reload() {
+    // Pedir al SW en espera que tome el control, luego recargar
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (reg?.waiting) {
+          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          // El SW activado lanzará controllerchange → recargamos
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            window.location.reload();
+          }, { once: true });
+        } else {
+          window.location.reload();
+        }
+      });
+    } else {
+      window.location.reload();
+    }
+  }
+
+  function dismiss() {
+    const banner = document.getElementById(BANNER_ID);
+    if (!banner) return;
+    banner.classList.remove('visible');
+    setTimeout(() => banner.remove(), 400);
+  }
+
+  // ── Escuchar mensajes del SW ──────────────────────────────────
+  // El SW envía { type: 'UPDATE_AVAILABLE' } cuando detecta que el
+  // HTML en red difiere del que está en caché (cabeceras ETag/Last-Modified).
+  function _listenSW() {
+    if (!('serviceWorker' in navigator)) return;
+    navigator.serviceWorker.addEventListener('message', e => {
+      if (e.data?.type === 'UPDATE_AVAILABLE') _show();
+    });
+
+    // También detectar cuando un SW nuevo queda en estado "waiting"
+    // (instalado pero esperando a que cierren todas las pestañas)
+    navigator.serviceWorker.getRegistration().then(reg => {
+      if (!reg) return;
+      if (reg.waiting) { _show(); return; }
+      reg.addEventListener('updatefound', () => {
+        const newSW = reg.installing;
+        if (!newSW) return;
+        newSW.addEventListener('statechange', () => {
+          if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+            _show();
+          }
+        });
+      });
+    }).catch(() => {});
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _listenSW);
+  } else {
+    _listenSW();
+  }
+
+  return { reload, dismiss };
 })();

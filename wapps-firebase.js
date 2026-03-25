@@ -161,7 +161,31 @@ const WFirebase = (() => {
     _waitForSDK();
   }
 
-  return { login, logout, onAuthChange, getUser, isOnline, isReady, pushToFirestore, pullFromFirestore, pullAll };
+  // ── watchDocument — listener en tiempo real de un documento Firestore ──
+  // Devuelve una función unsubscribe. Llama a callback(data) cada vez que
+  // el documento cambia en Firestore (desde cualquier dispositivo).
+  //
+  // Uso: const unsub = WFirebase.watchDocument(uid, 'despensa_items', data => render(data));
+  //
+  function watchDocument(uid, key, callback) {
+    if (!_ready || !uid || !_db) return () => {};
+    try {
+      const ref = _db.collection('users').doc(uid).collection('data').doc(key);
+      const unsub = ref.onSnapshot(snap => {
+        if (!snap.exists) return;
+        const data = snap.data();
+        if (typeof callback === 'function') callback(data);
+      }, err => {
+        console.warn(`[WFirebase.watchDocument] ${key}:`, err.message);
+      });
+      return unsub;
+    } catch(e) {
+      console.warn('[WFirebase.watchDocument] error:', e);
+      return () => {};
+    }
+  }
+
+  return { login, logout, onAuthChange, getUser, isOnline, isReady, pushToFirestore, pullFromFirestore, pullAll, watchDocument };
 
 })();
 

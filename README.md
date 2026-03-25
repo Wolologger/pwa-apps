@@ -34,11 +34,13 @@ localStorage (siempre)
     └── WStore.get / WStore.set
             └── WSync (cola offline)
                     └── Firebase Firestore (cuando hay sesión y red)
+                            └── onSnapshot (tiempo real → WStore.watchRealtime)
 ```
 
 - **Sin conexión**: todo funciona con `localStorage`. Los cambios se marcan como pendientes.
 - **Con conexión y sesión**: los datos se suben a Firestore automáticamente. Gana siempre el más reciente por `_updatedAt`.
-- **Service Worker** (`sw.js`): estrategia cache-first para todas las páginas. La app carga instantáneamente aunque no haya red.
+- **Tiempo real**: `WStore.watchRealtime` mantiene un listener `onSnapshot` activo. Cualquier cambio en otro dispositivo llega en segundos, sin necesidad de recargar.
+- **Service Worker** (`sw.js`): estrategia stale-while-revalidate para HTML. La app carga instantáneamente aunque no haya red. Si se despliega una versión nueva, aparece un banner para recargar.
 
 ---
 
@@ -46,10 +48,10 @@ localStorage (siempre)
 
 | Archivo | Descripción |
 |---|---|
-| `wapps-store.js` | Bus de datos (`WStore`), notificaciones (`WNotify`), cola offline |
+| `wapps-store.js` | Bus de datos (`WStore`), notificaciones (`WNotify`), cola offline, banner de actualización (`WUpdate`) |
 | `wapps-firebase.js` | Auth con Google y sincronización Firestore (`WFirebase`, `WSync`) |
 | `wapps-onboarding.js` | Sistema de onboarding para nuevos usuarios |
-| `sw.js` | Service Worker — offline, caché y actualizaciones en background |
+| `sw.js` | Service Worker — offline, caché, detección de actualizaciones |
 | `manifest.json` | Manifiesto PWA — iconos, shortcuts, colores |
 | `offline.html` | Página de fallback cuando no hay red ni caché |
 
@@ -116,6 +118,34 @@ service cloud.firestore {
 
 ---
 
+## Sincronización en tiempo real
+
+`WStore.watchRealtime` abre un listener `onSnapshot` sobre un documento Firestore. Cuando otro dispositivo guarda un cambio, llega automáticamente sin recargar la página.
+
+```js
+// Activar sync en tiempo real para una app concreta
+const unsubscribe = WStore.watchRealtime('despensa', 'items', data => {
+  render(data); // se llama cada vez que cambia en cualquier dispositivo
+});
+
+// Detener el listener (p.ej. al salir de la página)
+unsubscribe();
+```
+
+El listener compara `_updatedAt`: si el dato local ya es igual o más reciente, ignora la actualización remota. Esto evita bucles y conflictos con ediciones simultáneas.
+
+---
+
+## Banner de actualización
+
+Cuando se despliega una nueva versión, el Service Worker detecta el cambio y muestra automáticamente un banner en la parte inferior de la pantalla:
+
+> ⚡ Hay una actualización disponible — **[Recargar]** ✕
+
+El usuario decide cuándo recargar. La app nunca se recarga sola. El banner aparece tanto si el SW detecta cambios por ETag/Last-Modified como si queda en estado `waiting`.
+
+---
+
 ## Notificaciones
 
 `WNotify` gestiona alertas automáticas. Para activarlas en cualquier página:
@@ -130,6 +160,13 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 ---
 
 ## Changelog
+
+### v3.3.1
+- `sw.js` — estrategia stale-while-revalidate para HTML (antes cache-first puro). El SW ya no bloquea la activación con `skipWaiting`; espera a que el usuario confirme
+- `sw.js` — detecta cambios de contenido por ETag/Last-Modified y notifica a los clientes con `postMessage({ type: 'UPDATE_AVAILABLE' })`
+- `wapps-store.js` — nuevo módulo `WUpdate`: banner de actualización no intrusivo con botón "Recargar" y opción de ignorar. Compatible con el patrón SW `waiting`
+- `wapps-firebase.js` — nuevo método `WFirebase.watchDocument(uid, key, callback)`: listener `onSnapshot` sobre un documento Firestore
+- `wapps-store.js` — nuevo método `WStore.watchRealtime(app, key, onUpdate)`: sincronización en tiempo real entre dispositivos. Aplica cambios remotos solo si `_updatedAt` remoto es más reciente
 
 ### v3.3.0
 - `WTheme` reescrito — sistema de temas completo: modo dark/light, 6 colores de acento, 3 tamaños de fuente
@@ -164,41 +201,28 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 
 ### v2.9.0
 - `WTransition` — fade-out/in de 160ms entre todas las páginas, sin parpadeo blanco
-- Integrado en `wapps-store.js` para páginas con el módulo, inline para el resto
-- Intercepta automáticamente todos los `<a href="*.html">` sin modificar los links
 
 ### v2.8.0
-- `ajustes.html` — página central de ajustes con cuenta Firebase, notificaciones y estadísticas de datos
-- `index.html` — botón de ajustes redirige a `ajustes.html` en lugar de `editor-categorias.html`
-- SW v7: `ajustes.html` en precaché
+- `ajustes.html` — página central de ajustes
 
 ### v2.7.0
-- Eliminadas claves legacy de `wapps-store.js` (`LEGACY_KEYS`, escritura doble en `set()` y `syncOnLoad()`)
-- Añadida `migrateLegacy()` — migración one-shot al arrancar que copia datos al nuevo esquema y borra los duplicados
-- `get()` simplificado — ya no tiene fallback legacy
+- Eliminadas claves legacy de `wapps-store.js`
+- Añadida `migrateLegacy()` — migración one-shot al arrancar
 
 ### v2.6.0
 - `semana.html`, `instrumentos.html` y `setlist.html` conectados a WStore y Firebase
-- Corregidas las claves legacy `semana_v1→v2` e `instrumentos_v1→v2` en LEGACY_KEYS
 
 ### v2.5.0
-- Firebase SDK actualizado de 9.23.0 a 11.6.0 en index, backup y editor-categorias
-- `404.html` — página de error con accesos directos a las apps principales
-- SW v6: 404.html en precaché, usado como fallback para URLs desconocidas
-- Botones de acción primaria (btn-y) cambiados a fuente Bebas Neue para mayor visibilidad
-- Flecha de volver con stroke explícito amarillo en todos los archivos
+- Firebase SDK actualizado de 9.23.0 a 11.6.0
+- `404.html` — página de error con accesos directos
 
 ### v2.4.0
-- Indicador de sync (ONLINE/OFFLINE/SINCRONIZANDO + pendientes) en despensa, compra, obra y backup
-- `coches.html` y `ninos.html` conectados a WStore y Firebase — sus datos ya se sincronizan
-- `coches_v1` y `ninos_v1` añadidos a LEGACY_KEYS y WSTORE_KEYS
+- Indicador de sync (ONLINE/OFFLINE/SINCRONIZANDO) extendido
+- `coches.html` y `ninos.html` conectados a WStore y Firebase
 
 ### v2.3.0
 - Offline completo: todas las páginas HTML en precaché del SW
-- `offline.html` como fallback con redirección automática al recuperar red
-- Estrategia cache-first para carga instantánea
-- Flecha de volver y botones de acción con color de alto contraste
-- `WNotify` activo en `compra.html` y `obra.html`
+- `offline.html` como fallback con redirección automática
 
 ### v2.2.0
 - `WStore` y `WNotify` — bus de datos y sistema de notificaciones
@@ -206,7 +230,6 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 
 ### v2.1.0
 - Service Worker con estrategia network-first para HTML
-- Precaché de archivos JS compartidos
 
 ### v2.0.0
 - Integración Firebase Auth + Firestore

@@ -1,4 +1,4 @@
-const CACHE = 'wapps-v8';
+const CACHE = 'wapps-v8.1';
 
 const PRECACHE = [
   '/pwa-apps/manifest.json',
@@ -31,7 +31,7 @@ const PRECACHE = [
   '/pwa-apps/icons/icon-512.png',
 ];
 
-// Precache individual con tolerancia a fallos — un archivo roto no bloquea la instalación
+// Precache individual con tolerancia a fallos
 async function precacheAll(cache) {
   const results = await Promise.allSettled(
     PRECACHE.map(url =>
@@ -48,7 +48,7 @@ self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE).then(cache => precacheAll(cache))
   );
-  self.skipWaiting();
+  // NO llamar a skipWaiting() aquí — esperamos a que el usuario acepte desde el banner
 });
 
 self.addEventListener('activate', e => {
@@ -58,6 +58,14 @@ self.addEventListener('activate', e => {
     )
   );
   self.clients.claim();
+});
+
+// ── Mensajes desde el cliente ─────────────────────────────────
+// El cliente envía { type: 'SKIP_WAITING' } cuando el usuario pulsa "Recargar"
+self.addEventListener('message', e => {
+  if (e.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('fetch', e => {
@@ -78,21 +86,35 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // CACHE FIRST para HTML — offline-first, actualiza en background
+  // STALE-WHILE-REVALIDATE para HTML
+  // Sirve caché inmediatamente; actualiza en background y notifica si hay cambios.
   if (
     e.request.mode === 'navigate' ||
     url.pathname.endsWith('.html') ||
     url.pathname.endsWith('/')
   ) {
     e.respondWith(
-      caches.match(e.request).then(cached => {
-        const networkFetch = fetch(e.request).then(response => {
+      caches.open(CACHE).then(async cache => {
+        const cached = await cache.match(e.request);
+
+        const networkFetch = fetch(e.request).then(async response => {
           if (response.ok) {
+            const cachedRes = await cache.match(e.request);
+            const newEtag = response.headers.get('etag') || response.headers.get('last-modified');
+            const oldEtag = cachedRes?.headers?.get('etag') || cachedRes?.headers?.get('last-modified');
+
             const clone = response.clone();
-            caches.open(CACHE).then(cache => cache.put(e.request, clone));
+            await cache.put(e.request, clone);
+
+            // Si el contenido cambió, avisar a todos los clientes abiertos
+            if (newEtag && oldEtag && newEtag !== oldEtag) {
+              const clients = await self.clients.matchAll({ type: 'window' });
+              clients.forEach(client => client.postMessage({ type: 'UPDATE_AVAILABLE' }));
+            }
           }
           return response;
         }).catch(() => cached || caches.match('/pwa-apps/offline.html'));
+
         return cached || networkFetch;
       })
     );
