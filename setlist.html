@@ -801,15 +801,15 @@ function renderSongs() {
   const band = activeBand();
   if (!band) { document.getElementById('songs-body').innerHTML = '<div class="empty">Crea un grupo primero en la pestaña Grupos.</div>'; return; }
 
+  var sl=activeSetlist();
+  const allSongs=setlistSongs();
+
   document.getElementById('band-header-area').innerHTML = `
     <div class="band-header">
       <div class="band-color-dot" style="background:${band.color}"></div>
       <div class="band-header-name">${esc(band.nombre)}</div>
       <div class="band-header-count">${sl?esc(sl.nombre)+' \u00b7 ':''}${allSongs.length} canciones</div>
     </div>`;
-
-  var sl=activeSetlist();
-  const allSongs=setlistSongs();
   const totalSecs=allSongs.reduce((s,x) => s+parseDur(x.dur), 0);
   const aprendidas = allSongs.filter(s=>s.estado==='aprendida').length;
 
