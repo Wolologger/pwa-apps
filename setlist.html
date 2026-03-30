@@ -652,7 +652,11 @@ function selectBand(id) {
 // ═══════════════════════════════════════════════════════════════
 // ADD SONG
 // ═══════════════════════════════════════════════════════════════
-function toggleAdd() { document.getElementById('add-panel').classList.toggle('open'); renderGearPicker('add'); }
+function toggleAdd() {
+  const panel = document.getElementById('add-panel');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) renderGearPicker('add', null);
+}
 function closeAdd() { document.getElementById('add-panel').classList.remove('open'); }
 
 // Renderizar picker de gear para formulario de añadir/editar
@@ -1114,19 +1118,34 @@ function renderPerfSlide() {
     nextBtn.onclick = perfNext;
   }
 
-  // ── CHIVATO PRÓXIMA ──────────────────────────────────────────
+  // CHIVATO PROXIMA — título, tono, gear de la siguiente, alerta cambio instrumento
   const banner = document.getElementById('perf-next-banner');
+  const gcEl = document.getElementById('perf-gear-change');
   if (next) {
     banner.style.display = 'flex';
+    document.getElementById('perf-next-label').textContent = 'PR\u00d3XIMA';
     document.getElementById('perf-next-title').textContent = next.titulo;
-    document.getElementById('perf-next-tono').textContent = next.tono ? `— ${next.tono}` : '';
-    document.getElementById('perf-next-end').textContent = '';
+    document.getElementById('perf-next-tono').textContent = next.tono ? ('\u2014 ' + next.tono) : '';
+    // Gear de la siguiente canción
+    const nextGear = resolveGearWithPreset(next.gear);
+    const ngEl = document.getElementById('perf-next-gear');
+    if (ngEl) ngEl.textContent = nextGear.map(g => gearEmoji(g.tipo) + ' ' + g.nombre).join(' \u00b7 ');
+    // Detectar cambios de instrumento respecto a la canción actual
+    const curIds = new Set(gearEntries.map(g => g.id));
+    const nxtIds = new Set(nextGear.map(g => g.id));
+    const adds  = nextGear.filter(g => !curIds.has(g.id));
+    const drops = gearEntries.filter(g => !nxtIds.has(g.id));
+    let alertTxt = '';
+    if (adds.length)  alertTxt += '\u26a0 COGE: ' + adds.map(g => g.nombre).join(', ');
+    if (drops.length) alertTxt += (alertTxt ? ' \u00b7 ' : '') + 'DEJA: ' + drops.map(g => g.nombre).join(', ');
+    if (gcEl) { gcEl.textContent = alertTxt; gcEl.style.display = alertTxt ? 'block' : 'none'; }
   } else {
     banner.style.display = 'flex';
-    document.getElementById('perf-next-title').textContent = '';
+    document.getElementById('perf-next-label').textContent = '';
+    document.getElementById('perf-next-title').textContent = '\u00daltima canci\u00f3n del set';
     document.getElementById('perf-next-tono').textContent = '';
-    document.getElementById('perf-next-end').textContent = 'Última canción del set';
-    document.querySelector('.perf-next-label').textContent = '';
+    const ngEl2 = document.getElementById('perf-next-gear'); if (ngEl2) ngEl2.textContent = '';
+    if (gcEl) gcEl.style.display = 'none';
   }
 }
 
@@ -1623,7 +1642,7 @@ function buildSetlistText(band, songs, totalSecs) {
 }
 
 function buildGearText(band, songs) {
-  const songsWithGear = songs.filter(s=>s.gear&&Object.keys(s.gear).length>0);
+  const songsWithGear = songs.filter(s=>resolveGearWithPreset(s.gear).length>0);
   if (!songsWithGear.length) return `${band.nombre}\nSin configuración de gear registrada.`;
   return [
     `GEAR — ${band.nombre}`,
@@ -1666,7 +1685,7 @@ function shareSetlistWA() {
 
 function shareGearWA() {
   const band = activeBand(); if (!band) return;
-  const songs = bandSongs(band.id).filter(s=>s.gear&&Object.keys(s.gear).length>0);
+  const songs = setlistSongs().filter(s=>resolveGearWithPreset(s.gear).length>0);
   if (!songs.length) { showExportFb('Sin gear configurado','var(--o)'); return; }
   let txt = `🎛️ *GEAR — ${band.nombre}*\n\n`;
   songs.forEach(s => {
@@ -1686,7 +1705,8 @@ function shareGearWA() {
 }
 
 function downloadSetlist() {
-  const band = activeBand(); const songs = bandSongs(band.id);
+  const band = activeBand(); const songs = setlistSongs();
+  const sl = activeSetlist();
   const txt = buildSetlistText(band, songs, songs.reduce((s,x)=>s+parseDur(x.dur),0));
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([txt],{type:'text/plain'}));
@@ -1766,6 +1786,26 @@ function delBand(id) {
 // INIT
 // ═══════════════════════════════════════════════════════════════
 render();
+// Refrescar gear picker cuando cambian los instrumentos (nuevo instrumento añadido)
+window.addEventListener('wapps:change', function(e) {
+  if (e.detail && e.detail.app === 'instrumentos') {
+    const addPanel = document.getElementById('add-panel');
+    if (addPanel && addPanel.classList.contains('open')) renderGearPicker('add', null);
+    if (editId) renderGearPicker('edit', editId);
+    // Refrescar gear preset panel si está abierto
+    const gpp = document.getElementById('gear-preset-panel');
+    if (gpp) { const el = document.getElementById('gpp'); if(el) fillGearPicker(el, activeSetlist()?.gearPreset||{}, 'gpp'); }
+  }
+});
+// También refrescar al recuperar datos de Firestore
+window.addEventListener('storage', function(e) {
+  if (e.key && e.key.includes('instrumentos')) {
+    const addPanel = document.getElementById('add-panel');
+    if (addPanel && addPanel.classList.contains('open')) renderGearPicker('add', null);
+    if (editId) renderGearPicker('edit', editId);
+  }
+});
+
 if (typeof WStore !== 'undefined') {
   WStore.syncOnLoad('setlist', 'data', fresh => {
     state = fresh; nid = state.nextId||1;
