@@ -787,6 +787,10 @@ function render() {
   renderBandBar();
   renderSetlistBar();
   updateNavTitle();
+  // Refrescar picker de gear si el panel de añadir está abierto
+  if (document.getElementById('add-panel')?.classList.contains('open')) {
+    renderGearPicker('add', null);
+  }
   if (currentTab === 'canciones') renderSongs();
   if (currentTab === 'ensayos')   renderEnsayos();
   if (currentTab === 'exportar')  renderExport();
@@ -1799,10 +1803,14 @@ window.addEventListener('wapps:change', function(e) {
 });
 // También refrescar al recuperar datos de Firestore
 window.addEventListener('storage', function(e) {
-  if (e.key && e.key.includes('instrumentos')) {
+  // Captura cambios de instrumentos desde otras pestañas
+  // (instrumentos_v2 es la clave legacy que escribe instrumentos.html)
+  if (e.key && (e.key.includes('instrumentos') || e.key === 'instrumentos_v2')) {
     const addPanel = document.getElementById('add-panel');
     if (addPanel && addPanel.classList.contains('open')) renderGearPicker('add', null);
     if (editId) renderGearPicker('edit', editId);
+    const gpp = document.getElementById('gpp');
+    if (gpp) fillGearPicker(gpp, activeSetlist()?.gearPreset||{}, 'gpp');
   }
 });
 
