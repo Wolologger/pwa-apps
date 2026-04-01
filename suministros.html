@@ -316,7 +316,7 @@ select option{background:var(--bg2);}
         <div class="field-row">
           <div class="field">
             <div class="field-label">Importe total €</div>
-            <input type="number" id="f-importe" placeholder="0.00" step="0.01" min="0">
+            <input type="number" id="f-importe" placeholder="0.00 (negativo para reajuste)" step="0.01">
           </div>
           <div class="field">
             <div class="field-label">Consumo</div>
@@ -1015,13 +1015,13 @@ function addFactura() {
   // Validación con mensaje de campos faltantes
   const faltantes = [];
   if (!empresa) faltantes.push('empresa/comercializadora');
-  if (isNaN(importe) || importe <= 0) faltantes.push('importe');
+  if (isNaN(importe)) faltantes.push('importe');
   if (!inicio) faltantes.push('fecha de inicio');
   if (faltantes.length) {
     showToast('⚠ Faltan: ' + faltantes.join(', '), true);
     // Marcar campos vacíos visualmente
     document.getElementById('f-empresa').style.borderColor = !empresa ? 'var(--r)' : '';
-    document.getElementById('f-importe').style.borderColor = (isNaN(importe) || importe <= 0) ? 'var(--r)' : '';
+    document.getElementById('f-importe').style.borderColor = isNaN(importe) ? 'var(--r)' : '';
     document.getElementById('f-inicio').style.borderColor = !inicio ? 'var(--r)' : '';
     return;
   }
@@ -1143,7 +1143,7 @@ function renderFacturas() {
   });
   let html = '';
   facts.forEach(f => {
-    const color = TIPO_COLOR[f.tipo] || 'var(--muted)';
+    const color = f.importe < 0 ? 'var(--g)' : (TIPO_COLOR[f.tipo] || 'var(--muted)');
     const unit = TIPO_UNIT[f.tipo];
     const isEd = editId === f.id;
     const periodoStr = f.inicio ? (f.fin ? `${f.inicio} → ${f.fin}` : `desde ${f.inicio}`) : '';
