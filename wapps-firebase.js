@@ -309,6 +309,33 @@ const WSync = (() => {
     }
   });
 
-  return { markPending, clearPending, clearAllPending, getPending, syncAll, pullAll, WSTORE_KEYS };
+  // ── pushAll: fuerza subida de TODAS las claves, sin importar pendientes ──
+  async function pushAll(uid, filterKey) {
+    if (!uid || !WFirebase.isOnline()) return { pushed: 0, failed: 0 };
+    const keys = filterKey ? [filterKey] : WSTORE_KEYS;
+
+    window.dispatchEvent(new CustomEvent('wapps:sync-start', { detail: { total: keys.length } }));
+
+    let pushed = 0, failed = 0;
+    for (const key of keys) {
+      try {
+        const raw = localStorage.getItem('wapps.' + key);
+        if (!raw) continue;
+        const data = JSON.parse(raw);
+        const fsKey = key.replace('.', '_');
+        const ok = await WFirebase.pushToFirestore(uid, fsKey, data);
+        if (ok) { pushed++; clearPending(key); }
+        else    { failed++; }
+      } catch(e) {
+        console.error(`[WSync] pushAll error ${key}:`, e);
+        failed++;
+      }
+    }
+
+    window.dispatchEvent(new CustomEvent('wapps:sync-done', { detail: { pushed, failed } }));
+    return { pushed, failed };
+  }
+
+  return { markPending, clearPending, clearAllPending, getPending, syncAll, pullAll, pushAll, WSTORE_KEYS };
 
 })();

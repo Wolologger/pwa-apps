@@ -202,7 +202,11 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
       <span class="sync-label offline" id="sync-label">OFFLINE</span>
       <span class="sync-pending" id="sync-pending"></span>
     </div>
+    <div style="display:flex;gap:6px;">
+    <button class="sync-btn" id="pull-btn" onclick="manualPull()" disabled>↓ PULL</button>
     <button class="sync-btn" id="sync-btn" onclick="manualSync()" disabled>↑ SYNC</button>
+    <button class="sync-btn" id="push-app-btn" onclick="manualPushApp()" disabled title="Forzar subida de esta app a Firebase">⬆ SUBIR</button>
+  </div>
   </div>
 
   <!-- PET SELECTOR -->
@@ -990,6 +994,22 @@ async function manualSync(){
   await sync.syncAll(user.uid);
   updateSyncUI(fb.isOnline()?'online':'offline',sync.getPending().length);
 }
+async function manualPull() {
+  const fb   = _fb();
+  const sync = _sync();
+  if (!fb || !sync) return;
+  const user = fb.getUser();
+  if (!user || !fb.isOnline()) return;
+  const btn = document.getElementById('pull-btn');
+  if (btn) btn.disabled = true;
+  updateSyncUI('syncing', sync.getPending().length);
+  await sync.pullAll(user.uid);
+  updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
+  if (btn) btn.disabled = false;
+  // Reload page to reflect pulled data
+  window.location.reload();
+}
+
 window.addEventListener('wapps:online',()=>updateSyncUI('online',_sync()?.getPending().length??0));
 window.addEventListener('wapps:offline',()=>updateSyncUI('offline',_sync()?.getPending().length??0));
 window.addEventListener('wapps:sync-start',()=>updateSyncUI('syncing',_sync()?.getPending().length??0));

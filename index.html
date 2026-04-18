@@ -305,7 +305,11 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
       <span class="sync-label offline" id="sync-label">OFFLINE</span>
       <span class="sync-pending" id="sync-pending"></span>
     </div>
+    <div style="display:flex;gap:6px;">
+    <button class="sync-btn" id="pull-btn" onclick="manualPull()" disabled>↓ PULL</button>
     <button class="sync-btn" id="sync-btn" onclick="manualSync()" disabled>↑ SYNC</button>
+    <button class="sync-btn" id="push-all-btn" onclick="manualPushAll()" disabled title="Forzar subida completa a Firebase">⬆ SUBIR TODO</button>
+  </div>
   </div>
 
   <div class="hero">
@@ -832,6 +836,10 @@ function updateSyncUI(state, pendingCount) {
   const fb = _fb();
   const canSync = state === 'online' && fb && fb.getUser() && pendingCount > 0;
   btn.disabled = !canSync;
+  const pullBtn = document.getElementById('pull-btn');
+  if (pullBtn) pullBtn.disabled = !(state === 'online' && fb && fb.getUser());
+  const pushAllBtn = document.getElementById('push-all-btn');
+  if (pushAllBtn) pushAllBtn.disabled = !(state === 'online' && fb && fb.getUser());
 }
 
 async function manualSync() {
@@ -848,6 +856,37 @@ async function manualSync() {
   updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
   if (failed > 0) console.warn(`[Sync] ${failed} errores al sincronizar`);
 }
+async function manualPull() {
+  const fb   = _fb();
+  const sync = _sync();
+  if (!fb || !sync) return;
+  const user = fb.getUser();
+  if (!user || !fb.isOnline()) return;
+  const btn = document.getElementById('pull-btn');
+  if (btn) btn.disabled = true;
+  updateSyncUI('syncing', sync.getPending().length);
+  await sync.pullAll(user.uid);
+  updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
+  if (btn) btn.disabled = false;
+  // Reload page to reflect pulled data
+  window.location.reload();
+}
+async function manualPushAll() {
+  const fb   = _fb();
+  const sync = _sync();
+  if (!fb || !sync) return;
+  const user = fb.getUser();
+  if (!user || !fb.isOnline()) return;
+  const btn = document.getElementById('push-all-btn');
+  if (btn) btn.disabled = true;
+  updateSyncUI('syncing', sync.getPending().length);
+  const { pushed, failed } = await sync.pushAll(user.uid);
+  updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
+  if (btn) btn.disabled = !(fb.isOnline() && fb.getUser());
+  if (pushed > 0) console.info(`[PUSH ALL] ${pushed} claves subidas a Firebase`);
+  if (failed  > 0) console.warn(`[PUSH ALL] ${failed} claves fallaron`);
+}
+
 
 // ── Eventos Firebase ──────────────────────────────────────────────
 window.addEventListener('wapps:auth-change', async e => {
