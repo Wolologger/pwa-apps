@@ -26,13 +26,11 @@
 // ═══════════════════════════════════════════════════════════════
 // STORE — bus de datos con eventos
 // ═══════════════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════════════
-// STORE — bus de datos con eventos
-// ═══════════════════════════════════════════════════════════════
 const WStore = (() => {
   const PREFIX = 'wapps.';
 
   // Mapa de migración: clave nueva → clave legacy antigua
+  // Solo se usa UNA VEZ al arrancar para migrar datos al nuevo esquema.
   const MIGRATE_MAP = {
     'wapps.despensa.items':    'despensa_v1',
     'wapps.finanzas.data':     'finanzas_v1',
@@ -48,7 +46,8 @@ const WStore = (() => {
     'wapps.ninos.data':        'ninos_v1',
   };
 
-  // Migración one-shot: copia datos legacy a claves nuevas si no existen.
+  // Migración one-shot: copia datos legacy a claves nuevas si no existen,
+  // luego borra las claves legacy. Se ejecuta una sola vez al arrancar.
   function migrateLegacy() {
     const DONE_KEY = 'wapps._migrated_v2';
     try {
@@ -83,11 +82,18 @@ const WStore = (() => {
     }
   }
 
-  // Detectar localStorage vacío tras wipe del SW y recuperar Firestore
+  // ── Detectar localStorage vacío tras wipe del SW y recuperar Firestore ──
+  // Si no hay NINGUNA clave wapps.* de datos, probablemente el navegador
+  // purgó el localStorage (iOS/Safari, reinstalación, etc.). En ese caso
+  // lanzamos un pull completo en cuanto haya usuario autenticado.
+  // NOTA: el pull principal al autenticarse ocurre en wapps-firebase.js
+  // (listener wapps:auth-change en WSync). Esta función es el fallback
+  // para cuando localStorage está completamente vacío.
   function checkAndRecoverFromFirestore() {
     const hasData = Object.keys(MIGRATE_MAP).some(k => localStorage.getItem(k) !== null);
-    if (hasData) return;
+    if (hasData) return; // localStorage tiene datos — el pull lo gestiona WSync en auth-change
 
+    // Sin datos locales — esperar a que Firebase confirme usuario y tirar pull
     const doRecover = async () => {
       try {
         if (typeof WFirebase === 'undefined' || typeof WSync === 'undefined') return;
@@ -97,6 +103,7 @@ const WStore = (() => {
         const ok = await WSync.pullAll(user.uid);
         if (ok) {
           console.info('[WStore] Datos recuperados desde Firestore ✓');
+          // Emitir evento global para que las apps que ya cargaron se re-rendericen
           window.dispatchEvent(new CustomEvent('wapps:recovered', { detail: { source: 'firestore' } }));
         }
       } catch(e) {
@@ -104,6 +111,7 @@ const WStore = (() => {
       }
     };
 
+    // Si Firebase ya tiene usuario, recuperar ahora; si no, esperar auth-change
     if (typeof WFirebase !== 'undefined' && WFirebase.getUser()) {
       doRecover();
     } else {
@@ -111,77 +119,6 @@ const WStore = (() => {
       window.addEventListener('wapps:auth-change', handler);
     }
   }
-
-  // ── Helpers de UI — se definen primero porque set() y _applyRemoteIfNewer los usan ──
-
-  // _safeBodyAction: ejecuta fn(element) en cuanto document.body esté disponible.
-  // Evita el bug donde DOMContentLoaded ya se disparó y el listener nunca se llama.
-  function _safeBodyAction(fn) {
-    if (document.body) {
-      fn();
-    } else if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', fn, { once: true });
-    } else {
-      // readyState es 'interactive' o 'complete' pero body aún no existe — raro, usar rAF
-      requestAnimationFrame(() => { if (document.body) fn(); });
-    }
-  }
-
-  // _quotaGuard — detecta cuota llena y muestra banner de error
-  function _quotaGuard(e) {
-    if (e?.name !== 'QuotaExceededError' && e?.code !== 22) return false;
-    console.error('[WStore] localStorage lleno (QuotaExceededError)');
-    window.dispatchEvent(new CustomEvent('wapps:quota-exceeded'));
-    _safeBodyAction(() => {
-      if (document.getElementById('wapps-quota-banner')) return;
-      const el = document.createElement('div');
-      el.id = 'wapps-quota-banner';
-      el.style.cssText = [
-        'position:fixed','top:0','left:0','right:0','z-index:99999',
-        'background:#f04030','color:#fff','font-family:var(--fm,monospace)',
-        'font-size:12px','padding:10px 16px','text-align:center',
-        'display:flex','align-items:center','justify-content:center','gap:12px'
-      ].join(';');
-      el.innerHTML = [
-        '<span>⚠️ Almacenamiento lleno — algunos cambios no se han guardado.',
-        'Libera espacio en <a href="backup.html"',
-        'style="color:#fff;text-decoration:underline">Backup</a>.</span>',
-        '<button onclick="this.parentElement.remove()"',
-        'style="background:rgba(255,255,255,0.2);border:none;color:#fff;',
-        'border-radius:4px;padding:4px 10px;cursor:pointer;font-size:11px">✕</button>'
-      ].join(' ');
-      document.body.prepend(el);
-    });
-    return true;
-  }
-
-  // _showRealtimeToast — feedback visual cuando llega una actualización remota
-  let _toastTimer = null;
-  function _showRealtimeToast() {
-    _safeBodyAction(() => {
-      let toast = document.getElementById('wapps-realtime-toast');
-      if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'wapps-realtime-toast';
-        toast.style.cssText = [
-          'position:fixed','bottom:72px','right:16px','z-index:9998',
-          'background:var(--bg2,#141412)',
-          'border:0.5px solid rgba(48,216,128,0.4)',
-          'color:var(--g,#30d880)','border-radius:8px',
-          'padding:8px 14px','font-family:var(--fm,monospace)',
-          'font-size:11px','opacity:0',
-          'transition:opacity 0.25s ease','pointer-events:none'
-        ].join(';');
-        document.body.appendChild(toast);
-      }
-      toast.textContent = '↓ Actualizado desde otro dispositivo';
-      toast.style.opacity = '1';
-      clearTimeout(_toastTimer);
-      _toastTimer = setTimeout(() => { toast.style.opacity = '0'; }, 2500);
-    });
-  }
-
-  // ── Funciones principales de datos ──────────────────────────────
 
   function storageKey(app, key) {
     return `${PREFIX}${app}.${key}`;
@@ -199,32 +136,38 @@ const WStore = (() => {
   function set(app, key, value) {
     const sk = storageKey(app, key);
     try {
+      // Añadir timestamp para merge offline/online
       const payload = (value && typeof value === 'object' && !Array.isArray(value))
         ? { ...value, _updatedAt: new Date().toISOString() }
         : value;
 
       localStorage.setItem(sk, JSON.stringify(payload));
 
+      // Emitir evento personalizado para listeners en la misma pestaña
       window.dispatchEvent(new CustomEvent('wapps:change', {
         detail: { app, key, value: payload }
       }));
 
+      // ── Firebase sync ─────────────────────────────────────────
       const storeKey = `${app}.${key}`;
+
+      // Marcar como pendiente siempre (por si no hay red o usuario)
       if (typeof WSync !== 'undefined') {
         WSync.markPending(storeKey);
+
+        // Si hay usuario y red, intentar subir inmediatamente
         if (typeof WFirebase !== 'undefined') {
           const user = WFirebase.getUser();
           if (user && WFirebase.isOnline()) {
             const fsKey = storeKey.replace('.', '_');
             WFirebase.pushToFirestore(user.uid, fsKey, payload)
               .then(ok => { if (ok) WSync.clearPending(storeKey); })
-              .catch(() => {});
+              .catch(() => {}); // silencioso, queda en pending
           }
         }
       }
-    } catch(e) {
-      if (!_quotaGuard(e)) console.warn('WStore.set error:', e);
-    }
+
+    } catch(e) { console.warn('WStore.set error:', e); }
   }
 
   function on(app, key, callback) {
@@ -233,7 +176,9 @@ const WStore = (() => {
         callback(e.detail.value);
       }
     };
+    // Eventos en misma pestaña
     window.addEventListener('wapps:change', handler);
+    // Eventos cross-tab via StorageEvent nativo
     const storageHandler = (e) => {
       const sk = storageKey(app, key);
       if (e.key === sk) {
@@ -241,6 +186,7 @@ const WStore = (() => {
       }
     };
     window.addEventListener('storage', storageHandler);
+    // Devuelve función de cleanup
     return () => {
       window.removeEventListener('wapps:change', handler);
       window.removeEventListener('storage', storageHandler);
@@ -275,6 +221,7 @@ const WStore = (() => {
       const d = get('deseados', 'data');
       return d?.items || [];
     },
+    // Utilitario: media mensual de suministros por tipo
     suministrosMediaMensual(tipo) {
       const facturas = bridge.suministros()
         .filter(f => f.tipo === tipo)
@@ -292,6 +239,7 @@ const WStore = (() => {
       });
       return medias.reduce((s, v) => s + v, 0) / medias.length;
     },
+    // Gastos del mes actual en gastos-diarios
     gastosEsteMes() {
       const now = new Date();
       const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -299,6 +247,7 @@ const WStore = (() => {
         .filter(g => g.fecha?.startsWith(prefix))
         .reduce((s, g) => s + (g.importe || 0), 0);
     },
+    // Items de despensa que caducan en N días
     caducidadesProximas(dias = 3) {
       const hoy = new Date();
       hoy.setHours(0, 0, 0, 0);
@@ -312,8 +261,14 @@ const WStore = (() => {
   };
 
   // ── syncOnLoad: pull puntual de un dato desde Firestore ──────────
+  // Llámalo al inicio de cada app para aplicar datos remotos si son más recientes.
+  // No bloquea el render: la app ya carga con localStorage, esto actualiza en background.
+  //
+  // Uso:  WStore.syncOnLoad('despensa', 'items', data => render(data));
+  //
   async function syncOnLoad(app, key, onUpdate) {
     try {
+      // Necesita WFirebase disponible y usuario autenticado
       if (typeof WFirebase === 'undefined') return;
       const user = WFirebase.getUser();
       if (!user || !WFirebase.isOnline()) return;
@@ -322,17 +277,24 @@ const WStore = (() => {
       const remote = await WFirebase.pullFromFirestore(user.uid, fsKey);
       if (!remote) return;
 
+      // Comparar timestamps
       const localRaw  = localStorage.getItem(storageKey(app, key));
       const local     = localRaw ? JSON.parse(localRaw) : null;
       const remoteTs  = new Date(remote._updatedAt || 0).getTime();
       const localTs   = new Date(local?._updatedAt  || 0).getTime();
 
       if (remoteTs > localTs) {
+        // Firestore es más reciente — aplicar y notificar
         const clean = { ...remote };
         delete clean._updatedAt;
+
         const sk = storageKey(app, key);
         localStorage.setItem(sk, JSON.stringify(clean));
+
+        // Notificar a la app
         if (typeof onUpdate === 'function') onUpdate(clean);
+
+        // Emitir evento global
         window.dispatchEvent(new CustomEvent('wapps:change', {
           detail: { app, key, value: clean }
         }));
@@ -342,7 +304,8 @@ const WStore = (() => {
     }
   }
 
-  // ── syncAllOnLoad: pull de todas las claves del usuario ──────────
+  // ── syncAllOnLoad: pull de todas las claves del usuario ─────────
+  // Útil en index.html al hacer login para traer todo de golpe.
   async function syncAllOnLoad() {
     try {
       if (typeof WSync === 'undefined' || typeof WFirebase === 'undefined') return;
@@ -354,106 +317,12 @@ const WStore = (() => {
     }
   }
 
-  // ── Sync en tiempo real ─────────────────────────────────────────
-  // Orden correcto: _mergeByField → _applyRemoteIfNewer → watchRealtime
-  // Todas son function declarations: el hoisting garantiza que estén
-  // disponibles, pero el orden de lectura también es ahora lógico.
-
-  // Merge campo a campo: gana el campo con _updatedAt más reciente.
-  // Para arrays gana el documento más reciente como unidad.
-  function _mergeByField(local, remote) {
-    if (!local || typeof local !== 'object' || Array.isArray(local)) return remote;
-    if (!remote || typeof remote !== 'object' || Array.isArray(remote)) return remote;
-    const merged = { ...local };
-    for (const [k, remoteVal] of Object.entries(remote)) {
-      if (k === '_updatedAt') { merged[k] = remoteVal; continue; }
-      const localVal = local[k];
-      if (
-        localVal && typeof localVal === 'object' && !Array.isArray(localVal) &&
-        remoteVal && typeof remoteVal === 'object' && !Array.isArray(remoteVal)
-      ) {
-        const lTs = new Date(localVal._updatedAt || 0).getTime();
-        const rTs = new Date(remoteVal._updatedAt || 0).getTime();
-        merged[k] = rTs >= lTs ? _mergeByField(localVal, remoteVal) : localVal;
-      } else {
-        merged[k] = remoteVal;
-      }
-    }
-    return merged;
-  }
-
-  // Aplica dato remoto si es más reciente; usa merge campo a campo.
-  function _applyRemoteIfNewer(app, key, remote, onUpdate) {
-    try {
-      if (!remote) return;
-      const localRaw = localStorage.getItem(storageKey(app, key));
-      const local    = localRaw ? JSON.parse(localRaw) : null;
-      const remoteTs = new Date(remote._updatedAt || 0).getTime();
-      const localTs  = new Date(local?._updatedAt  || 0).getTime();
-      if (remoteTs <= localTs) return;
-
-      const merged = _mergeByField(local, remote);
-      try {
-        localStorage.setItem(storageKey(app, key), JSON.stringify(merged));
-      } catch(e) {
-        if (_quotaGuard(e)) return;
-        throw e;
-      }
-
-      if (typeof onUpdate === 'function') onUpdate(merged);
-      window.dispatchEvent(new CustomEvent('wapps:change', {
-        detail: { app, key, value: merged, source: 'realtime' }
-      }));
-      console.info(`[WStore.watchRealtime] ${app}.${key} merge en tiempo real ✓`);
-      _showRealtimeToast();
-    } catch(e) {
-      console.warn(`[WStore._applyRemoteIfNewer] ${app}.${key}:`, e);
-    }
-  }
-
-  // Registry de listeners activos — se limpian solos en pagehide
-  const _realtimeRegistry = [];
-
-  // Suscripción en tiempo real. Devuelve unsubscribe fn.
-  // Uso: const unsub = WStore.watchRealtime('despensa', 'items', data => render(data));
-  function watchRealtime(app, key, onUpdate) {
-    if (typeof WFirebase === 'undefined' || typeof WFirebase.watchDocument !== 'function') return () => {};
-    const user = WFirebase.getUser();
-    if (!user) {
-      // Usuario no autenticado aún — esperar auth-change
-      let unsub = () => {};
-      const handler = () => {
-        const u = WFirebase.getUser();
-        if (!u) return;
-        window.removeEventListener('wapps:auth-change', handler);
-        unsub = WFirebase.watchDocument(u.uid, `${app}_${key}`, remote => {
-          _applyRemoteIfNewer(app, key, remote, onUpdate);
-        });
-        _realtimeRegistry.push(() => unsub());
-      };
-      window.addEventListener('wapps:auth-change', handler);
-      const cancel = () => { unsub(); window.removeEventListener('wapps:auth-change', handler); };
-      _realtimeRegistry.push(cancel);
-      return cancel;
-    }
-    const unsub = WFirebase.watchDocument(user.uid, `${app}_${key}`, remote => {
-      _applyRemoteIfNewer(app, key, remote, onUpdate);
-    });
-    _realtimeRegistry.push(unsub);
-    return unsub;
-  }
-
-  // Limpiar todos los listeners al salir — evita conexiones Firestore huérfanas
-  window.addEventListener('pagehide', () => {
-    _realtimeRegistry.forEach(fn => { try { fn(); } catch(_) {} });
-    _realtimeRegistry.length = 0;
-  });
-
-  // ── Arranque ────────────────────────────────────────────────────
+  // Ejecutar migración al arrancar
   migrateLegacy();
+  // Detectar wipe de localStorage (iOS/Safari/SW) y recuperar desde Firestore
   checkAndRecoverFromFirestore();
 
-  return { get, set, on, bridge, syncOnLoad, syncAllOnLoad, watchRealtime };
+  return { get, set, on, bridge, syncOnLoad, syncAllOnLoad };
 })();
 
 
@@ -1078,165 +947,4 @@ const WPDF = (() => {
   }
 
   return { export: exportDoc };
-})();
-
-
-// ═══════════════════════════════════════════════════════════════
-// WUPDATE — Banner de actualización disponible
-// Escucha mensajes del Service Worker y muestra un banner no intrusivo
-// cuando hay una nueva versión desplegada. El usuario puede recargar
-// en ese momento o ignorarlo; la app nunca se recarga sola.
-// ═══════════════════════════════════════════════════════════════
-const WUpdate = (() => {
-
-  const BANNER_ID = 'wapps-update-banner';
-
-  function _injectStyles() {
-    if (document.getElementById('wapps-update-styles')) return;
-    const style = document.createElement('style');
-    style.id = 'wapps-update-styles';
-    style.textContent = `
-      #${BANNER_ID} {
-        position: fixed;
-        bottom: 16px;
-        left: 50%;
-        transform: translateX(-50%) translateY(120%);
-        z-index: 9999;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 16px;
-        background: var(--bg2, #141412);
-        border: 0.5px solid var(--y, #e8f040);
-        border-radius: 12px;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.4);
-        font-family: var(--fm, 'DM Mono', monospace);
-        font-size: 12px;
-        color: var(--text, #f0ebe0);
-        white-space: nowrap;
-        transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-        max-width: calc(100vw - 32px);
-      }
-      #${BANNER_ID}.visible {
-        transform: translateX(-50%) translateY(0);
-      }
-      #${BANNER_ID} .wu-msg {
-        flex: 1;
-        white-space: normal;
-        line-height: 1.4;
-      }
-      #${BANNER_ID} .wu-reload {
-        padding: 7px 14px;
-        background: var(--y, #e8f040);
-        color: var(--y-text, #0a0a09);
-        border: none;
-        border-radius: 7px;
-        font-family: var(--fm, 'DM Mono', monospace);
-        font-size: 11px;
-        font-weight: bold;
-        cursor: pointer;
-        white-space: nowrap;
-        flex-shrink: 0;
-      }
-      #${BANNER_ID} .wu-dismiss {
-        background: none;
-        border: none;
-        color: var(--muted, #5a5850);
-        font-size: 16px;
-        cursor: pointer;
-        padding: 0 2px;
-        line-height: 1;
-        flex-shrink: 0;
-      }
-      #${BANNER_ID} .wu-dismiss:hover { color: var(--text, #f0ebe0); }
-    `;
-    document.head.appendChild(style);
-  }
-
-  function _show() {
-    _injectStyles();
-    if (document.getElementById(BANNER_ID)) return; // ya visible
-
-    const banner = document.createElement('div');
-    banner.id = BANNER_ID;
-    banner.innerHTML = `
-      <span class="wu-msg">⚡ Hay una actualización disponible</span>
-      <button class="wu-reload" onclick="WUpdate.reload()">Recargar</button>
-      <button class="wu-dismiss" onclick="WUpdate.dismiss()" title="Ignorar">✕</button>
-    `;
-    document.body.appendChild(banner);
-
-    // Forzar reflow antes de añadir clase para que la transición funcione
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => banner.classList.add('visible'));
-    });
-  }
-
-  function reload() {
-    // Pedir al SW en espera que tome el control, luego recargar
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistration().then(reg => {
-        if (reg?.waiting) {
-          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-          // El SW activado lanzará controllerchange → recargamos
-          navigator.serviceWorker.addEventListener('controllerchange', () => {
-            window.location.reload();
-          }, { once: true });
-        } else {
-          window.location.reload();
-        }
-      });
-    } else {
-      window.location.reload();
-    }
-  }
-
-  function dismiss() {
-    const banner = document.getElementById(BANNER_ID);
-    if (!banner) return;
-    banner.classList.remove('visible');
-    setTimeout(() => banner.remove(), 400);
-    // Marcar en sessionStorage para re-mostrar al navegar a otra página
-    try { sessionStorage.setItem('wapps-update-pending', '1'); } catch(_) {}
-  }
-
-  // ── Escuchar mensajes del SW ──────────────────────────────────
-  function _listenSW() {
-    if (!('serviceWorker' in navigator)) return;
-    navigator.serviceWorker.addEventListener('message', e => {
-      if (e.data?.type === 'UPDATE_AVAILABLE') {
-        _show();
-      }
-    });
-
-    // Detectar SW nuevo en estado "waiting"
-    navigator.serviceWorker.getRegistration().then(reg => {
-      if (!reg) return;
-      if (reg.waiting) { _show(); return; }
-      reg.addEventListener('updatefound', () => {
-        const newSW = reg.installing;
-        if (!newSW) return;
-        newSW.addEventListener('statechange', () => {
-          if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
-            _show();
-          }
-        });
-      });
-    }).catch(() => {});
-
-    // Re-mostrar el banner si el usuario navegó entre páginas sin recargar
-    try {
-      if (sessionStorage.getItem('wapps-update-pending')) {
-        setTimeout(_show, 1500); // delay para no interrumpir el render inicial
-      }
-    } catch(_) {}
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', _listenSW);
-  } else {
-    _listenSW();
-  }
-
-  return { reload, dismiss };
 })();
