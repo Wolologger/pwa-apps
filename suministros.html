@@ -1431,7 +1431,14 @@ if (typeof WStore !== 'undefined') {
     const fresh = WStore.get('suministros','data');
     if (fresh && fresh.facturas) { state = fresh; nid = state.nextId || 1; render(); }
   });
+  window.addEventListener('wapps:auth-change', e => {
+    if (!e.detail?.user) return;
+    WStore.syncOnLoad('suministros', 'data', fresh => {
+      if (fresh && fresh.facturas) { state = fresh; nid = state.nextId||1; render(); }
+    });
+  });
 }
+
 </script>
 <script>
 // WTransition inline (página sin wapps-store.js)

@@ -1828,7 +1828,14 @@ if (typeof WStore !== 'undefined') {
     const fresh = WStore.get('setlist','data');
     if (fresh && (fresh.bands||fresh.songs)) { state=fresh; nid=state.nextId||1; if(!state.ensayos)state.ensayos=[]; render(); }
   });
+  window.addEventListener('wapps:auth-change', e => {
+    if (!e.detail?.user) return;
+    WStore.syncOnLoad('setlist', 'data', fresh => {
+      if (fresh) { state = fresh; nid = state.nextId||1; if (!state.ensayos) state.ensayos = []; render(); }
+    });
+  });
 }
+
 
 </script>
 <script>

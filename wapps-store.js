@@ -284,8 +284,23 @@ const WStore = (() => {
       const localTs   = new Date(local?._updatedAt  || 0).getTime();
 
       if (remoteTs > localTs) {
-        // Firestore es más reciente — aplicar y notificar
-        const clean = { ...remote };
+        let merged;
+
+        // Intentar merge inteligente si WSync lo soporta y la diferencia es < 24h
+        const ageDiff = remoteTs - localTs;
+        const MERGE_WINDOW_MS = 24 * 60 * 60 * 1000;
+        if (
+          local &&
+          ageDiff < MERGE_WINDOW_MS &&
+          typeof WSync !== 'undefined' &&
+          typeof WSync._mergeArraysForKey === 'function'
+        ) {
+          merged = WSync._mergeArraysForKey(fsKey, local, remote);
+        } else {
+          merged = { ...remote };
+        }
+
+        const clean = { ...merged };
         delete clean._updatedAt;
 
         const sk = storageKey(app, key);

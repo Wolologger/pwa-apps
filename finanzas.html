@@ -539,6 +539,12 @@ if (typeof WStore !== 'undefined') {
     const fresh = WStore.get('finanzas','data');
     if (fresh && (fresh.ingresos || fresh.gastos)) { state = fresh; render(); }
   });
+  window.addEventListener('wapps:auth-change', e => {
+    if (!e.detail?.user) return;
+    WStore.syncOnLoad('finanzas', 'data', fresh => {
+      if (fresh && (fresh.ingresos || fresh.gastos)) { state = fresh; render(); }
+    });
+  });
 }
 </script>
 <script>

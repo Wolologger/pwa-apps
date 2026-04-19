@@ -759,7 +759,25 @@ if(typeof WNotify !== 'undefined') WNotify.check();
 
 // Hide spinner when app is ready
 const _loadEl = document.getElementById('wapp-loading');
-if (_loadEl) { _loadEl.classList.add('fade'); setTimeout(() => { _loadEl.style.display='none'; _loadEl.remove(); }, 300); }
+if (_loadEl)
+
+// ── Sync desde Firebase al autenticarse (fix: auth puede llegar tarde) ──
+if (typeof WStore !== 'undefined') {
+  WStore.syncOnLoad('despensa', 'items', fresh => {
+    if (fresh && fresh.alimentos) { state = fresh; render(); }
+  });
+  window.addEventListener('wapps:recovered', () => {
+    const fresh = WStore.get('despensa', 'items');
+    if (fresh && fresh.alimentos) { state = fresh; render(); }
+  });
+  window.addEventListener('wapps:auth-change', e => {
+    if (!e.detail?.user) return;
+    WStore.syncOnLoad('despensa', 'items', fresh => {
+      if (fresh && fresh.alimentos) { state = fresh; render(); }
+    });
+  });
+}
+ { _loadEl.classList.add('fade'); setTimeout(() => { _loadEl.style.display='none'; _loadEl.remove(); }, 300); }
 
 // ── ONBOARDING ──
 const OB_STEPS = [

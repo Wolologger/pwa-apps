@@ -763,6 +763,24 @@ if(typeof WOnboarding!=='undefined')WOnboarding.show('compra', OB_STEPS);
 
 render();
 
+// Hide spinner
+
+// ── Sync desde Firebase al autenticarse (fix: auth puede llegar tarde) ──
+if (typeof WStore !== 'undefined') {
+  WStore.syncOnLoad('compra', 'data', fresh => {
+    if (fresh && fresh.items) { state = fresh; nid = state.nextId||1; render(); }
+  });
+  window.addEventListener('wapps:recovered', () => {
+    const fresh = WStore.get('compra', 'data');
+    if (fresh && fresh.items) { state = fresh; nid = state.nextId||1; render(); }
+  });
+  window.addEventListener('wapps:auth-change', e => {
+    if (!e.detail?.user) return;
+    WStore.syncOnLoad('compra', 'data', fresh => {
+      if (fresh && fresh.items) { state = fresh; nid = state.nextId||1; render(); }
+    });
+  });
+}
 // Hide spinner when app is ready
 // DOM ya está listo (script al final del body) — ocultar spinner inmediatamente
 const _loadEl = document.getElementById('wapp-loading');

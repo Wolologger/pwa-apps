@@ -1,4 +1,4 @@
-const CACHE = 'wapps-v8.2';
+const CACHE = 'wapps-v8.3';
 
 // Núcleo: solo lo imprescindible para arrancar offline y mostrar fallbacks.
 // El resto de páginas HTML se cachean la primera vez que el usuario las visita (lazy cache).

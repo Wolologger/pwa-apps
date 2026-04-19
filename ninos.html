@@ -606,6 +606,24 @@ function showTab(name, el) {
   if (fabLabels[name]) { fabBtn.textContent = fabLabels[name]; fab.style.display = 'block'; }
   else fab.style.display = 'none';
   render();
+
+
+// ── Sync desde Firebase al autenticarse (fix: auth puede llegar tarde) ──
+if (typeof WStore !== 'undefined') {
+  WStore.syncOnLoad('ninos', 'data', fresh => {
+    if (fresh && fresh.kids) { state = fresh; render(); }
+  });
+  window.addEventListener('wapps:recovered', () => {
+    const fresh = WStore.get('ninos', 'data');
+    if (fresh && fresh.kids) { state = fresh; render(); }
+  });
+  window.addEventListener('wapps:auth-change', e => {
+    if (!e.detail?.user) return;
+    WStore.syncOnLoad('ninos', 'data', fresh => {
+      if (fresh && fresh.kids) { state = fresh; render(); }
+    });
+  });
+}
 }
 
 function fabAction() {

@@ -540,6 +540,23 @@ function addPriceRecord(id, e) {
 
 render();
 
+// ── Sync desde Firebase al autenticarse (fix: auth puede llegar tarde) ──
+if (typeof WStore !== 'undefined') {
+  WStore.syncOnLoad('deseados', 'data', fresh => {
+    if (fresh && fresh.items) { state = fresh; nid = state.nextId||1; render(); }
+  });
+  window.addEventListener('wapps:recovered', () => {
+    const fresh = WStore.get('deseados', 'data');
+    if (fresh && fresh.items) { state = fresh; nid = state.nextId||1; render(); }
+  });
+  window.addEventListener('wapps:auth-change', e => {
+    if (!e.detail?.user) return;
+    WStore.syncOnLoad('deseados', 'data', fresh => {
+      if (fresh && fresh.items) { state = fresh; nid = state.nextId||1; render(); }
+    });
+  });
+}
+
 // Hide spinner when app is ready
 // DOM ya está listo (script al final del body) — ocultar spinner inmediatamente
 const _loadEl = document.getElementById('wapp-loading');

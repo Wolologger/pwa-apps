@@ -973,7 +973,18 @@ if (typeof WStore !== 'undefined') {
       render();
     }
   });
+  window.addEventListener('wapps:recovered', () => {
+    const fresh = WStore.get('obra', 'data');
+    if (fresh?.proyectos) { state = fresh; nid = state.nextId||200; activeProjectId = state.proyectos.find(p=>!p.archived)?.id || state.proyectos[0]?.id || null; render(); }
+  });
+  window.addEventListener('wapps:auth-change', e => {
+    if (!e.detail?.user) return;
+    WStore.syncOnLoad('obra', 'data', fresh => {
+      if (fresh?.proyectos) { state = fresh; nid = state.nextId||200; activeProjectId = state.proyectos.find(p=>!p.archived)?.id || state.proyectos[0]?.id || null; render(); }
+    });
+  });
 }
+
 
 // Notificaciones
 if(typeof WNotify !== 'undefined'){

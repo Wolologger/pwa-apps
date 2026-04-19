@@ -387,6 +387,12 @@ if(typeof WStore!=='undefined'){
     const fresh=WStore.get('instrumentos','data');
     if(fresh&&fresh.items){state=fresh;nid=state.nextId||1;updateFormFields();render();}
   });
+  window.addEventListener('wapps:auth-change', e => {
+    if (!e.detail?.user) return;
+    WStore.syncOnLoad('instrumentos', 'data', fresh => {
+      if (fresh && fresh.items) { state = fresh; nid = state.nextId||1; updateFormFields(); render(); }
+    });
+  });
 }
 
 function _fb()   { return (typeof WFirebase !== 'undefined') ? WFirebase : null; }

@@ -40,7 +40,7 @@ localStorage (siempre)
 - **Sin conexión**: todo funciona con `localStorage`. Los cambios se marcan como pendientes en `wapps.pending` (persiste entre sesiones).
 - **Con conexión y sesión**: los datos se suben a Firestore automáticamente. Gana siempre el más reciente por `_updatedAt`. Al cerrar la pestaña, `WSync` hace un flush de pendientes vía `visibilitychange`/`pagehide`.
 - **Tiempo real**: `WStore.watchRealtime` mantiene un listener `onSnapshot` activo con merge campo a campo. Los listeners se limpian solos en `pagehide`. Un toast sutil confirma cada actualización remota.
-- **Service Worker** (`sw.js` v8.2): precaché reducido al núcleo; el resto se cachea al visitar (lazy). Estrategia stale-while-revalidate para HTML con banner de actualización no intrusivo.
+- **Service Worker** (`sw.js` v8.3): precaché reducido al núcleo; el resto se cachea al visitar (lazy). Estrategia stale-while-revalidate para HTML con banner de actualización no intrusivo.
 - **Seguridad**: sesión expira tras 8 h de inactividad (configurable). Credenciales placeholder en `wapps-config.js` se detectan al arrancar.
 - **Resiliencia**: `QuotaExceededError` de localStorage muestra banner de alerta en lugar de fallar silenciosamente.
 
@@ -163,7 +163,24 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 
 ## Changelog
 
-### v3.3.2
+### v3.5.0
+- `wapps-firebase.js` — `WSync._mergeArrays(localArr, remoteArr, idField)`: merge inteligente de arrays por `id` — une items de ambos dispositivos en lugar de machacar uno con el otro
+- `wapps-firebase.js` — `WSync.pullAll()`: si la diferencia entre versiones local y remota es menor de 24h, aplica merge inteligente en lugar de reemplazar (despensa·alimentos, compra·items, deseados·items, setlist·canciones/bandas, mascotas·pets, coches·cars, ninos·kids, suministros·facturas, finanzas·ingresos/gastos, instrumentos·items, obra·proyectos)
+- `wapps-firebase.js` — `WSync._mergeArraysForKey()`: helper público usado también por `syncOnLoad`
+- `wapps-store.js` — `WStore.syncOnLoad()`: usa merge inteligente cuando `WSync._mergeArraysForKey` está disponible y la diferencia < 24h
+- `nextId` se ajusta al máximo de local y remoto en cada merge — evita colisiones de id entre dispositivos
+
+### v3.4.0
+- `wapps-firebase.js` — nuevo `WSync.pushAll(uid, filterKey?)`: fuerza subida completa a Firestore ignorando estado de pendientes
+- `index.html` — botón **⬆ SUBIR TODO** en sync-bar global: sube todas las apps a Firebase de golpe
+- Todas las apps — botón **⬆ SUBIR** individual en sync-bar: fuerza subida de los datos de esa app
+- Todas las apps — botón **↓ PULL** en sync-bar: descarga datos desde Firebase manualmente
+- `instrumentos.html`, `ninos.html` — sync-bar completa añadida (faltaba desde v3.1.1)
+- **Fix crítico** — `syncOnLoad` + `wapps:auth-change` en todas las apps: si Firebase tarda en confirmar la sesión al cargar la página, los datos remotos ahora se aplican correctamente en cuanto el usuario se autentica (compra, despensa, semana, mascotas, coches, deseados, ninos, obra, setlist, suministros, finanzas, instrumentos)
+- `wapps:recovered` extendido a todas las apps: reaccionan y re-renderizan al recuperar datos de Firestore tras un wipe de localStorage
+- `sw.js` v8.3 — bump de caché para forzar actualización en PWAs instaladas
+
+
 - `wapps-store.js` — `WStore.set()` captura `QuotaExceededError` y muestra banner de alerta en lugar de fallar silenciosamente
 - `wapps-store.js` — `_mergeByField()`: merge campo a campo en sincronización en tiempo real — ediciones simultáneas en campos distintos ya no se pierden
 - `wapps-store.js` — `_realtimeRegistry`: todos los listeners `onSnapshot` se registran y se limpian automáticamente en `pagehide` — sin conexiones Firestore huérfanas

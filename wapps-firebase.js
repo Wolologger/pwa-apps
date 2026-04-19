@@ -252,6 +252,62 @@ const WSync = (() => {
     return { pushed, failed };
   }
 
+  // ── Merge inteligente de arrays por id ───────────────────────────
+  // Evita machacar ediciones offline en dos dispositivos distintos.
+  // Une los arrays local y remoto por `idField`, priorizando el item
+  // con _updatedAt más reciente cuando hay conflicto en el mismo id.
+  // Solo se activa si ambas versiones tienen menos de 24h de diferencia
+  // (si la diferencia es mayor, gana el más reciente sin merge).
+  //
+  // Claves y campos de array que se pueden mergear:
+  const MERGE_MAP = {
+    'despensa_items':    [{ field: 'alimentos', id: 'id' }],
+    'compra_data':       [{ field: 'items',     id: 'id' }],
+    'deseados_data':     [{ field: 'items',     id: 'id' }],
+    'setlist_data':      [{ field: 'canciones', id: 'id' }, { field: 'bandas', id: 'id' }],
+    'mascotas_data':     [{ field: 'pets',      id: 'id' }],
+    'coches_data':       [{ field: 'cars',      id: 'id' }],
+    'ninos_data':        [{ field: 'kids',      id: 'id' }],
+    'suministros_data':  [{ field: 'facturas',  id: 'id' }],
+    'finanzas_data':     [{ field: 'ingresos',  id: 'id' }, { field: 'gastos', id: 'id' }],
+    'instrumentos_data': [{ field: 'items',     id: 'id' }],
+    'obra_data':         [{ field: 'proyectos', id: 'id' }],
+  };
+
+  const MERGE_WINDOW_MS = 24 * 60 * 60 * 1000; // 24 horas
+
+  function _mergeArrays(localArr, remoteArr, idField = 'id') {
+    if (!Array.isArray(localArr) || !localArr.length) return remoteArr || [];
+    if (!Array.isArray(remoteArr) || !remoteArr.length) return localArr;
+
+    const merged = new Map();
+
+    // Insertar todos los items locales primero
+    for (const item of localArr) {
+      merged.set(item[idField], item);
+    }
+
+    // Mezclar con remotos: si hay conflicto, gana el más reciente por _updatedAt
+    for (const remoteItem of remoteArr) {
+      const key = remoteItem[idField];
+      const localItem = merged.get(key);
+      if (!localItem) {
+        // Item nuevo en remoto — añadir
+        merged.set(key, remoteItem);
+      } else {
+        // Conflicto: comparar timestamps
+        const remoteTs = new Date(remoteItem._updatedAt || 0).getTime();
+        const localTs  = new Date(localItem._updatedAt  || 0).getTime();
+        if (remoteTs > localTs) {
+          merged.set(key, remoteItem);
+        }
+        // Si local es más reciente o igual, conservar local (ya está en el Map)
+      }
+    }
+
+    return Array.from(merged.values());
+  }
+
   // ── Pull: baja todo desde Firestore y mezcla con local ───────────
   async function pullAll(uid) {
     if (!uid || !WFirebase.isOnline()) return false;
@@ -263,18 +319,51 @@ const WSync = (() => {
         const localRaw = localStorage.getItem(localKey);
         const local    = localRaw ? JSON.parse(localRaw) : null;
 
-        // Gana el más reciente. En empate gana el local (evita machacar un restore reciente).
         const remoteTs = new Date(data._updatedAt || 0).getTime();
         const localTs  = new Date(local?._updatedAt || 0).getTime();
+        const ageDiff  = Math.abs(remoteTs - localTs);
 
-        if (!local || remoteTs > localTs) {
-          const clean = { ...data };
-          delete clean._updatedAt;
-          localStorage.setItem(localKey, JSON.stringify(clean));
-          const [app, key] = storeKey.split('.');
-          if (app && key) {
-            window.dispatchEvent(new CustomEvent('wapps:change', { detail: { app, key, value: clean } }));
+        let merged = null;
+
+        if (!local) {
+          // Sin datos locales — usar remoto directamente
+          merged = { ...data };
+        } else if (remoteTs <= localTs) {
+          // Local más reciente o igual — no tocar
+          continue;
+        } else if (ageDiff < MERGE_WINDOW_MS && MERGE_MAP[fsKey]) {
+          // Diferencia menor a 24h y clave con arrays mergeables:
+          // intentar merge inteligente en lugar de reemplazar
+          merged = { ...local };
+          let didMerge = false;
+          for (const { field, id } of MERGE_MAP[fsKey]) {
+            const localArr  = local[field];
+            const remoteArr = data[field];
+            if (Array.isArray(localArr) && Array.isArray(remoteArr)) {
+              merged[field] = _mergeArrays(localArr, remoteArr, id);
+              didMerge = true;
+            }
           }
+          if (!didMerge) {
+            // Sin arrays mergeables — comportamiento original (gana remoto)
+            merged = { ...data };
+          }
+          // Actualizar nextId al máximo de ambos para evitar colisiones
+          if (local.nextId || data.nextId) {
+            merged.nextId = Math.max(local.nextId || 0, data.nextId || 0);
+          }
+          console.info(`[WSync] merge inteligente aplicado: ${fsKey}`);
+        } else {
+          // Diferencia > 24h o clave sin merge map — gana el más reciente
+          merged = { ...data };
+        }
+
+        const clean = { ...merged };
+        delete clean._updatedAt;
+        localStorage.setItem(localKey, JSON.stringify(clean));
+        const [app, key] = storeKey.split('.');
+        if (app && key) {
+          window.dispatchEvent(new CustomEvent('wapps:change', { detail: { app, key, value: clean } }));
         }
       }
       return true;
@@ -336,6 +425,28 @@ const WSync = (() => {
     return { pushed, failed };
   }
 
-  return { markPending, clearPending, clearAllPending, getPending, syncAll, pullAll, pushAll, WSTORE_KEYS };
+  // ── _mergeArraysForKey: helper público para wapps-store.syncOnLoad ──
+  function _mergeArraysForKey(fsKey, local, remote) {
+    const fieldDefs = MERGE_MAP[fsKey];
+    if (!fieldDefs) return { ...remote };
+
+    const merged = { ...local };
+    let didMerge = false;
+    for (const { field, id } of fieldDefs) {
+      const localArr  = local[field];
+      const remoteArr = remote[field];
+      if (Array.isArray(localArr) && Array.isArray(remoteArr)) {
+        merged[field] = _mergeArrays(localArr, remoteArr, id);
+        didMerge = true;
+      }
+    }
+    if (!didMerge) return { ...remote };
+    if (local.nextId || remote.nextId) {
+      merged.nextId = Math.max(local.nextId || 0, remote.nextId || 0);
+    }
+    return merged;
+  }
+
+  return { markPending, clearPending, clearAllPending, getPending, syncAll, pullAll, pushAll, _mergeArraysForKey, WSTORE_KEYS };
 
 })();
