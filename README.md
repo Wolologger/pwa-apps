@@ -40,7 +40,7 @@ localStorage (siempre)
 - **Sin conexión**: todo funciona con `localStorage`. Los cambios se marcan como pendientes en `wapps.pending` (persiste entre sesiones).
 - **Con conexión y sesión**: los datos se suben a Firestore automáticamente. Gana siempre el más reciente por `_updatedAt`. Al cerrar la pestaña, `WSync` hace un flush de pendientes vía `visibilitychange`/`pagehide`.
 - **Tiempo real**: `WStore.watchRealtime` mantiene un listener `onSnapshot` activo con merge campo a campo. Los listeners se limpian solos en `pagehide`. Un toast sutil confirma cada actualización remota.
-- **Service Worker** (`sw.js` v8.3): precaché reducido al núcleo; el resto se cachea al visitar (lazy). Estrategia stale-while-revalidate para HTML con banner de actualización no intrusivo.
+- **Service Worker** (`sw.js` v8.5): precaché reducido al núcleo; el resto se cachea al visitar (lazy). Estrategia stale-while-revalidate para HTML con banner de actualización no intrusivo.
 - **Seguridad**: sesión expira tras 8 h de inactividad (configurable). Credenciales placeholder en `wapps-config.js` se detectan al arrancar.
 - **Resiliencia**: `QuotaExceededError` de localStorage muestra banner de alerta en lugar de fallar silenciosamente.
 
@@ -162,6 +162,18 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 ---
 
 ## Changelog
+
+### v3.7.0
+- **Fix crítico** — Firebase SDK (`firebase-app-compat`, `firebase-auth-compat`, `firebase-firestore-compat`), `wapps-config.js` y `wapps-firebase.js` añadidos al `<head>` de las 13 páginas de app. Antes `WFirebase` y `WSync` eran siempre `undefined` al abrir cualquier app directamente — todo el sync funcionaba solo desde `index.html`
+- Los botones ↑ SYNC, ↓ PULL y ⬆ SUBIR ahora operan correctamente en cualquier página
+- `syncOnLoad`, `wapps:auth-change` y `wapps:recovered` se ejecutan realmente en todas las apps
+- `sw.js` v8.5
+
+### v3.6.0
+- **Fix crítico** — `wapps-store.js` ahora se carga correctamente en todas las apps: `coches`, `deseados`, `finanzas`, `gastos-diarios`, `mascotas`, `semana`, `setlist`, `suministros`, `instrumentos`, `ninos`. Antes el script no estaba en el `<head>` y todos los guards `typeof WStore !== 'undefined'` devolvían `false` — Firebase nunca recibía datos de estas apps
+- `gastos-diarios.html` — conectado a Firebase: `load()`/`save()` pasan por `WStore.get/set('gastos','data')` + `syncOnLoad` + `wapps:auth-change` + `wapps:recovered`
+- `WTransition` inline eliminado de 8 páginas — `wapps-store.js` ya lo incluye, era código duplicado
+- `sw.js` v8.4 — bump de caché
 
 ### v3.5.0
 - `wapps-firebase.js` — `WSync._mergeArrays(localArr, remoteArr, idField)`: merge inteligente de arrays por `id` — une items de ambos dispositivos en lugar de machacar uno con el otro

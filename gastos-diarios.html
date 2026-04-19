@@ -9,6 +9,12 @@
 <meta name="theme-color" content="#0f0f0e">
 <title>Gastos</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
+<script src="wapps-config.js"></script>
+<script src="wapps-store.js"></script>
+<script src="wapps-firebase.js"></script>
 <style>
 :root{
   --bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;
@@ -268,12 +274,17 @@ let vy=new Date().getFullYear(), vm=new Date().getMonth();
 let curPanel='gastos', editId=null, selCat='otros';
 
 function load(){
+  // WStore primero (clave nueva — usada por backup/restore y Firebase sync)
+  if(typeof WStore!=='undefined'){const v=WStore.get('gastos','data');if(v&&v.gastos)return v;}
+  // Fallback a clave legacy
   try{const r=localStorage.getItem('gastos_v1');if(r)return JSON.parse(r);}catch(e){}
   return{gastos:[],budgets:{},nextId:1};
 }
 function save(){
   state.nextId=nid;
-  try{localStorage.setItem('gastos_v1',JSON.stringify(state));}catch(e){}
+  // WStore: persiste en localStorage Y marca pending para Firebase
+  if(typeof WStore!=='undefined'){WStore.set('gastos','data',state);}
+  else{try{localStorage.setItem('gastos_v1',JSON.stringify(state));}catch(e){}}
 }
 function nxtId(){return++nid;}
 function today(){const d=new Date();return`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;}
@@ -643,17 +654,25 @@ initCatPicker();
 render();
 // Focus amount on load
 setTimeout(()=>document.getElementById('qa-imp').focus(),300);
+
+// ── Sync desde Firebase al autenticarse ──
+if (typeof WStore !== 'undefined') {
+  WStore.syncOnLoad('gastos', 'data', fresh => {
+    if (fresh && fresh.gastos) { state = fresh; nid = state.nextId||1; render(); }
+  });
+  window.addEventListener('wapps:recovered', () => {
+    const fresh = WStore.get('gastos', 'data');
+    if (fresh && fresh.gastos) { state = fresh; nid = state.nextId||1; render(); }
+  });
+  window.addEventListener('wapps:auth-change', e => {
+    if (!e.detail?.user) return;
+    WStore.syncOnLoad('gastos', 'data', fresh => {
+      if (fresh && fresh.gastos) { state = fresh; nid = state.nextId||1; render(); }
+    });
+  });
+}
 </script>
-<script>
-// WTransition inline (página sin wapps-store.js)
-(function(){
-  const D=160;
-  function go(url){document.body.style.transition='opacity '+D+'ms ease';document.body.style.opacity='0';setTimeout(()=>{window.location.href=url;},D);}
-  function intercept(){document.addEventListener('click',e=>{const a=e.target.closest('a[href]');if(!a)return;const h=a.getAttribute('href');if(!h||!h.endsWith('.html')||h.startsWith('http')||a.target)return;e.preventDefault();go(h);},true);}
-  function fadeIn(){document.body.style.opacity='0';document.body.style.transition='none';requestAnimationFrame(()=>{requestAnimationFrame(()=>{document.body.style.transition='opacity '+D+'ms ease';document.body.style.opacity='1';});});}
-  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',()=>{intercept();fadeIn();});}else{intercept();fadeIn();}
-  window.WTransition={go};
-})();
+
 
 function _fb()   { return (typeof WFirebase !== 'undefined') ? WFirebase : null; }
 function _sync() { return (typeof WSync     !== 'undefined') ? WSync     : null; }

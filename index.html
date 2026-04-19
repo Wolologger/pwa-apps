@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0a0a09">
 <link rel="manifest" href="manifest.json">
 <title>W // APPS</title>
-<!-- version: 3.5.0 -->
+<!-- version: 3.7.0 -->
 <!-- Firebase SDK v9 compat -->
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
@@ -284,7 +284,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
     <div class="topbar-right">
       <button class="version-badge" onclick="openChangelog()" title="Ver changelog">
         <span class="version-dot"></span>
-        <span id="version-display">v3.5.0</span>
+        <span id="version-display">v3.7.0</span>
       </button>
       <div class="clock" id="clock">--:--</div>
       <button class="auth-btn" id="auth-btn" onclick="handleAuth()" title="Login con Google">
@@ -360,7 +360,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
     <div class="cl-modal">
       <div class="cl-handle"></div>
       <div class="cl-header">
-        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v3.5.0</span></div>
+        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v3.7.0</span></div>
         <button class="cl-close" onclick="closeChangelog()">✕</button>
       </div>
       <div class="cl-body" id="cl-body"></div>
@@ -373,10 +373,30 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
 const GITHUB_USER='Wolologger';
 const GITHUB_REPO='pwa-apps';
 
-const APP_VERSION = 'v3.5.0';
+const APP_VERSION = 'v3.7.0';
 
 // ── CHANGELOG ──────────────────────────────────────────────────────
 const CHANGELOG = [
+  {
+    version: 'v3.7.0',
+    date: 'Abril 2026',
+    items: [
+      { type: 'fix', text: 'Firebase SDK + wapps-firebase.js cargados en las 13 páginas de app — sync real en todas las apps al abrirlas directamente' },
+      { type: 'fix', text: 'WFirebase y WSync ya no son undefined en app pages — botones SYNC/PULL/SUBIR funcionan en cualquier página' },
+      { type: 'fix', text: 'syncOnLoad, wapps:auth-change y wapps:recovered ahora ejecutan realmente en todas las apps' },
+      { type: 'imp', text: 'sw.js — cache bump v8.5' },
+    ]
+  },
+  {
+    version: 'v3.6.0',
+    date: 'Abril 2026',
+    items: [
+      { type: 'fix', text: 'wapps-store.js cargado correctamente en todas las apps — coches, deseados, finanzas, gastos-diarios, mascotas, semana, setlist, suministros, instrumentos, ninos ya sincronizan con Firebase' },
+      { type: 'fix', text: 'gastos-diarios.html — conectado a WStore.get/set + syncOnLoad + wapps:auth-change + wapps:recovered' },
+      { type: 'fix', text: 'WTransition inline eliminado de 8 páginas — ya lo provee wapps-store.js, no había conflicto pero sí código duplicado' },
+      { type: 'imp', text: 'sw.js — cache bump v8.4 para forzar actualización en PWAs instaladas' },
+    ]
+  },
   {
     version: 'v3.5.0',
     date: 'Abril 2026',

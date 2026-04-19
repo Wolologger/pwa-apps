@@ -7,6 +7,12 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0a0a09">
 <title>Coches — W//APPS</title>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
+<script src="wapps-config.js"></script>
+<script src="wapps-store.js"></script>
+<script src="wapps-firebase.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -1259,16 +1265,7 @@ function showToast(msg, isErr=false) {
 // ── INIT ──
 render();
 </script>
-<script>
-// WTransition inline (página sin wapps-store.js)
-(function(){
-  const D=160;
-  function go(url){document.body.style.transition='opacity '+D+'ms ease';document.body.style.opacity='0';setTimeout(()=>{window.location.href=url;},D);}
-  function intercept(){document.addEventListener('click',e=>{const a=e.target.closest('a[href]');if(!a)return;const h=a.getAttribute('href');if(!h||!h.endsWith('.html')||h.startsWith('http')||a.target)return;e.preventDefault();go(h);},true);}
-  function fadeIn(){document.body.style.opacity='0';document.body.style.transition='none';requestAnimationFrame(()=>{requestAnimationFrame(()=>{document.body.style.transition='opacity '+D+'ms ease';document.body.style.opacity='1';});});}
-  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',()=>{intercept();fadeIn();});}else{intercept();fadeIn();}
-  window.WTransition={go};
-})();
+
 
 function _fb()   { return (typeof WFirebase !== 'undefined') ? WFirebase : null; }
 function _sync() { return (typeof WSync     !== 'undefined') ? WSync     : null; }
