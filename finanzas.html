@@ -565,6 +565,10 @@ function updateSyncUI(state, pendingCount) {
   label.textContent=labels[state]||state.toUpperCase();
   pend.textContent=pendingCount>0?'· '+pendingCount+' PENDIENTE'+(pendingCount>1?'S':''):'';
   btn.disabled=!(state==='online'&&_fb()&&_fb().getUser()&&pendingCount>0);
+  const pullBtn = document.getElementById('pull-btn');
+  if (pullBtn) pullBtn.disabled = !(state === 'online' && _fb() && _fb().getUser());
+  const pushAppBtn = document.getElementById('push-app-btn');
+  if (pushAppBtn) pushAppBtn.disabled = !(state === 'online' && _fb() && _fb().getUser());
 }
 async function manualSync(){
   const fb=_fb(),sync=_sync();if(!fb||!sync)return;
@@ -589,6 +593,21 @@ async function manualPull() {
   // Reload page to reflect pulled data
   window.location.reload();
 }
+async function manualPushApp() {
+  const fb   = _fb();
+  const sync = _sync();
+  if (!fb || !sync) return;
+  const user = fb.getUser();
+  if (!user || !fb.isOnline()) return;
+  const btn = document.getElementById('push-app-btn');
+  if (btn) btn.disabled = true;
+  updateSyncUI('syncing', sync.getPending().length);
+  const { pushed, failed } = await sync.pushAll(user.uid, 'finanzas.data');
+  updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
+  if (btn) btn.disabled = !(fb.isOnline() && fb.getUser());
+  console.info(`[PUSH APP] finanzas.data: ${pushed} subidas, ${failed} fallidas`);
+}
+
 
 window.addEventListener('wapps:online',()=>updateSyncUI('online',_sync()?.getPending().length??0));
 window.addEventListener('wapps:offline',()=>updateSyncUI('offline',_sync()?.getPending().length??0));

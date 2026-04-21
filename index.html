@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0a0a09">
 <link rel="manifest" href="manifest.json">
 <title>W // APPS</title>
-<!-- version: 3.7.0 -->
+<!-- version: 3.8.0 -->
 <!-- Firebase SDK v9 compat -->
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
@@ -284,7 +284,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
     <div class="topbar-right">
       <button class="version-badge" onclick="openChangelog()" title="Ver changelog">
         <span class="version-dot"></span>
-        <span id="version-display">v3.7.0</span>
+        <span id="version-display">v3.8.0</span>
       </button>
       <div class="clock" id="clock">--:--</div>
       <button class="auth-btn" id="auth-btn" onclick="handleAuth()" title="Login con Google">
@@ -360,7 +360,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
     <div class="cl-modal">
       <div class="cl-handle"></div>
       <div class="cl-header">
-        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v3.7.0</span></div>
+        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v3.8.0</span></div>
         <button class="cl-close" onclick="closeChangelog()">✕</button>
       </div>
       <div class="cl-body" id="cl-body"></div>
@@ -373,10 +373,19 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
 const GITHUB_USER='Wolologger';
 const GITHUB_REPO='pwa-apps';
 
-const APP_VERSION = 'v3.7.0';
+const APP_VERSION = 'v3.8.0';
 
 // ── CHANGELOG ──────────────────────────────────────────────────────
 const CHANGELOG = [
+  {
+    version: 'v3.8.0',
+    date: 'Abril 2026',
+    items: [
+      { type: 'fix', text: 'Botón ⬆ SUBIR — manualPushApp() añadido a 11 páginas que tenían el botón pero no la función' },
+      { type: 'fix', text: 'updateSyncUI — pull-btn y push-app-btn ahora se habilitan/deshabilitan correctamente en todas las páginas' },
+      { type: 'imp', text: 'sw.js — cache bump v8.6' },
+    ]
+  },
   {
     version: 'v3.7.0',
     date: 'Abril 2026',
