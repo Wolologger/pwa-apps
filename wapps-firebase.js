@@ -398,19 +398,53 @@ const WSync = (() => {
     }
   });
 
+  // Mapa de claves legacy → clave wapps.* (mismo que MIGRATE_MAP en wapps-store.js)
+  const LEGACY_MAP = {
+    'despensa.items':    'despensa_v1',
+    'compra.data':       'compra_v1',
+    'finanzas.data':     'finanzas_v1',
+    'suministros.data':  'suministros_v1',
+    'gastos.data':       'gastos_v1',
+    'semana.data':       'semana_v2',
+    'deseados.data':     'deseados_v1',
+    'obra.data':         'miobra_v2',
+    'instrumentos.data': 'instrumentos_v2',
+    'setlist.data':      'setlist_v1',
+    'coches.data':       'coches_v1',
+    'ninos.data':        'ninos_v1',
+  };
+
+  // Lee un dato intentando primero la clave wapps.* y luego la clave legacy
+  function _readLocal(key) {
+    const newRaw = localStorage.getItem('wapps.' + key);
+    if (newRaw) return JSON.parse(newRaw);
+    const legacyKey = LEGACY_MAP[key];
+    if (legacyKey) {
+      const oldRaw = localStorage.getItem(legacyKey);
+      if (oldRaw) {
+        const data = JSON.parse(oldRaw);
+        // Migrar al vuelo: copiar a clave nueva para que futuras lecturas sean directas
+        localStorage.setItem('wapps.' + key, JSON.stringify(data));
+        console.info(`[WSync] migración al vuelo: ${legacyKey} → wapps.${key}`);
+        return data;
+      }
+    }
+    return null;
+  }
+
   // ── pushAll: fuerza subida de TODAS las claves, sin importar pendientes ──
+  // Lee claves wapps.* con fallback a claves legacy — sube todo lo que haya en local.
   async function pushAll(uid, filterKey) {
     if (!uid || !WFirebase.isOnline()) return { pushed: 0, failed: 0 };
     const keys = filterKey ? [filterKey] : WSTORE_KEYS;
 
     window.dispatchEvent(new CustomEvent('wapps:sync-start', { detail: { total: keys.length } }));
 
-    let pushed = 0, failed = 0;
+    let pushed = 0, failed = 0, skipped = 0;
     for (const key of keys) {
       try {
-        const raw = localStorage.getItem('wapps.' + key);
-        if (!raw) continue;
-        const data = JSON.parse(raw);
+        const data = _readLocal(key);
+        if (!data) { skipped++; continue; }
         const fsKey = key.replace('.', '_');
         const ok = await WFirebase.pushToFirestore(uid, fsKey, data);
         if (ok) { pushed++; clearPending(key); }
@@ -421,6 +455,7 @@ const WSync = (() => {
       }
     }
 
+    console.info(`[WSync] pushAll: ${pushed} subidas, ${failed} fallidas, ${skipped} sin datos`);
     window.dispatchEvent(new CustomEvent('wapps:sync-done', { detail: { pushed, failed } }));
     return { pushed, failed };
   }

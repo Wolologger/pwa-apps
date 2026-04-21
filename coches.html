@@ -1316,7 +1316,11 @@ async function manualPushApp() {
   updateSyncUI('syncing', sync.getPending().length);
   const { pushed, failed } = await sync.pushAll(user.uid, 'coches.data');
   updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
-  if (btn) btn.disabled = !(fb.isOnline() && fb.getUser());
+  if (btn) {{
+    btn.disabled = !(fb.isOnline() && fb.getUser());
+    btn.textContent = failed > 0 ? `⚠ ${{pushed}}/${{pushed+failed}}` : pushed > 0 ? `✓ ${{pushed}}` : '⬆ SUBIR';
+    if (pushed > 0 || failed > 0) setTimeout(() => {{ if(btn) btn.textContent = '⬆ SUBIR'; }}, 3000);
+  }}
   console.info(`[PUSH APP] coches.data: ${pushed} subidas, ${failed} fallidas`);
 }
 

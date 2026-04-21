@@ -40,7 +40,7 @@ localStorage (siempre)
 - **Sin conexión**: todo funciona con `localStorage`. Los cambios se marcan como pendientes en `wapps.pending` (persiste entre sesiones).
 - **Con conexión y sesión**: los datos se suben a Firestore automáticamente. Gana siempre el más reciente por `_updatedAt`. Al cerrar la pestaña, `WSync` hace un flush de pendientes vía `visibilitychange`/`pagehide`.
 - **Tiempo real**: `WStore.watchRealtime` mantiene un listener `onSnapshot` activo con merge campo a campo. Los listeners se limpian solos en `pagehide`. Un toast sutil confirma cada actualización remota.
-- **Service Worker** (`sw.js` v8.6): precaché reducido al núcleo; el resto se cachea al visitar (lazy). Estrategia stale-while-revalidate para HTML con banner de actualización no intrusivo.
+- **Service Worker** (`sw.js` v8.7): precaché reducido al núcleo; el resto se cachea al visitar (lazy). Estrategia stale-while-revalidate para HTML con banner de actualización no intrusivo.
 - **Seguridad**: sesión expira tras 8 h de inactividad (configurable). Credenciales placeholder en `wapps-config.js` se detectan al arrancar.
 - **Resiliencia**: `QuotaExceededError` de localStorage muestra banner de alerta en lugar de fallar silenciosamente.
 
@@ -162,6 +162,13 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 ---
 
 ## Changelog
+
+### v3.9.0
+- **Fix** — `WSync.pushAll()` ahora lee claves legacy (`gastos_v1`, `compra_v1`, `semana_v2`, etc.) si `wapps.*` está vacío. Los datos que nunca pasaron por `WStore.set()` ahora se suben a Firebase al pulsar ⬆ SUBIR TODO
+- `_readLocal()`: al encontrar datos en clave legacy, los migra al vuelo a `wapps.*` para que lecturas futuras sean directas
+- Botón ⬆ SUBIR TODO: muestra resultado `✓ N SUBIDAS` o `⚠ N/M FAIL` 4 segundos tras completar
+- Botón ⬆ SUBIR (por app): ídem, 3 segundos
+- `sw.js` v8.7
 
 ### v3.8.0
 - **Fix** — botón ⬆ SUBIR tenía HTML pero no función `manualPushApp()` en 11 apps — ahora funciona en todas
