@@ -223,6 +223,42 @@ const WSync = (() => {
   }
 
   // ── Push: sube pendientes a Firestore ────────────────────────────
+  // Retry state en memoria — no persiste en localStorage
+  // Evita reintentar errores permanentes (ej. reglas de seguridad de Firestore)
+  const _retryCount = new Map();
+  const _MAX_RETRIES = 3;
+  const _RETRY_DELAYS = [2000, 4000, 8000]; // backoff exponencial: 2s → 4s → 8s
+
+  function _sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  async function _pushWithRetry(uid, key, attempt) {
+    attempt = attempt || 0;
+    if (attempt >= _MAX_RETRIES) {
+      console.warn('[WSync] max retries reached for', key, '— skipping this session');
+      return false;
+    }
+    const raw = localStorage.getItem('wapps.' + key);
+    if (!raw) { clearPending(key); return true; }
+    const data = JSON.parse(raw);
+    const fsKey = key.replace('.', '_');
+    try {
+      const ok = await WFirebase.pushToFirestore(uid, fsKey, data);
+      if (ok) { _retryCount.delete(key); return true; }
+    } catch(e) {
+      console.warn('[WSync] push error', key, e.message);
+    }
+    // Falló: esperar con backoff y reintentar
+    const nextAttempt = attempt + 1;
+    _retryCount.set(key, nextAttempt);
+    if (nextAttempt < _MAX_RETRIES) {
+      const delay = _RETRY_DELAYS[attempt] || 8000;
+      console.warn('[WSync] retry', nextAttempt, 'for', key, 'in', delay + 'ms');
+      await _sleep(delay);
+      return _pushWithRetry(uid, key, nextAttempt);
+    }
+    return false;
+  }
+
   async function syncAll(uid) {
     if (!uid || !WFirebase.isOnline()) return { pushed: 0, failed: 0 };
     const pending = getPending();
@@ -233,17 +269,14 @@ const WSync = (() => {
     let pushed = 0, failed = 0;
 
     for (const key of [...pending]) {
+      // Saltar claves que ya fallaron MAX_RETRIES veces en esta sesión
+      if ((_retryCount.get(key) || 0) >= _MAX_RETRIES) { failed++; continue; }
       try {
-        const raw = localStorage.getItem('wapps.' + key);
-        if (!raw) { clearPending(key); continue; }
-        const data = JSON.parse(raw);
-        // key para Firestore: reemplaza . por _ (Firestore no permite . en doc IDs)
-        const fsKey = key.replace('.', '_');
-        const ok = await WFirebase.pushToFirestore(uid, fsKey, data);
+        const ok = await _pushWithRetry(uid, key, 0);
         if (ok) { pushed++; clearPending(key); }
         else    { failed++; }
       } catch(e) {
-        console.error(`[WSync] error ${key}:`, e);
+        console.error('[WSync] syncAll error', key, ':', e);
         failed++;
       }
     }
@@ -358,14 +391,19 @@ const WSync = (() => {
           merged = { ...data };
         }
 
+        // Guardar CON _updatedAt en localStorage para que la próxima comparación
+        // sepa cuándo fue la última actualización y no sobreescriba datos más nuevos
+        localStorage.setItem(localKey, JSON.stringify(merged));
+        // Pasar a la app sin _updatedAt (campo interno, no de negocio)
         const clean = { ...merged };
         delete clean._updatedAt;
-        localStorage.setItem(localKey, JSON.stringify(clean));
         const [app, key] = storeKey.split('.');
         if (app && key) {
           window.dispatchEvent(new CustomEvent('wapps:change', { detail: { app, key, value: clean } }));
         }
       }
+      // Notificar a todas las apps para que se re-rendericen con los datos nuevos
+      window.dispatchEvent(new CustomEvent('wapps:recovered', { detail: { source: 'firestore' } }));
       return true;
     } catch(e) {
       console.error('[WSync] pullAll error:', e);

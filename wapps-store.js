@@ -300,11 +300,11 @@ const WStore = (() => {
           merged = { ...remote };
         }
 
+        // Guardar CON _updatedAt en localStorage para comparaciones futuras
+        localStorage.setItem(storageKey(app, key), JSON.stringify(merged));
+        // Pasar a la app sin _updatedAt (campo interno)
         const clean = { ...merged };
         delete clean._updatedAt;
-
-        const sk = storageKey(app, key);
-        localStorage.setItem(sk, JSON.stringify(clean));
 
         // Notificar a la app
         if (typeof onUpdate === 'function') onUpdate(clean);

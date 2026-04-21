@@ -163,6 +163,13 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 
 ## Changelog
 
+### v3.10.0
+- **Fix crítico sync** — `WSync.pullAll()` ahora conserva `_updatedAt` en localStorage al escribir datos de Firestore. Antes se borraba, causando que la próxima comparación viera `localTs=0` y Firestore siempre "ganara", sobrescribiendo datos locales más recientes
+- **Fix crítico sync** — `WSync.syncOnLoad()` en `wapps-store.js`: mismo fix de `_updatedAt` para lecturas puntuales
+- **Fix sync** — `WSync.pullAll()` ahora emite `wapps:recovered` al terminar, para que las apps que ya habían cargado se re-rendericen con los datos recibidos de Firestore
+- **Fix sync** — `WSync.syncAll()`: retry automático con backoff exponencial — 3 intentos por clave, delays 2s → 4s → 8s. Si falla 3 veces queda en `pending` pero no se reintenta en esa sesión (evita bucles en errores permanentes)
+- **Fix visual** — `obra.html`: `.btn-danger` ahora tiene `background:rgba(240,64,48,0.08)` — el texto de los botones de eliminar era rojo sobre fondo transparente oscuro, difícil de leer
+
 ### v3.9.0
 - **Fix** — `WSync.pushAll()` ahora lee claves legacy (`gastos_v1`, `compra_v1`, `semana_v2`, etc.) si `wapps.*` está vacío. Los datos que nunca pasaron por `WStore.set()` ahora se suben a Firebase al pulsar ⬆ SUBIR TODO
 - `_readLocal()`: al encontrar datos en clave legacy, los migra al vuelo a `wapps.*` para que lecturas futuras sean directas
