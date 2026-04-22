@@ -163,6 +163,14 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 
 ## Changelog
 
+### v3.11.1
+- **Fix** — `semana.html`: doble llave en `manualPushApp` corregida
+- **Fix** — `finanzas`, `gastos-diarios`, `deseados`, `mascotas`, `coches`: doble llave en `manualPushApp` corregida
+- **Fix** — `firebase-upload.html`: sesión Firebase ahora se detecta correctamente con `onAuthChange` + retry (9s)
+- **Mejora** — Version badge `v1.x` añadido al wnav de todas las apps que no lo tenían
+- **Añadido** — `despensa.html` y `semana.html` al repositorio de outputs
+- **Añadido** — `setlist.html`: botones PULL y SUBIR en sync-bar
+
 ### v3.11.0
 - **Onboarding** — tutorial de bienvenida añadido a 10 apps que no lo tenían: Instrumentos, Finanzas, Gastos Diarios, Suministros, Deseados, Mascotas, Coches, Niños, Mi Obra y Setlist. Cada app muestra 4 pasos explicativos la primera vez que se abre, con botón «👋 Ver guía de nuevo» en la sección de datos
 - **index.html** — versión actualizada a v3.11.0, changelog interactivo actualizado, banner de actualización del Service Worker (aparece cuando hay una nueva versión disponible)

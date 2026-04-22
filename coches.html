@@ -212,6 +212,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
 .sync-btn{background:transparent;border:0.5px solid var(--dim,#2a2a26);color:var(--muted,#5a5850);font-family:var(--fm);font-size:9px;letter-spacing:1px;padding:3px 9px;cursor:pointer;transition:all 0.15s;}
 .sync-btn:hover:not(:disabled){border-color:var(--y,#e8f040);color:var(--y,#e8f040);}
 .sync-btn:disabled{opacity:0.35;cursor:default;}
+.wnav-version{font-size:9px;color:var(--dim);font-family:var(--fm);letter-spacing:0.5px;border:1px solid var(--dim);padding:2px 6px;border-radius:3px;flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -223,7 +224,9 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
     <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
     <div class="wnav-sep"></div>
     <div class="wnav-title" id="wnav-title">COCHES</div>
-  </div>
+  
+  <div class="wnav-version">v1.x</div>
+</div>
   <div class="sync-bar" id="sync-bar">
     <div class="sync-status">
       <div class="sync-dot offline" id="sync-dot"></div>
@@ -1347,11 +1350,11 @@ async function manualPushApp() {
   updateSyncUI('syncing', sync.getPending().length);
   const { pushed, failed } = await sync.pushAll(user.uid, 'coches.data');
   updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
-  if (btn) {{
+  if (btn) {
     btn.disabled = !(fb.isOnline() && fb.getUser());
-    btn.textContent = failed > 0 ? `⚠ ${{pushed}}/${{pushed+failed}}` : pushed > 0 ? `✓ ${{pushed}}` : '⬆ SUBIR';
-    if (pushed > 0 || failed > 0) setTimeout(() => {{ if(btn) btn.textContent = '⬆ SUBIR'; }}, 3000);
-  }}
+    btn.textContent = failed > 0 ? `⚠ ${pushed}/${pushed+failed}` : pushed > 0 ? `✓ ${pushed}` : '⬆ SUBIR';
+    if (pushed > 0 || failed > 0) setTimeout(() => { if(btn) btn.textContent = '⬆ SUBIR'; }, 3000);
+  }
   console.info(`[PUSH APP] coches.data: ${pushed} subidas, ${failed} fallidas`);
 }
 

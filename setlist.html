@@ -331,6 +331,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.5;}
 .perf-gear-change{font-family:var(--fm);font-size:10px;color:var(--o);background:rgba(240,144,48,0.15);border:0.5px solid rgba(240,144,48,0.35);border-radius:5px;padding:3px 9px;flex-shrink:0;white-space:nowrap;}
 .wa-btn{background:#25d366;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-family:var(--fh);font-size:14px;letter-spacing:0.5px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:opacity 0.15s;}
 .wa-btn:hover{opacity:0.88;}
+.wnav-version{font-size:9px;color:var(--dim);font-family:var(--fm);letter-spacing:0.5px;border:1px solid var(--dim);padding:2px 6px;border-radius:3px;flex-shrink:0;}
 </style>
 <script src="wapps-onboarding.js"></script>
 </head>
@@ -389,7 +390,11 @@ textarea{resize:vertical;min-height:70px;line-height:1.5;}
     <span class="sync-label offline" id="sync-label">OFFLINE</span>
     <span class="sync-pending" id="sync-pending"></span>
   </div>
-  <button class="sync-btn" id="sync-btn" onclick="manualSync()" disabled>↑ SYNC</button>
+  <div style="display:flex;gap:6px;">
+    <button class="sync-btn" id="pull-btn" onclick="manualPull()" disabled>↓ PULL</button>
+    <button class="sync-btn" id="sync-btn" onclick="manualSync()" disabled>↑ SYNC</button>
+    <button class="sync-btn" id="push-app-btn" onclick="manualPushApp()" disabled title="Forzar subida de esta app a Firebase">⬆ SUBIR</button>
+  </div>
 </div>
 
 <div class="shell">
@@ -402,7 +407,9 @@ textarea{resize:vertical;min-height:70px;line-height:1.5;}
     <div class="wnav-sep"></div>
     <div class="wnav-title" id="wnav-title">SETLIST</div>
     <button class="wnav-act-btn" id="perf-launch-btn" onclick="launchPerfMode()">▶ ACTUAR</button>
-  </div>
+  
+  <div class="wnav-version">v1.x</div>
+</div>
 
   <!-- BAND BAR -->
   <div class="band-bar" id="band-bar"></div>
