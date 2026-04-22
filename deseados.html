@@ -173,7 +173,7 @@ select option{background:var(--bg2);}
     <div style="display:flex;gap:6px;">
     <button class="sync-btn" id="pull-btn" onclick="manualPull()" disabled>↓ PULL</button>
     <button class="sync-btn" id="sync-btn" onclick="manualSync()" disabled>↑ SYNC</button>
-    <button class="sync-btn" id="push-app-btn" onclick="manualPushApp()" disabled title="Forzar subida de esta app a Firebase">⬆ SUBIR</button>
+    <button class="sync-btn" id="push-app-btn" onclick="manualPushApp()" title="Forzar subida de esta app a Firebase">⬆ SUBIR</button>
   </div>
   </div>
 <div class="shell">
@@ -619,7 +619,7 @@ function updateSyncUI(state, pendingCount) {
   const pullBtn = document.getElementById('pull-btn');
   if (pullBtn) pullBtn.disabled = !(state === 'online' && _fb() && _fb().getUser());
   const pushAppBtn = document.getElementById('push-app-btn');
-  if (pushAppBtn) pushAppBtn.disabled = !(state === 'online' && _fb() && _fb().getUser());
+  if (pushAppBtn) pushAppBtn.disabled = false;
 }
 async function manualSync(){
   const fb=_fb(),sync=_sync();if(!fb||!sync)return;
@@ -656,7 +656,7 @@ async function manualPushApp() {
   const { pushed, failed } = await sync.pushAll(user.uid, 'deseados.data');
   updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
   if (btn) {
-    btn.disabled = !(fb.isOnline() && fb.getUser());
+    btn.disabled = false;
     btn.textContent = failed > 0 ? `⚠ ${pushed}/${pushed+failed}` : pushed > 0 ? `✓ ${pushed}` : '⬆ SUBIR';
     if (pushed > 0 || failed > 0) setTimeout(() => { if(btn) btn.textContent = '⬆ SUBIR'; }, 3000);
   }
