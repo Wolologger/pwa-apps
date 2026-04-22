@@ -155,6 +155,18 @@ function showTab(id, btn) {
   btn.classList.add('active');
 }
 
+// ── TIPO ──
+function setTipo(t) {
+  tipoActivo = t;
+  document.querySelectorAll('.tipo-btn').forEach(b => b.className = 'tipo-btn');
+  const btn = document.getElementById('btn-'+t);
+  if (t === 'todos') btn.style.background = 'var(--bg3)', btn.style.color = 'var(--text)', btn.style.borderColor = 'var(--border2)';
+  else { btn.classList.add('active-'+t); }
+  // Reset filter tipo
+  filterTipo = t === 'todos' ? '' : t;
+  render();
+}
+
 // CHEQUEO INICIAL (Única corrección)
 document.addEventListener('DOMContentLoaded', () => {
     updateSyncUI(navigator.onLine ? 'online' : 'offline');
