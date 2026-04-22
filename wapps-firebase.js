@@ -133,6 +133,7 @@ const WFirebase = (() => {
       if (!snap.exists) return null;
       const data = snap.data();
       delete data._updatedAt;
+      delete data._pushVersion;
       return data;
     } catch(e) {
       console.error(`[WFirebase] pull error ${key}:`, e);
@@ -397,6 +398,7 @@ const WSync = (() => {
         // Pasar a la app sin _updatedAt (campo interno, no de negocio)
         const clean = { ...merged };
         delete clean._updatedAt;
+        delete clean._pushVersion;
         const [app, key] = storeKey.split('.');
         if (app && key) {
           window.dispatchEvent(new CustomEvent('wapps:change', { detail: { app, key, value: clean } }));
@@ -472,6 +474,17 @@ const WSync = (() => {
 
   // ── pushAll: fuerza subida de TODAS las claves, sin importar pendientes ──
   // Lee claves wapps.* con fallback a claves legacy — sube todo lo que haya en local.
+  // Añade _pushVersion (subversión) que se incrementa en cada subida forzada por clave,
+  // independientemente del sistema de pendientes.
+  function _getPushVersion(key) {
+    try { return parseInt(localStorage.getItem('wapps.pushver.' + key) || '0', 10); } catch(e) { return 0; }
+  }
+  function _incPushVersion(key) {
+    const v = _getPushVersion(key) + 1;
+    try { localStorage.setItem('wapps.pushver.' + key, String(v)); } catch(e) {}
+    return v;
+  }
+
   async function pushAll(uid, filterKey) {
     if (!uid || !WFirebase.isOnline()) return { pushed: 0, failed: 0 };
     const keys = filterKey ? [filterKey] : WSTORE_KEYS;
@@ -484,9 +497,18 @@ const WSync = (() => {
         const data = _readLocal(key);
         if (!data) { skipped++; continue; }
         const fsKey = key.replace('.', '_');
-        const ok = await WFirebase.pushToFirestore(uid, fsKey, data);
-        if (ok) { pushed++; clearPending(key); }
-        else    { failed++; }
+        const version = _incPushVersion(key);
+        const dataWithVersion = { ...data, _pushVersion: version };
+        const ok = await WFirebase.pushToFirestore(uid, fsKey, dataWithVersion);
+        if (ok) {
+          pushed++;
+          clearPending(key);
+          console.info(`[WSync] pushAll ${key}: subversión v${version}`);
+        } else {
+          // Revertir versión si falló
+          try { localStorage.setItem('wapps.pushver.' + key, String(version - 1)); } catch(e) {}
+          failed++;
+        }
       } catch(e) {
         console.error(`[WSync] pushAll error ${key}:`, e);
         failed++;
@@ -520,6 +542,6 @@ const WSync = (() => {
     return merged;
   }
 
-  return { markPending, clearPending, clearAllPending, getPending, syncAll, pullAll, pushAll, _mergeArraysForKey, WSTORE_KEYS };
+  return { markPending, clearPending, clearAllPending, getPending, syncAll, pullAll, pushAll, getPushVersion: _getPushVersion, _mergeArraysForKey, WSTORE_KEYS };
 
 })();
