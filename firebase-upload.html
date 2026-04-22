@@ -243,37 +243,59 @@ async function uploadAll() {
 // Inicialización
 window.addEventListener('load', () => {
   renderGrid();
-  
-  // Comprobar sesión
-  const checkSession = () => {
+  setStatus('Conectando con Firebase…');
+
+  function onSession(user) {
     const fb = typeof WFirebase !== 'undefined' ? WFirebase : null;
     if (!fb) {
-      setStatus('Firebase no disponible — comprueba wapps-config.js','err');
+      setStatus('Firebase no disponible — comprueba wapps-config.js', 'err');
+      log('Firebase no disponible. Comprueba que wapps-config.js está correctamente configurado.', 'err');
       return;
     }
-    const user = fb.getUser();
-    const online = fb.isOnline();
     if (!user) {
-      setStatus('Sin sesión. Ve a Ajustes → inicia sesión con Google.','err');
-      log('Sin sesión activa. Abre Ajustes e inicia sesión con Google.','err');
-    } else if (!online) {
-      setStatus('Sin conexión a internet','err');
-      log('Offline — conecta a internet para subir datos.','err');
-    } else {
-      setStatus(`Listo — ${user.email}`, 'ok');
-      log(`Sesión activa: ${user.email}`, 'ok');
-      log(`${document.querySelectorAll('.entity:not(.skip)').length} entidades con datos locales detectadas`, 'info');
-      document.getElementById('btn-all').disabled = false;
+      setStatus('Sin sesión — inicia sesión en Ajustes', 'err');
+      log('Sin sesión activa. Ve a Ajustes e inicia sesión con Google.', 'err');
+      document.getElementById('btn-all').disabled = true;
+      return;
     }
-  };
-
-  // Esperar a que Firebase esté listo
-  if (typeof WFirebase !== 'undefined' && WFirebase.getUser()) {
-    checkSession();
-  } else {
-    window.addEventListener('wapps:auth-change', checkSession, { once: true });
-    setTimeout(checkSession, 3000); // fallback
+    if (!fb.isOnline()) {
+      setStatus('Sin conexión a internet', 'err');
+      log('Offline — conecta a internet para subir datos.', 'err');
+      return;
+    }
+    setStatus('Listo — ' + user.email, 'ok');
+    log('Sesión activa: ' + user.email, 'ok');
+    const count = document.querySelectorAll('.entity:not(.skip)').length;
+    log(count + ' entidades con datos locales detectadas.', 'info');
+    document.getElementById('btn-all').disabled = false;
+    // Re-render por si cambió algo
+    renderGrid();
   }
+
+  // Usar onAuthChange que espera correctamente al SDK de Firebase
+  function waitForFirebase(retries) {
+    if (typeof WFirebase !== 'undefined' && WFirebase.isReady()) {
+      // Firebase listo — registrar callback persistente
+      WFirebase.onAuthChange(onSession);
+      // Si ya hay usuario, llamar inmediatamente
+      const user = WFirebase.getUser();
+      if (user) onSession(user);
+    } else if (typeof WFirebase !== 'undefined' && retries > 0) {
+      // WFirebase existe pero SDK no está listo aún — esperar
+      setTimeout(() => waitForFirebase(retries - 1), 300);
+    } else if (retries > 0) {
+      // WFirebase aún no existe — esperar
+      setTimeout(() => waitForFirebase(retries - 1), 300);
+    } else {
+      setStatus('Firebase no disponible', 'err');
+      log('No se pudo conectar con Firebase después de 9 segundos.', 'err');
+    }
+  }
+
+  // También escuchar wapps:auth-change como respaldo
+  window.addEventListener('wapps:auth-change', e => onSession(e.detail?.user));
+
+  waitForFirebase(30); // 30 × 300ms = 9 segundos máx
 });
 </script>
 </body>
