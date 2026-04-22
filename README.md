@@ -163,12 +163,11 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 
 ## Changelog
 
-### v3.10.0
-- **Fix crítico sync** — `WSync.pullAll()` ahora conserva `_updatedAt` en localStorage al escribir datos de Firestore. Antes se borraba, causando que la próxima comparación viera `localTs=0` y Firestore siempre "ganara", sobrescribiendo datos locales más recientes
-- **Fix crítico sync** — `WSync.syncOnLoad()` en `wapps-store.js`: mismo fix de `_updatedAt` para lecturas puntuales
-- **Fix sync** — `WSync.pullAll()` ahora emite `wapps:recovered` al terminar, para que las apps que ya habían cargado se re-rendericen con los datos recibidos de Firestore
-- **Fix sync** — `WSync.syncAll()`: retry automático con backoff exponencial — 3 intentos por clave, delays 2s → 4s → 8s. Si falla 3 veces queda en `pending` pero no se reintenta en esa sesión (evita bucles en errores permanentes)
-- **Fix visual** — `obra.html`: `.btn-danger` ahora tiene `background:rgba(240,64,48,0.08)` — el texto de los botones de eliminar era rojo sobre fondo transparente oscuro, difícil de leer
+### v3.10.1
+- **Fix crítico** — `obra.html`, `compra.html`, `instrumentos.html`, `ninos.html`: JS roto por doble llave `${{var}}` en `manualPushApp()` → corregido a `${var}`
+- **Fix** — `instrumentos.html`, `ninos.html`, `obra.html`: función `esc()` reescrita sin `/</g` ni `/"/g` en regex (causaban `Unexpected token` en vm.Script y algunos browsers)
+- **Fix visual** — `obra.html`: `.btn-danger` añadido `background:rgba(240,64,48,0.08)` — botones Eliminar ahora visibles
+- **Fix backup** — `backup.html`: `mascotas`, `coches` y `ninos` ahora incluidas en backup completo (`wkey` era `null`)
 
 ### v3.9.0
 - **Fix** — `WSync.pushAll()` ahora lee claves legacy (`gastos_v1`, `compra_v1`, `semana_v2`, etc.) si `wapps.*` está vacío. Los datos que nunca pasaron por `WStore.set()` ahora se suben a Firebase al pulsar ⬆ SUBIR TODO

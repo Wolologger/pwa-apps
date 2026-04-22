@@ -560,7 +560,7 @@ function save() {
   } catch(e) {}
 }
 function nxtId() { return ++nid; }
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function esc(s){var t=String(s||'');t=t.replace(/&/g,'&amp;');t=t.replace(new RegExp('<','g'),'&lt;');t=t.replace(new RegExp('>','g'),'&gt;');t=t.replace(new RegExp(String.fromCharCode(34),'g'),'&quot;');return t;}
 function fmt(n,d=2) { return Number(n||0).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d}); }
 function today() { const d=new Date(); return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`; }
 function p2(n) { return String(n).padStart(2,'0'); }
@@ -1445,11 +1445,11 @@ async function manualPushApp() {
   updateSyncUI('syncing', sync.getPending().length);
   const { pushed, failed } = await sync.pushAll(user.uid, 'ninos.data');
   updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
-  if (btn) {{
+  if (btn) {
     btn.disabled = !(fb.isOnline() && fb.getUser());
-    btn.textContent = failed > 0 ? `⚠ ${{pushed}}/${{pushed+failed}}` : pushed > 0 ? `✓ ${{pushed}}` : '⬆ SUBIR';
-    if (pushed > 0 || failed > 0) setTimeout(() => {{ if(btn) btn.textContent = '⬆ SUBIR'; }}, 3000);
-  }}
+    btn.textContent = failed > 0 ? `⚠ ${pushed}/${pushed+failed}` : pushed > 0 ? `✓ ${pushed}` : '⬆ SUBIR';
+    if (pushed > 0 || failed > 0) setTimeout(() => { if(btn) btn.textContent = '⬆ SUBIR'; }, 3000);
+  }
   console.info(`[PUSH APP] ninos.data: ${pushed} subidas, ${failed} fallidas`);
 }
 window.addEventListener('wapps:online',      () => updateSyncUI('online',  _sync()?.getPending().length ?? 0));
