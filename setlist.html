@@ -7,6 +7,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0a0a09">
 <title>Setlist — W//APPS</title>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
+<script src="wapps-config.js"></script>
+<script src="wapps-store.js"></script>
+<script src="wapps-firebase.js"></script>
+<script src="wapps-onboarding.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
 
@@ -146,9 +153,6 @@ textarea{resize:vertical;min-height:70px;line-height:1.5;}
 /* FILTER BAR */
 .filter-bar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
 .filter-select{background:var(--bg2);border:0.5px solid var(--border2);border-radius:6px;color:var(--text);font-family:var(--fm);font-size:11px;padding:6px 10px;outline:none;cursor:pointer;}
-.filter-search{background:var(--bg2);border:0.5px solid var(--border2);border-radius:6px;color:var(--text);font-family:var(--fm);font-size:11px;padding:6px 10px;outline:none;flex:1;min-width:80px;transition:border-color 0.15s;}
-.filter-search:focus{border-color:var(--y);}
-.filter-search::placeholder{color:var(--muted);}
 .filter-select:focus{border-color:var(--y);}
 .filter-select option{background:var(--bg2);}
 
@@ -333,7 +337,6 @@ textarea{resize:vertical;min-height:70px;line-height:1.5;}
 .wa-btn:hover{opacity:0.88;}
 .wnav-version{font-size:9px;color:var(--dim);font-family:var(--fm);letter-spacing:0.5px;border:1px solid var(--dim);padding:2px 6px;border-radius:3px;flex-shrink:0;}
 </style>
-<script src="wapps-onboarding.js"></script>
 </head>
 <body>
 
@@ -537,7 +540,6 @@ let expandedNotes = new Set();
 let expandedGear = new Set();
 let expandedEnsayo = new Set();
 let filterEstado = '';
-let filterTexto = '';
 let dragSrc = null;
 let dragSrcEl = null;
 let perfIdx = 0;
@@ -656,7 +658,7 @@ function renderBandBar() {
 }
 function selectBand(id) {
   if (id === activeBandId) return;
-  activeBandId=id; filterEstado=''; filterTexto=''; ensayoRatings={};
+  activeBandId=id; filterEstado=''; ensayoRatings={};
   var bsls=bandSetlists(id); activeSetlistId=bsls.length?bsls[0].id:null;
   render();
 }
@@ -799,6 +801,10 @@ function render() {
   renderBandBar();
   renderSetlistBar();
   updateNavTitle();
+  // Refrescar picker de gear si el panel de añadir está abierto
+  if (document.getElementById('add-panel')?.classList.contains('open')) {
+    renderGearPicker('add', null);
+  }
   if (currentTab === 'canciones') renderSongs();
   if (currentTab === 'ensayos')   renderEnsayos();
   if (currentTab === 'exportar')  renderExport();
@@ -840,24 +846,17 @@ function renderSongs() {
     </div>`;
 
   document.getElementById('filter-bar').innerHTML = `
-    <select class="filter-select" onchange="filterEstado=this.value;renderSongs()">
+    <select class="filter-select" onchange="filterEstado=this.value;render()">
       <option value="">Todas</option>
       <option value="aprendida" ${filterEstado==='aprendida'?'selected':''}>✅ Aprendidas</option>
       <option value="proceso" ${filterEstado==='proceso'?'selected':''}>🟡 En proceso</option>
       <option value="pendiente" ${filterEstado==='pendiente'?'selected':''}>⚪ Pendientes</option>
       <option value="estudiar" ${filterEstado==='estudiar'?'selected':''}>🔴 Hay que estudiar</option>
-    </select>
-    <input class="filter-search" type="search" placeholder="Buscar…"
-      value="${filterTexto}" oninput="filterTexto=this.value;renderSongs()">
-    ${sl ? '<button class="btn btn-sm" onclick="manageSongsinSetlist()" style="font-size:10px">&#xB1; Set</button>' : ''}`;
+    </select>`;
 
   let songs = filterEstado === 'estudiar'
     ? allSongs.filter(s => (studyStats[s.id]?.estudiar||0) > 0)
     : (filterEstado ? allSongs.filter(s=>s.estado===filterEstado) : allSongs);
-  if (filterTexto.trim()) {
-    const q = filterTexto.trim().toLowerCase();
-    songs = songs.filter(s => s.titulo.toLowerCase().includes(q) || (s.artista||'').toLowerCase().includes(q));
-  }
 
   if (!songs.length) { document.getElementById('songs-body').innerHTML = '<div class="empty">Sin canciones. Pulsa + para añadir la primera.</div>'; return; }
 
@@ -1258,48 +1257,8 @@ function saveEnsayo() {
   if (!state.ensayos) state.ensayos = [];
   state.ensayos.unshift(ensayo);
   save();
-  // Crear evento en semana.html
-  sincronizarEnsayoEnSemana(ensayo, band);
   clearEnsayoForm();
   renderEnsayos();
-}
-
-function sincronizarEnsayoEnSemana(ensayo, band) {
-  try {
-    const semData = (typeof WStore !== 'undefined' ? WStore.get('semana','data') : null)
-      || JSON.parse(localStorage.getItem('wapps.semana.data') || localStorage.getItem('semana_v2') || 'null')
-      || { tasks:{}, events:[], nextId:1 };
-    if (!semData.events) semData.events = [];
-    const bien = ensayo.songs.filter(s=>s.rating==='bien').length;
-    const repasar = ensayo.songs.filter(s=>s.rating==='repasar').length;
-    const estudiar = ensayo.songs.filter(s=>s.rating==='estudiar').length;
-    const resumen = [
-      bien    ? bien    + ' \u2705' : '',
-      repasar ? repasar + ' \U0001f7e1' : '',
-      estudiar ? estudiar + ' \U0001f534' : ''
-    ].filter(Boolean).join(' ');
-    const titulo = '\U0001f3b8 Ensayo \u2014 ' + band.nombre
-      + (ensayo.titulo ? ' \u00b7 ' + ensayo.titulo : '')
-      + (resumen ? ' (' + resumen + ')' : '');
-    const maxId = semData.events.reduce(function(m,e){ return Math.max(m, e.id||0); }, semData.nextId||1);
-    semData.events.push({
-      id: maxId + 1,
-      titulo: titulo,
-      inicio: ensayo.fecha,
-      fin: ensayo.fecha,
-      tipo: 'ensayo',
-      color: band.color || '#e8f040',
-      notas: ensayo.duracion ? ('\u23f1 ' + ensayo.duracion) : ''
-    });
-    semData.nextId = maxId + 2;
-    if (typeof WStore !== 'undefined') {
-      WStore.set('semana', 'data', semData);
-    } else {
-      localStorage.setItem('wapps.semana.data', JSON.stringify(semData));
-    }
-  } catch(e) {
-    console.warn('[setlist] sincronizarEnsayoEnSemana error:', e);
-  }
 }
 
 function renderEnsayos() {
@@ -1868,11 +1827,12 @@ const OB_STEPS = [
   {
     icon:'📊',
     title:'Ensayos y progreso',
-    body:'Registra cada ensayo valorando cada canción. La gráfica de progreso muestra cómo evoluciona el repertorio.'
+    body:'Registra cada ensayo valorando cada canción. La gráfica muestra cómo evoluciona el repertorio.'
   },
 ];
 
 if(typeof WOnboarding!=='undefined')WOnboarding.show('setlist', OB_STEPS);
+
 render();
 // Refrescar gear picker cuando cambian los instrumentos (nuevo instrumento añadido)
 window.addEventListener('wapps:change', function(e) {
@@ -1887,10 +1847,14 @@ window.addEventListener('wapps:change', function(e) {
 });
 // También refrescar al recuperar datos de Firestore
 window.addEventListener('storage', function(e) {
-  if (e.key && e.key.includes('instrumentos')) {
+  // Captura cambios de instrumentos desde otras pestañas
+  // (instrumentos_v2 es la clave legacy que escribe instrumentos.html)
+  if (e.key && (e.key.includes('instrumentos') || e.key === 'instrumentos_v2')) {
     const addPanel = document.getElementById('add-panel');
     if (addPanel && addPanel.classList.contains('open')) renderGearPicker('add', null);
     if (editId) renderGearPicker('edit', editId);
+    const gpp = document.getElementById('gpp');
+    if (gpp) fillGearPicker(gpp, activeSetlist()?.gearPreset||{}, 'gpp');
   }
 });
 
@@ -1904,20 +1868,17 @@ if (typeof WStore !== 'undefined') {
     const fresh = WStore.get('setlist','data');
     if (fresh && (fresh.bands||fresh.songs)) { state=fresh; nid=state.nextId||1; if(!state.ensayos)state.ensayos=[]; render(); }
   });
+  window.addEventListener('wapps:auth-change', e => {
+    if (!e.detail?.user) return;
+    WStore.syncOnLoad('setlist', 'data', fresh => {
+      if (fresh) { state = fresh; nid = state.nextId||1; if (!state.ensayos) state.ensayos = []; render(); }
+    });
+  });
 }
+
 
 </script>
 <script>
-
-// WTransition inline
-(function(){
-  const D=160;
-  function go(url){document.body.style.transition='opacity '+D+'ms ease';document.body.style.opacity='0';setTimeout(()=>{window.location.href=url;},D);}
-  function intercept(){document.addEventListener('click',e=>{const a=e.target.closest('a[href]');if(!a)return;const h=a.getAttribute('href');if(!h||!h.endsWith('.html')||h.startsWith('http')||a.target)return;e.preventDefault();go(h);},true);}
-  function fadeIn(){document.body.style.opacity='0';document.body.style.transition='none';requestAnimationFrame(()=>{requestAnimationFrame(()=>{document.body.style.transition='opacity '+D+'ms ease';document.body.style.opacity='1';});});}
-  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',()=>{intercept();fadeIn();});}else{intercept();fadeIn();}
-  window.WTransition={go};
-})();
 
 // Sync bar
 function _fb(){return typeof WFirebase!=='undefined'?WFirebase:null;}
@@ -1930,6 +1891,10 @@ function updateSyncUI(state,pendingCount){
   label.textContent=labels[state]||state.toUpperCase();
   pend.textContent=pendingCount>0?'· '+pendingCount+' PENDIENTE'+(pendingCount>1?'S':''):'';
   btn.disabled=!(state==='online'&&_fb()&&_fb().getUser()&&pendingCount>0);
+  const pullBtn = document.getElementById('pull-btn');
+  if (pullBtn) pullBtn.disabled = !(state === 'online' && _fb() && _fb().getUser());
+  const pushAppBtn = document.getElementById('push-app-btn');
+  if (pushAppBtn) pushAppBtn.disabled = !(state === 'online' && _fb() && _fb().getUser());
 }
 async function manualSync(){
   const fb=_fb(),sync=_sync();if(!fb||!sync)return;
@@ -1939,6 +1904,37 @@ async function manualSync(){
   await sync.syncAll(user.uid);
   updateSyncUI(fb.isOnline()?'online':'offline',sync.getPending().length);
 }
+async function manualPull() {
+  const fb   = _fb();
+  const sync = _sync();
+  if (!fb || !sync) return;
+  const user = fb.getUser();
+  if (!user || !fb.isOnline()) return;
+  const btn = document.getElementById('pull-btn');
+  if (btn) btn.disabled = true;
+  updateSyncUI('syncing', sync.getPending().length);
+  await sync.pullAll(user.uid);
+  updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
+  if (btn) btn.disabled = false;
+  // Reload page to reflect pulled data
+  window.location.reload();
+}
+async function manualPushApp() {
+  const fb   = _fb();
+  const sync = _sync();
+  if (!fb || !sync) return;
+  const user = fb.getUser();
+  if (!user || !fb.isOnline()) return;
+  const btn = document.getElementById('push-app-btn');
+  if (btn) btn.disabled = true;
+  updateSyncUI('syncing', sync.getPending().length);
+  const { pushed, failed } = await sync.pushAll(user.uid, 'setlist.data');
+  updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
+  if (btn) btn.disabled = !(fb.isOnline() && fb.getUser());
+  console.info(`[PUSH APP] setlist.data: ${pushed} subidas, ${failed} fallidas`);
+}
+
+
 window.addEventListener('wapps:online',()=>updateSyncUI('online',_sync()?.getPending().length??0));
 window.addEventListener('wapps:offline',()=>updateSyncUI('offline',_sync()?.getPending().length??0));
 window.addEventListener('wapps:sync-start',()=>updateSyncUI('syncing',_sync()?.getPending().length??0));
