@@ -1873,6 +1873,8 @@ if (typeof WStore !== 'undefined') {
     WStore.syncOnLoad('setlist', 'data', fresh => {
       if (fresh) { state = fresh; nid = state.nextId||1; if (!state.ensayos) state.ensayos = []; render(); }
     });
+  
+    updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
   });
 }
 

@@ -40,7 +40,7 @@ localStorage (siempre)
 - **Sin conexión**: todo funciona con `localStorage`. Los cambios se marcan como pendientes en `wapps.pending` (persiste entre sesiones).
 - **Con conexión y sesión**: los datos se suben a Firestore automáticamente. Gana siempre el más reciente por `_updatedAt`. Al cerrar la pestaña, `WSync` hace un flush de pendientes vía `visibilitychange`/`pagehide`.
 - **Tiempo real**: `WStore.watchRealtime` mantiene un listener `onSnapshot` activo con merge campo a campo. Los listeners se limpian solos en `pagehide`. Un toast sutil confirma cada actualización remota.
-- **Service Worker** (`sw.js` v8.7): precaché reducido al núcleo; el resto se cachea al visitar (lazy). Estrategia stale-while-revalidate para HTML con banner de actualización no intrusivo.
+- **Service Worker** (`sw.js` v8.8): precaché reducido al núcleo; el resto se cachea al visitar (lazy). Estrategia stale-while-revalidate para HTML con banner de actualización no intrusivo.
 - **Seguridad**: sesión expira tras 8 h de inactividad (configurable). Credenciales placeholder en `wapps-config.js` se detectan al arrancar.
 - **Resiliencia**: `QuotaExceededError` de localStorage muestra banner de alerta en lugar de fallar silenciosamente.
 
@@ -162,6 +162,17 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 ---
 
 ## Changelog
+
+### v3.12.0
+- **Fix crítico** — `suministros.html`: doble llave `{{ }}` en `manualPushApp` corregida (JS crasheaba silenciosamente → el botón ⬆ SUBIR no funcionaba)
+- **Fix crítico** — `decisor.html`: faltaban los SDK de Firebase (`firebase-app-compat`, `firebase-auth-compat`, `firebase-firestore-compat`), `wapps-config.js`, `wapps-store.js` y `wapps-firebase.js`. El código usaba `_fb()` y `_sync()` pero nunca existían → ahora sincroniza correctamente con Firebase
+- **Fix crítico** — `decisor.html`: `loadState()`/`save()` migrados de `localStorage('decisor_v1')` directo a `WStore.get/set('decisor','data')` con fallback legacy → los datos ahora se suben a Firestore
+- **Fix** — 14 apps (`coches`, `compra`, `deseados`, `despensa`, `finanzas`, `gastos-diarios`, `instrumentos`, `mascotas`, `ninos`, `obra`, `semana`, `setlist`, `suministros`, `ajustes`): el handler `wapps:auth-change` no llamaba a `updateSyncUI()` → los botones ↓ PULL y ↑ SYNC quedaban `disabled` para siempre si cargabas la página ya logueado. Ahora se habilitan cuando Firebase confirma la sesión
+- **Fix** — `ajustes.html`: añadido listener `wapps:recovered` (re-renderiza usuario y stats de storage al recuperar datos de Firestore)
+- **Fix** — `decisor.html`: añadidos listeners `wapps:auth-change` (con `syncOnLoad`) y `wapps:recovered`
+- **Fix** — `backup.html`: añadido listener `wapps:auth-change` (antes los botones nunca se habilitaban tras login porque no había handler que actualizase el estado de la UI)
+- `sw.js` v8.8 — bump de caché para forzar actualización en PWAs instaladas
+- `manifest.json` — descripción actualizada a v3.12.0
 
 ### v3.11.1
 - **Fix** — `semana.html`: doble llave en `manualPushApp` corregida

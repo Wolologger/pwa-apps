@@ -431,6 +431,8 @@ if(typeof WStore!=='undefined'){
     WStore.syncOnLoad('instrumentos', 'data', fresh => {
       if (fresh && fresh.items) { state = fresh; nid = state.nextId||1; updateFormFields(); render(); }
     });
+  
+    updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
   });
 }
 

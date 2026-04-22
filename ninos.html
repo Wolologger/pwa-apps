@@ -636,6 +636,8 @@ if (typeof WStore !== 'undefined') {
     WStore.syncOnLoad('ninos', 'data', fresh => {
       if (fresh && fresh.kids) { state = fresh; render(); }
     });
+  
+    updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
   });
 }
 }

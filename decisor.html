@@ -6,6 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0a09">
 <title>Decisor — W//APPS</title>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
+<script src="wapps-config.js"></script>
+<script src="wapps-store.js"></script>
+<script src="wapps-firebase.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;--y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;--fh:'Bebas Neue',sans-serif;--fm:'DM Mono',monospace;}
@@ -180,10 +186,20 @@ const DEFAULT_PRESETS=[
 let state=loadState(),options=[],history=[],spinning=false,currentTab='decidir';
 
 function loadState(){
+  // Preferimos WStore (sincroniza con Firebase). Fallback a clave legacy.
+  if (typeof WStore !== 'undefined') {
+    const w = WStore.get('decisor','data');
+    if (w && w.presets) return w;
+  }
   try{const r=localStorage.getItem('decisor_v1');if(r)return JSON.parse(r);}catch(e){}
   return{presets:JSON.parse(JSON.stringify(DEFAULT_PRESETS)),nextId:10};
 }
-function save(){try{localStorage.setItem('decisor_v1',JSON.stringify(state));}catch(e){}}
+function save(){
+  if (typeof WStore !== 'undefined') {
+    try { WStore.set('decisor','data',state); return; } catch(e){}
+  }
+  try{localStorage.setItem('decisor_v1',JSON.stringify(state));}catch(e){}
+}
 function nxtId(){return++(state.nextId);}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
@@ -312,7 +328,7 @@ function showFB(msg,color){const el=document.getElementById('datos-fb');if(!el)r
 render();
 </script>
 <script>
-// WTransition inline (página sin wapps-store.js)
+// WTransition inline (fallback; wapps-store.js ya provee uno, pero este es defensivo)
 (function(){
   const D=160;
   function go(url){document.body.style.transition='opacity '+D+'ms ease';document.body.style.opacity='0';setTimeout(()=>{window.location.href=url;},D);}
@@ -362,6 +378,20 @@ window.addEventListener('wapps:offline',()=>updateSyncUI('offline',_sync()?.getP
 window.addEventListener('wapps:sync-start',()=>updateSyncUI('syncing',_sync()?.getPending().length??0));
 window.addEventListener('wapps:sync-done',()=>{const fb=_fb();updateSyncUI(fb?(fb.isOnline()?'online':'offline'):'offline',_sync()?.getPending().length??0);});
 window.addEventListener('wapps:pending-change',e=>{const fb=_fb(),label=document.getElementById('sync-label');const isSyncing=label?.className?.includes('syncing');updateSyncUI(isSyncing?'syncing':(fb?(fb.isOnline()?'online':'offline'):'offline'),e.detail.pending.length);});
+window.addEventListener('wapps:auth-change', e => {
+  if (!e.detail?.user) return;
+  if (typeof WStore !== 'undefined') {
+    WStore.syncOnLoad('decisor','data', fresh => {
+      if (fresh?.presets) { state = fresh; render(); }
+    });
+  }
+  updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
+});
+window.addEventListener('wapps:recovered', () => {
+  if (typeof WStore === 'undefined') return;
+  const fresh = WStore.get('decisor','data');
+  if (fresh?.presets) { state = fresh; render(); }
+});
 updateSyncUI(navigator.onLine?'online':'offline',0);
 </script>
 </body>

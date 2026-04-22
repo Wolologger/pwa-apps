@@ -742,6 +742,9 @@ window.addEventListener('wapps:pending-change', e => {
   const state=isSyncing?'syncing':(fb?(fb.isOnline()?'online':'offline'):'offline');
   updateSyncUI(state, e.detail.pending.length);
 });
+window.addEventListener('wapps:auth-change', () => {
+  updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
+});
 updateSyncUI(navigator.onLine ? 'online' : 'offline', 0);
 </script>
 </body>

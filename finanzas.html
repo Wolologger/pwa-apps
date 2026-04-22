@@ -583,6 +583,8 @@ if (typeof WStore !== 'undefined') {
     WStore.syncOnLoad('finanzas', 'data', fresh => {
       if (fresh && (fresh.ingresos || fresh.gastos)) { state = fresh; render(); }
     });
+  
+    updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
   });
 }
 </script>

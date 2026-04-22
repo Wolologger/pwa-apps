@@ -780,6 +780,8 @@ if (typeof WStore !== 'undefined') {
     WStore.syncOnLoad('despensa', 'items', fresh => {
       if (fresh && fresh.alimentos) { state = fresh; render(); }
     });
+  
+    updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
   });
 }
  { _loadEl.classList.add('fade'); setTimeout(() => { _loadEl.style.display='none'; _loadEl.remove(); }, 300); }
