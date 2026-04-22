@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>W//APPS — Subir a Firebase</title>
+<script src="wapps-config.js"></script>
+<script src="wapps-store.js"></script>
+<script src="wapps-firebase.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;
+  --text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;
+  --y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;
+  --fh:'Bebas Neue',sans-serif;--fm:'DM Mono',monospace;
+  --border2:rgba(255,255,255,0.13);
+}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm);padding:20px 16px 40px;}
+h1{font-family:var(--fh);font-size:32px;letter-spacing:1px;color:var(--y);margin-bottom:4px;}
+.sub{font-size:11px;color:var(--muted);margin-bottom:24px;}
+.card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:12px;padding:16px;margin-bottom:12px;}
+.card-title{font-family:var(--fh);font-size:18px;letter-spacing:0.5px;margin-bottom:8px;}
+.status-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;background:var(--bg3);margin-bottom:16px;font-size:12px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0;}
+.dot.ok{background:var(--g);}
+.dot.err{background:var(--r);}
+.dot.warn{background:var(--y);}
+.entity-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.entity{background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:all 0.15s;}
+.entity:hover{border-color:var(--y);}
+.entity.uploading{border-color:var(--y);opacity:0.7;pointer-events:none;}
+.entity.done{border-color:var(--g);background:rgba(48,216,128,0.06);}
+.entity.fail{border-color:var(--r);background:rgba(240,64,48,0.06);}
+.entity.skip{opacity:0.4;}
+.e-icon{font-size:18px;flex-shrink:0;}
+.e-name{font-size:11px;color:var(--text);letter-spacing:0.5px;}
+.e-status{font-size:9px;color:var(--muted);margin-top:2px;}
+.btn{width:100%;padding:14px;border:none;border-radius:10px;font-family:var(--fh);font-size:18px;letter-spacing:1px;cursor:pointer;transition:all 0.15s;margin-bottom:8px;}
+.btn-y{background:var(--y);color:#0a0a09;}
+.btn-y:hover{opacity:0.9;}
+.btn-y:disabled{opacity:0.4;cursor:default;}
+.btn-ghost{background:transparent;color:var(--muted);border:0.5px solid var(--border2);}
+.log{background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;padding:12px;font-size:10px;color:var(--muted);max-height:180px;overflow-y:auto;line-height:1.8;}
+.log .ok{color:var(--g);}
+.log .err{color:var(--r);}
+.log .info{color:var(--b);}
+.progress{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-bottom:16px;}
+.progress-fill{height:100%;background:var(--y);border-radius:2px;transition:width 0.3s ease;width:0%;}
+a.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:11px;text-decoration:none;margin-bottom:20px;}
+a.back:hover{color:var(--y);}
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← Volver al inicio</a>
+<h1>⬆ SUBIR A FIREBASE</h1>
+<p class="sub">Sube todos tus datos locales a Firebase para sincronizar con otro dispositivo</p>
+
+<div class="card">
+  <div id="status-bar" class="status-bar">
+    <div class="dot" id="status-dot"></div>
+    <span id="status-text">Comprobando sesión…</span>
+  </div>
+  <div class="card-title">Entidades</div>
+  <div class="entity-grid" id="entity-grid">
+    <!-- Se rellena con JS -->
+  </div>
+  <div class="progress"><div class="progress-fill" id="progress-fill"></div></div>
+  <button class="btn btn-y" id="btn-all" onclick="uploadAll()" disabled>⬆ SUBIR TODO</button>
+  <button class="btn btn-ghost" onclick="location.href='ajustes.html'">← Ajustes</button>
+</div>
+
+<div class="card">
+  <div class="card-title">Registro</div>
+  <div class="log" id="log"><span class="info">Esperando…</span></div>
+</div>
+
+<script>
+const ENTITIES = [
+  { key:'despensa.items',    icon:'🥫', name:'Despensa'     },
+  { key:'compra.data',       icon:'🛒', name:'Compra'       },
+  { key:'finanzas.data',     icon:'💰', name:'Finanzas'     },
+  { key:'gastos.data',       icon:'📊', name:'Gastos'       },
+  { key:'semana.data',       icon:'📅', name:'Semana'       },
+  { key:'setlist.data',      icon:'🎸', name:'Setlist'      },
+  { key:'instrumentos.data', icon:'🎛️', name:'Instrumentos' },
+  { key:'obra.data',         icon:'🏗️', name:'Obra'         },
+  { key:'mascotas.data',     icon:'🐾', name:'Mascotas'     },
+  { key:'coches.data',       icon:'🚗', name:'Coches'       },
+  { key:'ninos.data',        icon:'👶', name:'Niños'        },
+  { key:'deseados.data',     icon:'⭐', name:'Deseados'     },
+  { key:'suministros.data',  icon:'💡', name:'Suministros'  },
+];
+
+// Legacy keys fallback
+const LEGACY = {
+  'despensa.items':'despensa_v1','compra.data':'compra_v2',
+  'finanzas.data':'finanzas_v1','gastos.data':'gastos_v1',
+  'semana.data':'semana_v2','setlist.data':'setlist_v1',
+  'instrumentos.data':'instrumentos_v2','obra.data':'miobra_v2',
+  'mascotas.data':'mascotas_v1','coches.data':'coches_v1',
+  'ninos.data':'ninos_v1','deseados.data':'deseados_v2',
+  'suministros.data':'suministros_v1',
+};
+
+function readLocal(key) {
+  // 1. Clave nueva wapps.*
+  const raw = localStorage.getItem('wapps.' + key);
+  if (raw) { try { return JSON.parse(raw); } catch(e) {} }
+  // 2. Fallback legacy
+  const legKey = LEGACY[key];
+  if (legKey) {
+    const oldRaw = localStorage.getItem(legKey);
+    if (oldRaw) { try { return JSON.parse(oldRaw); } catch(e) {} }
+  }
+  // 3. Búsqueda por prefijo wapps.* parcial
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.endsWith(key.replace('.','.'))) {
+      try { return JSON.parse(localStorage.getItem(k)); } catch(e) {}
+    }
+  }
+  return null;
+}
+
+function log(msg, type='info') {
+  const el = document.getElementById('log');
+  el.innerHTML += `<div class="${type}">${new Date().toLocaleTimeString('es')} ${msg}</div>`;
+  el.scrollTop = el.scrollHeight;
+}
+
+function setStatus(text, type='') {
+  document.getElementById('status-text').textContent = text;
+  const dot = document.getElementById('status-dot');
+  dot.className = 'dot' + (type ? ' '+type : '');
+}
+
+function setEntityState(key, state, statusText) {
+  const id = 'e-' + key.replace(/[^a-z]/g,'_');
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'entity ' + (state || '');
+  el.querySelector('.e-status').textContent = statusText || '';
+}
+
+function setProgress(done, total) {
+  document.getElementById('progress-fill').style.width = (total > 0 ? (done/total*100) : 0) + '%';
+}
+
+// Renderizar grid
+function renderGrid() {
+  const grid = document.getElementById('entity-grid');
+  grid.innerHTML = ENTITIES.map(e => {
+    const data = readLocal(e.key);
+    const hasData = !!data;
+    const id = 'e-' + e.key.replace(/[^a-z]/g,'_');
+    const size = data ? (JSON.stringify(data).length / 1024).toFixed(1) + ' KB' : 'sin datos';
+    return `<div class="entity ${hasData?'':'skip'}" id="${id}" onclick="uploadOne('${e.key}')">
+      <span class="e-icon">${e.icon}</span>
+      <div>
+        <div class="e-name">${e.name}</div>
+        <div class="e-status" id="es-${e.key.replace(/[^a-z]/g,'_')}">${size}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function uploadOne(key) {
+  const fb = typeof WFirebase !== 'undefined' ? WFirebase : null;
+  const sync = typeof WSync !== 'undefined' ? WSync : null;
+  if (!fb || !sync) { log('Firebase no disponible','err'); return; }
+  const user = fb.getUser();
+  if (!user) { log('Sin sesión — inicia sesión primero','err'); return; }
+
+  const entity = ENTITIES.find(e => e.key === key);
+  const safeKey = key.replace(/[^a-z]/g,'_');
+  const statusEl = document.getElementById('es-' + safeKey);
+
+  setEntityState(key, 'uploading', 'Subiendo…');
+  log(`Subiendo ${entity?.name || key}…`);
+
+  const data = readLocal(key);
+  if (!data) {
+    setEntityState(key, 'skip', 'Sin datos');
+    log(`${entity?.name}: sin datos locales`, 'info');
+    return;
+  }
+
+  try {
+    const fsKey = key.replace('.','_');
+    // Añadir _updatedAt si no tiene
+    if (!data._updatedAt) data._updatedAt = new Date().toISOString();
+    const ok = await fb.pushToFirestore(user.uid, fsKey, data);
+    if (ok) {
+      setEntityState(key, 'done', '✓ subido');
+      log(`✓ ${entity?.name}: subido correctamente`, 'ok');
+    } else {
+      setEntityState(key, 'fail', '✗ error');
+      log(`✗ ${entity?.name}: falló la subida`, 'err');
+    }
+  } catch(e) {
+    setEntityState(key, 'fail', '✗ error');
+    log(`✗ ${entity?.name}: ${e.message}`, 'err');
+  }
+}
+
+async function uploadAll() {
+  const fb = typeof WFirebase !== 'undefined' ? WFirebase : null;
+  if (!fb) { log('Firebase no disponible','err'); return; }
+  const user = fb.getUser();
+  if (!user) { setStatus('Sin sesión — inicia sesión en Ajustes primero','err'); return; }
+  if (!fb.isOnline()) { setStatus('Sin conexión a internet','err'); return; }
+
+  const btn = document.getElementById('btn-all');
+  btn.disabled = true;
+  btn.textContent = 'Subiendo…';
+  setStatus('Subiendo datos a Firebase…','warn');
+  log('Iniciando subida completa…','info');
+
+  const withData = ENTITIES.filter(e => !!readLocal(e.key));
+  let done = 0, failed = 0;
+
+  for (const entity of withData) {
+    await uploadOne(entity.key);
+    done++;
+    setProgress(done, withData.length);
+    // Pequeña pausa para no saturar Firestore
+    await new Promise(r => setTimeout(r, 200));
+  }
+
+  const failed2 = document.querySelectorAll('.entity.fail').length;
+  if (failed2 > 0) {
+    setStatus(`⚠ ${failed2} error${failed2>1?'es':''}. Revisa el registro.`, 'err');
+    btn.textContent = `⚠ ${failed2} errores — reintentar`;
+  } else {
+    setStatus(`✓ ${done} entidades subidas a Firebase`, 'ok');
+    btn.textContent = '✓ Todo subido';
+  }
+  btn.disabled = false;
+  log(`Completado: ${done - failed2} OK, ${failed2} errores`, done-failed2>0?'ok':'err');
+}
+
+// Inicialización
+window.addEventListener('load', () => {
+  renderGrid();
+  
+  // Comprobar sesión
+  const checkSession = () => {
+    const fb = typeof WFirebase !== 'undefined' ? WFirebase : null;
+    if (!fb) {
+      setStatus('Firebase no disponible — comprueba wapps-config.js','err');
+      return;
+    }
+    const user = fb.getUser();
+    const online = fb.isOnline();
+    if (!user) {
+      setStatus('Sin sesión. Ve a Ajustes → inicia sesión con Google.','err');
+      log('Sin sesión activa. Abre Ajustes e inicia sesión con Google.','err');
+    } else if (!online) {
+      setStatus('Sin conexión a internet','err');
+      log('Offline — conecta a internet para subir datos.','err');
+    } else {
+      setStatus(`Listo — ${user.email}`, 'ok');
+      log(`Sesión activa: ${user.email}`, 'ok');
+      log(`${document.querySelectorAll('.entity:not(.skip)').length} entidades con datos locales detectadas`, 'info');
+      document.getElementById('btn-all').disabled = false;
+    }
+  };
+
+  // Esperar a que Firebase esté listo
+  if (typeof WFirebase !== 'undefined' && WFirebase.getUser()) {
+    checkSession();
+  } else {
+    window.addEventListener('wapps:auth-change', checkSession, { once: true });
+    setTimeout(checkSession, 3000); // fallback
+  }
+});
+</script>
+</body>
+</html>
