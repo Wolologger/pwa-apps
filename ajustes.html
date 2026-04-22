@@ -54,6 +54,24 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var
 .sync-btn{background:transparent;border:0.5px solid var(--dim);color:var(--muted);font-family:var(--fm);font-size:9px;letter-spacing:1px;padding:3px 9px;cursor:pointer;transition:all 0.15s;}
 .sync-btn:hover:not(:disabled){border-color:var(--y);color:var(--y);}
 .sync-btn:disabled{opacity:0.35;cursor:default;}
+.upload-modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+.upload-modal.open{display:flex;}
+.upload-sheet{background:var(--bg2,#141412);border-top:0.5px solid rgba(255,255,255,0.13);border-radius:16px 16px 0 0;width:100%;max-width:520px;padding:20px 16px 32px;}
+.upload-sheet-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;margin-bottom:4px;}
+.upload-sheet-sub{font-size:11px;color:var(--muted,#5a5850);font-family:var(--fm,'DM Mono',monospace);margin-bottom:16px;}
+.upload-entity-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.upload-entity-btn{background:var(--bg3,#1e1e1b);border:0.5px solid rgba(255,255,255,0.13);border-radius:8px;padding:10px 12px;text-align:left;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:8px;}
+.upload-entity-btn:hover{border-color:var(--y,#e8f040);background:rgba(232,240,64,0.05);}
+.upload-entity-btn.uploading{border-color:var(--y,#e8f040);opacity:0.6;pointer-events:none;}
+.upload-entity-btn.done{border-color:var(--g,#30d880);background:rgba(48,216,128,0.07);}
+.upload-entity-btn.fail{border-color:var(--r,#f04030);background:rgba(240,64,48,0.07);}
+.ue-icon{font-size:16px;flex-shrink:0;}
+.ue-label{font-size:11px;font-family:var(--fm,'DM Mono',monospace);color:var(--text,#f0ebe0);}
+.ue-status{font-size:9px;color:var(--muted,#5a5850);font-family:var(--fm,'DM Mono',monospace);margin-top:1px;}
+.upload-all-btn{width:100%;padding:12px;background:var(--y,#e8f040);color:#0a0a09;border:none;border-radius:10px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;cursor:pointer;transition:opacity 0.15s;margin-bottom:8px;}
+.upload-all-btn:hover{opacity:0.9;}
+.upload-all-btn:disabled{opacity:0.4;cursor:default;}
+.upload-cancel-btn{width:100%;padding:10px;background:transparent;color:var(--muted,#5a5850);border:0.5px solid rgba(255,255,255,0.13);border-radius:10px;font-family:var(--fm,'DM Mono',monospace);font-size:12px;cursor:pointer;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
 
 /* CONTENT */
@@ -200,10 +218,20 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var
       <div class="section-body">
         <div id="storage-stats"></div>
         <div class="divider"></div>
-        <a class="link-row" href="backup.html">
-          Backup y restauración
-          <span class="link-arrow">→</span>
-        </a>
+        <div style="display:flex;align-items:center;gap:0;">
+          <a class="link-row" href="backup.html" style="flex:1;border-radius:8px 0 0 8px;border-right:none;">
+            Backup y restauración
+            <span class="link-arrow">→</span>
+          </a>
+          <button id="upload-all-trigger" onclick="openUploadModal()"
+            style="flex-shrink:0;height:100%;padding:12px 14px;background:var(--y);color:#0a0a09;
+                   border:none;border-radius:0 8px 8px 0;font-family:'Bebas Neue',sans-serif;
+                   font-size:13px;letter-spacing:0.5px;cursor:pointer;transition:opacity 0.15s;
+                   display:flex;align-items:center;gap:5px;"
+            title="Subir todo a Firebase">
+            &#x2B06; SUBIR
+          </button>
+        </div>
         <a class="link-row" href="editor-categorias.html">
           Editor de categorías
           <span class="link-arrow">→</span>
@@ -220,6 +248,18 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var
 
 <div class="toast" id="toast"></div>
 
+<!-- Modal subir a Firebase -->
+<div class="upload-modal" id="upload-modal" onclick="if(event.target===this)closeUploadModal()">
+  <div class="upload-sheet">
+    <div class="upload-sheet-title">&#x2B06; Subir a Firebase</div>
+    <div class="upload-sheet-sub">Fuerza la subida aunque no haya cambios pendientes</div>
+    <div class="upload-entity-grid" id="upload-entity-grid"></div>
+    <button class="upload-all-btn" id="upload-all-btn" onclick="uploadAll()">&#x2B06; SUBIR TODO</button>
+    <button class="upload-cancel-btn" onclick="closeUploadModal()">Cancelar</button>
+  </div>
+</div>
+
+
 <script>
 // ── Helpers ────────────────────────────────────────────────────────
 function _fb()   { return (typeof WFirebase !== 'undefined') ? WFirebase : null; }
@@ -234,6 +274,104 @@ function showToast(msg, color) {
 }
 
 // ── Sync bar ───────────────────────────────────────────────────────
+// ── Entidades disponibles para subir ──────────────────────────────
+const UPLOAD_ENTITIES = [
+  { key:'despensa.items',    icon:'🥫', label:'Despensa'    },
+  { key:'compra.data',       icon:'🛒', label:'Compra'      },
+  { key:'finanzas.data',     icon:'💰', label:'Finanzas'    },
+  { key:'gastos.data',       icon:'📊', label:'Gastos'      },
+  { key:'semana.data',       icon:'📅', label:'Semana'      },
+  { key:'setlist.data',      icon:'🎸', label:'Setlist'     },
+  { key:'instrumentos.data', icon:'🎛️', label:'Instrumentos'},
+  { key:'obra.data',         icon:'🏗️', label:'Obra'        },
+  { key:'mascotas.data',     icon:'🐾', label:'Mascotas'    },
+  { key:'coches.data',       icon:'🚗', label:'Coches'      },
+  { key:'ninos.data',        icon:'👶', label:'Niños'       },
+  { key:'deseados.data',     icon:'⭐', label:'Deseados'    },
+  { key:'suministros.data',  icon:'💡', label:'Suministros' },
+];
+
+function openUploadModal() {
+  const fb = _fb(), sync = _sync();
+  if (!fb || !sync) { alert('Firebase no disponible.'); return; }
+  const user = fb.getUser();
+  if (!user) { alert('Inicia sesión para subir a Firebase.'); return; }
+  if (!fb.isOnline()) { alert('Sin conexión a internet.'); return; }
+  const grid = document.getElementById('upload-entity-grid');
+  grid.innerHTML = UPLOAD_ENTITIES.map(e => `
+    <button class="upload-entity-btn" id="ue-${e.key.replace('.','_')}" onclick="uploadEntity('${e.key}')">
+      <span class="ue-icon">${e.icon}</span>
+      <div>
+        <div class="ue-label">${e.label}</div>
+        <div class="ue-status" id="ues-${e.key.replace('.','_')}">Pendiente</div>
+      </div>
+    </button>`).join('');
+  document.getElementById('upload-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeUploadModal() {
+  document.getElementById('upload-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+async function uploadEntity(key) {
+  const fb = _fb(), sync = _sync();
+  if (!fb || !sync) return;
+  const user = fb.getUser(); if (!user) return;
+  const safeKey = key.replace('.', '_');
+  const btn = document.getElementById('ue-' + safeKey);
+  const statusEl = document.getElementById('ues-' + safeKey);
+  if (btn) btn.classList.add('uploading');
+  if (statusEl) statusEl.textContent = 'Subiendo…';
+  try {
+    const result = await sync.pushAll(user.uid, key);
+    const pushed = result?.pushed ?? 0;
+    const failed = result?.failed ?? 0;
+    if (btn) { btn.classList.remove('uploading'); btn.classList.add(failed > 0 ? 'fail' : 'done'); }
+    if (statusEl) statusEl.textContent = failed > 0 ? `✗ Error` : `✓ Subido`;
+  } catch(e) {
+    if (btn) { btn.classList.remove('uploading'); btn.classList.add('fail'); }
+    if (statusEl) statusEl.textContent = '✗ Error';
+  }
+}
+
+async function uploadAll() {
+  const fb = _fb(), sync = _sync();
+  if (!fb || !sync) return;
+  const user = fb.getUser(); if (!user) return;
+  const allBtn = document.getElementById('upload-all-btn');
+  if (allBtn) { allBtn.disabled = true; allBtn.textContent = 'Subiendo…'; }
+  let totalPushed = 0, totalFailed = 0;
+  for (const entity of UPLOAD_ENTITIES) {
+    const safeKey = entity.key.replace('.', '_');
+    const btn = document.getElementById('ue-' + safeKey);
+    const statusEl = document.getElementById('ues-' + safeKey);
+    if (btn) btn.classList.add('uploading');
+    if (statusEl) statusEl.textContent = 'Subiendo…';
+    try {
+      const result = await sync.pushAll(user.uid, entity.key);
+      const pushed = result?.pushed ?? 0;
+      const failed = result?.failed ?? 0;
+      totalPushed += pushed; totalFailed += failed;
+      if (btn) { btn.classList.remove('uploading'); btn.classList.add(failed > 0 ? 'fail' : 'done'); }
+      if (statusEl) statusEl.textContent = failed > 0 ? '✗ Error' : '✓ Subido';
+    } catch(e) {
+      totalFailed++;
+      if (btn) { btn.classList.remove('uploading'); btn.classList.add('fail'); }
+      if (statusEl) statusEl.textContent = '✗ Error';
+    }
+  }
+  if (allBtn) {
+    allBtn.textContent = totalFailed > 0
+      ? `⚠ ${totalFailed} error${totalFailed > 1 ? 'es' : ''}`
+      : `✓ Todo subido (${totalPushed})`;
+    setTimeout(() => {
+      if (allBtn) { allBtn.disabled = false; allBtn.textContent = '⬆ SUBIR TODO'; }
+    }, 3000);
+  }
+}
+
 function updateSyncUI(state, pendingCount) {
   const dot   = document.getElementById('sync-dot');
   const label = document.getElementById('sync-label');
