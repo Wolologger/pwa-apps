@@ -50,6 +50,7 @@
 <script src="wapps-config.js"></script>
 <script src="wapps-store.js"></script>
 <script src="wapps-firebase.js"></script>
+<script src="wapps-onboarding.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -523,6 +524,10 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
           <button class="btn btn-y btn-sm" style="flex:1" onclick="exportJSON()">↓ Exportar JSON</button>
           <button class="btn btn-sm" style="flex:1" onclick="document.getElementById('fi').click()">↑ Importar JSON</button>
           <input type="file" id="fi" accept=".json" style="display:none" onchange="importFile(event)">
+        </div>
+                <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border,rgba(255,255,255,0.07));">
+          <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-bottom:8px;">¿Primera vez? Vuelve a ver la guía.</div>
+          <button class="btn btn-sm" style="width:100%;" onclick="if(typeof WOnboarding!=='undefined'){WOnboarding.reset('ninos');WOnboarding.show('ninos',OB_STEPS)}">👋 Ver guía de nuevo</button>
         </div>
         <div id="datos-fb" class="fb"></div>
       </div>
@@ -1386,6 +1391,32 @@ function showToast(msg, isErr=false) {
 }
 
 // ── INIT ──
+
+
+const OB_STEPS = [
+  {
+    icon:'👶',
+    title:'Bienvenido a Niños',
+    body:'Seguimiento de la salud y desarrollo de tus hijos. Vacunas, médicos, crecimiento, colegio y actividades.'
+  },
+  {
+    icon:'📏',
+    title:'Crecimiento',
+    body:'Registra talla y peso en cada visita médica. La gráfica muestra la evolución a lo largo del tiempo.'
+  },
+  {
+    icon:'💉',
+    title:'Vacunas y médicos',
+    body:'Anota cada vacuna y visita médica con fecha, médico y observaciones. Todo el historial en un sitio.'
+  },
+  {
+    icon:'🎒',
+    title:'Colegio y actividades',
+    body:'Registra notas, actividades extraescolares y eventos importantes del cole.'
+  },
+];
+
+if(typeof WOnboarding!=='undefined')WOnboarding.show('ninos', OB_STEPS);
 render();
 
 function _fb()   { return (typeof WFirebase !== 'undefined') ? WFirebase : null; }

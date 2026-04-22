@@ -50,6 +50,7 @@
 <script src="wapps-config.js"></script>
 <script src="wapps-store.js"></script>
 <script src="wapps-firebase.js"></script>
+<script src="wapps-onboarding.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;--y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;--o:#f09030;--fh:'Bebas Neue',sans-serif;--fm:'DM Mono',monospace;--fs:'DM Sans',sans-serif;}
@@ -204,6 +205,10 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
           <button class="btn btn-y btn-sm" style="flex:1" onclick="exportJSON()">↓ Exportar JSON</button>
           <button class="btn btn-sm" style="flex:1" onclick="document.getElementById('fi').click()">↑ Importar JSON</button>
           <input type="file" id="fi" accept=".json" style="display:none" onchange="importFile(event)">
+        </div>
+                <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border,rgba(255,255,255,0.07));">
+          <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-bottom:8px;">¿Primera vez? Vuelve a ver la guía.</div>
+          <button class="btn btn-sm" style="width:100%;" onclick="if(typeof WOnboarding!=='undefined'){WOnboarding.reset('instrumentos');WOnboarding.show('instrumentos',OB_STEPS)}">👋 Ver guía de nuevo</button>
         </div>
         <div id="datos-fb" class="fb"></div>
       </div>
@@ -385,7 +390,33 @@ function importFile(e){
 }
 function showFB(msg,color){const el=document.getElementById('datos-fb');if(!el)return;el.textContent=msg;el.style.color=color;el.style.display='block';setTimeout(()=>el.style.display='none',2500);}
 
-updateFormFields();render();
+updateFormFields();
+
+const OB_STEPS = [
+  {
+    icon:'🎸',
+    title:'Bienvenido a Instrumentos',
+    body:'Registra todos tus instrumentos, pedales y equipos. Consulta su gear de un vistazo desde el Setlist.'
+  },
+  {
+    icon:'🎛️',
+    title:'Gear por instrumento',
+    body:'Añade modelo, tipo de cuerdas y configuración. Todo aparece automáticamente en el modo directo del Setlist cuando lo asignas a una canción.'
+  },
+  {
+    icon:'⚙️',
+    title:'Seguimiento de setup',
+    body:'Anota la fecha del último setup. La app te avisará cuando lleve más de 180 días sin mantenimiento.'
+  },
+  {
+    icon:'📊',
+    title:'Pestaña Datos',
+    body:'Exporta e importa tu inventario como JSON para hacer backup o moverlo a otro dispositivo.'
+  },
+];
+
+if(typeof WOnboarding!=='undefined')WOnboarding.show('instrumentos', OB_STEPS);
+render();
 // Si localStorage estaba vacío, recuperar desde Firestore en background
 if(typeof WStore!=='undefined'){
   WStore.syncOnLoad('instrumentos','data',fresh=>{state=fresh;nid=state.nextId||1;updateFormFields();render();});

@@ -13,6 +13,7 @@
 <script src="wapps-config.js"></script>
 <script src="wapps-store.js"></script>
 <script src="wapps-firebase.js"></script>
+<script src="wapps-onboarding.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -246,6 +247,10 @@ select option{background:var(--bg2);}
           <button class="btn btn-sm" style="flex:1" onclick="cpJSON()">⎘ Copiar JSON</button>
           <button class="btn btn-sm" style="flex:1" onclick="document.getElementById('fi').click()">↑ Importar JSON</button>
           <input type="file" id="fi" accept=".json" style="display:none" onchange="importFile(event)">
+        </div>
+                <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border,rgba(255,255,255,0.07));">
+          <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-bottom:8px;">¿Primera vez? Vuelve a ver la guía.</div>
+          <button class="btn btn-sm" style="width:100%;" onclick="if(typeof WOnboarding!=='undefined'){WOnboarding.reset('deseados');WOnboarding.show('deseados',OB_STEPS)}">👋 Ver guía de nuevo</button>
         </div>
         <div id="datos-fb" class="fb"></div>
       </div>
@@ -544,6 +549,32 @@ function addPriceRecord(id, e) {
   save(); render();
 }
 
+
+
+const OB_STEPS = [
+  {
+    icon:'⭐',
+    title:'Bienvenido a Deseados',
+    body:'Tu lista de deseos organizada. Guarda links de productos, libros, películas o cualquier cosa que quieras conseguir.'
+  },
+  {
+    icon:'🏷️',
+    title:'Categorías y prioridad',
+    body:'Asigna una categoría y prioridad (Alta / Media / Baja) a cada ítem. Filtra por las que más te interesan.'
+  },
+  {
+    icon:'🔗',
+    title:'Links directos',
+    body:'Añade la URL del producto para ir directo a la tienda cuando lo quieras comprar.'
+  },
+  {
+    icon:'✅',
+    title:'Marcar como conseguido',
+    body:'Cuando consigas algo, márcalo como completado. Queda en el historial para que veas todo lo que has logrado.'
+  },
+];
+
+if(typeof WOnboarding!=='undefined')WOnboarding.show('deseados', OB_STEPS);
 render();
 
 // ── Sync desde Firebase al autenticarse (fix: auth puede llegar tarde) ──

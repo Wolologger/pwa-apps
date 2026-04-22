@@ -13,6 +13,7 @@
 <script src="wapps-config.js"></script>
 <script src="wapps-store.js"></script>
 <script src="wapps-firebase.js"></script>
+<script src="wapps-onboarding.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -473,6 +474,10 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
           <button class="btn btn-y btn-sm" style="flex:1" onclick="exportJSON()">↓ Exportar JSON</button>
           <button class="btn btn-sm" style="flex:1" onclick="document.getElementById('fi').click()">↑ Importar JSON</button>
           <input type="file" id="fi" accept=".json" style="display:none" onchange="importFile(event)">
+        </div>
+                <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border,rgba(255,255,255,0.07));">
+          <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-bottom:8px;">¿Primera vez? Vuelve a ver la guía.</div>
+          <button class="btn btn-sm" style="width:100%;" onclick="if(typeof WOnboarding!=='undefined'){WOnboarding.reset('coches');WOnboarding.show('coches',OB_STEPS)}">👋 Ver guía de nuevo</button>
         </div>
         <div id="datos-fb" class="fb"></div>
       </div>
@@ -1263,6 +1268,32 @@ function showToast(msg, isErr=false) {
 }
 
 // ── INIT ──
+
+
+const OB_STEPS = [
+  {
+    icon:'🚗',
+    title:'Bienvenido a Coches',
+    body:'Gestiona el mantenimiento de tus vehículos. Repostajes, revisiones, seguros y todos los gastos en un sitio.'
+  },
+  {
+    icon:'⛽',
+    title:'Repostajes',
+    body:'Registra cada repostaje con litros, importe y kilómetros. La app calcula el consumo medio automáticamente.'
+  },
+  {
+    icon:'🔧',
+    title:'Mantenimiento',
+    body:'Anota revisiones, cambios de aceite, ITV… Con fecha y próximo mantenimiento para que nunca se te olvide.'
+  },
+  {
+    icon:'💶',
+    title:'Coste total del vehículo',
+    body:'La pestaña Resumen suma todos los gastos del año: combustible, mantenimiento y seguros.'
+  },
+];
+
+if(typeof WOnboarding!=='undefined')WOnboarding.show('coches', OB_STEPS);
 render();
 </script>
 

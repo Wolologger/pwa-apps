@@ -16,6 +16,7 @@
 <script src="wapps-config.js"></script>
 <script src="wapps-store.js"></script>
 <script src="wapps-firebase.js"></script>
+<script src="wapps-onboarding.js"></script>
 <style>
 :root{
   --bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;
@@ -723,7 +724,11 @@ function renderDatos() {
     <div class="card" style="padding:12px 14px;">
       <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">${proj.tasks.length} tareas · ${proj.gastos.length} gastos · ${size} KB</div>
       <div class="action-row">
-        <button class="btn btn-accent" style="flex:1" onclick="exportJSON()">↓ Descargar JSON</button>
+        <button class="btn btn-accent" style="flex:1"         <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border,rgba(255,255,255,0.07));">
+          <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-bottom:8px;">¿Primera vez? Vuelve a ver la guía.</div>
+          <button class="btn btn-sm" style="width:100%;" onclick="if(typeof WOnboarding!=='undefined'){WOnboarding.reset('obra');WOnboarding.show('obra',OB_STEPS)}">👋 Ver guía de nuevo</button>
+        </div>
+        onclick="exportJSON()">↓ Descargar JSON</button>
         <button class="btn" style="flex:1" onclick="copyJSON()">⎘ Copiar</button>
       </div>
       <div id="copy-feedback" class="import-feedback"></div>
@@ -975,7 +980,33 @@ if (typeof WStore !== 'undefined') {
     if (fresh?.proyectos) {
       state = fresh; nid = state.nextId || 200;
       activeProjectId = state.proyectos.find(p=>!p.archived)?.id || state.proyectos[0]?.id || null;
-      render();
+      
+
+const OB_STEPS = [
+  {
+    icon:'🏗️',
+    title:'Bienvenido a Mi Obra',
+    body:'Gestiona tu reforma o construcción. Tareas, gastos y seguimiento del presupuesto en un sitio.'
+  },
+  {
+    icon:'✅',
+    title:'Tareas y progreso',
+    body:'Crea tareas por categoría (electricidad, fontanería, pintura…) y márcalas como completadas. El progreso se calcula automáticamente.'
+  },
+  {
+    icon:'💶',
+    title:'Control de gastos',
+    body:'Registra cada gasto con categoría y proveedor. Ve cuánto llevas gastado vs el presupuesto disponible.'
+  },
+  {
+    icon:'📦',
+    title:'Múltiples proyectos',
+    body:'Crea proyectos separados para diferentes obras o zonas. Archiva los terminados sin perder el historial.'
+  },
+];
+
+if(typeof WOnboarding!=='undefined')WOnboarding.show('obra', OB_STEPS);
+render();
     }
   });
   window.addEventListener('wapps:recovered', () => {

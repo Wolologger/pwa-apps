@@ -13,6 +13,7 @@
 <script src="wapps-config.js"></script>
 <script src="wapps-store.js"></script>
 <script src="wapps-firebase.js"></script>
+<script src="wapps-onboarding.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -909,6 +910,10 @@ select option{background:var(--bg2);}
           <input type="file" id="fi" accept=".json" style="display:none" onchange="importFile(event)">
         </div>
         <div id="datos-fb" style="font-size:11px;margin-top:8px;display:none;font-family:var(--fm);"></div>
+        <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border2,rgba(255,255,255,0.13));">
+          <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-bottom:8px;">¿Primera vez? Vuelve a ver la guía.</div>
+          <button class="btn btn-sm" style="width:100%;" onclick="if(typeof WOnboarding!=='undefined'){WOnboarding.reset('suministros');WOnboarding.show('suministros',OB_STEPS)}">👋 Ver guía de nuevo</button>
+        </div>
       </div>
     </div>
 
@@ -1429,6 +1434,31 @@ function nextQuiz(tipo) { quizState[tipo].current++; renderQuizFor(tipo); }
 
 // ── INIT ──
 setTipo('todos');
+
+const OB_STEPS = [
+  {
+    icon:'💡',
+    title:'Bienvenido a Suministros',
+    body:'Registra tus facturas de luz, gas y agua. Compara el consumo entre periodos y detecta subidas inesperadas.'
+  },
+  {
+    icon:'📄',
+    title:'Añadir factura',
+    body:'Pulsa + y elige el tipo de suministro. Introduce el importe (puede ser negativo para reajustes) y las fechas.'
+  },
+  {
+    icon:'📉',
+    title:'Gráficas de evolución',
+    body:'Las gráficas muestran la evolución del importe y del precio por unidad consumida. Útil para detectar cambios de tarifa.'
+  },
+  {
+    icon:'⚠️',
+    title:'Alertas automáticas',
+    body:'Si una factura es un 20% más cara que la anterior, aparece una alerta automática para que lo revises.'
+  },
+];
+
+if(typeof WOnboarding!=='undefined')WOnboarding.show('suministros', OB_STEPS);
 render();
 // Si localStorage estaba vacío, recuperar desde Firestore en background
 if (typeof WStore !== 'undefined') {

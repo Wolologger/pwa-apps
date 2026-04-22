@@ -15,6 +15,7 @@
 <script src="wapps-config.js"></script>
 <script src="wapps-store.js"></script>
 <script src="wapps-firebase.js"></script>
+<script src="wapps-onboarding.js"></script>
 <style>
 :root{
   --bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;
@@ -536,6 +537,10 @@ function renderDatos(){
         <button class="btn" style="flex:1" onclick="cpJSON()">⎘ Copiar</button>
       </div>
       <div id="cp-fb" class="fb"></div>
+      <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border,rgba(255,255,255,0.07));">
+        <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-bottom:8px;">¿Primera vez? Vuelve a ver la guía.</div>
+        <button class="btn btn-sm" style="width:100%;" onclick="if(typeof WOnboarding!=='undefined'){WOnboarding.reset('gastos');WOnboarding.show('gastos',OB_STEPS)}">👋 Ver guía de nuevo</button>
+      </div>
     </div>
     <div class="sec-lbl">Importar</div>
     <div class="data-card">
@@ -651,6 +656,32 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 
 // ── INIT ──
 initCatPicker();
+
+
+const OB_STEPS = [
+  {
+    icon:'📊',
+    title:'Bienvenido a Gastos Diarios',
+    body:'Registra cada gasto del día en segundos. Lleva el control de en qué te gastas el dinero sin complicaciones.'
+  },
+  {
+    icon:'⚡',
+    title:'Registro rápido',
+    body:'Escribe el concepto, el importe y pulsa añadir. La categoría se recuerda para la próxima vez que escribas lo mismo.'
+  },
+  {
+    icon:'📅',
+    title:'Vista por día y mes',
+    body:'Navega entre días con las flechas. El resumen mensual muestra el total y el desglose por categoría.'
+  },
+  {
+    icon:'💸',
+    title:'Desde Lista Compra',
+    body:'Al completar la compra en la app Compra puedes anotar los precios — se registran aquí automáticamente.'
+  },
+];
+
+if(typeof WOnboarding!=='undefined')WOnboarding.show('gastos', OB_STEPS);
 render();
 // Focus amount on load
 setTimeout(()=>document.getElementById('qa-imp').focus(),300);

@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0a0a09">
 <link rel="manifest" href="manifest.json">
 <title>W // APPS</title>
-<!-- version: 3.9.0 -->
+<!-- version: 3.10.1 -->
 <!-- Firebase SDK v9 compat -->
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
@@ -243,6 +243,18 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
 .cmd-row-arrow{font-size:10px;color:var(--dim);}
 .cmd-empty{padding:12px;font-size:11px;color:var(--muted);font-family:var(--fm);text-align:center;}
 
+
+  /* Banner actualización SW */
+  #update-bar{position:fixed;bottom:0;left:0;right:0;z-index:9999;
+    background:var(--y);color:#0a0a09;display:flex;align-items:center;
+    justify-content:space-between;padding:10px 16px;
+    font-family:var(--fm);font-size:12px;
+    transform:translateY(100%);transition:transform 0.3s ease;
+    max-width:520px;margin:0 auto;border-radius:12px 12px 0 0;}
+  #update-bar.visible{transform:translateY(0);}
+  #update-bar button{background:#0a0a09;color:var(--y);border:none;
+    border-radius:6px;padding:5px 14px;font-family:var(--fm);font-size:11px;
+    cursor:pointer;letter-spacing:0.5px;}
 </style>
 </head>
 <body>
@@ -284,7 +296,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
     <div class="topbar-right">
       <button class="version-badge" onclick="openChangelog()" title="Ver changelog">
         <span class="version-dot"></span>
-        <span id="version-display">v3.9.0</span>
+        <span id="version-display">v3.10.1</span>
       </button>
       <div class="clock" id="clock">--:--</div>
       <button class="auth-btn" id="auth-btn" onclick="handleAuth()" title="Login con Google">
@@ -299,7 +311,13 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
     </div>
   </div>
 
-  <div class="sync-bar" id="sync-bar">
+  <!-- Banner actualización SW -->
+<div id="update-bar">
+  <span>&#x1F504; Nueva versión disponible</span>
+  <button onclick="applyUpdate()">Actualizar</button>
+</div>
+
+<div class="sync-bar" id="sync-bar">
     <div class="sync-status">
       <div class="sync-dot offline" id="sync-dot"></div>
       <span class="sync-label offline" id="sync-label">OFFLINE</span>
@@ -360,7 +378,7 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
     <div class="cl-modal">
       <div class="cl-handle"></div>
       <div class="cl-header">
-        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v3.9.0</span></div>
+        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v3.10.1</span></div>
         <button class="cl-close" onclick="closeChangelog()">✕</button>
       </div>
       <div class="cl-body" id="cl-body"></div>
@@ -373,11 +391,21 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
 const GITHUB_USER='Wolologger';
 const GITHUB_REPO='pwa-apps';
 
-const APP_VERSION = 'v3.9.0';
+const APP_VERSION = 'v3.10.1';
 
 // ── CHANGELOG ──────────────────────────────────────────────────────
 const CHANGELOG = [
   {
+    version: 'v3.10.1',
+    date: '2025',
+    items: [
+      { type: 'fix', text: 'obra, compra, instrumentos, ninos: JS roto por doble llave en manualPushApp — pantalla en blanco corregida' },
+      { type: 'fix', text: 'backup.html: mascotas, coches y niños ahora incluidos en el backup completo' },
+      { type: 'fix', text: 'WSync: retry automático con backoff 2s→4s→8s al subir a Firestore' },
+      { type: 'fix', text: 'WSync.pullAll: conserva _updatedAt en localStorage — fix crítico de sync entre dispositivos' },
+      { type: 'fix', text: 'WSync.pullAll: emite wapps:recovered para que las apps se re-rendericen' },
+    ],
+  }, {
     version: 'v3.9.0',
     date: 'Abril 2026',
     items: [
@@ -780,7 +808,38 @@ async function loadApps(){
 }
 
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{navigator.serviceWorker.register('/pwa-apps/sw.js').catch(()=>{});});
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/pwa-apps/sw.js').then(reg => {
+      // Detectar SW nuevo instalado
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        nw.addEventListener('statechange', () => {
+          if(nw.state === 'installed' && navigator.serviceWorker.controller) {
+            document.getElementById('update-bar').classList.add('visible');
+          }
+        });
+      });
+      // SW ya esperando (recarga tras update)
+      if(reg.waiting && navigator.serviceWorker.controller) {
+        document.getElementById('update-bar').classList.add('visible');
+      }
+    }).catch(() => {});
+    // Mensaje desde el SW
+    navigator.serviceWorker.addEventListener('message', e => {
+      if(e.data && e.data.type === 'UPDATE_AVAILABLE') {
+        document.getElementById('update-bar').classList.add('visible');
+      }
+    });
+  });
+}
+
+function applyUpdate() {
+  document.getElementById('update-bar').classList.remove('visible');
+  navigator.serviceWorker.ready.then(reg => {
+    if(reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+  });
+  navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload());
+  setTimeout(() => window.location.reload(), 500);
 }
 
 async function clearCache() {

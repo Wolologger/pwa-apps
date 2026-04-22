@@ -13,6 +13,7 @@
 <script src="wapps-config.js"></script>
 <script src="wapps-store.js"></script>
 <script src="wapps-firebase.js"></script>
+<script src="wapps-onboarding.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -481,7 +482,11 @@ function renderDatos(){
         <button class="btn btn-sm" style="flex:1" onclick="document.getElementById('fi').click()">↑ Importar JSON</button>
         <input type="file" id="fi" accept=".json" style="display:none" onchange="importFile(event)">
       </div>
-      <div id="datos-fb" class="fb"></div>
+              <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border,rgba(255,255,255,0.07));">
+          <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-bottom:8px;">¿Primera vez? Vuelve a ver la guía.</div>
+          <button class="btn btn-sm" style="width:100%;" onclick="if(typeof WOnboarding!=='undefined'){WOnboarding.reset('finanzas');WOnboarding.show('finanzas',OB_STEPS)}">👋 Ver guía de nuevo</button>
+        </div>
+        <div id="datos-fb" class="fb"></div>
     </div>
     <div class="data-card">
       <div style="font-family:var(--fh);font-size:16px;margin-bottom:6px;">Apps conectadas</div>
@@ -537,6 +542,32 @@ function showFB(msg,color){
   setTimeout(()=>el.style.display='none',2500);
 }
 
+
+
+const OB_STEPS = [
+  {
+    icon:'💰',
+    title:'Bienvenido a Finanzas',
+    body:'Controla tus ingresos y gastos. Ve el balance mensual de un vistazo y detecta patrones en tus finanzas.'
+  },
+  {
+    icon:'➕',
+    title:'Añadir movimientos',
+    body:'Pulsa + para añadir un ingreso o gasto. Asigna una categoría y el mes se calcula automáticamente.'
+  },
+  {
+    icon:'📈',
+    title:'Gráficas y balance',
+    body:'La pestaña Resumen muestra el balance mes a mes con gráfica de barras. El color rojo indica que gastas más de lo que ingresas.'
+  },
+  {
+    icon:'🔄',
+    title:'Movimientos recurrentes',
+    body:'Marca un movimiento como recurrente para que aparezca automáticamente cada mes sin tener que repetirlo.'
+  },
+];
+
+if(typeof WOnboarding!=='undefined')WOnboarding.show('finanzas', OB_STEPS);
 render();
 // Si localStorage estaba vacío, recuperar desde Firestore en background
 if (typeof WStore !== 'undefined') {

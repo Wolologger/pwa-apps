@@ -218,20 +218,14 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var
       <div class="section-body">
         <div id="storage-stats"></div>
         <div class="divider"></div>
-        <div style="display:flex;align-items:center;gap:0;">
-          <a class="link-row" href="backup.html" style="flex:1;border-radius:8px 0 0 8px;border-right:none;">
-            Backup y restauración
-            <span class="link-arrow">→</span>
-          </a>
-          <button id="upload-all-trigger" onclick="openUploadModal()"
-            style="flex-shrink:0;height:100%;padding:12px 14px;background:var(--y);color:#0a0a09;
-                   border:none;border-radius:0 8px 8px 0;font-family:'Bebas Neue',sans-serif;
-                   font-size:13px;letter-spacing:0.5px;cursor:pointer;transition:opacity 0.15s;
-                   display:flex;align-items:center;gap:5px;"
-            title="Subir todo a Firebase">
-            &#x2B06; SUBIR
-          </button>
-        </div>
+        <a class="link-row" href="backup.html">
+          Backup y restauración
+          <span class="link-arrow">→</span>
+        </a>
+        <button class="link-row" onclick="openUploadModal()" style="color:var(--text);">
+          <span>&#x2B06; Subir todo a Firebase</span>
+          <span class="link-arrow" style="color:var(--g);">↑</span>
+        </button>
         <a class="link-row" href="editor-categorias.html">
           Editor de categorías
           <span class="link-arrow">→</span>

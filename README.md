@@ -163,6 +163,11 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 
 ## Changelog
 
+### v3.11.0
+- **Onboarding** — tutorial de bienvenida añadido a 10 apps que no lo tenían: Instrumentos, Finanzas, Gastos Diarios, Suministros, Deseados, Mascotas, Coches, Niños, Mi Obra y Setlist. Cada app muestra 4 pasos explicativos la primera vez que se abre, con botón «👋 Ver guía de nuevo» en la sección de datos
+- **index.html** — versión actualizada a v3.11.0, changelog interactivo actualizado, banner de actualización del Service Worker (aparece cuando hay una nueva versión disponible)
+- **ajustes.html** — botón «⬆ Subir todo a Firebase» rediseñado como link-row discreto; abre panel con las 13 entidades individuales para subir seleccionando
+
 ### v3.10.1
 - **Fix crítico** — `obra.html`, `compra.html`, `instrumentos.html`, `ninos.html`: JS roto por doble llave `${{var}}` en `manualPushApp()` → corregido a `${var}`
 - **Fix** — `instrumentos.html`, `ninos.html`, `obra.html`: función `esc()` reescrita sin `/</g` ni `/"/g` en regex (causaban `Unexpected token` en vm.Script y algunos browsers)
