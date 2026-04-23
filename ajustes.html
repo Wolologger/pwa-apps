@@ -8,15 +8,16 @@
 <meta name="theme-color" content="#0a0a09">
 <link rel="manifest" href="manifest.json">
 <title>Ajustes — W//APPS</title>
-<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-config.js"></script>
 <script src="wapps-store.js"></script>
 <script src="wapps-firebase.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="wapps-nav.js" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{
+:root{color-scheme:dark;
   --bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;
   --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
   --text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;
@@ -113,6 +114,14 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var
 /* TOAST */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;padding:10px 18px;font-size:12px;color:var(--text);z-index:999;opacity:0;transition:opacity 0.25s;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;}
+
+/* === RESPONSIVE: tablet/desktop === */
+@media (min-width:720px){
+  body{max-width:720px;margin:0 auto;box-shadow:0 0 0 1px var(--line2);}
+}
+@media (min-width:1024px){
+  body{max-width:900px;}
+}
 </style>
 </head>
 <body>
@@ -425,7 +434,7 @@ function renderUser(user) {
     area.innerHTML = `
       <div class="user-row">
         ${user.photoURL
-          ? `<img class="user-avatar" src="${user.photoURL}" alt="${user.displayName}">`
+          ? `<img class="user-avatar" src="${user.photoURL}" alt="${user.displayName}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">`
           : `<div class="user-avatar-placeholder">👤</div>`}
         <div>
           <div class="user-name">${user.displayName || 'Usuario'}</div>

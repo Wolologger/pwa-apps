@@ -4,9 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="theme-color" content="#0a0a09">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Sin conexión — W//APPS</title>
+<link rel="manifest" href="manifest.json">
 <style>
-:root{--bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;--y:#e8f040;--r:#f04030;--g:#30d880;--text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;--border2:rgba(255,255,255,0.13);--fm:'DM Mono',monospace;--fh:'Bebas Neue',sans-serif;}
+:root{color-scheme:dark;--bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;--y:#e8f040;--r:#f04030;--g:#30d880;--text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;--border2:rgba(255,255,255,0.13);--fm:'DM Mono',monospace;--fh:'Bebas Neue',sans-serif;}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--fm);}
 .grid-bg{position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.06) 1px,transparent 1px);background-size:40px 40px;}
@@ -27,6 +30,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .status{font-size:10px;color:var(--muted);margin-top:24px;letter-spacing:0.5px;}
 .status span{color:var(--r);}
 </style>
+<script src="wapps-nav.js" defer></script>
 </head>
 <body>
 <div class="grid-bg"></div>

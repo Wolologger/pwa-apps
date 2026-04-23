@@ -441,16 +441,17 @@ const WSync = (() => {
   // Mapa de claves legacy → clave wapps.* (mismo que MIGRATE_MAP en wapps-store.js)
   const LEGACY_MAP = {
     'despensa.items':    'despensa_v1',
-    'compra.data':       'compra_v1',
+    'compra.data':       'compra_v2',
     'finanzas.data':     'finanzas_v1',
     'suministros.data':  'suministros_v1',
     'gastos.data':       'gastos_v1',
     'semana.data':       'semana_v2',
-    'deseados.data':     'deseados_v1',
-    'obra.data':         'miobra_v2',
+    'deseados.data':     'deseados_v2',
+    'obra.data':         'obra_multiproj_v1',
     'instrumentos.data': 'instrumentos_v2',
     'setlist.data':      'setlist_v1',
     'coches.data':       'coches_v1',
+    'mascotas.data':     'mascotas_v1',
     'ninos.data':        'ninos_v1',
   };
 

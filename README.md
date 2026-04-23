@@ -40,7 +40,7 @@ localStorage (siempre)
 - **Sin conexión**: todo funciona con `localStorage`. Los cambios se marcan como pendientes en `wapps.pending` (persiste entre sesiones).
 - **Con conexión y sesión**: los datos se suben a Firestore automáticamente. Gana siempre el más reciente por `_updatedAt`. Al cerrar la pestaña, `WSync` hace un flush de pendientes vía `visibilitychange`/`pagehide`.
 - **Tiempo real**: `WStore.watchRealtime` mantiene un listener `onSnapshot` activo con merge campo a campo. Los listeners se limpian solos en `pagehide`. Un toast sutil confirma cada actualización remota.
-- **Service Worker** (`sw.js` v8.8): precaché reducido al núcleo; el resto se cachea al visitar (lazy). Estrategia stale-while-revalidate para HTML con banner de actualización no intrusivo.
+- **Service Worker** (`sw.js` v9.0): precaché reducido al núcleo; el resto se cachea al visitar (lazy). Estrategia stale-while-revalidate para HTML con banner de actualización no intrusivo.
 - **Seguridad**: sesión expira tras 8 h de inactividad (configurable). Credenciales placeholder en `wapps-config.js` se detectan al arrancar.
 - **Resiliencia**: `QuotaExceededError` de localStorage muestra banner de alerta en lugar de fallar silenciosamente.
 
@@ -162,6 +162,57 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 ---
 
 ## Changelog
+
+### v4.0.0
+
+**Versión mayor** con correcciones críticas, rediseño del panel de inicio, responsive completo y mejoras de rendimiento.
+
+**🔴 Fix crítico — upload a Firebase roto en 4 apps**
+- `wapps-firebase.js` · `LEGACY_MAP` estaba mal mapeado y faltaba `mascotas` por completo:
+  - `compra.data` → `compra_v2` (antes: `compra_v1` ❌)
+  - `deseados.data` → `deseados_v2` (antes: `deseados_v1` ❌)
+  - `obra.data` → `obra_multiproj_v1` (antes: `miobra_v2` ❌)
+  - `mascotas.data` → `mascotas_v1` (**antes: no existía en el mapa** ❌)
+- **Consecuencia**: si tenías datos guardados en claves legacy de estas apps (instalación previa a v3.12), `_readLocal()` no los encontraba al hacer push → nunca se subían a Firebase ni migraban a `wapps.*`. De ahí que coches/mascotas pareciesen no subir nada.
+- Verificación completa de las 13 apps sincronizadas: todas consistentes.
+
+**🎨 Rediseño — index.html (panel de inicio)**
+- Eliminado "MIS HERRAMIENTAS" y el carrusel ticker con nombres desplazándose horizontalmente.
+- Nuevo **dashboard con 4 widgets** en el home que muestran datos reales:
+  1. **Hoy** — tareas del día de `semana.data` (lista de checks con pendientes en negrita)
+  2. **Gasto rápido** — form inline (importe · concepto · categoría · ✓ Añadir) que escribe directamente a `wapps.gastos.data` con marca pendiente
+  3. **Próximamente** — próximos 7 días con tareas no hechas del calendario
+  4. **Sincronización** — última sync, último backup local, nº pendientes (se actualiza al sync-done)
+- **Rediseñadas las categorías**: antes sidebar vertical negra de 72 px, ahora pills horizontales arriba con scroll horizontal, icono + label + count, línea de acento por categoría (verde · amarillo · morado · azul · gris).
+- Grid de apps ahora responsive: 3 cols móvil → 4 cols tablet → 5 cols desktop.
+
+**📱 Responsive iPad/Android/web**
+- Media queries añadidas a 19 apps:
+  - ≥720 px: `body` con `max-width:720px` + centrado con sombra lateral
+  - ≥1024 px: `body` con `max-width:900px`
+- En móvil todo se comporta igual que antes.
+
+**🧭 Navegación entre páginas mejorada**
+- Nuevo `wapps-nav.js` (1.4 KB) cargado con `defer` en 21 HTML:
+  - Tecla **ESC** → vuelve a `index.html` (ignorada en inputs/modales activos)
+  - **Swipe** desde borde izquierdo (>80 px) → vuelve a `index.html`
+- Los botones `.wnav-back` ya existentes siguen funcionando.
+
+**🌓 Modo claro del OS**
+- `color-scheme: dark` añadido al `:root` de los 22 HTML. Esto fuerza al navegador a renderizar scrollbars, inputs nativos y controles del sistema en tema oscuro aunque el OS esté en modo claro (antes aparecían en negro sobre negro).
+
+**🔄 Botón SYNC con feedback**
+- `manualSync()` en 13 apps: ahora muestra `✓ Al día` si no había pendientes, `✓ N` si subió N entradas, o `⚠ N/M` si falló algo. El texto vuelve al original a los 2.5 s.
+
+**⚡ Rendimiento**
+- `<link rel="preconnect">` a `fonts.googleapis.com`, `fonts.gstatic.com` y `firestore.googleapis.com` en 19 HTML. Reduce el handshake TLS en primera carga (~100-300 ms por dominio en móvil 4G).
+- `obra.html`: fusionados 2 `<link>` de Google Fonts en uno.
+- Icon grid del index pasó de 3 cols fijas a 3→4→5 según viewport.
+
+**Bumps**
+- `sw.js` v8.9 → v9.0 (cambio mayor de caché, limpieza automática al activar)
+- `manifest.json` v3.13.0 → v4.0.0
+- Nuevo archivo: `wapps-nav.js`
 
 ### v3.12.0
 - **Fix crítico** — `suministros.html`: doble llave `{{ }}` en `manualPushApp` corregida (JS crasheaba silenciosamente → el botón ⬆ SUBIR no funcionaba)

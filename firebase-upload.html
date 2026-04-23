@@ -2,17 +2,21 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>W//APPS — Subir a Firebase</title>
-<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-config.js"></script>
 <script src="wapps-store.js"></script>
 <script src="wapps-firebase.js"></script>
+<script src="wapps-nav.js" defer></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-:root{
+:root{color-scheme:dark;
   --bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;
   --text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;
   --y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;
@@ -52,6 +56,14 @@ h1{font-family:var(--fh);font-size:32px;letter-spacing:1px;color:var(--y);margin
 .progress-fill{height:100%;background:var(--y);border-radius:2px;transition:width 0.3s ease;width:0%;}
 a.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:11px;text-decoration:none;margin-bottom:20px;}
 a.back:hover{color:var(--y);}
+
+/* === RESPONSIVE: tablet/desktop === */
+@media (min-width:720px){
+  body{max-width:720px;margin:0 auto;box-shadow:0 0 0 1px var(--line2);}
+}
+@media (min-width:1024px){
+  body{max-width:900px;}
+}
 </style>
 </head>
 <body>

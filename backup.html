@@ -7,17 +7,19 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0a0a09">
 <title>Backup — W//APPS</title>
+<link rel="manifest" href="manifest.json">
 <!-- version: 1.1.0 -->
 <!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-config.js"></script>
 <script src="wapps-store.js"></script>
 <script src="wapps-firebase.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="wapps-nav.js" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{
+:root{color-scheme:dark;
   --bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;
   --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
   --text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;
@@ -124,6 +126,14 @@ input[type="file"]{display:none;}
 .sync-btn{background:transparent;border:0.5px solid var(--dim,#2a2a26);color:var(--muted,#5a5850);font-family:var(--fm);font-size:9px;letter-spacing:1px;padding:3px 9px;cursor:pointer;transition:all 0.15s;}
 .sync-btn:hover:not(:disabled){border-color:var(--y,#e8f040);color:var(--y,#e8f040);}
 .sync-btn:disabled{opacity:0.35;cursor:default;}
+
+/* === RESPONSIVE: tablet/desktop === */
+@media (min-width:720px){
+  body{max-width:720px;margin:0 auto;box-shadow:0 0 0 1px var(--line2);}
+}
+@media (min-width:1024px){
+  body{max-width:900px;}
+}
 </style>
 </head>
 <body>

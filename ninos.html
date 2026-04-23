@@ -44,16 +44,18 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0a0a09">
 <title>Niños — W//APPS</title>
-<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-config.js"></script>
 <script src="wapps-store.js"></script>
 <script src="wapps-firebase.js"></script>
+<script src="wapps-nav.js" defer></script>
 <script src="wapps-onboarding.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{
+:root{color-scheme:dark;
   --bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;
   --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
   --text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;
@@ -260,6 +262,14 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
 .sync-btn:hover:not(:disabled){border-color:var(--y,#e8f040);color:var(--y,#e8f040);}
 .sync-btn:disabled{opacity:0.35;cursor:default;}
 .wnav-version{font-size:9px;color:var(--dim);font-family:var(--fm);letter-spacing:0.5px;border:1px solid var(--dim);padding:2px 6px;border-radius:3px;flex-shrink:0;}
+
+/* === RESPONSIVE: tablet/desktop === */
+@media (min-width:720px){
+  body{max-width:720px;margin:0 auto;box-shadow:0 0 0 1px var(--line2);}
+}
+@media (min-width:1024px){
+  body{max-width:900px;}
+}
 </style>
 </head>
 <body>
@@ -313,7 +323,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
           <div class="field"><div class="field-label">Emoji / icono</div><input type="text" id="fk-emoji" placeholder="👦" maxlength="2" style="text-align:center;font-size:20px;"></div>
         </div>
         <div class="field-row">
-          <div class="field"><div class="field-label">Fecha de nacimiento</div><input type="date" id="fk-nacimiento"></div>
+          <div class="field"><div class="field-label">Fecha de nacimiento</div><input type="date" id="fk-nacimiento" max="2099-12-31"></div>
           <div class="field"><div class="field-label">Sexo</div>
             <select id="fk-sexo">
               <option value="niño">👦 Niño</option>
@@ -572,7 +582,7 @@ function esc(s){var t=String(s||'');t=t.replace(/&/g,'&amp;');t=t.replace(new Re
 function fmt(n,d=2) { return Number(n||0).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d}); }
 function today() { const d=new Date(); return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`; }
 function p2(n) { return String(n).padStart(2,'0'); }
-function daysUntil(dateStr) { if(!dateStr) return null; return Math.ceil((new Date(dateStr)-new Date())/(1000*60*60*24)); }
+function daysUntil(dateStr) { if(!dateStr) return null; const d=new Date(dateStr+'T12:00:00'); const now=new Date(); now.setHours(12,0,0,0); return Math.ceil((d-now)/(1000*60*60*24)); }
 
 function calcAge(birthDate) {
   if (!birthDate) return null;
@@ -1422,6 +1432,8 @@ const OB_STEPS = [
 ];
 
 if(typeof WOnboarding!=='undefined')WOnboarding.show('ninos', OB_STEPS);
+// Limitar fechas de nacimiento a hoy (no permitir futuras)
+(function(){ const _t=today(); ['fk-nacimiento'].forEach(id=>{const el=document.getElementById(id); if(el) el.max=_t;}); })();
 render();
 
 function _fb()   { return (typeof WFirebase !== 'undefined') ? WFirebase : null; }
@@ -1445,16 +1457,22 @@ function updateSyncUI(state, pendingCount) {
   const pushAppBtn = document.getElementById('push-app-btn');
   if (pushAppBtn) pushAppBtn.disabled = false;
 }
-async function manualSync() {
-  const fb   = _fb();
-  const sync = _sync();
-  if (!fb || !sync) return;
-  const user = fb.getUser();
-  if (!user || !fb.isOnline()) return;
-  updateSyncUI('syncing', sync.getPending().length);
-  document.getElementById('sync-btn').disabled = true;
-  await sync.syncAll(user.uid);
-  updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
+async function manualSync(){
+  const fb=_fb(),sync=_sync();if(!fb||!sync)return;
+  const user=fb.getUser();if(!user||!fb.isOnline())return;
+  const btn=document.getElementById('sync-btn');
+  const originalText = btn?.textContent || '↑ SYNC';
+  updateSyncUI('syncing',sync.getPending().length);
+  if(btn)btn.disabled=true;
+  const result = await sync.syncAll(user.uid);
+  updateSyncUI(fb.isOnline()?'online':'offline',sync.getPending().length);
+  if(btn){
+    const {pushed=0,failed=0}=result||{};
+    if(pushed===0 && failed===0) btn.textContent='✓ Al día';
+    else if(failed>0) btn.textContent=`⚠ ${pushed}/${pushed+failed}`;
+    else btn.textContent=`✓ ${pushed}`;
+    setTimeout(()=>{if(btn)btn.textContent=originalText;},2500);
+  }
 }
 async function manualPull() {
   const fb   = _fb();

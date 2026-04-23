@@ -11,15 +11,15 @@
 <title>W // APPS</title>
 <!-- version: 3.11.0 -->
 <!-- Firebase SDK v9 compat -->
-<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-store.js"></script>
 <script src="wapps-config.js"></script>
 <script src="wapps-firebase.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;--line:rgba(255,255,255,0.06);--line2:rgba(255,255,255,0.12);--text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;--y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;--fh:'Bebas Neue',sans-serif;--fm:'DM Mono',monospace;}
+:root{color-scheme:dark;--bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;--line:rgba(255,255,255,0.06);--line2:rgba(255,255,255,0.12);--text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;--y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;--fh:'Bebas Neue',sans-serif;--fm:'DM Mono',monospace;}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html{background:var(--bg);}
 body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm);overflow-x:hidden;}
@@ -62,12 +62,38 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
 .status-dot{width:5px;height:5px;border-radius:50%;background:var(--g);animation:pulse 2s ease-in-out infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 
-/* TICKER */
-.ticker{border-bottom:1px solid var(--line2);padding:7px 0;overflow:hidden;white-space:nowrap;}
-.ticker-inner{display:inline-block;animation:ticker 30s linear infinite;}
-.ticker-item{display:inline-block;font-size:10px;color:var(--muted);letter-spacing:1px;padding:0 20px;}
-.ticker-item span{color:var(--y);}
-@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+/* DASHBOARD WIDGETS */
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;padding:1px;background:var(--line2);border-bottom:1px solid var(--line2);}
+.dash-card{background:var(--bg2);padding:14px 16px;text-decoration:none;color:var(--text);display:flex;flex-direction:column;gap:10px;min-height:130px;transition:background 0.15s;}
+a.dash-card:hover{background:var(--bg3);}
+.dash-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+.dash-title{font-family:var(--fm);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+.dash-count{font-family:var(--fh);font-size:22px;line-height:1;color:var(--y);}
+.dash-body{flex:1;display:flex;flex-direction:column;gap:4px;min-height:0;}
+.dash-empty{font-size:10px;color:var(--dim);font-style:italic;}
+.dash-task-item{font-size:11px;color:var(--text);line-height:1.35;display:flex;align-items:flex-start;gap:6px;}
+.dash-task-item.done{color:var(--dim);text-decoration:line-through;}
+.dash-task-check{flex-shrink:0;color:var(--y);}
+.dash-task-item.done .dash-task-check{color:var(--dim);}
+.dash-row{display:flex;justify-content:space-between;align-items:center;font-size:10px;gap:8px;}
+.dash-lbl{color:var(--muted);letter-spacing:0.5px;}
+.dash-val{color:var(--text);font-family:var(--fm);}
+.dash-sync-body{justify-content:center;}
+.qg-row{display:flex;gap:6px;}
+.qg-input{background:var(--bg);border:0.5px solid var(--line2);color:var(--text);font-family:var(--fm);font-size:12px;padding:7px 9px;border-radius:3px;min-width:0;}
+.qg-input:focus{outline:none;border-color:var(--y);}
+.qg-imp{flex:0 0 80px;}
+.qg-con{flex:1;}
+.qg-cat{flex:1;}
+.qg-btn{flex:0 0 auto;background:var(--y);color:#0a0a09;border:none;font-family:var(--fm);font-size:11px;letter-spacing:0.5px;padding:7px 12px;border-radius:3px;cursor:pointer;font-weight:500;}
+.qg-btn:hover{opacity:0.9;}
+.qg-btn:disabled{opacity:0.4;cursor:default;}
+.qg-fb{font-size:10px;color:var(--g);min-height:12px;letter-spacing:0.5px;}
+.qg-fb.err{color:var(--r);}
+@media (max-width:560px){
+  .dash-grid{grid-template-columns:1fr;}
+  .dash-card{min-height:auto;}
+}
 
 /* FILTER BAR */
 .filter-bar{display:flex;gap:6px;padding:10px 20px;border-bottom:1px solid var(--line2);overflow-x:auto;scrollbar-width:none;flex-shrink:0;}
@@ -197,10 +223,27 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
 .cl-new-badge{display:inline-flex;align-items:center;gap:4px;font-size:8px;padding:2px 7px;border-radius:99px;background:rgba(232,240,64,0.15);color:var(--y);border:0.5px solid rgba(232,240,64,0.3);margin-left:8px;vertical-align:middle;}
 
 /* CATEGORY GRID */
+/* CATEGORIES: pills horizontales arriba (rediseñado v4.0.0) */
+.cat-bar{display:flex;gap:8px;padding:12px 16px 4px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line2);background:var(--bg);}
+.cat-bar::-webkit-scrollbar{display:none;}
+.cat-pill{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--bg2);border:1px solid var(--line2);border-radius:99px;cursor:pointer;transition:all 0.15s;font-family:var(--fm);}
+.cat-pill:hover{border-color:rgba(255,255,255,0.25);background:var(--bg3);}
+.cat-pill.active{background:var(--y);border-color:var(--y);}
+.cat-pill.active .cp-icon,.cat-pill.active .cp-label,.cat-pill.active .cp-count{color:#0a0a09;}
+.cp-icon{font-size:14px;line-height:1;}
+.cp-label{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text);}
+.cp-count{font-size:9px;color:var(--muted);font-weight:600;opacity:0.8;}
+/* Category accent colors (pill border when not active) */
+.cat-pill.c-hogar{border-left:3px solid var(--g);}
+.cat-pill.c-dinero{border-left:3px solid var(--y);}
+.cat-pill.c-musica{border-left:3px solid #c060f0;}
+.cat-pill.c-produc{border-left:3px solid var(--b);}
+.cat-pill.c-util{border-left:3px solid var(--muted);}
+.cat-pill.active.c-hogar,.cat-pill.active.c-dinero,.cat-pill.active.c-musica,.cat-pill.active.c-produc,.cat-pill.active.c-util{border-left-color:#0a0a09;}
+
 /* SIDEBAR + ICON GRID LAYOUT */
-.launcher{display:flex;flex:1;min-height:320px;}
-.launcher-sidebar{width:72px;background:#0d0d0c;border-right:1px solid var(--line2);flex-shrink:0;display:flex;flex-direction:column;padding:8px 0;overflow-y:auto;scrollbar-width:none;}
-.launcher-sidebar::-webkit-scrollbar{display:none;}
+.launcher{display:flex;flex-direction:column;flex:1;min-height:320px;}
+.launcher-sidebar{display:none;}
 .sb-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;cursor:pointer;transition:all 0.12s;border-left:2px solid transparent;position:relative;}
 .sb-item.active{border-left-color:var(--y);background:rgba(232,240,64,0.04);}
 .sb-item:hover:not(.active){background:rgba(255,255,255,0.025);}
@@ -211,6 +254,8 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
 .launcher-content{flex:1;overflow-y:auto;padding:12px 16px 24px;scrollbar-width:none;}
 .launcher-content::-webkit-scrollbar{display:none;}
 .icon-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+@media (min-width:560px){.icon-grid{grid-template-columns:repeat(4,1fr);}}
+@media (min-width:900px){.icon-grid{grid-template-columns:repeat(5,1fr);}}
 .icon-card{background:var(--bg2);border:0.5px solid var(--line2);border-radius:10px;padding:12px 8px 10px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:all 0.15s;text-decoration:none;color:var(--text);border-top-width:2px;}
 .icon-card:hover{border-color:rgba(232,240,64,0.4);background:#1a1a17;transform:translateY(-2px);}
 .icon-card:active{transform:scale(0.95);}
@@ -331,8 +376,8 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
   </div>
 
   <div class="hero">
-    <div class="hero-label">Panel de control</div>
-    <div class="hero-title">MIS<em>HERRAMIENTAS</em></div>
+    <div class="hero-label" id="hero-date">—</div>
+    <div class="hero-title">W<em>APPS</em></div>
     <div class="hero-meta">
       <div class="hero-stat"><strong id="app-count">—</strong> apps</div>
       <div class="hero-stat"><span class="status"><span class="status-dot"></span>LIVE</span></div>
@@ -341,10 +386,63 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
     <div class="hero-corner">W</div>
   </div>
 
-  <div class="ticker">
-    <div class="ticker-inner">
-      <span class="ticker-item">OBRA <span>●</span></span><span class="ticker-item">GASTOS <span>●</span></span><span class="ticker-item">DESPENSA <span>●</span></span><span class="ticker-item">SETLIST <span>●</span></span><span class="ticker-item">FINANZAS <span>●</span></span><span class="ticker-item">SEMANA <span>●</span></span><span class="ticker-item">DESEADOS <span>●</span></span><span class="ticker-item">COMPRA <span>●</span></span><span class="ticker-item">INSTRUMENTOS <span>●</span></span><span class="ticker-item">MASCOTAS <span>●</span></span><span class="ticker-item">BACKUP <span>●</span></span><span class="ticker-item">WOLOLOGGER <span>●</span></span>
-      <span class="ticker-item">OBRA <span>●</span></span><span class="ticker-item">GASTOS <span>●</span></span><span class="ticker-item">DESPENSA <span>●</span></span><span class="ticker-item">SETLIST <span>●</span></span><span class="ticker-item">FINANZAS <span>●</span></span><span class="ticker-item">SEMANA <span>●</span></span><span class="ticker-item">DESEADOS <span>●</span></span><span class="ticker-item">COMPRA <span>●</span></span><span class="ticker-item">INSTRUMENTOS <span>●</span></span><span class="ticker-item">MASCOTAS <span>●</span></span><span class="ticker-item">BACKUP <span>●</span></span><span class="ticker-item">WOLOLOGGER <span>●</span></span>
+  <!-- DASHBOARD WIDGETS -->
+  <div class="dash-grid">
+    <!-- Tareas hoy -->
+    <a href="semana.html" class="dash-card dash-tasks">
+      <div class="dash-head">
+        <span class="dash-title">Hoy</span>
+        <span class="dash-count" id="dash-tasks-count">—</span>
+      </div>
+      <div class="dash-body" id="dash-tasks-body">
+        <div class="dash-empty">Sin tareas</div>
+      </div>
+    </a>
+
+    <!-- Gasto rápido -->
+    <div class="dash-card dash-quick-gasto">
+      <div class="dash-head">
+        <span class="dash-title">Gasto rápido</span>
+        <span class="dash-count" id="dash-month-total">—</span>
+      </div>
+      <div class="qg-row">
+        <input class="qg-input qg-imp" id="qg-imp" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00">
+        <input class="qg-input qg-con" id="qg-con" type="text" placeholder="Concepto">
+      </div>
+      <div class="qg-row">
+        <select class="qg-input qg-cat" id="qg-cat">
+          <option value="otros">🛒 Otros</option>
+          <option value="comida">🥑 Comida</option>
+          <option value="transporte">🚗 Transporte</option>
+          <option value="ocio">🎉 Ocio</option>
+          <option value="hogar">🏠 Hogar</option>
+          <option value="salud">💊 Salud</option>
+        </select>
+        <button class="qg-btn" onclick="quickAddGasto()">✓ Añadir</button>
+      </div>
+      <div class="qg-fb" id="qg-fb"></div>
+    </div>
+
+    <!-- Próximos eventos calendario -->
+    <a href="semana.html" class="dash-card dash-next">
+      <div class="dash-head">
+        <span class="dash-title">Próximamente</span>
+      </div>
+      <div class="dash-body" id="dash-next-body">
+        <div class="dash-empty">Nada en los próximos días</div>
+      </div>
+    </a>
+
+    <!-- Estado de sincronización -->
+    <div class="dash-card dash-sync-info">
+      <div class="dash-head">
+        <span class="dash-title">Sincronización</span>
+      </div>
+      <div class="dash-body dash-sync-body">
+        <div class="dash-row"><span class="dash-lbl">Última sync</span><span class="dash-val" id="dash-last-sync">—</span></div>
+        <div class="dash-row"><span class="dash-lbl">Último backup</span><span class="dash-val" id="dash-last-backup">—</span></div>
+        <div class="dash-row"><span class="dash-lbl">Pendientes</span><span class="dash-val" id="dash-pending">0</span></div>
+      </div>
     </div>
   </div>
 
@@ -356,7 +454,8 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
   </div>
   <div class="cmd-dropdown" id="cmd-dropdown"></div>
 
-  <!-- SIDEBAR + ICON GRID LAUNCHER -->
+  <!-- CATEGORY PILLS + ICON GRID LAUNCHER -->
+  <div class="cat-bar" id="cat-bar"></div>
   <div class="launcher" id="launcher-wrap">
     <div class="launcher-sidebar" id="launcher-sidebar"></div>
     <div class="launcher-content" id="launcher-content">
@@ -648,9 +747,28 @@ function renderLauncher() {
   document.getElementById('app-count').textContent = visible.length;
   document.getElementById('file-count').textContent = `${visible.length} app${visible.length!==1?'s':''}`;
 
-  // Sidebar
+  // Category pills (horizontal bar)
+  const catBar = document.getElementById('cat-bar');
+  if (catBar) {
+    const allCats = [CAT_ALL, ...CATEGORIES];
+    catBar.innerHTML = allCats.map(cat => {
+      const count = cat.id === 'all'
+        ? visible.length
+        : visible.filter(f => cat.files && cat.files.includes(f.name)).length;
+      if (count === 0 && cat.id !== 'all') return '';
+      const active = activeCatId === cat.id ? ' active' : '';
+      return `<div class="cat-pill ${cat.cls||''}${active}" onclick="selectLauncherCat('${cat.id}')">
+        <span class="cp-icon">${cat.icon||'⊞'}</span>
+        <span class="cp-label">${cat.label}</span>
+        <span class="cp-count">${count}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Sidebar (kept hidden via CSS; still populated for backward compat)
   const sidebarCats = [CAT_ALL, ...CATEGORIES];
-  document.getElementById('launcher-sidebar').innerHTML = sidebarCats.map(cat => {
+  const sb = document.getElementById('launcher-sidebar');
+  if (sb) sb.innerHTML = sidebarCats.map(cat => {
     const count = cat.id === 'all'
       ? visible.length
       : visible.filter(f => cat.files && cat.files.includes(f.name)).length;
@@ -922,7 +1040,7 @@ function updateAuthBtn(user) {
   if (!btn) return;
   if (user) {
     btn.innerHTML = user.photoURL
-      ? `<img class="auth-avatar" src="${user.photoURL}" alt="${user.displayName}">`
+      ? `<img class="auth-avatar" src="${user.photoURL}" alt="${user.displayName}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">`
       : `<span>${user.displayName?.split(' ')[0] || 'USER'}</span>`;
     btn.title = `${user.displayName} · Click para cerrar sesión`;
     btn.style.borderColor = 'rgba(48,216,128,0.4)';
@@ -1051,6 +1169,172 @@ window.addEventListener('wapps:pending-change', e => {
 // WFirebase/WSync aún no existen en este punto, se usan de forma segura
 // a través de los getters _fb() / _sync() dentro de la función.
 updateSyncUI(navigator.onLine ? 'online' : 'offline', 0);
+
+// ──────────────────────────────────────────────────────────────
+// DASHBOARD: rellenar widgets con datos reales
+// ──────────────────────────────────────────────────────────────
+function _p2(n){return String(n).padStart(2,'0');}
+function _todayKey(){const d=new Date();return `${d.getFullYear()}-${_p2(d.getMonth()+1)}-${_p2(d.getDate())}`;}
+function _readLS(key){try{const r=localStorage.getItem(key);return r?JSON.parse(r):null;}catch(e){return null;}}
+function _wappsData(app,key){return _readLS(`wapps.${app}.${key}`);}
+
+function renderDashDate(){
+  const el=document.getElementById('hero-date');
+  if(!el) return;
+  const d=new Date();
+  const days=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const months=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  el.textContent=`${days[d.getDay()]} · ${d.getDate()} ${months[d.getMonth()]}`;
+}
+
+function renderDashTasks(){
+  const body=document.getElementById('dash-tasks-body');
+  const count=document.getElementById('dash-tasks-count');
+  if(!body) return;
+  const semana=_wappsData('semana','data') || _readLS('semana_v2') || {tasks:{}};
+  const today=_todayKey();
+  const tasks=(semana.tasks && semana.tasks[today]) || [];
+  if(tasks.length===0){
+    body.innerHTML='<div class="dash-empty">Sin tareas para hoy</div>';
+    count.textContent='0';
+    return;
+  }
+  const pending=tasks.filter(t=>!t.done).length;
+  count.textContent=pending;
+  body.innerHTML=tasks.slice(0,4).map(t=>{
+    const txt=String(t.text||'').replace(/</g,'&lt;');
+    return `<div class="dash-task-item ${t.done?'done':''}"><span class="dash-task-check">${t.done?'✓':'○'}</span><span>${txt}</span></div>`;
+  }).join('') + (tasks.length>4?`<div class="dash-empty">+${tasks.length-4} más</div>`:'');
+}
+
+function renderDashNext(){
+  const body=document.getElementById('dash-next-body');
+  if(!body) return;
+  const semana=_wappsData('semana','data') || _readLS('semana_v2') || {tasks:{}};
+  const today=_todayKey();
+  // Look at next 7 days
+  const upcoming=[];
+  const now=new Date();
+  for(let i=1;i<=7;i++){
+    const d=new Date(now); d.setDate(d.getDate()+i);
+    const key=`${d.getFullYear()}-${_p2(d.getMonth()+1)}-${_p2(d.getDate())}`;
+    const ts=(semana.tasks && semana.tasks[key]) || [];
+    ts.forEach(t=>{if(!t.done)upcoming.push({date:key,text:t.text,day:d.getDate()});});
+    if(upcoming.length>=4)break;
+  }
+  if(upcoming.length===0){
+    body.innerHTML='<div class="dash-empty">Nada en los próximos 7 días</div>';
+    return;
+  }
+  body.innerHTML=upcoming.slice(0,4).map(u=>{
+    const txt=String(u.text||'').replace(/</g,'&lt;');
+    const d=new Date(u.date+'T12:00:00');
+    const dn=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.getDay()];
+    return `<div class="dash-task-item"><span class="dash-task-check" style="color:var(--muted);font-size:9px;min-width:28px;">${dn} ${u.day}</span><span>${txt}</span></div>`;
+  }).join('');
+}
+
+function renderDashSyncInfo(){
+  const lsEl=document.getElementById('dash-last-sync');
+  const lbEl=document.getElementById('dash-last-backup');
+  const pEl=document.getElementById('dash-pending');
+  if(!lsEl) return;
+  // Last sync: from _sync().getPending or wapps-firebase internal
+  const lastSync=localStorage.getItem('wapps.lastSync');
+  if(lsEl){
+    if(lastSync){
+      const d=new Date(lastSync);
+      const diffMin=Math.round((Date.now()-d.getTime())/60000);
+      if(diffMin<1) lsEl.textContent='ahora';
+      else if(diffMin<60) lsEl.textContent=`hace ${diffMin} min`;
+      else if(diffMin<1440) lsEl.textContent=`hace ${Math.round(diffMin/60)} h`;
+      else lsEl.textContent=`${d.getDate()}/${d.getMonth()+1}`;
+    } else lsEl.textContent='nunca';
+  }
+  const lastBackup=localStorage.getItem('wapps.lastBackup');
+  if(lbEl){
+    if(lastBackup){
+      const d=new Date(lastBackup);
+      const diffDay=Math.round((Date.now()-d.getTime())/86400000);
+      if(diffDay===0) lbEl.textContent='hoy';
+      else if(diffDay===1) lbEl.textContent='ayer';
+      else if(diffDay<30) lbEl.textContent=`hace ${diffDay} d`;
+      else lbEl.textContent=`${d.getDate()}/${d.getMonth()+1}`;
+    } else lbEl.textContent='nunca';
+  }
+  if(pEl){
+    const pending=_sync()?.getPending()?.length ?? 0;
+    pEl.textContent=pending;
+    pEl.style.color=pending>0?'var(--y)':'var(--text)';
+  }
+}
+
+// Quick gasto add — escribe en wapps.gastos.data + marca pendiente
+function quickAddGasto(){
+  const imp=parseFloat(document.getElementById('qg-imp').value);
+  const con=document.getElementById('qg-con').value.trim();
+  const cat=document.getElementById('qg-cat').value;
+  const fb=document.getElementById('qg-fb');
+  if(isNaN(imp)||imp<=0){
+    fb.textContent='Importe inválido'; fb.className='qg-fb err';
+    setTimeout(()=>{fb.textContent='';fb.className='qg-fb';},2000);
+    return;
+  }
+  const data=_wappsData('gastos','data') || _readLS('gastos_v1') || {gastos:[],nextId:1};
+  if(!data.gastos) data.gastos=[];
+  if(!data.nextId) data.nextId=1;
+  const gasto={
+    id: data.nextId++,
+    importe: imp,
+    concepto: con || ({otros:'Otros',comida:'Comida',transporte:'Transporte',ocio:'Ocio',hogar:'Hogar',salud:'Salud'})[cat],
+    fecha: _todayKey(),
+    cat: cat,
+    nota: ''
+  };
+  data.gastos.push(gasto);
+  if(typeof WStore !== 'undefined'){
+    WStore.set('gastos','data',data);
+  } else {
+    localStorage.setItem('wapps.gastos.data', JSON.stringify(data));
+    localStorage.setItem('gastos_v1', JSON.stringify(data));
+  }
+  document.getElementById('qg-imp').value='';
+  document.getElementById('qg-con').value='';
+  fb.textContent=`✓ ${imp.toFixed(2)} € añadido`; fb.className='qg-fb';
+  setTimeout(()=>{fb.textContent='';},2500);
+  renderDashMonthTotal();
+  renderDashSyncInfo();
+}
+
+function renderDashMonthTotal(){
+  const el=document.getElementById('dash-month-total');
+  if(!el) return;
+  const data=_wappsData('gastos','data') || _readLS('gastos_v1');
+  if(!data?.gastos){el.textContent='0 €'; return;}
+  const now=new Date();
+  const pfx=`${now.getFullYear()}-${_p2(now.getMonth()+1)}`;
+  const total=data.gastos.filter(g=>g.fecha && g.fecha.startsWith(pfx)).reduce((s,g)=>s+Number(g.importe||0),0);
+  el.textContent=`${total.toFixed(0)} €`;
+}
+
+function renderDashAll(){
+  renderDashDate();
+  renderDashTasks();
+  renderDashNext();
+  renderDashSyncInfo();
+  renderDashMonthTotal();
+}
+
+// Actualizar en eventos relevantes
+window.addEventListener('wapps:sync-done',()=>{
+  localStorage.setItem('wapps.lastSync', new Date().toISOString());
+  renderDashSyncInfo();
+});
+window.addEventListener('wapps:pending-change', renderDashSyncInfo);
+window.addEventListener('focus', renderDashAll);
+renderDashAll();
+// Refresco cada 60s por si pasa tiempo mirando el dashboard
+setInterval(renderDashAll, 60000);
 </script>
 </body>
 </html>

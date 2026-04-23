@@ -44,16 +44,18 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0a0a09">
 <title>Instrumentos — W//APPS</title>
-<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-config.js"></script>
 <script src="wapps-store.js"></script>
 <script src="wapps-firebase.js"></script>
+<script src="wapps-nav.js" defer></script>
 <script src="wapps-onboarding.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;--y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;--o:#f09030;--fh:'Bebas Neue',sans-serif;--fm:'DM Mono',monospace;--fs:'DM Sans',sans-serif;}
+:root{color-scheme:dark;--bg:#0a0a09;--bg2:#141412;--bg3:#1e1e1b;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--text:#f0ebe0;--muted:#5a5850;--dim:#2a2a26;--y:#e8f040;--r:#f04030;--g:#30d880;--b:#30a8f0;--o:#f09030;--fh:'Bebas Neue',sans-serif;--fm:'DM Mono',monospace;--fs:'DM Sans',sans-serif;}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--fs);overflow-x:hidden;}
 .wnav{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:100;flex-shrink:0;}
@@ -139,6 +141,14 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
 .sync-btn:hover:not(:disabled){border-color:var(--y,#e8f040);color:var(--y,#e8f040);}
 .sync-btn:disabled{opacity:0.35;cursor:default;}
 .wnav-version{font-size:9px;color:var(--dim);font-family:var(--fm);letter-spacing:0.5px;border:1px solid var(--dim);padding:2px 6px;border-radius:3px;flex-shrink:0;}
+
+/* === RESPONSIVE: tablet/desktop === */
+@media (min-width:720px){
+  body{max-width:720px;margin:0 auto;box-shadow:0 0 0 1px var(--line2);}
+}
+@media (min-width:1024px){
+  body{max-width:900px;}
+}
 </style>
 </head>
 <body>
@@ -457,16 +467,22 @@ function updateSyncUI(state, pendingCount) {
   const pushAppBtn = document.getElementById('push-app-btn');
   if (pushAppBtn) pushAppBtn.disabled = false;
 }
-async function manualSync() {
-  const fb   = _fb();
-  const sync = _sync();
-  if (!fb || !sync) return;
-  const user = fb.getUser();
-  if (!user || !fb.isOnline()) return;
-  updateSyncUI('syncing', sync.getPending().length);
-  document.getElementById('sync-btn').disabled = true;
-  await sync.syncAll(user.uid);
-  updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
+async function manualSync(){
+  const fb=_fb(),sync=_sync();if(!fb||!sync)return;
+  const user=fb.getUser();if(!user||!fb.isOnline())return;
+  const btn=document.getElementById('sync-btn');
+  const originalText = btn?.textContent || '↑ SYNC';
+  updateSyncUI('syncing',sync.getPending().length);
+  if(btn)btn.disabled=true;
+  const result = await sync.syncAll(user.uid);
+  updateSyncUI(fb.isOnline()?'online':'offline',sync.getPending().length);
+  if(btn){
+    const {pushed=0,failed=0}=result||{};
+    if(pushed===0 && failed===0) btn.textContent='✓ Al día';
+    else if(failed>0) btn.textContent=`⚠ ${pushed}/${pushed+failed}`;
+    else btn.textContent=`✓ ${pushed}`;
+    setTimeout(()=>{if(btn)btn.textContent=originalText;},2500);
+  }
 }
 async function manualPull() {
   const fb   = _fb();
