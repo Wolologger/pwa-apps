@@ -362,6 +362,14 @@ select option{background:var(--bg2);}
     <button class="tipo-btn" id="btn-agua" onclick="setTipo('agua')">💧 AGUA</button>
   </div>
 
+  <!-- QUICK ADD (acceso rápido a nueva factura) -->
+  <div style="display:flex;gap:8px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border2,rgba(255,255,255,0.1))">
+    <span style="font-size:10px;color:var(--muted);font-family:var(--fm);letter-spacing:1px;align-self:center;flex:1">NUEVA FACTURA</span>
+    <button class="sync-btn" onclick="quickNewFactura('luz')" style="padding:5px 12px">⚡ Luz</button>
+    <button class="sync-btn" onclick="quickNewFactura('gas')" style="padding:5px 12px">🔥 Gas</button>
+    <button class="sync-btn" onclick="quickNewFactura('agua')" style="padding:5px 12px">💧 Agua</button>
+  </div>
+
   <!-- TABS -->
   <div class="tabs">
     <button class="tab active" onclick="showTab('facturas',this)">Facturas</button>
@@ -1080,6 +1088,17 @@ function showTab(name, el) {
 }
 
 // ── ADD ──
+function quickNewFactura(tipo) {
+  // Seleccionar ese tipo y abrir el panel de nueva factura
+  setTipo(tipo);
+  const p = document.getElementById('add-panel');
+  p.classList.add('open');
+  const sel = document.getElementById('f-tipo');
+  if (sel) sel.value = tipo;
+  // Scroll to form
+  p.scrollIntoView({ behavior:'smooth', block:'start' });
+  setTimeout(() => { const el=document.getElementById('f-empresa'); if(el)el.focus(); }, 300);
+}
 function toggleAdd() {
   const p = document.getElementById('add-panel');
   p.classList.toggle('open');
@@ -1598,7 +1617,9 @@ async function manualPull() {
   updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
   if (btn) btn.disabled = false;
   // Reload page to reflect pulled data
-  window.location.reload();
+  // Emitir wapps:recovered para que la app recargue datos sin reload de página
+  window.dispatchEvent(new CustomEvent('wapps:recovered'));
+  if (btn) btn.disabled = false;
 }
 async function manualPushApp() {
   const fb   = _fb();

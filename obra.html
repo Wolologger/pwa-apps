@@ -315,7 +315,7 @@ select option{background:var(--bg2);}
     <div id="gastos" class="section">
       <div class="add-panel" id="add-gasto-panel">
         <input type="text" id="g-concepto" placeholder="Concepto...">
-        <input type="number" id="g-importe" placeholder="Importe €" step="0.01">
+        <input type="number" inputmode="decimal" id="g-importe" placeholder="Importe €" step="0.01">
         <select id="g-cat"></select>
         <div style="display:flex;gap:8px;margin-top:4px;">
           <button class="btn btn-accent" style="flex:1" onclick="addGasto()">Añadir</button>
@@ -350,7 +350,7 @@ select option{background:var(--bg2);}
     </div>
     <div class="modal-field">
       <div class="modal-label">Presupuesto (€)</div>
-      <input class="modal-input" type="number" id="mp-budget" placeholder="0">
+      <input class="modal-input" type="number" inputmode="decimal" id="mp-budget" placeholder="0">
     </div>
     <div class="modal-field">
       <div class="modal-label">Color</div>
@@ -687,7 +687,7 @@ function renderTareas() {
             </div>
           </div>
         </div>
-        <button class="icon-btn" onclick="startEditTask(${t.id})">✎</button>
+        <button aria-label="Editar" class="icon-btn" onclick="startEditTask(${t.id})">✎</button>
       </div>`;
     });
     html += '</div>';
@@ -712,11 +712,11 @@ function renderGastos() {
             </div>
             <div class="gasto-cat">${g.cat}</div>
           </div>
-          <button class="icon-btn" onclick="startEditGasto(${g.id})">✎</button>
+          <button aria-label="Editar" class="icon-btn" onclick="startEditGasto(${g.id})">✎</button>
         </div>
         <div class="edit-form ${isEd?'open':''}" id="eg-${g.id}">
           <input type="text" id="eg-c-${g.id}" value="${esc(g.concepto)}">
-          <input type="number" id="eg-i-${g.id}" value="${g.importe}" step="0.01">
+          <input type="number" inputmode="decimal" id="eg-i-${g.id}" value="${g.importe}" step="0.01">
           <select id="eg-cat-${g.id}">${CATS.map(c=>`<option value="${c}"${c===g.cat?' selected':''}>${c}</option>`).join('')}</select>
           <div class="ef-btns">
             <button class="btn btn-accent" style="flex:1" onclick="saveGasto(${g.id})">Guardar</button>
@@ -734,7 +734,7 @@ function renderGastos() {
   } else {
     html = '<div class="empty">Sin gastos registrados aún</div>';
   }
-  html += `<div class="card" style="margin-top:16px;"><div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Presupuesto total disponible</div><div style="display:flex;gap:8px;"><input type="number" id="pres-input" placeholder="€" value="${proj.presupuesto||''}" style="flex:1;min-width:0;"><button class="btn btn-accent" onclick="setPresupuesto()">Guardar</button></div></div>`;
+  html += `<div class="card" style="margin-top:16px;"><div style="font-size:12px;color:var(--muted);margin-bottom:10px;">Presupuesto total disponible</div><div style="display:flex;gap:8px;"><input type="number" inputmode="decimal" id="pres-input" placeholder="€" value="${proj.presupuesto||''}" style="flex:1;min-width:0;"><button class="btn btn-accent" onclick="setPresupuesto()">Guardar</button></div></div>`;
   document.getElementById('gastos-body').innerHTML = html;
 }
 
@@ -1075,7 +1075,9 @@ async function manualPull() {
   updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
   if (btn) btn.disabled = false;
   // Reload page to reflect pulled data
-  window.location.reload();
+  // Emitir wapps:recovered para que la app recargue datos sin reload de página
+  window.dispatchEvent(new CustomEvent('wapps:recovered'));
+  if (btn) btn.disabled = false;
 }
 async function manualPushApp() {
   const fb   = _fb();

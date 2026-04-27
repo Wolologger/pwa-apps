@@ -373,7 +373,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
         </div>
         <div class="field-row">
           <div class="field"><div class="field-label">Próxima dosis / fin tratamiento</div><input type="date" id="fm-proxima"></div>
-          <div class="field"><div class="field-label">Stock (unidades/ml)</div><input type="number" id="fm-stock" placeholder="0" min="0" step="1"></div>
+          <div class="field"><div class="field-label">Stock (unidades/ml)</div><input type="number" inputmode="decimal" id="fm-stock" placeholder="0" min="0" step="1"></div>
         </div>
         <div class="field"><div class="field-label">Recetado por / indicaciones</div><input type="text" id="fm-notas" placeholder="Observaciones del médico…"></div>
         <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;">
@@ -406,7 +406,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
           <div class="field"><div class="field-label">Motivo / diagnóstico</div><input type="text" id="fv-motivo" placeholder="ej: Bronquitis, revisión 4 años…"></div>
         </div>
         <div class="field-row">
-          <div class="field"><div class="field-label">Coste €</div><input type="number" id="fv-coste" placeholder="0.00" step="0.01" min="0"></div>
+          <div class="field"><div class="field-label">Coste €</div><input type="number" inputmode="decimal" id="fv-coste" placeholder="0.00" step="0.01" min="0"></div>
           <div class="field"><div class="field-label">Próxima visita (opcional)</div><input type="date" id="fv-proxima"></div>
         </div>
         <div class="field"><div class="field-label">Notas / tratamiento</div><textarea id="fv-notas" placeholder="Observaciones del médico, tratamiento indicado…"></textarea></div>
@@ -457,7 +457,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
           </div>
         </div>
         <div class="field-row">
-          <div class="field"><div class="field-label">Coste €</div><input type="number" id="fe-coste" placeholder="0.00" step="0.01" min="0"></div>
+          <div class="field"><div class="field-label">Coste €</div><input type="number" inputmode="decimal" id="fe-coste" placeholder="0.00" step="0.01" min="0"></div>
           <div class="field"><div class="field-label">Próximo examen (opcional)</div><input type="date" id="fe-proximo"></div>
         </div>
         <div class="field"><div class="field-label">Valores / observaciones</div><textarea id="fe-notas" placeholder="Resultados, valores relevantes, recomendaciones…"></textarea></div>
@@ -478,12 +478,12 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
       <div class="add-panel open" id="add-crecimiento-panel" style="margin-bottom:14px;">
         <div class="ap-title">Registrar medidas</div>
         <div class="field-row">
-          <div class="field"><div class="field-label">Talla (cm)</div><input type="number" id="fg-talla" placeholder="85.5" step="0.5" min="0"></div>
-          <div class="field"><div class="field-label">Peso (kg)</div><input type="number" id="fg-peso" placeholder="12.3" step="0.1" min="0"></div>
+          <div class="field"><div class="field-label">Talla (cm)</div><input type="number" inputmode="decimal" id="fg-talla" placeholder="85.5" step="0.5" min="0"></div>
+          <div class="field"><div class="field-label">Peso (kg)</div><input type="number" inputmode="decimal" id="fg-peso" placeholder="12.3" step="0.1" min="0"></div>
           <div class="field"><div class="field-label">Fecha</div><input type="date" id="fg-fecha"></div>
         </div>
         <div class="field-row">
-          <div class="field"><div class="field-label">Per. cefálico (cm, opcional)</div><input type="number" id="fg-cabeza" placeholder="48.0" step="0.5" min="0"></div>
+          <div class="field"><div class="field-label">Per. cefálico (cm, opcional)</div><input type="number" inputmode="decimal" id="fg-cabeza" placeholder="48.0" step="0.5" min="0"></div>
           <div class="field"><div class="field-label">Notas (opcional)</div><input type="text" id="fg-notas" placeholder="ej: Revisión 2 años"></div>
         </div>
         <button class="btn btn-y btn-sm" onclick="addGrowth()" style="margin-top:4px;">Guardar</button>
@@ -497,7 +497,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
         <div class="ap-title">Nuevo gasto</div>
         <div class="field"><div class="field-label">Concepto</div><input type="text" id="fga-concepto" placeholder="ej: Consulta pediatra, ropa de invierno…"></div>
         <div class="field-row">
-          <div class="field"><div class="field-label">Importe €</div><input type="number" id="fga-importe" placeholder="0.00" step="0.01" min="0"></div>
+          <div class="field"><div class="field-label">Importe €</div><input type="number" inputmode="decimal" id="fga-importe" placeholder="0.00" step="0.01" min="0"></div>
           <div class="field"><div class="field-label">Fecha</div><input type="date" id="fga-fecha"></div>
         </div>
         <div class="field-row">
@@ -958,7 +958,7 @@ function renderMedicacion() {
           <div><div class="field-label">Próxima dosis</div><input type="date" id="em-p-${m.id}" value="${m.proxima||''}"></div>
         </div>
         <div class="ef-row">
-          <div><div class="field-label">Stock (uds.)</div><input type="number" id="em-s-${m.id}" value="${m.stock||0}" min="0"></div>
+          <div><div class="field-label">Stock (uds.)</div><input type="number" inputmode="decimal" id="em-s-${m.id}" value="${m.stock||0}" min="0"></div>
           <div><div class="field-label">Notas</div><input type="text" id="em-no-${m.id}" value="${esc(m.notas||'')}"></div>
         </div>
         <div class="ef-btns">

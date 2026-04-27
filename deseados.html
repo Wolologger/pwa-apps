@@ -323,6 +323,17 @@ function closeAdd(){document.getElementById('add-panel').classList.remove('open'
 
 function addWish(){
   const nombre=document.getElementById('f-nombre').value.trim();if(!nombre)return;
+  // Detección de duplicados: nombre similar (insensible a mayús/signos)
+  const normalize = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+  const isDuplicate = state.items.some(i => normalize(i.nombre) === normalize(nombre));
+  if (isDuplicate) {
+    const existingEl = document.getElementById('f-nombre');
+    if (existingEl) { existingEl.style.borderColor='var(--y)'; setTimeout(()=>existingEl.style.borderColor='',2000); }
+    // Show toast or small feedback
+    const fb = document.getElementById('add-fb');
+    if (fb) { fb.textContent='⚠ Ya existe en tu lista'; fb.style.display='block'; setTimeout(()=>{fb.style.display='none';},2500); }
+    return;
+  }
   state.items.push({
     id:nxtId(),nombre,
     precio:parseFloat(document.getElementById('f-precio').value)||0,

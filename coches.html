@@ -294,7 +294,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
           <div class="field"><div class="field-label">Modelo</div><input type="text" id="fc-modelo" placeholder="ej: Golf, Corolla…"></div>
         </div>
         <div class="field-row">
-          <div class="field"><div class="field-label">Año</div><input type="number" id="fc-anno" placeholder="2018" min="1900" max="2099"></div>
+          <div class="field"><div class="field-label">Año</div><input type="number" inputmode="decimal" id="fc-anno" placeholder="2018" min="1900" max="2099"></div>
           <div class="field"><div class="field-label">Combustible</div>
             <select id="fc-combustible">
               <option value="gasolina">⛽ Gasolina</option>
@@ -308,7 +308,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
         </div>
         <div class="field-row">
           <div class="field"><div class="field-label">Matrícula</div><input type="text" id="fc-matricula" placeholder="1234 ABC" style="text-transform:uppercase;"></div>
-          <div class="field"><div class="field-label">Km actuales</div><input type="number" id="fc-km" placeholder="85000" min="0"></div>
+          <div class="field"><div class="field-label">Km actuales</div><input type="number" inputmode="decimal" id="fc-km" placeholder="85000" min="0"></div>
         </div>
         <div class="field-row">
           <div class="field"><div class="field-label">Nº bastidor (VIN)</div><input type="text" id="fc-vin" placeholder="WVWZZZ…" style="text-transform:uppercase;"></div>
@@ -357,12 +357,12 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
           </div>
         </div>
         <div class="field-row">
-          <div class="field"><div class="field-label">Km en que toca (opcional)</div><input type="number" id="fm-km-trigger" placeholder="90000" min="0"></div>
-          <div class="field"><div class="field-label">Cada N km (intervalo)</div><input type="number" id="fm-km-intervalo" placeholder="10000" min="0"></div>
+          <div class="field"><div class="field-label">Km en que toca (opcional)</div><input type="number" inputmode="decimal" id="fm-km-trigger" placeholder="90000" min="0"></div>
+          <div class="field"><div class="field-label">Cada N km (intervalo)</div><input type="number" inputmode="decimal" id="fm-km-intervalo" placeholder="10000" min="0"></div>
         </div>
         <div class="field-row">
           <div class="field"><div class="field-label">Fecha estimada (opcional)</div><input type="date" id="fm-fecha"></div>
-          <div class="field"><div class="field-label">Cada N meses (intervalo)</div><input type="number" id="fm-meses-intervalo" placeholder="12" min="0"></div>
+          <div class="field"><div class="field-label">Cada N meses (intervalo)</div><input type="number" inputmode="decimal" id="fm-meses-intervalo" placeholder="12" min="0"></div>
         </div>
         <div class="field"><div class="field-label">Notas</div><input type="text" id="fm-notas" placeholder="Observaciones…"></div>
         <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;">
@@ -383,11 +383,11 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
         </div>
         <div class="field"><div class="field-label">Trabajos realizados</div><textarea id="fs-trabajos" placeholder="ej: Cambio aceite 5W30, filtro aceite, filtro habitáculo…"></textarea></div>
         <div class="field-row">
-          <div class="field"><div class="field-label">Km al realizar</div><input type="number" id="fs-km" placeholder="85000" min="0"></div>
-          <div class="field"><div class="field-label">Coste total €</div><input type="number" id="fs-coste" placeholder="0.00" step="0.01" min="0"></div>
+          <div class="field"><div class="field-label">Km al realizar</div><input type="number" inputmode="decimal" id="fs-km" placeholder="85000" min="0"></div>
+          <div class="field"><div class="field-label">Coste total €</div><input type="number" inputmode="decimal" id="fs-coste" placeholder="0.00" step="0.01" min="0"></div>
         </div>
         <div class="field-row">
-          <div class="field"><div class="field-label">Próxima revisión (km)</div><input type="number" id="fs-proxkm" placeholder="95000" min="0"></div>
+          <div class="field"><div class="field-label">Próxima revisión (km)</div><input type="number" inputmode="decimal" id="fs-proxkm" placeholder="95000" min="0"></div>
           <div class="field"><div class="field-label">Próxima revisión (fecha)</div><input type="date" id="fs-proxfecha"></div>
         </div>
         <div class="field"><div class="field-label">Notas / repuestos usados</div><input type="text" id="fs-notas" placeholder="Marca aceite, referencias de repuestos…"></div>
@@ -413,14 +413,14 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
         <div class="ap-title">Registrar repostaje</div>
         <div class="field-row">
           <div class="field"><div class="field-label">Fecha</div><input type="date" id="ff-fecha"></div>
-          <div class="field"><div class="field-label">Km actuales</div><input type="number" id="ff-km" placeholder="85420" min="0"></div>
+          <div class="field"><div class="field-label">Km actuales</div><input type="number" inputmode="decimal" id="ff-km" placeholder="85420" min="0"></div>
         </div>
         <div class="field-row">
-          <div class="field"><div class="field-label">Litros / kWh</div><input type="number" id="ff-litros" placeholder="40.5" step="0.01" min="0"></div>
-          <div class="field"><div class="field-label">Precio por litro €</div><input type="number" id="ff-precio" placeholder="1.62" step="0.001" min="0"></div>
+          <div class="field"><div class="field-label">Litros / kWh</div><input type="number" inputmode="decimal" id="ff-litros" placeholder="40.5" step="0.01" min="0"></div>
+          <div class="field"><div class="field-label">Precio por litro €</div><input type="number" inputmode="decimal" id="ff-precio" placeholder="1.62" step="0.001" min="0"></div>
         </div>
         <div class="field-row">
-          <div class="field"><div class="field-label">Importe total €</div><input type="number" id="ff-total" placeholder="65.61" step="0.01" min="0"></div>
+          <div class="field"><div class="field-label">Importe total €</div><input type="number" inputmode="decimal" id="ff-total" placeholder="65.61" step="0.01" min="0"></div>
           <div class="field"><div class="field-label">Gasolinera (opcional)</div><input type="text" id="ff-gasolinera" placeholder="ej: Repsol A-8"></div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;font-family:var(--fm);">
@@ -460,7 +460,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
           <div class="field"><div class="field-label">Fecha vencimiento</div><input type="date" id="fd-vence"></div>
         </div>
         <div class="field-row">
-          <div class="field"><div class="field-label">Importe €</div><input type="number" id="fd-importe" placeholder="0.00" step="0.01" min="0"></div>
+          <div class="field"><div class="field-label">Importe €</div><input type="number" inputmode="decimal" id="fd-importe" placeholder="0.00" step="0.01" min="0"></div>
           <div class="field"><div class="field-label">Compañía / entidad</div><input type="text" id="fd-entidad" placeholder="ej: Mapfre, Jefatura…"></div>
         </div>
         <div class="field"><div class="field-label">Notas / nº de póliza / referencia</div><input type="text" id="fd-notas" placeholder="Nº póliza, referencia, observaciones…"></div>
@@ -623,7 +623,7 @@ function renderCarBar() {
     `<button class="car-chip ${c.id === activeCarId ? 'active' : ''}" onclick="selectCar(${c.id})">
       <span>${c.emoji||'🚗'}</span>${esc(c.alias||c.marca)}
     </button>`
-  ).join('') + `<button class="car-add-btn" onclick="toggleAddCar()">+</button>`;
+  ).join('') + `<button aria-label="Añadir" class="car-add-btn" onclick="toggleAddCar()">+</button>`;
   const car = activeCar();
   document.getElementById('wnav-title').textContent = car ? (car.alias||car.marca).toUpperCase() : 'COCHES';
 }
@@ -759,11 +759,11 @@ function renderPerfil() {
       <div><div class="field-label">Modelo</div><input type="text" id="ec-mo-${car.id}" value="${esc(car.modelo||'')}"></div>
     </div>
     <div class="ef-row">
-      <div><div class="field-label">Año</div><input type="number" id="ec-an-${car.id}" value="${car.anno||''}"></div>
+      <div><div class="field-label">Año</div><input type="number" inputmode="decimal" id="ec-an-${car.id}" value="${car.anno||''}"></div>
       <div><div class="field-label">Matrícula</div><input type="text" id="ec-mt-${car.id}" value="${esc(car.matricula||'')}" style="text-transform:uppercase;"></div>
     </div>
     <div class="ef-row">
-      <div><div class="field-label">Km actuales</div><input type="number" id="ec-km-${car.id}" value="${car.km||0}" min="0"></div>
+      <div><div class="field-label">Km actuales</div><input type="number" inputmode="decimal" id="ec-km-${car.id}" value="${car.km||0}" min="0"></div>
       <div><div class="field-label">Color</div><input type="text" id="ec-co-${car.id}" value="${esc(car.color||'')}"></div>
     </div>
     <div class="ef-row">
@@ -989,7 +989,7 @@ function servCard(s) {
       </div>
       <div style="text-align:right;">
         ${s.coste ? `<div class="serv-cost">${fmt(s.coste)} €</div>` : ''}
-        <button class="icon-btn del" onclick="delServ(${s.id})" style="margin-top:4px;">×</button>
+        <button aria-label="Eliminar" class="icon-btn del" onclick="delServ(${s.id})" style="margin-top:4px;">×</button>
       </div>
     </div>
   </div>`;
@@ -1076,7 +1076,7 @@ function renderCombustible() {
               ${f.fecha} ${f.km ? `· 📍 ${Number(f.km).toLocaleString('es-ES')} km` : ''} ${f.gasolinera ? `· ${esc(f.gasolinera)}` : ''} ${f.precio ? `· ${fmt(f.precio,3)} €/L` : ''}
             </div>
           </div>
-          <button class="icon-btn del" onclick="delFuel(${f.id})">×</button>
+          <button aria-label="Eliminar" class="icon-btn del" onclick="delFuel(${f.id})">×</button>
         </div>
       </div>`;
     });
@@ -1162,7 +1162,7 @@ function docCard(d) {
         ${d.notas ? `<span>${esc(d.notas)}</span>` : ''}
       </div>
     </div>
-    <button class="icon-btn del" onclick="delDoc(${d.id})">×</button>
+    <button aria-label="Eliminar" class="icon-btn del" onclick="delDoc(${d.id})">×</button>
   </div>`;
 }
 
@@ -1227,7 +1227,7 @@ function renderDatos() {
   const car = activeCar();
   const kmRow = document.getElementById('km-update-row');
   if (kmRow && car) {
-    kmRow.innerHTML = `<div style="flex:1;min-width:120px;"><div class="field-label">Km actuales (${Number(car.km||0).toLocaleString('es-ES')} km)</div><input type="number" id="km-new-val" placeholder="${car.km||0}" min="0" style="background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--fm);font-size:13px;padding:9px 12px;outline:none;width:100%;"></div>
+    kmRow.innerHTML = `<div style="flex:1;min-width:120px;"><div class="field-label">Km actuales (${Number(car.km||0).toLocaleString('es-ES')} km)</div><input type="number" inputmode="decimal" id="km-new-val" placeholder="${car.km||0}" min="0" style="background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--fm);font-size:13px;padding:9px 12px;outline:none;width:100%;"></div>
     <button class="btn btn-y btn-sm" style="margin-bottom:1px;" onclick="updateKm()">Actualizar</button>`;
   }
 
@@ -1373,7 +1373,9 @@ async function manualPull() {
   updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
   if (btn) btn.disabled = false;
   // Reload page to reflect pulled data
-  window.location.reload();
+  // Emitir wapps:recovered para que la app recargue datos sin reload de página
+  window.dispatchEvent(new CustomEvent('wapps:recovered'));
+  if (btn) btn.disabled = false;
 }
 async function manualPushApp() {
   const fb   = _fb();

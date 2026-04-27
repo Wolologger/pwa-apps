@@ -369,13 +369,13 @@ function renderIngresos(){
   const total=totalIngresos();
   let html=`<div class="block"><div class="block-header"><span class="block-title">Ingresos</span><span class="block-total income">${fmt(total)} €/mes</span></div>`;
   state.ingresos.forEach(i=>{
-    html+=`<div class="item-row"><span class="item-name">${esc(i.nombre)}</span><span class="item-freq">${FREQ[i.freq]}</span><span class="item-amount" style="color:var(--g)">${fmt(i.importe)} €</span><button class="item-del" onclick="delIngreso(${i.id})">×</button></div>`;
+    html+=`<div class="item-row"><span class="item-name">${esc(i.nombre)}</span><span class="item-freq">${FREQ[i.freq]}</span><span class="item-amount" style="color:var(--g)">${fmt(i.importe)} €</span><button aria-label="Eliminar" class="item-del" onclick="delIngreso(${i.id})">×</button></div>`;
   });
   html+=`<div class="add-row">
     <input type="text" id="ai-n" placeholder="Concepto" style="flex:2;min-width:80px;">
-    <input type="number" id="ai-i" placeholder="€" step="0.01" style="width:80px;">
+    <input type="number" inputmode="decimal" id="ai-i" placeholder="€" step="0.01" style="width:80px;">
     <select id="ai-f" style="min-width:80px;">${Object.entries(FREQ).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select>
-    <button class="add-btn" onclick="addIngreso()">+</button>
+    <button aria-label="Añadir" class="add-btn" onclick="addIngreso()">+</button>
   </div></div>`;
   document.getElementById('ingresos-body').innerHTML=html;
 }
@@ -391,16 +391,16 @@ function renderFijos(){
     const catTotal=arr.reduce((s,g)=>s+toMonthly(g),0);
     html+=`<div style="font-size:10px;color:var(--muted);font-family:var(--fm);letter-spacing:1px;text-transform:uppercase;padding:8px 0 4px;border-top:0.5px solid var(--border);margin-top:4px;">${GASTO_CATS[cat]||cat} · ${fmt(catTotal)} €/mes</div>`;
     arr.forEach(g=>{
-      html+=`<div class="item-row"><span class="item-name">${esc(g.nombre)}</span><span class="item-freq">${FREQ[g.freq]}</span><span class="item-amount" style="color:var(--r)">${fmt(g.importe)} €</span><button class="item-del" onclick="delGasto(${g.id})">×</button></div>`;
+      html+=`<div class="item-row"><span class="item-name">${esc(g.nombre)}</span><span class="item-freq">${FREQ[g.freq]}</span><span class="item-amount" style="color:var(--r)">${fmt(g.importe)} €</span><button aria-label="Eliminar" class="item-del" onclick="delGasto(${g.id})">×</button></div>`;
     });
   });
 
   html+=`<div class="add-row">
     <input type="text" id="ag-n" placeholder="Concepto" style="flex:2;min-width:80px;">
-    <input type="number" id="ag-i" placeholder="€" step="0.01" style="width:70px;">
+    <input type="number" inputmode="decimal" id="ag-i" placeholder="€" step="0.01" style="width:70px;">
     <select id="ag-c" style="min-width:80px;">${Object.entries(GASTO_CATS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select>
     <select id="ag-f" style="min-width:80px;">${Object.entries(FREQ).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select>
-    <button class="add-btn" onclick="addGasto()">+</button>
+    <button aria-label="Añadir" class="add-btn" onclick="addGasto()">+</button>
   </div></div>`;
 
   // Suministros connected block

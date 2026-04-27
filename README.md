@@ -163,6 +163,47 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 
 ## Changelog
 
+### v4.4.0
+- **Nuevo** — Categorización automática de gastos por concepto: "Mercadona"→supermercado, "Repsol"→gasolina, etc. (30 reglas, cubre ~80%)
+- **Nuevo** — Búsqueda global en datos: prefijo `>` en el buscador del index busca en gastos, tareas, despensa y compra
+- **Nuevo** — Alertas de cumpleaños en `mascotas` y `ninos`: toast al abrir si hoy es el día
+- **Nuevo** — Predicción de próxima factura en `suministros`: media histórica de intervalos → fecha estimada con color
+- **Nuevo** — Estadísticas por día de semana en `gastos-diarios`: barras con total Lun-Dom
+- **Nuevo** — Panel de errores de sync en `ajustes`: log de los últimos 20 fallos de push a Firestore
+- **Nuevo** — Stats por app en `ajustes`: grid con nº items, KB y fecha de última edición
+- **Nuevo** — `wapps-sync-ui.js`: módulo compartido con `_fb()`, `_sync()`, `updateSyncUI()`, `manualSync/Pull/PushApp()` — incluido en 16 apps
+- **Mejora** — Haptic feedback en acciones clave: toggle tareas, añadir gasto, swipe de vuelta, pull-to-refresh
+- **Mejora** — View Transitions API en `wapps-nav.js`: navegación con fade entre páginas (Chrome/Android)
+- **Mejora** — Pull-to-refresh en todas las apps: arrastrar desde arriba → refresca datos
+- **Fix** — B2: localStorage limpiado al hacer logout (evita datos de cuenta anterior visibles a la siguiente)
+- **Fix** — L2: CSS muerto eliminado en `ninos.html` (~1 KB, 11 reglas)
+- `sw.js` v10.0, manifest v4.4.0
+
+### v4.3.0
+- **Nuevo** — SW cachea Firebase SDK, Fonts y jsPDF (Cloudflare) — app arranca offline tras primera visita
+- **Nuevo** — Dashboard pausa su setInterval cuando la pestaña está oculta (ahorra batería)
+- **Nuevo** — Latencia muestra `—` inmediato al perder conexión (no espera 30s)
+- **Fix** — 5 apps: debounce de `save()` a 200ms (ninos, obra, coches, gastos-diarios, suministros)
+- **Fix** — `manifest.json`: shortcuts mejorados (añadida Semana)
+- **Fix** — L1: Modal QR eliminado de `setlist.html`
+
+### v4.2.0
+- **Fix crítico** — `pullFromFirestore` borraba `_updatedAt` → `syncOnLoad` no podía comparar timestamps → iPad nunca recibía datos del móvil (10/10 tests pasan)
+- **Nuevo** — Monitor de latencia/conectividad en `wapps-firebase.js`: ping a Cloudflare cada 30s, emite `wapps:latency`, corrige `navigator.onLine` cuando miente
+- **Nuevo** — Auth event replay: `wapps:auth-change` se reemite al DOMContentLoaded para listeners tardíos (arregla "semana offline")
+- **Nuevo** — `WFirebase.setOnline()`: permite forzar estado offline si el ping falla
+- **Nuevo** — `WFirebase.getLastAuth()`: acceso al último evento de auth
+
+### v4.1.1
+- **Fix crítico** — `pullFromFirestore` preserva `_updatedAt` (causa raíz de iPad sin datos del móvil)
+- **Nuevo** — Indicador de latencia en hero del index (Cloudflare ping)
+- **Mejora** — Hero del index: 6 bloques de info útil (última sync, backup, pendientes, datos KB, estado, latencia)
+
+### v4.1.0
+- **Fix** — Botón SYNC no requiere pendientes para habilitarse (13 apps)
+- **Mejora** — Responsive mejorado: body full-width, contenido centrado (sin bordes en iPad)
+- **Nuevo** — `wapps-nav.js`: ESC y swipe desde borde izq vuelven al home
+
 ### v4.0.0
 
 **Versión mayor** con correcciones críticas, rediseño del panel de inicio, responsive completo y mejoras de rendimiento.
