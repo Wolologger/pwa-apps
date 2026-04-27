@@ -8,7 +8,15 @@
 <meta name="theme-color" content="#0a0a09">
 <title>Finanzas — W//APPS</title>
 <link rel="manifest" href="manifest.json">
-<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js">
+function haptic(p='light'){if(!navigator.vibrate)return;
+  if(p==='light')navigator.vibrate(8);
+  else if(p==='medium')navigator.vibrate(18);
+  else if(p==='success')navigator.vibrate([8,50,8]);
+  else if(p==='error')navigator.vibrate([30,60,30]);
+  else navigator.vibrate(p);}
+
+</script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-config.js"></script>
@@ -155,6 +163,22 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
   .fab-area{max-width:900px!important;}
   .wnav{max-width:900px;}
 }
+
+/* === iPad horizontal (landscape) === */
+@media (min-width:720px) and (orientation:landscape){
+  /* Aumentar max-width en landscape para aprovechar el espacio */
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:900px;}
+  .fab-area{max-width:900px!important;}
+  .wnav{max-width:900px;}
+  /* Fuentes ligeramente más grandes en pantalla grande */
+  .ic-name{font-size:11px;}
+  .dash-card{min-height:100px;}
+}
+@media (min-width:1200px){
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:1100px;}
+  .fab-area{max-width:1100px!important;}
+  .wnav{max-width:1100px;}
+}
 </style>
 </head>
 <body>
@@ -216,7 +240,18 @@ function save(){
   if(typeof WStore!=='undefined'){WStore.set('finanzas','data',state);}
   try{localStorage.setItem('finanzas_v1',JSON.stringify(state));}catch(e){}
 }
-function nxtId(){return++state.nextId;}
+
+// wuid(): ID único de dispositivo. Usa crypto.randomUUID() si disponible,
+// si no, timestamp+random (probabilidad de colisión ~0 en uso real).
+function wuid() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    // UUID v4: garantiza unicidad global
+    return crypto.randomUUID();
+  }
+  // Fallback: timestamp ms + 8 hex random chars
+  return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,10);
+}
+function nxtId(){ return wuid(); }
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function fmt(n,d=2){return Number(n||0).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d});}
 function toMonthly(item){return item.importe/(FREQ_M[item.freq]||1);}
@@ -517,6 +552,7 @@ function renderDatos(){
 
 // Actions
 function addIngreso(){
+  haptic('light');
   const n=document.getElementById('ai-n').value.trim(),i=parseFloat(document.getElementById('ai-i').value);
   if(!n||isNaN(i))return;
   state.ingresos.push({id:nxtId(),nombre:n,importe:i,freq:document.getElementById('ai-f').value});

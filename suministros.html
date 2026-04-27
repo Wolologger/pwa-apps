@@ -63,6 +63,14 @@ function renderPredictions() {
   el.innerHTML = preds || '<div style="color:var(--muted);font-size:10px">Necesitas al menos 2 facturas del mismo tipo</div>';
 }
 
+
+function haptic(p='light'){if(!navigator.vibrate)return;
+  if(p==='light')navigator.vibrate(8);
+  else if(p==='medium')navigator.vibrate(18);
+  else if(p==='success')navigator.vibrate([8,50,8]);
+  else if(p==='error')navigator.vibrate([30,60,30]);
+  else navigator.vibrate(p);}
+
 </script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
@@ -325,6 +333,22 @@ select option{background:var(--bg2);}
   body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:900px;}
   .fab-area{max-width:900px!important;}
   .wnav{max-width:900px;}
+}
+
+/* === iPad horizontal (landscape) === */
+@media (min-width:720px) and (orientation:landscape){
+  /* Aumentar max-width en landscape para aprovechar el espacio */
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:900px;}
+  .fab-area{max-width:900px!important;}
+  .wnav{max-width:900px;}
+  /* Fuentes ligeramente más grandes en pantalla grande */
+  .ic-name{font-size:11px;}
+  .dash-card{min-height:100px;}
+}
+@media (min-width:1200px){
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:1100px;}
+  .fab-area{max-width:1100px!important;}
+  .wnav{max-width:1100px;}
 }
 </style>
 </head>
@@ -1057,7 +1081,18 @@ function showToast(msg, isErr = false) {
   clearTimeout(_toastTimer);
   _toastTimer = setTimeout(() => { el.style.opacity = '0'; }, 2800);
 }
-function nxtId() { return ++nid; }
+
+// wuid(): ID único de dispositivo. Usa crypto.randomUUID() si disponible,
+// si no, timestamp+random (probabilidad de colisión ~0 en uso real).
+function wuid() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    // UUID v4: garantiza unicidad global
+    return crypto.randomUUID();
+  }
+  // Fallback: timestamp ms + 8 hex random chars
+  return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,10);
+}
+function nxtId(){ return wuid(); }
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function fmt(n, dec=2) { return Number(n).toLocaleString('es-ES', {minimumFractionDigits:dec, maximumFractionDigits:dec}); }
 
@@ -1108,6 +1143,7 @@ function toggleAdd() {
 }
 function closeAdd() { document.getElementById('add-panel').classList.remove('open'); }
 function addFactura() {
+  haptic('light');
   const tipo = document.getElementById('f-tipo').value;
   const num = document.getElementById('f-num').value.trim();
   const empresa = document.getElementById('f-empresa').value.trim();

@@ -47,6 +47,14 @@ function save() {
 }
 // Guardar inmediatamente antes de que el usuario cierre la pestaña
 window.addEventListener('beforeunload', () => { if (_saveDebounce) _saveImmediate(); }, {once:true});
+
+function haptic(p='light'){if(!navigator.vibrate)return;
+  if(p==='light')navigator.vibrate(8);
+  else if(p==='medium')navigator.vibrate(18);
+  else if(p==='success')navigator.vibrate([8,50,8]);
+  else if(p==='error')navigator.vibrate([30,60,30]);
+  else navigator.vibrate(p);}
+
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
@@ -273,6 +281,22 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
   body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:900px;}
   .fab-area{max-width:900px!important;}
   .wnav{max-width:900px;}
+}
+
+/* === iPad horizontal (landscape) === */
+@media (min-width:720px) and (orientation:landscape){
+  /* Aumentar max-width en landscape para aprovechar el espacio */
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:900px;}
+  .fab-area{max-width:900px!important;}
+  .wnav{max-width:900px;}
+  /* Fuentes ligeramente más grandes en pantalla grande */
+  .ic-name{font-size:11px;}
+  .dash-card{min-height:100px;}
+}
+@media (min-width:1200px){
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:1100px;}
+  .fab-area{max-width:1100px!important;}
+  .wnav{max-width:1100px;}
 }
 </style>
 </head>
@@ -581,7 +605,18 @@ function _saveImmediate() {
     if (typeof WStore !== 'undefined') WStore.set('ninos', 'data', state);
   } catch(e) {}
 }
-function nxtId() { return ++nid; }
+
+// wuid(): ID único de dispositivo. Usa crypto.randomUUID() si disponible,
+// si no, timestamp+random (probabilidad de colisión ~0 en uso real).
+function wuid() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    // UUID v4: garantiza unicidad global
+    return crypto.randomUUID();
+  }
+  // Fallback: timestamp ms + 8 hex random chars
+  return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,10);
+}
+function nxtId(){ return wuid(); }
 function esc(s){var t=String(s||'');t=t.replace(/&/g,'&amp;');t=t.replace(new RegExp('<','g'),'&lt;');t=t.replace(new RegExp('>','g'),'&gt;');t=t.replace(new RegExp(String.fromCharCode(34),'g'),'&quot;');return t;}
 function fmt(n,d=2) { return Number(n||0).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d}); }
 function today() { const d=new Date(); return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`; }
@@ -697,6 +732,7 @@ function closeAddKid() { document.getElementById('add-kid-panel').classList.remo
 
 // ── ADD KID ──
 function addKid() {
+  haptic('light');
   const nombre = document.getElementById('fk-nombre').value.trim();
   if (!nombre) return;
   const kid = {

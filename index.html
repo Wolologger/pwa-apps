@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="W//APPS">
 <meta name="theme-color" content="#0a0a09">
 <link rel="manifest" href="manifest.json">
+<link rel="icon" id="dyn-favicon" href="icons/icon-192.png" type="image/png">
 <title>W // APPS</title>
 <!-- version: 3.11.0 -->
 <!-- Firebase SDK v9 compat -->
@@ -310,6 +311,17 @@ a.dash-card:hover{background:var(--bg3);}
     border-radius:6px;padding:5px 14px;
     font-family:var(--fm);font-size:11px;cursor:pointer;
   }
+
+@media (min-width:720px) and (orientation:landscape){
+  .dash-grid{grid-template-columns:repeat(4,1fr);}
+  .icon-grid{grid-template-columns:repeat(5,1fr);}
+  .hero-info-grid{grid-template-columns:repeat(6,1fr);}
+}
+@media (min-width:1200px){
+  .dash-grid{grid-template-columns:repeat(4,1fr);}
+  .icon-grid{grid-template-columns:repeat(6,1fr);}
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:1100px;}
+}
 </style>
 </head>
 <body>
@@ -1554,6 +1566,46 @@ window.addEventListener('wapps:pending-change', renderDashSyncInfo);
 window.addEventListener('focus', renderDashAll);
 renderDashAll();
 startLatencyMonitor();
+
+// E8: Favicon dinámico — refleja estado de red en el icono de la pestaña
+// 🟢 verde = online+sync OK, 🟡 amarillo = pendientes, 🔴 rojo = offline
+function _updateFavicon(color) {
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 32;
+    const ctx = canvas.getContext('2d');
+    // Fondo oscuro
+    ctx.fillStyle = '#0a0a09';
+    ctx.fillRect(0,0,32,32);
+    // Letra W
+    ctx.fillStyle = '#e8f040';
+    ctx.font = 'bold 22px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('W', 16, 16);
+    // Dot de estado (esquina superior derecha)
+    ctx.beginPath();
+    ctx.arc(26, 6, 5, 0, Math.PI*2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    const link = document.getElementById('dyn-favicon');
+    if (link) link.href = canvas.toDataURL('image/png');
+  } catch(e) { /* canvas no disponible */ }
+}
+
+// Actualizar favicon según estado de red y pendientes
+function _refreshFavicon() {
+  const pending = _sync()?.getPending()?.length ?? 0;
+  const online  = _fb()?.isOnline() ?? navigator.onLine;
+  if (!online) _updateFavicon('#f04030');        // 🔴 offline
+  else if (pending > 0) _updateFavicon('#e8f040'); // 🟡 pendientes
+  else _updateFavicon('#30d880');                // 🟢 sincronizado
+}
+window.addEventListener('wapps:online',          _refreshFavicon);
+window.addEventListener('wapps:offline',         _refreshFavicon);
+window.addEventListener('wapps:pending-change',  _refreshFavicon);
+window.addEventListener('wapps:sync-done',       _refreshFavicon);
+setTimeout(_refreshFavicon, 800); // delay para que WFirebase esté listo
 
 // Refresco cada 60 s, PERO solo cuando la pestaña está visible.
 // Ahorra batería y ciclos de CPU cuando la app está en background.

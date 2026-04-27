@@ -20,6 +20,14 @@ function saveState() {
 }
 // Guardar inmediatamente antes de que el usuario cierre la pestaña
 window.addEventListener('beforeunload', () => { if (_saveDebounce) _saveImmediate(); }, {once:true});
+
+function haptic(p='light'){if(!navigator.vibrate)return;
+  if(p==='light')navigator.vibrate(8);
+  else if(p==='medium')navigator.vibrate(18);
+  else if(p==='success')navigator.vibrate([8,50,8]);
+  else if(p==='error')navigator.vibrate([30,60,30]);
+  else navigator.vibrate(p);}
+
 </script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
@@ -222,6 +230,22 @@ select option{background:var(--bg2);}
   body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:900px;}
   .fab-area{max-width:900px!important;}
   .wnav{max-width:900px;}
+}
+
+/* === iPad horizontal (landscape) === */
+@media (min-width:720px) and (orientation:landscape){
+  /* Aumentar max-width en landscape para aprovechar el espacio */
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:900px;}
+  .fab-area{max-width:900px!important;}
+  .wnav{max-width:900px;}
+  /* Fuentes ligeramente más grandes en pantalla grande */
+  .ic-name{font-size:11px;}
+  .dash-card{min-height:100px;}
+}
+@media (min-width:1200px){
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:1100px;}
+  .fab-area{max-width:1100px!important;}
+  .wnav{max-width:1100px;}
 }
 </style>
 </head>
@@ -772,6 +796,7 @@ function renderDatos() {
 
 // ── TASK ACTIONS ──
 function toggleTask(id) {
+  haptic('light');
   const proj = activeProject(); if(!proj) return;
   const t = proj.tasks.find(t=>t.id===id);
   if (t) { t.done=!t.done; saveState(); render(); }

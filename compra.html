@@ -188,6 +188,22 @@ select option{background:var(--bg2);}
   .fab-area{max-width:900px!important;}
   .wnav{max-width:900px;}
 }
+
+/* === iPad horizontal (landscape) === */
+@media (min-width:720px) and (orientation:landscape){
+  /* Aumentar max-width en landscape para aprovechar el espacio */
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:900px;}
+  .fab-area{max-width:900px!important;}
+  .wnav{max-width:900px;}
+  /* Fuentes ligeramente más grandes en pantalla grande */
+  .ic-name{font-size:11px;}
+  .dash-card{min-height:100px;}
+}
+@media (min-width:1200px){
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:1100px;}
+  .fab-area{max-width:1100px!important;}
+  .wnav{max-width:1100px;}
+}
 </style>
 </head>
 <body>
@@ -308,7 +324,18 @@ function loadState(){
   };
 }
 function save(){state.nextId=nid;try{localStorage.setItem('compra_v2',JSON.stringify(state));}catch(e){}if(typeof WStore!=='undefined')WStore.set('compra','data',state);}
-function nxtId(){return++nid;}
+
+// wuid(): ID único de dispositivo. Usa crypto.randomUUID() si disponible,
+// si no, timestamp+random (probabilidad de colisión ~0 en uso real).
+function wuid() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    // UUID v4: garantiza unicidad global
+    return crypto.randomUUID();
+  }
+  // Fallback: timestamp ms + 8 hex random chars
+  return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,10);
+}
+function nxtId(){ return wuid(); }
 function esc(s){var t=String(s||'');t=t.replace(/&/g,'&amp;');t=t.replace(new RegExp('<','g'),'&lt;');t=t.replace(new RegExp('>','g'),'&gt;');t=t.replace(new RegExp(String.fromCharCode(34),'g'),'&quot;');return t;}
 function catById(id){return state.cats.find(c=>c.id===id)||{emoji:'📦',name:id};}
 

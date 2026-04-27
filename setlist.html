@@ -8,7 +8,15 @@
 <meta name="theme-color" content="#0a0a09">
 <title>Setlist — W//APPS</title>
 <link rel="manifest" href="manifest.json">
-<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js">
+function haptic(p='light'){if(!navigator.vibrate)return;
+  if(p==='light')navigator.vibrate(8);
+  else if(p==='medium')navigator.vibrate(18);
+  else if(p==='success')navigator.vibrate([8,50,8]);
+  else if(p==='error')navigator.vibrate([30,60,30]);
+  else navigator.vibrate(p);}
+
+</script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-config.js"></script>
@@ -352,6 +360,22 @@ textarea{resize:vertical;min-height:70px;line-height:1.5;}
   .fab-area{max-width:900px!important;}
   .wnav{max-width:900px;}
 }
+
+/* === iPad horizontal (landscape) === */
+@media (min-width:720px) and (orientation:landscape){
+  /* Aumentar max-width en landscape para aprovechar el espacio */
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:900px;}
+  .fab-area{max-width:900px!important;}
+  .wnav{max-width:900px;}
+  /* Fuentes ligeramente más grandes en pantalla grande */
+  .ic-name{font-size:11px;}
+  .dash-card{min-height:100px;}
+}
+@media (min-width:1200px){
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:1100px;}
+  .fab-area{max-width:1100px!important;}
+  .wnav{max-width:1100px;}
+}
 </style>
 </head>
 <body>
@@ -657,7 +681,7 @@ function renderBandBar() {
   const bar = document.getElementById('band-bar');
   bar.innerHTML = state.bands.map(b =>
     `<button class="band-chip ${b.id===activeBandId?'active':''}" style="${b.id===activeBandId?`--band-color:${b.color}`:''}" onclick="selectBand(${b.id})">${esc(b.nombre)}</button>`
-  ).join('') + `<button class="band-add-btn" onclick="showTab('bandas',document.querySelectorAll('.tab')[3])">+</button>`;
+  ).join('') + `<button aria-label="Añadir" class="band-add-btn" onclick="showTab('bandas',document.querySelectorAll('.tab')[3])">+</button>`;
 }
 function selectBand(id) {
   if (id === activeBandId) return;
@@ -774,6 +798,7 @@ function resolveGear(songGear) {
 }
 
 function addSong() {
+  haptic('light');
   const titulo = document.getElementById('f-titulo').value.trim();
   if (!titulo || !activeBandId) return;
   const songs = bandSongs(activeBandId);
@@ -908,7 +933,7 @@ function renderSongs() {
         </div>
         <div class="song-right">
           ${s.dur?`<div class="song-dur">${esc(s.dur)}</div>`:''}
-          <button class="btn btn-sm" style="opacity:0.3;border:none;padding:2px 6px;font-size:13px;" onclick="startEdit(${s.id})">✎</button>
+          <button aria-label="Editar" class="btn btn-sm" style="opacity:0.3;border:none;padding:2px 6px;font-size:13px;" onclick="startEdit(${s.id})">✎</button>
         </div>
       </div>
       <div class="edit-form ${isEd?'open':''}" id="ef-${s.id}">
@@ -1727,7 +1752,7 @@ function renderBands() {
       <div class="band-color-dot" style="background:${b.color};width:14px;height:14px;border-radius:50%;flex-shrink:0;"></div>
       <div class="band-manage-name">${esc(b.nombre)}</div>
       <div class="band-manage-count">${count} canciones</div>
-      <button class="btn btn-sm btn-r" onclick="delBand(${b.id})">✕</button>
+      <button aria-label="Cerrar" class="btn btn-sm btn-r" onclick="delBand(${b.id})">✕</button>
     </div>`;
   }).join('');
 }
