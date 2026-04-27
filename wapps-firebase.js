@@ -40,6 +40,7 @@ const WFirebase = (() => {
   let _auth  = null;
   let _db    = null;
   let _user  = null;
+  let _lastAuthEvent = null;
   let _ready = false;
   let _online = navigator.onLine;
 
@@ -55,6 +56,7 @@ const WFirebase = (() => {
       // Observer de auth persistente
       _auth.onAuthStateChanged(user => {
         _user = user;
+        _lastAuthEvent = { user };
         // Al autenticarse: bajar siempre datos de Firestore, sin importar localStorage
         if (user && _online) {
           WSync.pullAll(user.uid).catch(() => {});
@@ -77,8 +79,75 @@ const WFirebase = (() => {
   }
 
   // Online/Offline
+  // _online refleja navigator.onLine pero puede ser forzado por otras capas (p.ej. ping periódico)
   window.addEventListener('online',  () => { _online = true;  window.dispatchEvent(new CustomEvent('wapps:online')); });
-  window.addEventListener('offline', () => { _online = false; window.dispatchEvent(new CustomEvent('wapps:offline')); });
+  window.addEventListener('offline', () => { 
+    _online = false; 
+    _lastLatency = null;
+    window.dispatchEvent(new CustomEvent('wapps:offline'));
+    window.dispatchEvent(new CustomEvent('wapps:latency', { detail: { ms: null, reason: 'navigator-offline' } }));
+  });
+
+  // Permite a monitores externos (latencia) forzar el estado cuando navigator.onLine miente
+  function setOnline(v) {
+    const prev = _online;
+    _online = !!v;
+    if (prev !== _online) {
+      window.dispatchEvent(new CustomEvent(_online ? 'wapps:online' : 'wapps:offline'));
+    }
+  }
+
+  // ── Reachability monitor ─────────────────────────────────────────
+  // navigator.onLine miente con frecuencia (WiFi sin internet, captive portal, etc.)
+  // Ping periódico a Cloudflare para validar conectividad real.
+  // Emite 'wapps:latency' con detail.ms (o null si falla)
+  let _lastLatency = null;
+  let _pingTimer = null;
+  const PING_URL = 'https://www.cloudflare.com/cdn-cgi/trace';
+  const PING_INTERVAL = 30000; // 30s
+
+  async function _pingOnce() {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      _lastLatency = null;
+      setOnline(false);
+      window.dispatchEvent(new CustomEvent('wapps:latency', { detail: { ms: null, reason: 'navigator-offline' } }));
+      return;
+    }
+    try {
+      const t0 = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+      const res = await fetch(PING_URL, { method: 'GET', cache: 'no-store', mode: 'cors' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      await res.text();
+      const ms = Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - t0);
+      _lastLatency = ms;
+      // Si navigator decía offline pero el fetch funciona, forzar online
+      if (!_online) setOnline(true);
+      window.dispatchEvent(new CustomEvent('wapps:latency', { detail: { ms } }));
+    } catch (e) {
+      _lastLatency = null;
+      // navigator.onLine mintió: forzar offline
+      if (_online) setOnline(false);
+      window.dispatchEvent(new CustomEvent('wapps:latency', { detail: { ms: null, reason: 'fetch-failed' } }));
+    }
+  }
+
+  function getLatency() { return _lastLatency; }
+
+  function startPingMonitor() {
+    if (_pingTimer) return;
+    _pingOnce();
+    _pingTimer = setInterval(_pingOnce, PING_INTERVAL);
+    // Re-ping al volver al foreground (si estaba en bg, navigator.onLine puede estar stale)
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) _pingOnce();
+      });
+    }
+  }
+
+  function stopPingMonitor() {
+    if (_pingTimer) { clearInterval(_pingTimer); _pingTimer = null; }
+  }
 
   // ── Auth ─────────────────────────────────────────────────────────
   async function login() {
@@ -111,6 +180,26 @@ const WFirebase = (() => {
   function getUser()   { return _user; }
   function isOnline()  { return _online; }
   function isReady()   { return _ready; }
+  function getLastAuth() { return _lastAuthEvent; }
+
+  // Replay del último auth-change para listeners que se registran tarde.
+  // Llamado al final de la carga del módulo; reemite el evento en el próximo
+  // tick si ya había usuario autenticado (caso típico: la app monta su listener
+  // después de que Firebase ya autenticó silenciosamente vía sesión persistente).
+  function _replayLastAuth() {
+    if (_lastAuthEvent) {
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('wapps:auth-change', { detail: _lastAuthEvent }));
+      }, 0);
+    } else {
+      // Aún sin auth — esperar y re-chequear cuando WFirebase esté listo
+      setTimeout(() => {
+        if (_lastAuthEvent) {
+          window.dispatchEvent(new CustomEvent('wapps:auth-change', { detail: _lastAuthEvent }));
+        }
+      }, 500);
+    }
+  }
 
   // ── Firestore push ────────────────────────────────────────────────
   async function pushToFirestore(uid, key, data) {
@@ -121,6 +210,7 @@ const WFirebase = (() => {
       return true;
     } catch(e) {
       console.error(`[WFirebase] push error ${key}:`, e);
+      window.dispatchEvent(new CustomEvent('wapps:sync-error', { detail: { msg: `push ${key}: ${e.message||e}` } }));
       return false;
     }
   }
@@ -132,7 +222,8 @@ const WFirebase = (() => {
       const snap = await _db.collection('users').doc(uid).collection('data').doc(key).get();
       if (!snap.exists) return null;
       const data = snap.data();
-      delete data._updatedAt;
+      // Conservar _updatedAt — es necesario para que WStore.syncOnLoad compare timestamps.
+      // Solo limpiamos _pushVersion que es interno del push.
       delete data._pushVersion;
       return data;
     } catch(e) {
@@ -166,9 +257,39 @@ const WFirebase = (() => {
     _waitForSDK();
   }
 
-  return { login, logout, onAuthChange, getUser, isOnline, isReady, pushToFirestore, pullFromFirestore, pullAll };
-
+  return { login, logout, onAuthChange, getUser, getLastAuth, isOnline, setOnline, isReady, pushToFirestore, pullFromFirestore, pullAll, getLatency, startPingMonitor, stopPingMonitor };
 })();
+
+// Auto-arrancar monitor de conectividad real (todas las apps se benefician)
+// y reemitir el último auth-change para listeners que se registren tarde
+// (caso típico: app monta su listener wapps:auth-change DESPUÉS de que
+//  Firebase ya autenticó vía sesión persistente → se perdía el evento → la
+//  app se quedaba pintada como OFFLINE aunque hubiera user activo).
+if (typeof window !== 'undefined' && window.WFirebase) {
+  function _wfb_post_init() {
+    window.WFirebase.startPingMonitor();
+    // Reemitir auth si ya había user en el momento del DOMContentLoaded
+    const last = window.WFirebase.getLastAuth ? window.WFirebase.getLastAuth() : null;
+    if (last) {
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('wapps:auth-change', { detail: last }));
+      }, 0);
+    }
+    // También: si auth aún no completó al DOMContentLoaded, esperar 1s y
+    // reemitir el último que llegue (cubre apps con auth lento)
+    setTimeout(() => {
+      const late = window.WFirebase.getLastAuth ? window.WFirebase.getLastAuth() : null;
+      if (late && late !== last) {
+        window.dispatchEvent(new CustomEvent('wapps:auth-change', { detail: late }));
+      }
+    }, 1500);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _wfb_post_init);
+  } else {
+    setTimeout(_wfb_post_init, 100);
+  }
+}
 
 
 // ═══════════════════════════════════════════════════════════════
@@ -545,4 +666,24 @@ const WSync = (() => {
 
   return { markPending, clearPending, clearAllPending, getPending, syncAll, pullAll, pushAll, getPushVersion: _getPushVersion, _mergeArraysForKey, WSTORE_KEYS };
 
+})();
+// ─────────────────────────────────────────────────────────────────────────────
+// B2 FIX: Clear local wapps.* data on logout (prevents data bleeding between accounts)
+// Wrapped in a self-calling block so it patches WFirebase.logout after it's defined
+(function(){
+  if (typeof WFirebase === 'undefined') return;
+  const _origLogout = WFirebase.logout;
+  WFirebase.logout = async function() {
+    await _origLogout();
+    // Clear all wapps.* keys so next user doesn't see previous user's data
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && (k.startsWith('wapps.') || k === 'wapps.pending' || k === 'wapps.lastSync' || k === 'wapps.lastBackup')) {
+        keysToRemove.push(k);
+      }
+    }
+    keysToRemove.forEach(k => localStorage.removeItem(k));
+    console.info('[WFirebase] logout: limpiados', keysToRemove.length, 'keys locales');
+  };
 })();

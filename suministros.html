@@ -8,12 +8,69 @@
 <meta name="theme-color" content="#0a0a09">
 <title>Suministros — W//APPS</title>
 <link rel="manifest" href="manifest.json">
-<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js">
+// Debounce: agrupa múltiples saves consecutivos en uno (200ms)
+let _saveDebounce = null;
+const _saveImmediate = save;
+function save() {
+  if (_saveDebounce) clearTimeout(_saveDebounce);
+  _saveDebounce = setTimeout(() => { _saveDebounce = null; _saveImmediate(); }, 200);
+}
+// Guardar inmediatamente antes de que el usuario cierre la pestaña
+window.addEventListener('beforeunload', () => { if (_saveDebounce) _saveImmediate(); }, {once:true});
+
+// ── Predicción de próxima factura ─────────────────────────────
+function predictNextBill(tipo) {
+  const bills = (state.facturas || [])
+    .filter(f => f.tipo === tipo && f.inicio)
+    .sort((a,b) => a.inicio.localeCompare(b.inicio));
+  if (bills.length < 2) return null;
+  // Media de días entre facturas
+  let intervals = [];
+  for (let i = 1; i < bills.length; i++) {
+    const d0 = new Date(bills[i-1].inicio + 'T12:00:00');
+    const d1 = new Date(bills[i].inicio + 'T12:00:00');
+    intervals.push(Math.round((d1-d0)/(86400000)));
+  }
+  const avgDays = Math.round(intervals.reduce((a,b)=>a+b,0)/intervals.length);
+  // Última factura + intervalo medio = próxima esperada
+  const last = new Date(bills[bills.length-1].inicio + 'T12:00:00');
+  const next = new Date(last.getTime() + avgDays * 86400000);
+  const today = new Date();
+  const daysLeft = Math.round((next - today) / 86400000);
+  return { date: next.toISOString().slice(0,10), daysLeft, avgDays };
+}
+
+function renderPredictions() {
+  const el = document.getElementById('predictions-block');
+  if (!el) return;
+  const types = [...new Set((state.facturas||[]).map(f=>f.tipo).filter(Boolean))];
+  const preds = types.map(tipo => {
+    const p = predictNextBill(tipo);
+    if (!p) return '';
+    const urgent = p.daysLeft < 7;
+    const overdue = p.daysLeft < 0;
+    const color = overdue ? 'var(--r)' : urgent ? 'var(--y)' : 'var(--g)';
+    const label = overdue
+      ? `atrasada ${Math.abs(p.daysLeft)}d`
+      : p.daysLeft === 0 ? 'hoy' : `en ${p.daysLeft}d`;
+    const icons = {luz:'⚡',gas:'🔥',agua:'💧',internet:'📡',otro:'📄'};
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:0.5px solid var(--border2,rgba(255,255,255,0.1));font-family:var(--fm);font-size:11px">
+      <span>${icons[tipo]||'📄'} ${tipo.charAt(0).toUpperCase()+tipo.slice(1)}</span>
+      <span style="color:${color}">${p.date} · ${label}</span>
+    </div>`;
+  }).filter(Boolean).join('');
+  el.innerHTML = preds || '<div style="color:var(--muted);font-size:10px">Necesitas al menos 2 facturas del mismo tipo</div>';
+}
+
+</script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-config.js"></script>
 <script src="wapps-store.js"></script>
 <script src="wapps-firebase.js"></script>
+<script src="wapps-sync-ui.js" defer></script>
+<script src="wapps-pdf.js" defer></script>
 <script src="wapps-nav.js" defer></script>
 <script src="wapps-onboarding.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
@@ -258,12 +315,16 @@ select option{background:var(--bg2);}
 .sync-btn:hover:not(:disabled){border-color:var(--y,#e8f040);color:var(--y,#e8f040);}
 .sync-btn:disabled{opacity:0.35;cursor:default;}
 
-/* === RESPONSIVE: tablet/desktop === */
+/* === RESPONSIVE: tablet/desktop (content centered via inner container) === */
 @media (min-width:720px){
-  body{max-width:720px;margin:0 auto;box-shadow:0 0 0 1px var(--line2);}
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:760px;margin-left:auto;margin-right:auto;}
+  .fab-area{max-width:760px!important;left:50%!important;transform:translateX(-50%)!important;}
+  .wnav{max-width:760px;margin-left:auto;margin-right:auto;width:100%;box-sizing:border-box;}
 }
 @media (min-width:1024px){
-  body{max-width:900px;}
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:900px;}
+  .fab-area{max-width:900px!important;}
+  .wnav{max-width:900px;}
 }
 </style>
 </head>
@@ -961,7 +1022,7 @@ function loadState() {
   try { const r = localStorage.getItem('suministros_v1'); if (r) return JSON.parse(r); } catch(e) {}
   return { facturas: [], nextId: 1 };
 }
-function save() {
+function _saveImmediate() {
   state.nextId = nid;
   // Guardar en WStore (sync Firebase) y en clave legacy por compatibilidad
   if (typeof WStore !== 'undefined') {
@@ -1279,7 +1340,9 @@ function chartOpts(unit) {
 }
 
 // ── RESUMEN ──
+      <div style="margin-top:16px">        <div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-family:var(--fm);margin-bottom:8px">Próximas facturas (estimado)</div>        <div id="predictions-block"></div>      </div>
 function renderResumen() {
+  renderPredictions();
   const anios = allAnios();
   let html = '';
   html += '<div class="section-label">Por suministro</div>';
@@ -1499,7 +1562,7 @@ function updateSyncUI(state, pendingCount) {
   const labels={online:'ONLINE',offline:'OFFLINE',syncing:'SINCRONIZANDO...'};
   label.textContent=labels[state]||state.toUpperCase();
   pend.textContent=pendingCount>0?'· '+pendingCount+' PENDIENTE'+(pendingCount>1?'S':''):'';
-  btn.disabled=!(state==='online'&&_fb()&&_fb().getUser()&&pendingCount>0);
+  btn.disabled=!(state==='online'&&_fb()&&_fb().getUser());
   const pullBtn = document.getElementById('pull-btn');
   if (pullBtn) pullBtn.disabled = !(state === 'online' && _fb() && _fb().getUser());
   const pushAppBtn = document.getElementById('push-app-btn');

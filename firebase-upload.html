@@ -57,12 +57,16 @@ h1{font-family:var(--fh);font-size:32px;letter-spacing:1px;color:var(--y);margin
 a.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:11px;text-decoration:none;margin-bottom:20px;}
 a.back:hover{color:var(--y);}
 
-/* === RESPONSIVE: tablet/desktop === */
+/* === RESPONSIVE: tablet/desktop (content centered via inner container) === */
 @media (min-width:720px){
-  body{max-width:720px;margin:0 auto;box-shadow:0 0 0 1px var(--line2);}
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:760px;margin-left:auto;margin-right:auto;}
+  .fab-area{max-width:760px!important;left:50%!important;transform:translateX(-50%)!important;}
+  .wnav{max-width:760px;margin-left:auto;margin-right:auto;width:100%;box-sizing:border-box;}
 }
 @media (min-width:1024px){
-  body{max-width:900px;}
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:900px;}
+  .fab-area{max-width:900px!important;}
+  .wnav{max-width:900px;}
 }
 </style>
 </head>

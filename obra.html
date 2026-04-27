@@ -10,12 +10,24 @@
 <title>Mi Obra — W//APPS</title>
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js">
+// Debounce: agrupa múltiples saves consecutivos en uno (200ms)
+let _saveDebounce = null;
+const _saveImmediate = saveState;
+function saveState() {
+  if (_saveDebounce) clearTimeout(_saveDebounce);
+  _saveDebounce = setTimeout(() => { _saveDebounce = null; _saveImmediate(); }, 200);
+}
+// Guardar inmediatamente antes de que el usuario cierre la pestaña
+window.addEventListener('beforeunload', () => { if (_saveDebounce) _saveImmediate(); }, {once:true});
+</script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-config.js"></script>
 <script src="wapps-store.js"></script>
 <script src="wapps-firebase.js"></script>
+<script src="wapps-sync-ui.js" defer></script>
+<script src="wapps-pdf.js" defer></script>
 <script src="wapps-nav.js" defer></script>
 <style>
 :root{color-scheme:dark;
@@ -200,12 +212,16 @@ select option{background:var(--bg2);}
 .sync-btn:hover:not(:disabled){border-color:var(--y,#e8f040);color:var(--y,#e8f040);}
 .sync-btn:disabled{opacity:0.35;cursor:default;}
 
-/* === RESPONSIVE: tablet/desktop === */
+/* === RESPONSIVE: tablet/desktop (content centered via inner container) === */
 @media (min-width:720px){
-  body{max-width:720px;margin:0 auto;box-shadow:0 0 0 1px var(--line2);}
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:760px;margin-left:auto;margin-right:auto;}
+  .fab-area{max-width:760px!important;left:50%!important;transform:translateX(-50%)!important;}
+  .wnav{max-width:760px;margin-left:auto;margin-right:auto;width:100%;box-sizing:border-box;}
 }
 @media (min-width:1024px){
-  body{max-width:900px;}
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:900px;}
+  .fab-area{max-width:900px!important;}
+  .wnav{max-width:900px;}
 }
 </style>
 </head>
@@ -406,7 +422,7 @@ let viewMode = 'project'; // 'global' | 'project'
 function activeProject() { return state.proyectos.find(p=>p.id===activeProjectId) || null; }
 function nextId() { return ++nid; }
 
-function saveState() {
+function _saveImmediate() {
   state.nextId = nid;
   try { localStorage.setItem('obra_multiproj_v1', JSON.stringify(state)); } catch(e) {}
   // Also keep legacy key in sync for finanzas bridge
@@ -1022,7 +1038,7 @@ function updateSyncUI(state, pendingCount) {
   label.textContent = labels[state] || state.toUpperCase();
   pend.textContent = pendingCount > 0 ? '· ' + pendingCount + ' PENDIENTE' + (pendingCount > 1 ? 'S' : '') : '';
   const fb = _fb();
-  const canSync = state === 'online' && fb && fb.getUser() && pendingCount > 0;
+  const canSync = state === 'online' && fb && fb.getUser();
   btn.disabled = !canSync;
   const pullBtn = document.getElementById('pull-btn');
   if (pullBtn) pullBtn.disabled = !(state === 'online' && fb && fb.getUser());

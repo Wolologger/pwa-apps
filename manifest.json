@@ -2,7 +2,7 @@
   "id": "/pwa-apps/",
   "name": "W//APPS — Wolologger",
   "short_name": "W//APPS",
-  "description": "Panel de herramientas personales: obra, gastos, despensa y más — v4.0.0",
+  "description": "Panel de herramientas personales: obra, gastos, despensa y más — v4.4.0",
   "start_url": "/pwa-apps/",
   "scope": "/pwa-apps/",
   "display": "standalone",
@@ -51,17 +51,24 @@
   ],
   "shortcuts": [
     {
-      "name": "Mi Obra",
-      "short_name": "Obra",
-      "url": "/pwa-apps/obra.html",
-      "description": "Gestión de la reforma",
-      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
-    },
-    {
       "name": "Gastos Diarios",
       "short_name": "Gastos",
       "url": "/pwa-apps/gastos-diarios.html",
-      "description": "Control de gastos del día a día",
+      "description": "Apuntar gasto rápido",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Semana",
+      "short_name": "Semana",
+      "url": "/pwa-apps/semana.html",
+      "description": "Tareas de hoy",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Mi Obra",
+      "short_name": "Obra",
+      "url": "/pwa-apps/obra.html",
+      "description": "Tareas y gastos de obra",
       "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     },
     {

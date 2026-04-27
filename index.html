@@ -51,10 +51,16 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
 
 /* HERO */
 .hero{padding:28px 20px 20px;border-bottom:1px solid var(--line2);position:relative;overflow:hidden;}
-.hero-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
-.hero-title{font-family:var(--fh);font-size:clamp(44px,14vw,64px);line-height:0.95;letter-spacing:1px;margin-bottom:14px;}
-.hero-title em{color:var(--y);font-style:normal;display:block;}
-.hero-meta{display:flex;gap:14px;flex-wrap:wrap;}
+.hero-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.hero-info{padding:18px 20px 16px;border-bottom:1px solid var(--line2);background:var(--bg);}
+.hero-info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line2);border:1px solid var(--line2);}
+.info-block{background:var(--bg2);padding:10px 12px;display:flex;flex-direction:column;gap:3px;min-height:52px;}
+.info-lbl{font-size:8px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);font-family:var(--fm);}
+.info-val{font-size:13px;color:var(--text);font-family:var(--fm);line-height:1.2;}
+.info-val strong{font-family:var(--fh);font-size:18px;color:var(--y);}
+@media (max-width:480px){
+  .hero-info-grid{grid-template-columns:repeat(2,1fr);}
+}
 .hero-stat{font-size:11px;color:var(--muted);}
 .hero-stat strong{color:var(--text);font-weight:500;}
 .hero-corner{position:absolute;bottom:16px;right:20px;font-family:var(--fh);font-size:72px;color:var(--dim);line-height:1;pointer-events:none;user-select:none;}
@@ -257,7 +263,7 @@ a.dash-card:hover{background:var(--bg3);}
 @media (min-width:560px){.icon-grid{grid-template-columns:repeat(4,1fr);}}
 @media (min-width:900px){.icon-grid{grid-template-columns:repeat(5,1fr);}}
 .icon-card{background:var(--bg2);border:0.5px solid var(--line2);border-radius:10px;padding:12px 8px 10px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:all 0.15s;text-decoration:none;color:var(--text);border-top-width:2px;}
-.icon-card:hover{border-color:rgba(232,240,64,0.4);background:#1a1a17;transform:translateY(-2px);}
+.icon-card:hover{border-color:rgba(232,240,64,0.4);background:var(--bg3);transform:translateY(-2px);}
 .icon-card:active{transform:scale(0.95);}
 .icon-card.c-hogar{border-top-color:rgba(48,216,128,0.5);}
 .icon-card.c-dinero{border-top-color:rgba(232,240,64,0.5);}
@@ -270,14 +276,14 @@ a.dash-card:hover{background:var(--bg3);}
 .launcher-cat-title{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;font-family:var(--fm);}
 
 /* COMMAND PALETTE */
-.cmd-bar{margin:10px 20px 0;background:#111110;border:0.5px solid rgba(255,255,255,0.12);border-radius:8px;display:flex;align-items:center;gap:8px;padding:8px 12px;transition:border-color 0.15s;}
+.cmd-bar{margin:10px 20px 0;background:var(--bg2);border:0.5px solid var(--line2);border-radius:8px;display:flex;align-items:center;gap:8px;padding:8px 12px;transition:border-color 0.15s;}
 .cmd-bar:focus-within{border-color:rgba(232,240,64,0.4);}
 .cmd-slash{font-size:13px;color:var(--muted);font-family:var(--fm);}
 .cmd-input{background:transparent;border:none;outline:none;color:var(--y);font-family:var(--fm);font-size:12px;flex:1;caret-color:var(--y);}
 .cmd-input::placeholder{color:var(--muted);}
 .cmd-input::-webkit-input-placeholder{color:var(--muted);}
 .cmd-kbd{font-size:8px;color:var(--dim);font-family:var(--fm);padding:2px 5px;border:0.5px solid var(--dim);border-radius:3px;}
-.cmd-dropdown{background:#111110;border:0.5px solid rgba(255,255,255,0.12);border-top:none;border-radius:0 0 8px 8px;margin:0 20px;display:none;}
+.cmd-dropdown{background:var(--bg2);border:0.5px solid var(--line2);border-top:none;border-radius:0 0 8px 8px;margin:0 20px;display:none;}
 .cmd-dropdown.open{display:block;}
 .cmd-row{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;transition:background 0.1s;text-decoration:none;}
 .cmd-row:hover,.cmd-row.active{background:rgba(232,240,64,0.05);}
@@ -347,7 +353,7 @@ a.dash-card:hover{background:var(--bg3);}
     <div class="topbar-right">
       <button class="version-badge" onclick="openChangelog()" title="Ver changelog">
         <span class="version-dot"></span>
-        <span id="version-display">v3.11.0</span>
+        <span id="version-display">v4.4.0</span>
       </button>
       <div class="clock" id="clock">--:--</div>
       <button class="auth-btn" id="auth-btn" onclick="handleAuth()" title="Login con Google">
@@ -375,15 +381,38 @@ a.dash-card:hover{background:var(--bg3);}
   </div>
   </div>
 
-  <div class="hero">
+  <div class="hero hero-info">
     <div class="hero-label" id="hero-date">—</div>
-    <div class="hero-title">W<em>APPS</em></div>
-    <div class="hero-meta">
-      <div class="hero-stat"><strong id="app-count">—</strong> apps</div>
-      <div class="hero-stat"><span class="status"><span class="status-dot"></span>LIVE</span></div>
-      <div class="hero-stat">Build <strong>2026.03</strong></div>
+    <div class="hero-info-grid">
+      <div class="info-block">
+        <div class="info-lbl">Última sync Firebase</div>
+        <div class="info-val" id="hero-last-sync">—</div>
+      </div>
+      <div class="info-block">
+        <div class="info-lbl">Último backup local</div>
+        <div class="info-val" id="hero-last-backup">—</div>
+      </div>
+      <div class="info-block">
+        <div class="info-lbl">Pendientes</div>
+        <div class="info-val" id="hero-pending">0</div>
+      </div>
+      <div class="info-block">
+        <div class="info-lbl">Apps activas</div>
+        <div class="info-val"><strong id="app-count">—</strong></div>
+      </div>
+      <div class="info-block">
+        <div class="info-lbl">Datos locales</div>
+        <div class="info-val" id="hero-storage">—</div>
+      </div>
+      <div class="info-block">
+        <div class="info-lbl">Estado</div>
+        <div class="info-val"><span class="status"><span class="status-dot"></span><span id="hero-net-status">ONLINE</span></span></div>
+      </div>
+      <div class="info-block">
+        <div class="info-lbl">Latencia</div>
+        <div class="info-val" id="hero-latency">—</div>
+      </div>
     </div>
-    <div class="hero-corner">W</div>
   </div>
 
   <!-- DASHBOARD WIDGETS -->
@@ -449,7 +478,7 @@ a.dash-card:hover{background:var(--bg3);}
   <!-- COMMAND PALETTE -->
   <div class="cmd-bar">
     <span class="cmd-slash">/</span>
-    <input class="cmd-input" id="cmd-input" placeholder="buscar app…" autocomplete="off" spellcheck="false">
+    <input class="cmd-input" id="cmd-input" placeholder="buscar app… · &gt; buscar en datos" autocomplete="off" spellcheck="false">
     <span class="cmd-kbd">/ para buscar</span>
   </div>
   <div class="cmd-dropdown" id="cmd-dropdown"></div>
@@ -477,7 +506,7 @@ a.dash-card:hover{background:var(--bg3);}
     <div class="cl-modal">
       <div class="cl-handle"></div>
       <div class="cl-header">
-        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v3.11.0</span></div>
+        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v4.4.0</span></div>
         <button class="cl-close" onclick="closeChangelog()">✕</button>
       </div>
       <div class="cl-body" id="cl-body"></div>
@@ -490,11 +519,35 @@ a.dash-card:hover{background:var(--bg3);}
 const GITHUB_USER='Wolologger';
 const GITHUB_REPO='pwa-apps';
 
-const APP_VERSION = 'v3.11.0';
+const APP_VERSION = 'v4.4.0';
 
 // ── CHANGELOG ──────────────────────────────────────────────────────
 const CHANGELOG = [
   {
+    version: 'v4.0.0',
+    date: 'Abril 2026',
+    items: [
+      { type: 'fix', text: 'wapps-firebase.js · LEGACY_MAP corregido: compra_v2, deseados_v2, obra_multiproj_v1, + mascotas añadida (4 apps no subían a Firebase)' },
+      { type: 'new', text: 'Dashboard en el home: Hoy · Gasto rápido · Próximamente · Sincronización (datos reales de semana, gastos, sync)' },
+      { type: 'new', text: 'Categorías rediseñadas: pills horizontales con colores, scroll horizontal' },
+      { type: 'new', text: 'Responsive iPad/desktop: body centrado max-width 720/900 px' },
+      { type: 'new', text: 'wapps-nav.js: ESC y swipe desde borde izq vuelven al home' },
+      { type: 'imp', text: 'color-scheme: dark forzado en todas las apps (scrollbars/inputs nativos oscuros)' },
+      { type: 'imp', text: 'SYNC con feedback: "✓ Al día", "✓ N" o "⚠ N/M" durante 2.5 s' },
+      { type: 'imp', text: 'preconnect a fonts.googleapis, fonts.gstatic y firestore (-100-300 ms primera carga)' },
+      { type: 'del', text: 'Hero "MIS HERRAMIENTAS" y carrusel ticker horizontal' },
+    ],
+  }, {
+    version: 'v3.12.0',
+    date: 'Abril 2026',
+    items: [
+      { type: 'fix', text: 'suministros.html · doble llave {{ }} en manualPushApp (JS crasheaba silenciosamente)' },
+      { type: 'fix', text: 'decisor.html · faltaban los SDK de Firebase y wapps-*.js' },
+      { type: 'fix', text: 'decisor.html · loadState/save migrados a WStore (ahora sincroniza)' },
+      { type: 'fix', text: '14 apps · wapps:auth-change no actualizaba updateSyncUI (botones PULL/SYNC disabled tras login)' },
+      { type: 'fix', text: 'backup.html · sin listener wapps:auth-change (sync buttons nunca se habilitaban)' },
+    ],
+  }, {
     version: 'v3.11.0',
     date: 'Abril 2026',
     items: [
@@ -798,7 +851,7 @@ function renderLauncherGrid(visible) {
 
   const grid = files.map(f => {
     const m = META[f.name] || autoMeta(f.name);
-    return `<a class="icon-card ${cls}" href="${f.name}">
+    return `<a class="icon-card ${cls}" href="${f.name}" data-prefetch="${f.name}">
       <span class="ic-emoji">${m.emoji||'→'}</span>
       <span class="ic-name">${m.name}</span>
     </a>`;
@@ -807,6 +860,33 @@ function renderLauncherGrid(visible) {
   document.getElementById('launcher-content').innerHTML =
     `<div class="launcher-cat-title">${label} — ${files.length} app${files.length!==1?'s':''}</div>
      <div class="icon-grid">${grid || '<div class="err-msg">Sin apps</div>'}</div>`;
+
+  // Prefetch on hover/touchstart — pinta apps instantáneamente al pulsar
+  _wirePrefetch();
+}
+
+// ── Prefetch dinámico ──────────────────────────────────────────
+// Cuando el usuario hace hover (desktop) o touchstart (móvil) sobre una app card,
+// disparamos un <link rel="prefetch"> para que el HTML quede en caché del browser.
+// Cuando hace click, la navegación es instantánea.
+const _prefetched = new Set();
+function _prefetch(href){
+  if (!href || _prefetched.has(href)) return;
+  _prefetched.add(href);
+  const link = document.createElement('link');
+  link.rel = 'prefetch';
+  link.href = href;
+  link.as = 'document';
+  document.head.appendChild(link);
+}
+function _wirePrefetch(){
+  document.querySelectorAll('a.icon-card[data-prefetch]').forEach(a => {
+    const href = a.getAttribute('data-prefetch');
+    // Hover (desktop)
+    a.addEventListener('mouseenter', () => _prefetch(href), { once: true, passive: true });
+    // Touch (móvil) — empieza prefetch en cuanto el dedo toca, antes de soltar
+    a.addEventListener('touchstart', () => _prefetch(href), { once: true, passive: true });
+  });
 }
 
 function selectLauncherCat(id) {
@@ -835,6 +915,60 @@ function initCmdPalette() {
   function getResults(q) {
     const visible = allFiles.filter(f => !hidden.has(f.name));
     if (!q) return visible.slice(0, 7);
+
+    // Búsqueda global en datos locales: prefijo '>' busca en gastos, tareas, productos
+    if (q.startsWith('>') && q.length > 2) {
+      const ql = q.slice(1).trim().toLowerCase();
+      const dataResults = [];
+
+      // Buscar en gastos
+      try {
+        const gastos = JSON.parse(localStorage.getItem('wapps.gastos.data') || 'null');
+        (gastos?.gastos || []).forEach(g => {
+          if ((g.concepto||'').toLowerCase().includes(ql)) {
+            dataResults.push({ type:'gasto', label:`${g.concepto}`, sub:`${(g.importe||0).toFixed(2)} € · ${g.fecha||''}`, href:'gastos-diarios.html', emoji:'💸' });
+          }
+        });
+      } catch(e){}
+
+      // Buscar en tareas semana
+      try {
+        const sem = JSON.parse(localStorage.getItem('wapps.semana.data') || 'null');
+        Object.entries(sem?.tasks || {}).forEach(([fecha, tasks]) => {
+          (tasks||[]).forEach(t => {
+            if ((t.text||'').toLowerCase().includes(ql)) {
+              dataResults.push({ type:'tarea', label:`${t.text}`, sub:`Tarea · ${fecha}`, href:'semana.html', emoji:'📅' });
+            }
+          });
+        });
+      } catch(e){}
+
+      // Buscar en despensa
+      try {
+        const desp = JSON.parse(localStorage.getItem('wapps.despensa.items') || 'null');
+        (desp?.items || []).forEach(it => {
+          if ((it.nombre||'').toLowerCase().includes(ql) || (it.marca||'').toLowerCase().includes(ql)) {
+            dataResults.push({ type:'producto', label:`${it.nombre}`, sub:`Despensa · ${it.cantidad||''} ${it.unidad||''}`, href:'despensa.html', emoji:'🥫' });
+          }
+        });
+      } catch(e){}
+
+      // Buscar en compra
+      try {
+        const compra = JSON.parse(localStorage.getItem('wapps.compra.data') || 'null');
+        (compra?.items || []).forEach(it => {
+          if ((it.text||it.nombre||'').toLowerCase().includes(ql)) {
+            dataResults.push({ type:'compra', label:`${it.text||it.nombre}`, sub:`Lista compra`, href:'compra.html', emoji:'🛒' });
+          }
+        });
+      } catch(e){}
+
+      if (dataResults.length === 0) {
+        return [{ name:'Sin resultados en datos locales', desc:'Prueba sin el prefijo ">" para buscar apps', emoji:'🔍', file:null }];
+      }
+      return dataResults.slice(0, 8).map(r => ({ ...r, name: r.label, desc: r.sub, file: { name: r.href } }));
+    }
+
     const ql = q.toLowerCase();
     return visible.filter(f => {
       const m = META[f.name] || autoMeta(f.name);
@@ -846,11 +980,22 @@ function initCmdPalette() {
     currentResults = results;
     activeIdx = results.length ? 0 : -1;
     if (!results.length) {
-      dropdown.innerHTML = `<div class="cmd-empty">Sin resultados</div>`;
+      dropdown.innerHTML = `<div class="cmd-empty">Sin resultados — prueba <span style="color:var(--y)"> &gt; concepto</span> para buscar en datos</div>`;
       dropdown.classList.add('open');
       return;
     }
     dropdown.innerHTML = results.map((f, i) => {
+      // Data search result
+      if (f.emoji && !META[f.name]) {
+        return `<a class="cmd-row${i===0?' active':''}" href="${f.file?.name||'#'}" data-idx="${i}">
+          <span class="cmd-row-icon">${f.emoji}</span>
+          <div class="cmd-row-body">
+            <div class="cmd-row-name">${(f.name||'').replace(/</g,'&lt;')}</div>
+            <div class="cmd-row-desc">${(f.desc||'').replace(/</g,'&lt;')}</div>
+          </div>
+          <span class="cmd-row-arrow">↗</span>
+        </a>`;
+      }
       const m = META[f.name] || autoMeta(f.name);
       return `<a class="cmd-row${i===0?' active':''}" href="${f.name}" data-idx="${i}">
         <span class="cmd-row-icon">${m.emoji||'→'}</span>
@@ -1317,12 +1462,87 @@ function renderDashMonthTotal(){
   el.textContent=`${total.toFixed(0)} €`;
 }
 
+function renderHeroInfo(){
+  // Last sync
+  const lastSync = localStorage.getItem('wapps.lastSync');
+  const lsEl = document.getElementById('hero-last-sync');
+  if (lsEl){
+    if (lastSync){
+      const d = new Date(lastSync);
+      const diffMin = Math.round((Date.now()-d.getTime())/60000);
+      if (diffMin < 1) lsEl.textContent = 'ahora';
+      else if (diffMin < 60) lsEl.textContent = `hace ${diffMin} min`;
+      else if (diffMin < 1440) lsEl.textContent = `hace ${Math.round(diffMin/60)} h`;
+      else lsEl.textContent = `${_p2(d.getDate())}/${_p2(d.getMonth()+1)} ${_p2(d.getHours())}:${_p2(d.getMinutes())}`;
+    } else lsEl.textContent = 'nunca';
+  }
+  // Last backup
+  const lb = localStorage.getItem('wapps.lastBackup');
+  const lbEl = document.getElementById('hero-last-backup');
+  if (lbEl){
+    if (lb){
+      const d = new Date(lb);
+      const diffDay = Math.round((Date.now()-d.getTime())/86400000);
+      if (diffDay === 0) lbEl.textContent = 'hoy';
+      else if (diffDay === 1) lbEl.textContent = 'ayer';
+      else if (diffDay < 30) lbEl.textContent = `hace ${diffDay} d`;
+      else lbEl.textContent = `${_p2(d.getDate())}/${_p2(d.getMonth()+1)}`;
+    } else lbEl.textContent = 'nunca';
+  }
+  // Pending count
+  const pEl = document.getElementById('hero-pending');
+  if (pEl){
+    const p = _sync()?.getPending()?.length ?? 0;
+    pEl.textContent = p;
+    pEl.style.color = p > 0 ? 'var(--y)' : 'var(--text)';
+  }
+  // Storage size
+  const stEl = document.getElementById('hero-storage');
+  if (stEl){
+    let total = 0;
+    for (let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i);
+      if (k && k.startsWith('wapps.')){
+        total += (localStorage.getItem(k) || '').length * 2;
+      }
+    }
+    if (total < 1024) stEl.textContent = total + ' B';
+    else if (total < 1024*1024) stEl.textContent = (total/1024).toFixed(0) + ' KB';
+    else stEl.textContent = (total/(1024*1024)).toFixed(2) + ' MB';
+  }
+  // Net status
+  const nsEl = document.getElementById('hero-net-status');
+  if (nsEl) nsEl.textContent = navigator.onLine ? 'ONLINE' : 'OFFLINE';
+}
+
+// ── Latencia (escucha el evento wapps:latency emitido por wapps-firebase) ──
+function _renderLatencyDisplay(ms){
+  const el = document.getElementById('hero-latency');
+  if (!el) return;
+  if (ms === null || ms === undefined) {
+    el.textContent = navigator.onLine ? 'sin conexión' : '—';
+    el.style.color = navigator.onLine ? 'var(--r)' : 'var(--muted)';
+    return;
+  }
+  el.textContent = ms + ' ms';
+  if (ms < 100) el.style.color = 'var(--g)';
+  else if (ms < 300) el.style.color = 'var(--y)';
+  else el.style.color = 'var(--r)';
+}
+window.addEventListener('wapps:latency', e => _renderLatencyDisplay(e.detail?.ms));
+// Pintar última latencia conocida al cargar
+function startLatencyMonitor(){
+  const ms = (typeof WFirebase !== 'undefined' && WFirebase.getLatency) ? WFirebase.getLatency() : null;
+  _renderLatencyDisplay(ms);
+}
+
 function renderDashAll(){
   renderDashDate();
   renderDashTasks();
   renderDashNext();
   renderDashSyncInfo();
   renderDashMonthTotal();
+  renderHeroInfo();
 }
 
 // Actualizar en eventos relevantes
@@ -1333,8 +1553,23 @@ window.addEventListener('wapps:sync-done',()=>{
 window.addEventListener('wapps:pending-change', renderDashSyncInfo);
 window.addEventListener('focus', renderDashAll);
 renderDashAll();
-// Refresco cada 60s por si pasa tiempo mirando el dashboard
-setInterval(renderDashAll, 60000);
+startLatencyMonitor();
+
+// Refresco cada 60 s, PERO solo cuando la pestaña está visible.
+// Ahorra batería y ciclos de CPU cuando la app está en background.
+let _dashTimer = null;
+function _startDashTimer(){
+  if (_dashTimer) return;
+  _dashTimer = setInterval(renderDashAll, 60000);
+}
+function _stopDashTimer(){
+  if (_dashTimer) { clearInterval(_dashTimer); _dashTimer = null; }
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) _stopDashTimer();
+  else { renderDashAll(); _startDashTimer(); }
+});
+if (!document.hidden) _startDashTimer();
 </script>
 </body>
 </html>

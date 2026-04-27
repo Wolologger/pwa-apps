@@ -10,12 +10,68 @@
 <title>Gastos</title>
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js">
+// Debounce: agrupa múltiples saves consecutivos en uno (200ms)
+let _saveDebounce = null;
+const _saveImmediate = save;
+function save() {
+  if (_saveDebounce) clearTimeout(_saveDebounce);
+  _saveDebounce = setTimeout(() => { _saveDebounce = null; _saveImmediate(); }, 200);
+}
+// Guardar inmediatamente antes de que el usuario cierre la pestaña
+window.addEventListener('beforeunload', () => { if (_saveDebounce) _saveImmediate(); }, {once:true});
+
+// ── Haptic feedback (silencioso si el dispositivo no lo soporta) ──
+function haptic(pattern='light') {
+  if (!navigator.vibrate) return;
+  if (pattern === 'light') navigator.vibrate(8);
+  else if (pattern === 'medium') navigator.vibrate(18);
+  else if (pattern === 'success') navigator.vibrate([8, 50, 8]);
+  else if (pattern === 'error') navigator.vibrate([30, 60, 30]);
+  else navigator.vibrate(pattern);
+}
+
+
+// ── Stats por día de la semana ─────────────────────────────────
+function renderDayStats() {
+  const el = document.getElementById('day-stats-block');
+  if (!el) return;
+  const days = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const totals = new Array(7).fill(0);
+  const counts = new Array(7).fill(0);
+  (state.gastos || []).forEach(g => {
+    if (!g.fecha) return;
+    const d = new Date(g.fecha + 'T12:00:00');
+    totals[d.getDay()] += Number(g.importe||0);
+    counts[d.getDay()]++;
+  });
+  const max = Math.max(...totals, 1);
+  const total = totals.reduce((a,b)=>a+b,0);
+  const topDay = totals.indexOf(Math.max(...totals));
+  el.innerHTML = `<div style="font-size:9px;color:var(--muted);font-family:var(--fm);margin-bottom:8px;letter-spacing:1px">GASTOS POR DÍA DE SEMANA</div>` +
+    days.map((d,i) => {
+      const pct = Math.round((totals[i]/max)*100);
+      const avg = counts[i] ? (totals[i]/counts[i]).toFixed(1) : 0;
+      const isTop = i === topDay && totals[i] > 0;
+      return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-family:var(--fm);font-size:10px">
+        <span style="width:24px;color:${isTop?'var(--y)':'var(--muted)'}${isTop?';font-weight:600':''}">${d}</span>
+        <div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${isTop?'var(--y)':'var(--b)'};border-radius:3px;transition:width 0.4s"></div>
+        </div>
+        <span style="color:${isTop?'var(--y)':'var(--text)'};width:60px;text-align:right">${totals[i].toFixed(0)} €</span>
+      </div>`;
+    }).join('') +
+    `<div style="font-size:9px;color:var(--muted);font-family:var(--fm);margin-top:6px">Día con más gasto: <span style="color:var(--y)">${days[topDay]}</span> · Total histórico: <strong style="color:var(--text)">${total.toFixed(0)} €</strong></div>`;
+}
+
+</script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-config.js"></script>
 <script src="wapps-store.js"></script>
 <script src="wapps-firebase.js"></script>
+<script src="wapps-sync-ui.js" defer></script>
+<script src="wapps-pdf.js" defer></script>
 <script src="wapps-nav.js" defer></script>
 <script src="wapps-onboarding.js"></script>
 <style>
@@ -184,12 +240,16 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .sync-btn:disabled{opacity:0.35;cursor:default;}
 .wnav-version{font-size:9px;color:var(--dim);font-family:var(--fm);letter-spacing:0.5px;border:1px solid var(--dim);padding:2px 6px;border-radius:3px;flex-shrink:0;}
 
-/* === RESPONSIVE: tablet/desktop === */
+/* === RESPONSIVE: tablet/desktop (content centered via inner container) === */
 @media (min-width:720px){
-  body{max-width:720px;margin:0 auto;box-shadow:0 0 0 1px var(--line2);}
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:760px;margin-left:auto;margin-right:auto;}
+  .fab-area{max-width:760px!important;left:50%!important;transform:translateX(-50%)!important;}
+  .wnav{max-width:760px;margin-left:auto;margin-right:auto;width:100%;box-sizing:border-box;}
 }
 @media (min-width:1024px){
-  body{max-width:900px;}
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:900px;}
+  .fab-area{max-width:900px!important;}
+  .wnav{max-width:900px;}
 }
 </style>
 </head>
@@ -293,8 +353,7 @@ function load(){
   try{const r=localStorage.getItem('gastos_v1');if(r)return JSON.parse(r);}catch(e){}
   return{gastos:[],budgets:{},nextId:1};
 }
-function save(){
-  state.nextId=nid;
+function _saveImmediate() {  state.nextId=nid;
   // WStore: persiste en localStorage Y marca pending para Firebase
   if(typeof WStore!=='undefined'){WStore.set('gastos','data',state);}
   else{try{localStorage.setItem('gastos_v1',JSON.stringify(state));}catch(e){}}
@@ -355,12 +414,49 @@ function showPanel(name, el){
 }
 
 // ── QUICK ADD ──
+// ── AUTO-CATEGORIZACIÓN ────────────────────────────────────────
+// Clasifica el concepto con reglas de texto simples. Sin IA, sin red.
+// Devuelve id de categoría o null si no hay match.
+const AUTO_CAT_RULES = [
+  // Supermercados
+  { cat:'super', words:['mercadona','lidl','aldi','carrefour','dia','eroski','alcampo','hipercor','bonpreu','consum','ahorro','freshco','simply'] },
+  // Gasolina / combustible
+  { cat:'gasolina', words:['repsol','cepsa','bp','shell','galp','campsa','petronor','gasolinera','combustible','gasolina','gasoil','diésel'] },
+  // Transporte
+  { cat:'transporte', words:['renfe','metro','autobús','autobus','bus','taxi','uber','cabify','blablacar','avión','avion','vueling','iberia','parking','peaje','tren'] },
+  // Comida / restaurantes
+  { cat:'comida', words:['café','cafe','cafetería','cafeteria','bar','restaurante','mcdonalds','burguer','burger','pizza','sushi','kebab','bocadillo','menú','menu','almuerzo','cena','desayuno','copa','cerveza','vino'] },
+  // Farmacia / salud
+  { cat:'farmacia', words:['farmacia','médico','medico','dentista','fisio','fisioterapia','hospital','clínica','clinica','medicamento','pastilla','parafarmacia','óptica','optica'] },
+  // Ocio / entretenimiento
+  { cat:'ocio', words:['cine','teatro','concierto','spotify','netflix','disney','amazon prime','hbo','steam','ps4','ps5','xbox','nintendo','libro','kindle','museo','entrada','deporte','gym','padel','fútbol','futbol'] },
+  // Hogar
+  { cat:'hogar', words:['ikea','leroy','bauhaus','bricomart','ferretería','ferreteria','electricidad','fontanería','fontaneria','limpieza','luz','gas','agua','alquiler','hipoteca','comunidad'] },
+];
+
+function autoCat(concepto) {
+  if (!concepto) return null;
+  const low = concepto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  for (const rule of AUTO_CAT_RULES) {
+    if (rule.words.some(w => low.includes(w.normalize('NFD').replace(/[\u0300-\u036f]/g,'')))) {
+      return rule.cat;
+    }
+  }
+  return null;
+}
+
 function qaAdd(){
+  haptic('light');
   const imp=parseFloat(document.getElementById('qa-imp').value);
   let con=document.getElementById('qa-con').value.trim();
   if(isNaN(imp)||imp<=0)return;
   if(!con)con=CM[selCat].label;
-  state.gastos.push({id:nxtId(),importe:imp,concepto:con,fecha:today(),cat:selCat,nota:''});
+  // Auto-categorizar por concepto si la categoría sigue en "otros" (no elegida manualmente)
+  const detectedCat = autoCat(con);
+  const finalCat = (selCat === 'otros' && detectedCat) ? detectedCat : selCat;
+  // Si se auto-detectó, actualizar la UI de categoría
+  if (finalCat !== selCat) selectCat(finalCat);
+  state.gastos.push({id:nxtId(),importe:imp,concepto:con,fecha:today(),cat:finalCat,nota:''});
   document.getElementById('qa-imp').value='';
   document.getElementById('qa-con').value='';
   document.getElementById('qa-imp').focus();
@@ -728,7 +824,7 @@ function updateSyncUI(state, pendingCount) {
   const labels={online:'ONLINE',offline:'OFFLINE',syncing:'SINCRONIZANDO...'};
   label.textContent=labels[state]||state.toUpperCase();
   pend.textContent=pendingCount>0?'· '+pendingCount+' PENDIENTE'+(pendingCount>1?'S':''):'';
-  btn.disabled=!(state==='online'&&_fb()&&_fb().getUser()&&pendingCount>0);
+  btn.disabled=!(state==='online'&&_fb()&&_fb().getUser());
   const pullBtn = document.getElementById('pull-btn');
   if (pullBtn) pullBtn.disabled = !(state === 'online' && _fb() && _fb().getUser());
   const pushAppBtn = document.getElementById('push-app-btn');

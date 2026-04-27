@@ -1,4 +1,4 @@
-const CACHE = 'wapps-v9.0';
+const CACHE = 'wapps-v10.0';
 
 // Núcleo: solo lo imprescindible para arrancar offline y mostrar fallbacks.
 // El resto de páginas HTML se cachean la primera vez que el usuario las visita (lazy cache).
@@ -59,17 +59,39 @@ self.addEventListener('message', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Dejar pasar sin cachear: APIs externas, Firebase, CDNs
+  // CDNs cacheables: Firebase SDK, Google Fonts, Cloudflare jsPDF.
+  // Estrategia: cache-first con fallback a red. Permite arrancar la app
+  // 100% offline tras la primera visita (antes solo HTML/JS propios cacheaban).
+  const isCacheableCDN =
+    (url.hostname === 'www.gstatic.com' && url.pathname.includes('/firebasejs/')) ||
+    url.hostname === 'fonts.googleapis.com' ||
+    url.hostname === 'fonts.gstatic.com' ||
+    url.hostname === 'cdnjs.cloudflare.com';
+
+  if (isCacheableCDN) {
+    e.respondWith(
+      caches.match(e.request).then(cached => {
+        if (cached) return cached;
+        return fetch(e.request).then(response => {
+          if (response.ok || response.type === 'opaque') {
+            const clone = response.clone();
+            caches.open(CACHE).then(cache => cache.put(e.request, clone));
+          }
+          return response;
+        }).catch(() => cached);
+      })
+    );
+    return;
+  }
+
+  // Dejar pasar sin cachear: otros APIs externas (Firebase Firestore tiene su propio cache)
   if (
     url.hostname.includes('api.github.com') ||
-    url.hostname.includes('fonts.googleapis.com') ||
-    url.hostname.includes('fonts.gstatic.com') ||
     url.hostname.includes('googleapis.com') ||
-    url.hostname.includes('gstatic.com') ||
     url.hostname.includes('workers.dev') ||
     url.hostname.includes('edamam.com') ||
     url.hostname.includes('firebaseapp.com') ||
-    url.hostname.includes('cdnjs.cloudflare.com')
+    url.hostname.includes('cloudflare.com')
   ) {
     return;
   }

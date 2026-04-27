@@ -14,6 +14,7 @@
 <script src="wapps-config.js"></script>
 <script src="wapps-store.js"></script>
 <script src="wapps-firebase.js"></script>
+<script src="wapps-sync-ui.js" defer></script>
 <script src="wapps-nav.js" defer></script>
 <script src="wapps-onboarding.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
@@ -143,12 +144,16 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .sync-btn:disabled{opacity:0.35;cursor:default;}
 .wnav-version{font-size:9px;color:var(--dim);font-family:var(--fm);letter-spacing:0.5px;border:1px solid var(--dim);padding:2px 6px;border-radius:3px;flex-shrink:0;}
 
-/* === RESPONSIVE: tablet/desktop === */
+/* === RESPONSIVE: tablet/desktop (content centered via inner container) === */
 @media (min-width:720px){
-  body{max-width:720px;margin:0 auto;box-shadow:0 0 0 1px var(--line2);}
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:760px;margin-left:auto;margin-right:auto;}
+  .fab-area{max-width:760px!important;left:50%!important;transform:translateX(-50%)!important;}
+  .wnav{max-width:760px;margin-left:auto;margin-right:auto;width:100%;box-sizing:border-box;}
 }
 @media (min-width:1024px){
-  body{max-width:900px;}
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:900px;}
+  .fab-area{max-width:900px!important;}
+  .wnav{max-width:900px;}
 }
 </style>
 </head>
@@ -609,7 +614,7 @@ function updateSyncUI(state, pendingCount) {
   const labels={online:'ONLINE',offline:'OFFLINE',syncing:'SINCRONIZANDO...'};
   label.textContent=labels[state]||state.toUpperCase();
   pend.textContent=pendingCount>0?'· '+pendingCount+' PENDIENTE'+(pendingCount>1?'S':''):'';
-  btn.disabled=!(state==='online'&&_fb()&&_fb().getUser()&&pendingCount>0);
+  btn.disabled=!(state==='online'&&_fb()&&_fb().getUser());
   const pullBtn = document.getElementById('pull-btn');
   if (pullBtn) pullBtn.disabled = !(state === 'online' && _fb() && _fb().getUser());
   const pushAppBtn = document.getElementById('push-app-btn');

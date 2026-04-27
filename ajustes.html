@@ -8,12 +8,76 @@
 <meta name="theme-color" content="#0a0a09">
 <link rel="manifest" href="manifest.json">
 <title>Ajustes — W//APPS</title>
-<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js">
+// ── Error log de sync ──────────────────────────────────────────
+const _syncErrors = JSON.parse(localStorage.getItem('wapps.syncErrors') || '[]');
+function _logSyncError(msg) {
+  const entry = { ts: new Date().toISOString(), msg: String(msg) };
+  _syncErrors.unshift(entry);
+  if (_syncErrors.length > 20) _syncErrors.length = 20;
+  localStorage.setItem('wapps.syncErrors', JSON.stringify(_syncErrors));
+  renderSyncErrors();
+}
+function renderSyncErrors() {
+  const el = document.getElementById('sync-error-log');
+  if (!el) return;
+  if (!_syncErrors.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:10px;font-family:var(--fm)">Sin errores recientes ✓</div>';
+    return;
+  }
+  el.innerHTML = _syncErrors.slice(0,10).map(e => {
+    const d = new Date(e.ts);
+    const t = d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+    const day = d.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit'});
+    return \`<div style="display:flex;gap:8px;font-size:10px;font-family:var(--fm);padding:4px 0;border-bottom:0.5px solid var(--border,rgba(255,255,255,0.07))">
+      <span style="color:var(--muted);flex-shrink:0">\${day} \${t}</span>
+      <span style="color:var(--r)">\${e.msg.replace(/</g,'&lt;')}</span>
+    </div>\`;
+  }).join('');
+}
+window.addEventListener('wapps:sync-error', e => _logSyncError(e.detail?.msg || 'error desconocido'));
+
+// ── Stats por app ──────────────────────────────────────────────
+function renderAppStats() {
+  const el = document.getElementById('app-stats-grid');
+  if (!el) return;
+  const apps = [
+    { key:'gastos.data',       label:'Gastos',     emoji:'💸', countFn: d=>d?.gastos?.length },
+    { key:'compra.data',       label:'Compra',     emoji:'🛒', countFn: d=>d?.items?.length },
+    { key:'despensa.items',    label:'Despensa',   emoji:'🥫', countFn: d=>d?.items?.length },
+    { key:'semana.data',       label:'Semana',     emoji:'📅', countFn: d=>Object.values(d?.tasks||{}).flat().length },
+    { key:'obra.data',         label:'Obra',       emoji:'🏗️', countFn: d=>(d?.proyectos||[]).reduce((s,p)=>(s+(p.tasks||[]).length),0) },
+    { key:'suministros.data',  label:'Suminist.',  emoji:'⚡', countFn: d=>d?.facturas?.length },
+    { key:'coches.data',       label:'Coches',     emoji:'🚗', countFn: d=>d?.cars?.length },
+    { key:'mascotas.data',     label:'Mascotas',   emoji:'🐾', countFn: d=>d?.pets?.length },
+    { key:'ninos.data',        label:'Niños',      emoji:'👶', countFn: d=>d?.kids?.length },
+    { key:'setlist.data',      label:'Setlist',    emoji:'🎸', countFn: d=>d?.songs?.length },
+    { key:'finanzas.data',     label:'Finanzas',   emoji:'💰', countFn: d=>d?.entries?.length },
+    { key:'deseados.data',     label:'Deseados',   emoji:'❤️', countFn: d=>d?.items?.length },
+    { key:'instrumentos.data', label:'Instrumen.', emoji:'🎹', countFn: d=>d?.instruments?.length },
+  ];
+  el.innerHTML = apps.map(app => {
+    const raw = localStorage.getItem('wapps.' + app.key);
+    if (!raw) return '';
+    let data;
+    try { data = JSON.parse(raw); } catch(e) { return ''; }
+    const count = app.countFn(data);
+    const sizeKB = (raw.length * 2 / 1024).toFixed(0);
+    const updatedAt = data?._updatedAt ? new Date(data._updatedAt).toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit'}) : '—';
+    return \`<div style="background:var(--bg2);border:0.5px solid var(--border,rgba(255,255,255,0.07));border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:3px">
+      <div style="font-size:14px">\${app.emoji} <span style="font-family:var(--fm);font-size:10px;letter-spacing:0.5px">\${app.label}</span></div>
+      <div style="font-family:var(--fm);font-size:20px;color:var(--y)">\${count ?? '—'}</div>
+      <div style="font-size:9px;color:var(--muted);font-family:var(--fm)">\${sizeKB} KB · \${updatedAt}</div>
+    </div>\`;
+  }).filter(Boolean).join('');
+}
+</script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-config.js"></script>
 <script src="wapps-store.js"></script>
 <script src="wapps-firebase.js"></script>
+<script src="wapps-sync-ui.js" defer></script>
 <script src="wapps-nav.js" defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -115,12 +179,16 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;padding:10px 18px;font-size:12px;color:var(--text);z-index:999;opacity:0;transition:opacity 0.25s;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;}
 
-/* === RESPONSIVE: tablet/desktop === */
+/* === RESPONSIVE: tablet/desktop (content centered via inner container) === */
 @media (min-width:720px){
-  body{max-width:720px;margin:0 auto;box-shadow:0 0 0 1px var(--line2);}
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:760px;margin-left:auto;margin-right:auto;}
+  .fab-area{max-width:760px!important;left:50%!important;transform:translateX(-50%)!important;}
+  .wnav{max-width:760px;margin-left:auto;margin-right:auto;width:100%;box-sizing:border-box;}
 }
 @media (min-width:1024px){
-  body{max-width:900px;}
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:900px;}
+  .fab-area{max-width:900px!important;}
+  .wnav{max-width:900px;}
 }
 </style>
 </head>
@@ -225,7 +293,19 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var
         <span class="section-title">Datos</span>
       </div>
       <div class="section-body">
-        <div id="storage-stats"></div>
+        
+      <!-- Panel de errores de sync -->
+      <div class="section-block" style="margin-top:16px">
+        <div class="section-label" style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+          <span>Errores de sincronización</span>
+          <button class="btn btn-sm" onclick="_syncErrors.length=0;localStorage.removeItem('wapps.syncErrors');renderSyncErrors()">Limpiar</button>
+        </div>
+        <div id="sync-error-log" style="max-height:180px;overflow-y:auto"></div>
+      </div>
+
+      <div class="section-label" style="margin-bottom:8px">Estadísticas por app</div>
+      <div id="app-stats-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px"></div>
+<div id="storage-stats"></div>
         <div class="divider"></div>
         <a class="link-row" href="backup.html">
           Backup y restauración
@@ -482,6 +562,7 @@ function fmtSize(bytes) {
 }
 
 function renderStorageStats() {
+  renderAppStats();
   const el = document.getElementById('storage-stats');
   if (!el) return;
 

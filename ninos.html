@@ -37,6 +37,16 @@
     document.body && (document.body.style.background = isDark?'#0a0a09':'#f5f4f0');
   } catch(e) {}
 })();
+
+// Debounce: agrupa múltiples saves consecutivos en uno (200ms)
+let _saveDebounce = null;
+const _saveImmediate = save;
+function save() {
+  if (_saveDebounce) clearTimeout(_saveDebounce);
+  _saveDebounce = setTimeout(() => { _saveDebounce = null; _saveImmediate(); }, 200);
+}
+// Guardar inmediatamente antes de que el usuario cierre la pestaña
+window.addEventListener('beforeunload', () => { if (_saveDebounce) _saveImmediate(); }, {once:true});
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
@@ -51,6 +61,7 @@
 <script src="wapps-config.js"></script>
 <script src="wapps-store.js"></script>
 <script src="wapps-firebase.js"></script>
+<script src="wapps-sync-ui.js" defer></script>
 <script src="wapps-nav.js" defer></script>
 <script src="wapps-onboarding.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
@@ -101,11 +112,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .section.active{display:block;}
 
 /* SPINNER */
-.spinner-overlay{display:none;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1rem;gap:12px;}
 .spinner-overlay.show{display:flex;}
-.spinner{width:20px;height:20px;border:2px solid var(--border2);border-top-color:var(--y);border-radius:50%;animation:spin 0.6s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
-.spinner-label{font-size:12px;color:var(--muted);font-family:var(--fm);}
 
 /* KID PROFILE CARD */
 .kid-profile{background:var(--bg2);border:0.5px solid var(--border2);border-radius:14px;padding:18px;margin-bottom:14px;position:relative;}
@@ -180,7 +188,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .growth-diff{font-size:10px;font-family:var(--fm);padding:2px 6px;border-radius:99px;}
 .growth-up{background:rgba(48,216,128,0.1);color:var(--g);}
 .growth-down{background:rgba(240,64,48,0.1);color:var(--r);}
-.growth-eq{background:rgba(90,88,80,0.1);color:var(--muted);}
 
 /* EXPENSE CARDS */
 .expense-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
@@ -188,12 +195,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .expense-concept{font-size:13px;font-weight:500;}
 .expense-meta{font-size:11px;color:var(--muted);font-family:var(--fm);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;}
 .expense-cat{font-size:9px;padding:2px 8px;border-radius:99px;font-family:var(--fm);}
-.expense-cat-medico{background:rgba(240,64,48,0.1);color:var(--r);border:0.5px solid rgba(240,64,48,0.25);}
-.expense-cat-farmacia{background:rgba(192,96,240,0.1);color:var(--p);border:0.5px solid rgba(192,96,240,0.25);}
-.expense-cat-colegio{background:rgba(48,168,240,0.1);color:var(--b);border:0.5px solid rgba(48,168,240,0.25);}
-.expense-cat-ropa{background:rgba(240,144,48,0.1);color:var(--o);border:0.5px solid rgba(240,144,48,0.25);}
-.expense-cat-actividad{background:rgba(48,216,128,0.1);color:var(--g);border:0.5px solid rgba(48,216,128,0.25);}
-.expense-cat-otro{background:rgba(90,88,80,0.12);color:var(--muted);border:0.5px solid var(--border2);}
 .expense-amount{font-family:var(--fh);font-size:22px;color:var(--y);flex-shrink:0;white-space:nowrap;}
 
 /* ADD PANELS */
@@ -234,7 +235,6 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
 .summary-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px;}
 .summary-label{font-size:9px;color:var(--muted);font-family:var(--fm);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:4px;}
 .summary-val{font-family:var(--fh);font-size:24px;line-height:1;}
-.summary-sub{font-size:10px;color:var(--muted);font-family:var(--fm);margin-top:2px;}
 
 /* DATA */
 .data-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:14px;margin-bottom:10px;}
@@ -263,12 +263,16 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
 .sync-btn:disabled{opacity:0.35;cursor:default;}
 .wnav-version{font-size:9px;color:var(--dim);font-family:var(--fm);letter-spacing:0.5px;border:1px solid var(--dim);padding:2px 6px;border-radius:3px;flex-shrink:0;}
 
-/* === RESPONSIVE: tablet/desktop === */
+/* === RESPONSIVE: tablet/desktop (content centered via inner container) === */
 @media (min-width:720px){
-  body{max-width:720px;margin:0 auto;box-shadow:0 0 0 1px var(--line2);}
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:760px;margin-left:auto;margin-right:auto;}
+  .fab-area{max-width:760px!important;left:50%!important;transform:translateX(-50%)!important;}
+  .wnav{max-width:760px;margin-left:auto;margin-right:auto;width:100%;box-sizing:border-box;}
 }
 @media (min-width:1024px){
-  body{max-width:900px;}
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:900px;}
+  .fab-area{max-width:900px!important;}
+  .wnav{max-width:900px;}
 }
 </style>
 </head>
@@ -570,7 +574,7 @@ function loadState() {
   try { const r = localStorage.getItem('ninos_v1'); if (r) return JSON.parse(r); } catch(e) {}
   return { kids: [], nextId: 1 };
 }
-function save() {
+function _saveImmediate() {
   state.nextId = nid;
   try {
     localStorage.setItem('ninos_v1', JSON.stringify(state));
@@ -586,7 +590,7 @@ function daysUntil(dateStr) { if(!dateStr) return null; const d=new Date(dateStr
 
 function calcAge(birthDate) {
   if (!birthDate) return null;
-  const birth = new Date(birthDate);
+  const birth = new Date(birthDate + 'T12:00:00');
   const now = new Date();
   let years = now.getFullYear() - birth.getFullYear();
   let months = now.getMonth() - birth.getMonth();
@@ -594,6 +598,22 @@ function calcAge(birthDate) {
   if (years === 0) return `${months} mes${months !== 1 ? 'es' : ''}`;
   if (years < 3) return `${years} año${years !== 1 ? 's' : ''} y ${months} mes${months !== 1 ? 'es' : ''}`;
   return `${years} año${years !== 1 ? 's' : ''}`;
+}
+
+function isBirthdayToday(birthDate) {
+  if (!birthDate) return false;
+  const b = new Date(birthDate + 'T12:00:00');
+  const n = new Date();
+  return b.getDate() === n.getDate() && b.getMonth() === n.getMonth();
+}
+
+function checkBirthdayAlerts() {
+  const today = (state.kids || []).filter(k => isBirthdayToday(k.nacimiento));
+  if (!today.length) return;
+  today.forEach(k => {
+    const age = calcAge(k.nacimiento);
+    showToast(`🎂 ¡Hoy es el cumpleaños de ${k.nombre}! ${age ? '(' + age + ')' : ''}`);
+  });
 }
 
 function activeKid() { return state.kids.find(k => k.id === activeKidId); }
@@ -1435,6 +1455,8 @@ if(typeof WOnboarding!=='undefined')WOnboarding.show('ninos', OB_STEPS);
 // Limitar fechas de nacimiento a hoy (no permitir futuras)
 (function(){ const _t=today(); ['fk-nacimiento'].forEach(id=>{const el=document.getElementById(id); if(el) el.max=_t;}); })();
 render();
+// Alertas de cumpleaños al cargar
+setTimeout(checkBirthdayAlerts, 1200);
 
 function _fb()   { return (typeof WFirebase !== 'undefined') ? WFirebase : null; }
 function _sync() { return (typeof WSync     !== 'undefined') ? WSync     : null; }
@@ -1450,7 +1472,7 @@ function updateSyncUI(state, pendingCount) {
   label.textContent = labels[state] || state.toUpperCase();
   pend.textContent = pendingCount > 0 ? '· ' + pendingCount + ' PENDIENTE' + (pendingCount > 1 ? 'S' : '') : '';
   const fb = _fb();
-  const canSync = state === 'online' && fb && fb.getUser() && pendingCount > 0;
+  const canSync = state === 'online' && fb && fb.getUser();
   btn.disabled = !canSync;
   const pullBtn = document.getElementById('pull-btn');
   if (pullBtn) pullBtn.disabled = !(state === 'online' && fb && fb.getUser());

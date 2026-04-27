@@ -8,12 +8,24 @@
 <meta name="theme-color" content="#0a0a09">
 <title>Mascotas — W//APPS</title>
 <link rel="manifest" href="manifest.json">
-<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js">
+// ── Haptic feedback (silencioso si el dispositivo no lo soporta) ──
+function haptic(pattern='light') {
+  if (!navigator.vibrate) return;
+  if (pattern === 'light') navigator.vibrate(8);
+  else if (pattern === 'medium') navigator.vibrate(18);
+  else if (pattern === 'success') navigator.vibrate([8, 50, 8]);
+  else if (pattern === 'error') navigator.vibrate([30, 60, 30]);
+  else navigator.vibrate(pattern);
+}
+
+</script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-config.js"></script>
 <script src="wapps-store.js"></script>
 <script src="wapps-firebase.js"></script>
+<script src="wapps-sync-ui.js" defer></script>
 <script src="wapps-nav.js" defer></script>
 <script src="wapps-onboarding.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
@@ -195,12 +207,16 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
 .sync-btn:disabled{opacity:0.35;cursor:default;}
 .wnav-version{font-size:9px;color:var(--dim);font-family:var(--fm);letter-spacing:0.5px;border:1px solid var(--dim);padding:2px 6px;border-radius:3px;flex-shrink:0;}
 
-/* === RESPONSIVE: tablet/desktop === */
+/* === RESPONSIVE: tablet/desktop (content centered via inner container) === */
 @media (min-width:720px){
-  body{max-width:720px;margin:0 auto;box-shadow:0 0 0 1px var(--line2);}
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:760px;margin-left:auto;margin-right:auto;}
+  .fab-area{max-width:760px!important;left:50%!important;transform:translateX(-50%)!important;}
+  .wnav{max-width:760px;margin-left:auto;margin-right:auto;width:100%;box-sizing:border-box;}
 }
 @media (min-width:1024px){
-  body{max-width:900px;}
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:900px;}
+  .fab-area{max-width:900px!important;}
+  .wnav{max-width:900px;}
 }
 </style>
 </head>
@@ -412,7 +428,7 @@ function daysSince(dateStr) { if(!dateStr) return null; const d=new Date(dateStr
 
 function calcAge(birthDate) {
   if (!birthDate) return null;
-  const birth = new Date(birthDate);
+  const birth = new Date(birthDate + 'T12:00:00');
   const now = new Date();
   let years = now.getFullYear() - birth.getFullYear();
   let months = now.getMonth() - birth.getMonth();
@@ -420,6 +436,22 @@ function calcAge(birthDate) {
   if (years === 0) return `${months} mes${months !== 1 ? 'es' : ''}`;
   if (years < 2) return `${years} año${years !== 1 ? 's' : ''} y ${months} mes${months !== 1 ? 'es' : ''}`;
   return `${years} año${years !== 1 ? 's' : ''}`;
+}
+
+function isBirthdayToday(birthDate) {
+  if (!birthDate) return false;
+  const b = new Date(birthDate + 'T12:00:00');
+  const n = new Date();
+  return b.getDate() === n.getDate() && b.getMonth() === n.getMonth();
+}
+
+function checkBirthdayAlerts() {
+  const today = state.pets.filter(p => isBirthdayToday(p.nacimiento));
+  if (!today.length) return;
+  today.forEach(p => {
+    const age = calcAge(p.nacimiento);
+    showToast(`🎂 ¡Hoy es el cumpleaños de ${p.nombre}! ${age ? '(' + age + ')' : ''}`);
+  });
 }
 
 function activePet() { return state.pets.find(p => p.id === activePetId); }
@@ -1035,6 +1067,8 @@ if(typeof WOnboarding!=='undefined')WOnboarding.show('mascotas', OB_STEPS);
 // Limitar fechas de nacimiento a hoy (no permitir futuras)
 (function(){ const _t=today(); ['fp-nacimiento'].forEach(id=>{const el=document.getElementById(id); if(el) el.max=_t;}); })();
 render();
+// Alertas de cumpleaños al cargar (delay para que el toast sea visible)
+setTimeout(checkBirthdayAlerts, 1200);
 </script>
 
 <script>
@@ -1047,7 +1081,7 @@ function updateSyncUI(state, pendingCount) {
   const labels={online:'ONLINE',offline:'OFFLINE',syncing:'SINCRONIZANDO...'};
   label.textContent=labels[state]||state.toUpperCase();
   pend.textContent=pendingCount>0?'· '+pendingCount+' PENDIENTE'+(pendingCount>1?'S':''):'';
-  btn.disabled=!(state==='online'&&_fb()&&_fb().getUser()&&pendingCount>0);
+  btn.disabled=!(state==='online'&&_fb()&&_fb().getUser());
   const pullBtn = document.getElementById('pull-btn');
   if (pullBtn) pullBtn.disabled = !(state === 'online' && _fb() && _fb().getUser());
   const pushAppBtn = document.getElementById('push-app-btn');

@@ -10,12 +10,24 @@
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <!-- ★ Bus compartido -->
-<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js">
+// ── Haptic feedback (silencioso si el dispositivo no lo soporta) ──
+function haptic(pattern='light') {
+  if (!navigator.vibrate) return;
+  if (pattern === 'light') navigator.vibrate(8);
+  else if (pattern === 'medium') navigator.vibrate(18);
+  else if (pattern === 'success') navigator.vibrate([8, 50, 8]);
+  else if (pattern === 'error') navigator.vibrate([30, 60, 30]);
+  else navigator.vibrate(pattern);
+}
+
+</script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-config.js"></script>
 <script src="wapps-store.js"></script>
 <script src="wapps-firebase.js"></script>
+<script src="wapps-sync-ui.js" defer></script>
 <script src="wapps-nav.js" defer></script>
 <script src="wapps-onboarding.js"></script>
 <style>
@@ -159,12 +171,16 @@ select option{background:var(--bg2);}
 .sync-btn:hover:not(:disabled){border-color:var(--y,#e8f040);color:var(--y,#e8f040);}
 .sync-btn:disabled{opacity:0.35;cursor:default;}
 
-/* === RESPONSIVE: tablet/desktop === */
+/* === RESPONSIVE: tablet/desktop (content centered via inner container) === */
 @media (min-width:720px){
-  body{max-width:720px;margin:0 auto;box-shadow:0 0 0 1px var(--line2);}
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:760px;margin-left:auto;margin-right:auto;}
+  .fab-area{max-width:760px!important;left:50%!important;transform:translateX(-50%)!important;}
+  .wnav{max-width:760px;margin-left:auto;margin-right:auto;width:100%;box-sizing:border-box;}
 }
 @media (min-width:1024px){
-  body{max-width:900px;}
+  body > *:not(.wapp-loading):not(.login-screen):not(.cl-backdrop):not(.fab-area){max-width:900px;}
+  .fab-area{max-width:900px!important;}
+  .wnav{max-width:900px;}
 }
 </style>
 </head>
@@ -836,7 +852,7 @@ function updateSyncUI(state, pendingCount) {
   label.textContent = labels[state] || state.toUpperCase();
   pend.textContent = pendingCount > 0 ? '· ' + pendingCount + ' PENDIENTE' + (pendingCount > 1 ? 'S' : '') : '';
   const fb = _fb();
-  const canSync = state === 'online' && fb && fb.getUser() && pendingCount > 0;
+  const canSync = state === 'online' && fb && fb.getUser();
   btn.disabled = !canSync;
   const pullBtn = document.getElementById('pull-btn');
   if (pullBtn) pullBtn.disabled = !(state === 'online' && fb && fb.getUser());
