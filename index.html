@@ -421,8 +421,8 @@ a.dash-card:hover{background:var(--bg3);}
         <div class="info-val"><span class="status"><span class="status-dot"></span><span id="hero-net-status">ONLINE</span></span></div>
       </div>
       <div class="info-block">
-        <div class="info-lbl">Latencia</div>
-        <div class="info-val" id="hero-latency">—</div>
+        <div class="info-lbl">Datos en Firebase</div>
+        <div class="info-val" id="hero-firebase-size">—</div>
       </div>
     </div>
   </div>
@@ -1527,26 +1527,40 @@ function renderHeroInfo(){
   if (nsEl) nsEl.textContent = navigator.onLine ? 'ONLINE' : 'OFFLINE';
 }
 
-// ── Latencia (escucha el evento wapps:latency emitido por wapps-firebase) ──
-function _renderLatencyDisplay(ms){
-  const el = document.getElementById('hero-latency');
+// ── Datos en Firebase (estimado desde localStorage synced) ──────
+function _renderFirebaseSize() {
+  const el = document.getElementById('hero-firebase-size');
   if (!el) return;
-  if (ms === null || ms === undefined) {
-    el.textContent = navigator.onLine ? 'sin conexión' : '—';
-    el.style.color = navigator.onLine ? 'var(--r)' : 'var(--muted)';
-    return;
+  const SYNC_KEYS = [
+    'wapps.despensa.items','wapps.compra.data','wapps.suministros.data',
+    'wapps.finanzas.data','wapps.gastos.data','wapps.semana.data',
+    'wapps.deseados.data','wapps.obra.data','wapps.instrumentos.data',
+    'wapps.setlist.data','wapps.mascotas.data','wapps.coches.data','wapps.ninos.data'
+  ];
+  let synced = 0;
+  let pending_keys = [];
+  try { pending_keys = JSON.parse(localStorage.getItem('wapps.pending') || '[]'); } catch(e){}
+  for (const k of SYNC_KEYS) {
+    const raw = localStorage.getItem(k);
+    if (!raw) continue;
+    const key_name = k.replace('wapps.','');
+    if (!pending_keys.includes(key_name)) synced += raw.length * 2;
   }
-  el.textContent = ms + ' ms';
-  if (ms < 100) el.style.color = 'var(--g)';
-  else if (ms < 300) el.style.color = 'var(--y)';
-  else el.style.color = 'var(--r)';
+  const fmtKB = b => b < 1024 ? b + ' B' : (b/1024).toFixed(1) + ' KB';
+  const MAX = 1024 * 1024;
+  const pct = Math.round((synced / MAX) * 100);
+  if (pending_keys.length > 0) {
+    el.textContent = fmtKB(synced) + ' (' + pending_keys.length + ' pendientes)';
+    el.style.color = 'var(--y)';
+  } else {
+    el.textContent = fmtKB(synced) + ' / 1 MB (' + pct + '%)';
+    el.style.color = pct > 80 ? 'var(--r)' : 'var(--text)';
+  }
 }
-window.addEventListener('wapps:latency', e => _renderLatencyDisplay(e.detail?.ms));
-// Pintar última latencia conocida al cargar
-function startLatencyMonitor(){
-  const ms = (typeof WFirebase !== 'undefined' && WFirebase.getLatency) ? WFirebase.getLatency() : null;
-  _renderLatencyDisplay(ms);
-}
+window.addEventListener('wapps:sync-done', _renderFirebaseSize);
+window.addEventListener('wapps:pending-change', _renderFirebaseSize);
+window.addEventListener('wapps:auth-change', _renderFirebaseSize);
+function startLatencyMonitor(){ _renderFirebaseSize(); }
 
 function renderDashAll(){
   renderDashDate();

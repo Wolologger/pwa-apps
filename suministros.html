@@ -1082,15 +1082,10 @@ function showToast(msg, isErr = false) {
   _toastTimer = setTimeout(() => { el.style.opacity = '0'; }, 2800);
 }
 
-// wuid(): ID único de dispositivo. Usa crypto.randomUUID() si disponible,
-// si no, timestamp+random (probabilidad de colisión ~0 en uso real).
+// wuid(): ID numérico único basado en timestamp. Seguro en onclick="fn(id)".
+// Probabilidad de colisión entre 2 dispositivos en el mismo millisegundo: ~0 en uso real.
 function wuid() {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    // UUID v4: garantiza unicidad global
-    return crypto.randomUUID();
-  }
-  // Fallback: timestamp ms + 8 hex random chars
-  return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,10);
+  return Date.now();
 }
 function nxtId(){ return wuid(); }
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }

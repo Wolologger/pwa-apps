@@ -160,8 +160,18 @@ const WStore = (() => {
           const user = WFirebase.getUser();
           if (user && WFirebase.isOnline()) {
             const fsKey = storeKey.replace('.', '_');
-            WFirebase.pushToFirestore(user.uid, fsKey, payload)
-              .then(ok => { if (ok) WSync.clearPending(storeKey); })
+            // CRÍTICO: pasar el mismo payload (con el mismo _updatedAt) a Firestore
+            // para que local y Firebase queden sincronizados exactamente.
+            // pushToFirestore añade su propio _updatedAt — usamos el de payload
+            // para evitar la deriva T1 (local) vs T2 (remote) que causa re-syncs infinitos.
+            WFirebase.pushToFirestoreExact(user.uid, fsKey, payload)
+              .then(ok => {
+                if (ok) {
+                  WSync.clearPending(storeKey);
+                  // Actualizar local con el mismo timestamp confirmado
+                  localStorage.setItem(sk, JSON.stringify(payload));
+                }
+              })
               .catch(() => {}); // silencioso, queda en pending
           }
         }

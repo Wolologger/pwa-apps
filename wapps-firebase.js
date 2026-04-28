@@ -215,6 +215,23 @@ const WFirebase = (() => {
     }
   }
 
+  // Versión que preserva el _updatedAt del payload (evita deriva de timestamps).
+  // Usar cuando local ya tiene _updatedAt y queremos que Firebase sea idéntico,
+  // para que el siguiente syncOnLoad vea remoteTs === localTs y no descargue de vuelta.
+  async function pushToFirestoreExact(uid, key, data) {
+    if (!_ready || !uid) return false;
+    try {
+      const payload = { ...data };
+      if (!payload._updatedAt) payload._updatedAt = new Date().toISOString();
+      await _db.collection('users').doc(uid).collection('data').doc(key).set(payload);
+      return true;
+    } catch(e) {
+      console.error(`[WFirebase] pushExact error ${key}:`, e);
+      window.dispatchEvent(new CustomEvent('wapps:sync-error', { detail: { msg: `pushExact ${key}: ${e.message||e}` } }));
+      return false;
+    }
+  }
+
   // ── Firestore pull ────────────────────────────────────────────────
   async function pullFromFirestore(uid, key) {
     if (!_ready || !uid) return null;
@@ -257,7 +274,7 @@ const WFirebase = (() => {
     _waitForSDK();
   }
 
-  return { login, logout, onAuthChange, getUser, getLastAuth, isOnline, setOnline, isReady, pushToFirestore, pullFromFirestore, pullAll, getLatency, startPingMonitor, stopPingMonitor };
+  return { login, logout, onAuthChange, getUser, getLastAuth, isOnline, setOnline, isReady, pushToFirestore, pushToFirestoreExact, pullFromFirestore, pullAll, getLatency, startPingMonitor, stopPingMonitor };
 })();
 
 // Auto-arrancar monitor de conectividad real (todas las apps se benefician)
