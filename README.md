@@ -163,6 +163,12 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 
 ## Changelog
 
+### v4.5.0
+- **Fix crítico** — `coches.html` y 15 apps más: `wuid()` devolvía UUID con guiones (`550e8400-...`) que al insertarse en `onclick="fn(${item.id})"` generaban JS inválido (guiones = operadores). Resultado: no se podían añadir coches ni items. Revertido a `Date.now()` numérico.
+- **Fix crítico** — Sync nunca quedaba a la par entre dispositivos: `WStore.set()` guardaba local con `_updatedAt=T1` pero `pushToFirestore()` subía a Firebase con `_updatedAt=T2` (posterior). Firebase quedaba siempre más nuevo → `syncOnLoad` descargaba innecesariamente → bucle infinito. Arreglado con `pushToFirestoreExact()` que preserva el timestamp exacto del payload local.
+- **Mejora** — Hero index: bloque "Latencia" eliminado. Sustituido por "Datos en Firebase" que muestra KB sincronizados / 1 MB máximo de Firestore, porcentaje y aviso cuando hay pendientes.
+- `sw.js` v10.1, manifest v4.5.0
+
 ### v4.4.0
 - **Nuevo** — Categorización automática de gastos por concepto: "Mercadona"→supermercado, "Repsol"→gasolina, etc. (30 reglas, cubre ~80%)
 - **Nuevo** — Búsqueda global en datos: prefijo `>` en el buscador del index busca en gastos, tareas, despensa y compra

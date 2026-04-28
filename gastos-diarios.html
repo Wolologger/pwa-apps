@@ -11,15 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js">
-// Debounce: agrupa múltiples saves consecutivos en uno (200ms)
-let _saveDebounce = null;
-const _saveImmediate = save;
-function save() {
-  if (_saveDebounce) clearTimeout(_saveDebounce);
-  _saveDebounce = setTimeout(() => { _saveDebounce = null; _saveImmediate(); }, 200);
-}
-// Guardar inmediatamente antes de que el usuario cierre la pestaña
-window.addEventListener('beforeunload', () => { if (_saveDebounce) _saveImmediate(); }, {once:true});
+
 
 // ── Haptic feedback (silencioso si el dispositivo no lo soporta) ──
 function haptic(pattern='light') {
@@ -372,6 +364,8 @@ function load(){
 function _saveImmediate() {  state.nextId=nid;
   // WStore: persiste en localStorage Y marca pending para Firebase
   if(typeof WStore!=='undefined'){WStore.set('gastos','data',state);}
+function save() { _saveImmediate(); }
+
   else{try{localStorage.setItem('gastos_v1',JSON.stringify(state));}catch(e){}}
 }
 

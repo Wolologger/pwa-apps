@@ -9,67 +9,9 @@
 <title>Suministros — W//APPS</title>
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js">
-// Debounce: agrupa múltiples saves consecutivos en uno (200ms)
-let _saveDebounce = null;
-const _saveImmediate = save;
-function save() {
-  if (_saveDebounce) clearTimeout(_saveDebounce);
-  _saveDebounce = setTimeout(() => { _saveDebounce = null; _saveImmediate(); }, 200);
-}
-// Guardar inmediatamente antes de que el usuario cierre la pestaña
-window.addEventListener('beforeunload', () => { if (_saveDebounce) _saveImmediate(); }, {once:true});
-
-// ── Predicción de próxima factura ─────────────────────────────
-function predictNextBill(tipo) {
-  const bills = (state.facturas || [])
-    .filter(f => f.tipo === tipo && f.inicio)
-    .sort((a,b) => a.inicio.localeCompare(b.inicio));
-  if (bills.length < 2) return null;
-  // Media de días entre facturas
-  let intervals = [];
-  for (let i = 1; i < bills.length; i++) {
-    const d0 = new Date(bills[i-1].inicio + 'T12:00:00');
-    const d1 = new Date(bills[i].inicio + 'T12:00:00');
-    intervals.push(Math.round((d1-d0)/(86400000)));
-  }
-  const avgDays = Math.round(intervals.reduce((a,b)=>a+b,0)/intervals.length);
-  // Última factura + intervalo medio = próxima esperada
-  const last = new Date(bills[bills.length-1].inicio + 'T12:00:00');
-  const next = new Date(last.getTime() + avgDays * 86400000);
-  const today = new Date();
-  const daysLeft = Math.round((next - today) / 86400000);
-  return { date: next.toISOString().slice(0,10), daysLeft, avgDays };
-}
-
-function renderPredictions() {
-  const el = document.getElementById('predictions-block');
-  if (!el) return;
-  const types = [...new Set((state.facturas||[]).map(f=>f.tipo).filter(Boolean))];
-  const preds = types.map(tipo => {
-    const p = predictNextBill(tipo);
-    if (!p) return '';
-    const urgent = p.daysLeft < 7;
-    const overdue = p.daysLeft < 0;
-    const color = overdue ? 'var(--r)' : urgent ? 'var(--y)' : 'var(--g)';
-    const label = overdue
-      ? `atrasada ${Math.abs(p.daysLeft)}d`
-      : p.daysLeft === 0 ? 'hoy' : `en ${p.daysLeft}d`;
-    const icons = {luz:'⚡',gas:'🔥',agua:'💧',internet:'📡',otro:'📄'};
-    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:0.5px solid var(--border2,rgba(255,255,255,0.1));font-family:var(--fm);font-size:11px">
-      <span>${icons[tipo]||'📄'} ${tipo.charAt(0).toUpperCase()+tipo.slice(1)}</span>
-      <span style="color:${color}">${p.date} · ${label}</span>
-    </div>`;
-  }).filter(Boolean).join('');
-  el.innerHTML = preds || '<div style="color:var(--muted);font-size:10px">Necesitas al menos 2 facturas del mismo tipo</div>';
-}
 
 
-function haptic(p='light'){if(!navigator.vibrate)return;
-  if(p==='light')navigator.vibrate(8);
-  else if(p==='medium')navigator.vibrate(18);
-  else if(p==='success')navigator.vibrate([8,50,8]);
-  else if(p==='error')navigator.vibrate([30,60,30]);
-  else navigator.vibrate(p);}
+
 
 </script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
@@ -1059,7 +1001,9 @@ function _saveImmediate() {
   // Guardar en WStore (sync Firebase) y en clave legacy por compatibilidad
   if (typeof WStore !== 'undefined') {
     WStore.set('suministros', 'data', state);
-  } else {
+  }
+function save() { _saveImmediate(); }
+ else {
     try { localStorage.setItem('suministros_v1', JSON.stringify(state)); } catch(e) {}
   }
   try { localStorage.setItem('suministros_v1', JSON.stringify(state)); } catch(e) {}

@@ -9,22 +9,7 @@
 <title>Coches — W//APPS</title>
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js">
-// Debounce: agrupa múltiples saves consecutivos en uno (200ms)
-let _saveDebounce = null;
-const _saveImmediate = save;
-function save() {
-  if (_saveDebounce) clearTimeout(_saveDebounce);
-  _saveDebounce = setTimeout(() => { _saveDebounce = null; _saveImmediate(); }, 200);
-}
-// Guardar inmediatamente antes de que el usuario cierre la pestaña
-window.addEventListener('beforeunload', () => { if (_saveDebounce) _saveImmediate(); }, {once:true});
 
-function haptic(p='light'){if(!navigator.vibrate)return;
-  if(p==='light')navigator.vibrate(8);
-  else if(p==='medium')navigator.vibrate(18);
-  else if(p==='success')navigator.vibrate([8,50,8]);
-  else if(p==='error')navigator.vibrate([30,60,30]);
-  else navigator.vibrate(p);}
 
 </script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
@@ -563,7 +548,9 @@ function _saveImmediate() {
   try {
     localStorage.setItem('coches_v1', JSON.stringify(state));
     if (typeof WStore !== 'undefined') WStore.set('coches', 'data', state);
-  } catch(e) {}
+  }
+function save() { _saveImmediate(); }
+ catch(e) {}
 }
 
 // wuid(): ID numérico único basado en timestamp. Seguro en onclick="fn(id)".
