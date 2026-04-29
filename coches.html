@@ -548,10 +548,11 @@ function _saveImmediate() {
   try {
     localStorage.setItem('coches_v1', JSON.stringify(state));
     if (typeof WStore !== 'undefined') WStore.set('coches', 'data', state);
-  }
-function save() { _saveImmediate(); }
- catch(e) {}
+  } catch(e) {}
+} catch(e) {}
 }
+
+function save() { _saveImmediate(); }
 
 // wuid(): ID numérico único basado en timestamp. Seguro en onclick="fn(id)".
 // Probabilidad de colisión entre 2 dispositivos en el mismo millisegundo: ~0 en uso real.

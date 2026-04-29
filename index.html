@@ -365,7 +365,7 @@ a.dash-card:hover{background:var(--bg3);}
     <div class="topbar-right">
       <button class="version-badge" onclick="openChangelog()" title="Ver changelog">
         <span class="version-dot"></span>
-        <span id="version-display">v4.5.0</span>
+        <span id="version-display">v4.5.1</span>
       </button>
       <div class="clock" id="clock">--:--</div>
       <button class="auth-btn" id="auth-btn" onclick="handleAuth()" title="Login con Google">
@@ -531,7 +531,7 @@ a.dash-card:hover{background:var(--bg3);}
 const GITHUB_USER='Wolologger';
 const GITHUB_REPO='pwa-apps';
 
-const APP_VERSION = 'v4.5.0';
+const APP_VERSION = 'v4.5.1';
 
 // ── CHANGELOG ──────────────────────────────────────────────────────
 const CHANGELOG = [
@@ -1225,7 +1225,7 @@ function updateSyncUI(state, pendingCount) {
     ? `· ${pendingCount} PENDIENTE${pendingCount > 1 ? 'S' : ''}` : '';
 
   const fb = _fb();
-  const canSync = state === 'online' && fb && fb.getUser() && pendingCount > 0;
+  const canSync = state === 'online' && fb && fb.getUser();
   btn.disabled = !canSync;
   const pullBtn = document.getElementById('pull-btn');
   if (pullBtn) pullBtn.disabled = !(state === 'online' && fb && fb.getUser());
@@ -1259,8 +1259,7 @@ async function manualPull() {
   await sync.pullAll(user.uid);
   updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
   if (btn) btn.disabled = false;
-  // Reload page to reflect pulled data
-  window.location.reload();
+  window.dispatchEvent(new CustomEvent('wapps:recovered'));
 }
 async function manualPushAll() {
   const fb   = _fb();

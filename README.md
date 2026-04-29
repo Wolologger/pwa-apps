@@ -163,6 +163,11 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 
 ## Changelog
 
+### v4.5.1
+- **Fix crítico** — `suministros.html`: el bloque HTML de predicciones de facturas se inyectó dentro del bloque `<script>` → `SyntaxError` que rompía tabs, facturas y toda la navegación de la app. Movido al lugar correcto dentro del panel `<div id="resumen">`.
+- **Fix crítico** — `coches.html`, `ninos.html`, `obra.html`: la inyección automática del debounce partió la función `_saveImmediate()` separando el `try` del `catch` con `function save()` en medio → `SyntaxError` silencioso que impedía añadir coches, guardar niños o cualquier elemento en obra.
+- `sw.js` v10.2, manifest v4.5.1
+
 ### v4.5.0
 - **Fix crítico** — `coches.html` y 15 apps más: `wuid()` devolvía UUID con guiones (`550e8400-...`) que al insertarse en `onclick="fn(${item.id})"` generaban JS inválido (guiones = operadores). Resultado: no se podían añadir coches ni items. Revertido a `Date.now()` numérico.
 - **Fix crítico** — Sync nunca quedaba a la par entre dispositivos: `WStore.set()` guardaba local con `_updatedAt=T1` pero `pushToFirestore()` subía a Firebase con `_updatedAt=T2` (posterior). Firebase quedaba siempre más nuevo → `syncOnLoad` descargaba innecesariamente → bucle infinito. Arreglado con `pushToFirestoreExact()` que preserva el timestamp exacto del payload local.
