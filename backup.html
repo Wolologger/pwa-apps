@@ -726,51 +726,6 @@ function showToast(msg, isErr=false) {
 // ── INIT ──
 render();
 
-function _fb()   { return (typeof WFirebase !== 'undefined') ? WFirebase : null; }
-function _sync() { return (typeof WSync     !== 'undefined') ? WSync     : null; }
-function updateSyncUI(state, pendingCount) {
-  const dot  = document.getElementById('sync-dot');
-  const label= document.getElementById('sync-label');
-  const btn  = document.getElementById('sync-btn');
-  const pend = document.getElementById('sync-pending');
-  if (!dot) return;
-  dot.className   = 'sync-dot ' + state;
-  label.className = 'sync-label ' + state;
-  const labels = { online:'ONLINE', offline:'OFFLINE', syncing:'SINCRONIZANDO...' };
-  label.textContent = labels[state] || state.toUpperCase();
-  pend.textContent = pendingCount > 0 ? '· ' + pendingCount + ' PENDIENTE' + (pendingCount > 1 ? 'S' : '') : '';
-  const fb = _fb();
-  const canSync = state === 'online' && fb && fb.getUser() && pendingCount > 0;
-  btn.disabled = !canSync;
-  const pullBtn = document.getElementById('pull-btn');
-  if (pullBtn) pullBtn.disabled = !(state === 'online' && fb && fb.getUser());
-}
-async function manualSync() {
-  const fb   = _fb();
-  const sync = _sync();
-  if (!fb || !sync) return;
-  const user = fb.getUser();
-  if (!user || !fb.isOnline()) return;
-  updateSyncUI('syncing', sync.getPending().length);
-  document.getElementById('sync-btn').disabled = true;
-  await sync.syncAll(user.uid);
-  updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
-}
-async function manualPull() {
-  const fb   = _fb();
-  const sync = _sync();
-  if (!fb || !sync) return;
-  const user = fb.getUser();
-  if (!user || !fb.isOnline()) return;
-  const btn = document.getElementById('pull-btn');
-  if (btn) btn.disabled = true;
-  updateSyncUI('syncing', sync.getPending().length);
-  await sync.pullAll(user.uid);
-  updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
-  if (btn) btn.disabled = false;
-  // Reload page to reflect pulled data
-  window.location.reload();
-}
 
 window.addEventListener('wapps:online',      () => updateSyncUI('online',  _sync()?.getPending().length ?? 0));
 window.addEventListener('wapps:offline',     () => updateSyncUI('offline', _sync()?.getPending().length ?? 0));
@@ -785,7 +740,6 @@ window.addEventListener('wapps:pending-change', e => {
 window.addEventListener('wapps:auth-change', () => {
   updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
 });
-updateSyncUI(navigator.onLine ? 'online' : 'offline', 0);
 </script>
 </body>
 </html>

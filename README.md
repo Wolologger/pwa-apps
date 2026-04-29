@@ -163,6 +163,12 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 
 ## Changelog
 
+### v4.6.0
+- **Limpieza L12** — Eliminado boilerplate sync inline de 16 apps (~35 KB en total): `_fb()`, `_sync()`, `updateSyncUI()`, `manualSync()`, `manualPull()`, `manualPushApp()`. Todas dependen ahora de `wapps-sync-ui.js`.
+- **Limpieza L13** — `manualPull()` centralizado en módulo. `wapps-nav.js` ya usa `typeof manualPull === 'function'` para compatibilidad.
+- **Rendimiento P3** — Debounce de 200ms en `save()` añadido a `compra`, `decisor`, `deseados`, `finanzas`, `mascotas`, `semana`, `setlist`.
+- `sw.js` v10.3, manifest v4.6.0
+
 ### v4.5.1
 - **Fix crítico** — `suministros.html`: el bloque HTML de predicciones de facturas se inyectó dentro del bloque `<script>` → `SyntaxError` que rompía tabs, facturas y toda la navegación de la app. Movido al lugar correcto dentro del panel `<div id="resumen">`.
 - **Fix crítico** — `coches.html`, `ninos.html`, `obra.html`: la inyección automática del debounce partió la función `_saveImmediate()` separando el `try` del `catch` con `function save()` en medio → `SyntaxError` silencioso que impedía añadir coches, guardar niños o cualquier elemento en obra.

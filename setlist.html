@@ -425,7 +425,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.5;}
   <div style="display:flex;gap:6px;">
     <button class="sync-btn" id="pull-btn" onclick="manualPull()" disabled>↓ PULL</button>
     <button class="sync-btn" id="sync-btn" onclick="manualSync()" disabled>↑ SYNC</button>
-    <button class="sync-btn" id="push-app-btn" onclick="manualPushApp()" title="Forzar subida de esta app a Firebase">⬆ SUBIR</button>
+    <button class="sync-btn" id="push-app-btn" onclick="manualPushApp('setlist.data')" title="Forzar subida de esta app a Firebase">⬆ SUBIR</button>
   </div>
 </div>
 
@@ -588,6 +588,16 @@ function save() {
   if (typeof WStore !== 'undefined') WStore.set('setlist', 'data', state);
   try { localStorage.setItem('setlist_v1', JSON.stringify(state)); } catch(e) {}
 }
+
+// Debounce: agrupa saves consecutivos en uno (200ms)
+let _saveDebounce = null;
+const _saveImmediate = save;
+function save() {
+  if (_saveDebounce) clearTimeout(_saveDebounce);
+  _saveDebounce = setTimeout(() => { _saveDebounce = null; _saveImmediate(); }, 200);
+}
+window.addEventListener('beforeunload', () => { if (_saveDebounce) _saveImmediate(); }, {once:true});
+
 function nxtId() { return ++nid; }
 function esc(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -1848,8 +1858,6 @@ if (typeof WStore !== 'undefined') {
 <script>
 
 // Sync bar
-function _fb(){return typeof WFirebase!=='undefined'?WFirebase:null;}
-function _sync(){return typeof WSync!=='undefined'?WSync:null;}
 function updateSyncUI(state,pendingCount){
   const dot=document.getElementById('sync-dot'),label=document.getElementById('sync-label'),btn=document.getElementById('sync-btn'),pend=document.getElementById('sync-pending');
   if(!dot)return;
@@ -1880,35 +1888,6 @@ async function manualSync(){
     setTimeout(()=>{if(btn)btn.textContent=originalText;},2500);
   }
 }
-async function manualPull() {
-  const fb   = _fb();
-  const sync = _sync();
-  if (!fb || !sync) return;
-  const user = fb.getUser();
-  if (!user || !fb.isOnline()) return;
-  const btn = document.getElementById('pull-btn');
-  if (btn) btn.disabled = true;
-  updateSyncUI('syncing', sync.getPending().length);
-  await sync.pullAll(user.uid);
-  updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
-  if (btn) btn.disabled = false;
-  // Reload page to reflect pulled data
-  window.location.reload();
-}
-async function manualPushApp() {
-  const fb   = _fb();
-  const sync = _sync();
-  if (!fb || !sync) return;
-  const user = fb.getUser();
-  if (!user || !fb.isOnline()) return;
-  const btn = document.getElementById('push-app-btn');
-  if (btn) btn.disabled = true;
-  updateSyncUI('syncing', sync.getPending().length);
-  const { pushed, failed } = await sync.pushAll(user.uid, 'setlist.data');
-  updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
-  if (btn) btn.disabled = false;
-  console.info(`[PUSH APP] setlist.data: ${pushed} subidas, ${failed} fallidas`);
-}
 
 
 window.addEventListener('wapps:online',()=>updateSyncUI('online',_sync()?.getPending().length??0));
@@ -1916,7 +1895,6 @@ window.addEventListener('wapps:offline',()=>updateSyncUI('offline',_sync()?.getP
 window.addEventListener('wapps:sync-start',()=>updateSyncUI('syncing',_sync()?.getPending().length??0));
 window.addEventListener('wapps:sync-done',()=>{const fb=_fb();updateSyncUI(fb?(fb.isOnline()?'online':'offline'):'offline',_sync()?.getPending().length??0);});
 window.addEventListener('wapps:pending-change',e=>{const fb=_fb(),label=document.getElementById('sync-label');const isSyncing=label?.className?.includes('syncing');updateSyncUI(isSyncing?'syncing':(fb?(fb.isOnline()?'online':'offline'):'offline'),e.detail.pending.length);});
-updateSyncUI(navigator.onLine?'online':'offline',0);
 
 </script>
 </body>

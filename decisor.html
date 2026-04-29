@@ -232,6 +232,16 @@ function save(){
   }
   try{localStorage.setItem('decisor_v1',JSON.stringify(state));}catch(e){}
 }
+
+// Debounce: agrupa saves consecutivos en uno (200ms)
+let _saveDebounce = null;
+const _saveImmediate = save;
+function save() {
+  if (_saveDebounce) clearTimeout(_saveDebounce);
+  _saveDebounce = setTimeout(() => { _saveDebounce = null; _saveImmediate(); }, 200);
+}
+window.addEventListener('beforeunload', () => { if (_saveDebounce) _saveImmediate(); }, {once:true});
+
 function nxtId(){return++(state.nextId);}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
@@ -370,40 +380,6 @@ render();
   window.WTransition={go};
 })();
 
-function _fb()   { return (typeof WFirebase !== 'undefined') ? WFirebase : null; }
-function _sync() { return (typeof WSync     !== 'undefined') ? WSync     : null; }
-function updateSyncUI(state, pendingCount) {
-  const dot=document.getElementById('sync-dot'),label=document.getElementById('sync-label'),btn=document.getElementById('sync-btn'),pend=document.getElementById('sync-pending');
-  if(!dot)return;
-  dot.className='sync-dot '+state; label.className='sync-label '+state;
-  const labels={online:'ONLINE',offline:'OFFLINE',syncing:'SINCRONIZANDO...'};
-  label.textContent=labels[state]||state.toUpperCase();
-  pend.textContent=pendingCount>0?'· '+pendingCount+' PENDIENTE'+(pendingCount>1?'S':''):'';
-  btn.disabled=!(state==='online'&&_fb()&&_fb().getUser()&&pendingCount>0);
-}
-async function manualSync(){
-  const fb=_fb(),sync=_sync();if(!fb||!sync)return;
-  const user=fb.getUser();if(!user||!fb.isOnline())return;
-  updateSyncUI('syncing',sync.getPending().length);
-  document.getElementById('sync-btn').disabled=true;
-  await sync.syncAll(user.uid);
-  updateSyncUI(fb.isOnline()?'online':'offline',sync.getPending().length);
-}
-async function manualPull() {
-  const fb   = _fb();
-  const sync = _sync();
-  if (!fb || !sync) return;
-  const user = fb.getUser();
-  if (!user || !fb.isOnline()) return;
-  const btn = document.getElementById('pull-btn');
-  if (btn) btn.disabled = true;
-  updateSyncUI('syncing', sync.getPending().length);
-  await sync.pullAll(user.uid);
-  updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
-  if (btn) btn.disabled = false;
-  // Reload page to reflect pulled data
-  window.location.reload();
-}
 
 window.addEventListener('wapps:online',()=>updateSyncUI('online',_sync()?.getPending().length??0));
 window.addEventListener('wapps:offline',()=>updateSyncUI('offline',_sync()?.getPending().length??0));
@@ -424,7 +400,6 @@ window.addEventListener('wapps:recovered', () => {
   const fresh = WStore.get('decisor','data');
   if (fresh?.presets) { state = fresh; render(); }
 });
-updateSyncUI(navigator.onLine?'online':'offline',0);
 </script>
 </body>
 </html>

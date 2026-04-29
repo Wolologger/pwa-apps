@@ -270,7 +270,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
     <div style="display:flex;gap:6px;">
     <button class="sync-btn" id="pull-btn" onclick="manualPull()" disabled>↓ PULL</button>
     <button class="sync-btn" id="sync-btn" onclick="manualSync()" disabled>↑ SYNC</button>
-    <button class="sync-btn" id="push-app-btn" onclick="manualPushApp()" title="Forzar subida de esta app a Firebase">⬆ SUBIR</button>
+    <button class="sync-btn" id="push-app-btn" onclick="manualPushApp('coches.data')" title="Forzar subida de esta app a Firebase">⬆ SUBIR</button>
   </div>
   </div>
 
@@ -549,7 +549,6 @@ function _saveImmediate() {
     localStorage.setItem('coches_v1', JSON.stringify(state));
     if (typeof WStore !== 'undefined') WStore.set('coches', 'data', state);
   } catch(e) {}
-} catch(e) {}
 }
 
 function save() { _saveImmediate(); }
@@ -1347,21 +1346,6 @@ render();
 </script>
 
 <script>
-function _fb()   { return (typeof WFirebase !== 'undefined') ? WFirebase : null; }
-function _sync() { return (typeof WSync     !== 'undefined') ? WSync     : null; }
-function updateSyncUI(state, pendingCount) {
-  const dot=document.getElementById('sync-dot'),label=document.getElementById('sync-label'),btn=document.getElementById('sync-btn'),pend=document.getElementById('sync-pending');
-  if(!dot)return;
-  dot.className='sync-dot '+state; label.className='sync-label '+state;
-  const labels={online:'ONLINE',offline:'OFFLINE',syncing:'SINCRONIZANDO...'};
-  label.textContent=labels[state]||state.toUpperCase();
-  pend.textContent=pendingCount>0?'· '+pendingCount+' PENDIENTE'+(pendingCount>1?'S':''):'';
-  btn.disabled=!(state==='online'&&_fb()&&_fb().getUser());
-  const pullBtn = document.getElementById('pull-btn');
-  if (pullBtn) pullBtn.disabled = !(state === 'online' && _fb() && _fb().getUser());
-  const pushAppBtn = document.getElementById('push-app-btn');
-  if (pushAppBtn) pushAppBtn.disabled = false;
-}
 async function manualSync(){
   const fb=_fb(),sync=_sync();if(!fb||!sync)return;
   const user=fb.getUser();if(!user||!fb.isOnline())return;
@@ -1379,41 +1363,6 @@ async function manualSync(){
     setTimeout(()=>{if(btn)btn.textContent=originalText;},2500);
   }
 }
-async function manualPull() {
-  const fb   = _fb();
-  const sync = _sync();
-  if (!fb || !sync) return;
-  const user = fb.getUser();
-  if (!user || !fb.isOnline()) return;
-  const btn = document.getElementById('pull-btn');
-  if (btn) btn.disabled = true;
-  updateSyncUI('syncing', sync.getPending().length);
-  await sync.pullAll(user.uid);
-  updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
-  if (btn) btn.disabled = false;
-  // Reload page to reflect pulled data
-  // Emitir wapps:recovered para que la app recargue datos sin reload de página
-  window.dispatchEvent(new CustomEvent('wapps:recovered'));
-  if (btn) btn.disabled = false;
-}
-async function manualPushApp() {
-  const fb   = _fb();
-  const sync = _sync();
-  if (!fb || !sync) return;
-  const user = fb.getUser();
-  if (!user || !fb.isOnline()) return;
-  const btn = document.getElementById('push-app-btn');
-  if (btn) btn.disabled = true;
-  updateSyncUI('syncing', sync.getPending().length);
-  const { pushed, failed } = await sync.pushAll(user.uid, 'coches.data');
-  updateSyncUI(fb.isOnline() ? 'online' : 'offline', sync.getPending().length);
-  if (btn) {
-    btn.disabled = false;
-    btn.textContent = failed > 0 ? `⚠ ${pushed}/${pushed+failed}` : pushed > 0 ? `✓ ${pushed}` : '⬆ SUBIR';
-    if (pushed > 0 || failed > 0) setTimeout(() => { if(btn) btn.textContent = '⬆ SUBIR'; }, 3000);
-  }
-  console.info(`[PUSH APP] coches.data: ${pushed} subidas, ${failed} fallidas`);
-}
 
 
 window.addEventListener('wapps:online',()=>updateSyncUI('online',_sync()?.getPending().length??0));
@@ -1421,7 +1370,6 @@ window.addEventListener('wapps:offline',()=>updateSyncUI('offline',_sync()?.getP
 window.addEventListener('wapps:sync-start',()=>updateSyncUI('syncing',_sync()?.getPending().length??0));
 window.addEventListener('wapps:sync-done',()=>{const fb=_fb();updateSyncUI(fb?(fb.isOnline()?'online':'offline'):'offline',_sync()?.getPending().length??0);});
 window.addEventListener('wapps:pending-change',e=>{const fb=_fb(),label=document.getElementById('sync-label');const isSyncing=label?.className?.includes('syncing');updateSyncUI(isSyncing?'syncing':(fb?(fb.isOnline()?'online':'offline'):'offline'),e.detail.pending.length);});
-updateSyncUI(navigator.onLine?'online':'offline',0);
 </script>
 </body>
 </html>
