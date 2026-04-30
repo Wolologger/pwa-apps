@@ -2,7 +2,7 @@
   "id": "/pwa-apps/",
   "name": "W//APPS — Wolologger",
   "short_name": "W//APPS",
-  "description": "Panel de herramientas personales: obra, gastos, despensa y más — v4.7.1",
+  "description": "Panel de herramientas personales: obra, gastos, despensa y más — v4.7.3",
   "start_url": "/pwa-apps/",
   "scope": "/pwa-apps/",
   "display": "standalone",
