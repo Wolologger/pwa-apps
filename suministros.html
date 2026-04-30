@@ -684,9 +684,10 @@
       <div class="section-label">Exportar / Importar</div>
       <div style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:14px;margin-bottom:10px;">
         <div style="font-size:12px;color:var(--muted);font-family:var(--fm);margin-bottom:10px;" id="datos-info"></div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btn-y" style="flex:1" onclick="exportJSON()">↓ Exportar JSON</button>
-          <button class="btn" style="flex:1" onclick="document.getElementById('fi').click()">↑ Importar JSON</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-y" style="flex:1" onclick="exportJSON()">↓ JSON</button>
+          <button class="btn" style="flex:1" onclick="exportCSV()">↓ CSV</button>
+          <button class="btn" style="flex:1" onclick="document.getElementById('fi').click()">↑ Importar</button>
           <input type="file" id="fi" accept=".json" style="display:none" onchange="importFile(event)">
         </div>
         <div id="datos-fb" style="font-size:11px;margin-top:8px;display:none;font-family:var(--fm);"></div>
@@ -1143,7 +1144,24 @@ function renderDatos() {
 function exportJSON() {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));
-  a.download = `suministros-${new Date().toISOString().slice(0,10)}.json`;
+  a.download = `suministros-${today()}.json`;
+  a.click();
+}
+function exportCSV() {
+  const rows = [['Tipo','Nº Factura','Empresa','Importe €','Consumo','Unidad','Periodo inicio','Periodo fin','Notas']];
+  state.facturas
+    .sort((a,b) => a.inicio?.localeCompare(b.inicio||''))
+    .forEach(f => rows.push([
+      f.tipo||'', f.num||'', f.empresa||'',
+      String(f.importe||'').replace('.',','),
+      String(f.consumo||'').replace('.',','),
+      TIPO_UNIT[f.tipo]||'',
+      f.inicio||'', f.fin||'', f.notas||''
+    ]));
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download = `suministros-${today()}.csv`;
   a.click();
 }
 function importFile(e) {

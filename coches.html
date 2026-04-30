@@ -32,7 +32,7 @@
     <div class="wnav-sep"></div>
     <div class="wnav-title" id="wnav-title">COCHES</div>
 
-  <div class="wnav-version">v2.1</div>
+  <div class="wnav-version">v2.2</div>
 </div>
   <div class="sync-bar" id="sync-bar">
     <div class="sync-status">
@@ -281,8 +281,9 @@
         <div style="font-family:var(--fh);font-size:16px;margin-top:16px;margin-bottom:6px;">Exportar / Importar</div>
         <div style="font-size:11px;color:var(--muted);font-family:var(--fm);margin-bottom:10px;" id="datos-info"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn btn-y btn-sm" style="flex:1" onclick="exportJSON()">↓ Exportar JSON</button>
-          <button class="btn btn-sm" style="flex:1" onclick="document.getElementById('fi').click()">↑ Importar JSON</button>
+          <button class="btn btn-y btn-sm" style="flex:1" onclick="exportJSON()">↓ JSON</button>
+          <button class="btn btn-sm" style="flex:1" onclick="exportCSV()">↓ CSV</button>
+          <button class="btn btn-sm" style="flex:1" onclick="document.getElementById('fi').click()">↑ Importar</button>
           <input type="file" id="fi" accept=".json" style="display:none" onchange="importFile(event)">
         </div>
                 <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border,rgba(255,255,255,0.07));">
@@ -1039,6 +1040,31 @@ function exportJSON() {
   a.href = URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));
   a.download = `coches-${today()}.json`; a.click();
   showFB('Descargado ✓','var(--g)');
+}
+function exportCSV() {
+  const rows = [];
+  state.cars.forEach(car => {
+    const nombre = `${car.marca||''} ${car.modelo||''}`.trim() || car.nombre || 'Vehículo';
+    (car.servicios||[]).forEach(s => rows.push([
+      nombre, 'Servicio', s.fecha||'', s.tipo||'', s.descripcion||'',
+      String(s.coste||0).replace('.',','), String(s.km||''), s.taller||'', s.notas||''
+    ]));
+    (car.repostajes||[]).forEach(r => rows.push([
+      nombre, 'Repostaje', r.fecha||'', 'Combustible', `${r.litros||0}L`,
+      String(r.coste||0).replace('.',','), String(r.km||''), '', r.notas||''
+    ]));
+    (car.gastos||[]).forEach(g => rows.push([
+      nombre, 'Gasto', g.fecha||'', g.concepto||'', '',
+      String(g.importe||0).replace('.',','), '', '', g.notas||''
+    ]));
+  });
+  rows.sort((a,b) => a[2].localeCompare(b[2]));
+  const header = ['Vehículo','Tipo','Fecha','Descripción','Detalle','Importe €','Km','Taller','Notas'];
+  const csv = [header, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download = `coches-${today()}.csv`; a.click();
+  showFB('CSV descargado ✓','var(--g)');
 }
 function importFile(e) {
   const f = e.target.files[0]; if (!f) return;

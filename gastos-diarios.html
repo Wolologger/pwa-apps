@@ -448,7 +448,8 @@ function renderDatos(){
     <div class="data-card">
       <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">${state.gastos.length} gastos · ${size} KB</div>
       <div class="act-row">
-        <button class="btn btn-acc" style="flex:1" onclick="expJSON()">↓ Descargar</button>
+        <button class="btn btn-acc" style="flex:1" onclick="expJSON()">↓ JSON</button>
+        <button class="btn" style="flex:1" onclick="expCSV()">↓ CSV</button>
         <button class="btn" style="flex:1" onclick="cpJSON()">⎘ Copiar</button>
       </div>
       <div id="cp-fb" class="fb"></div>
@@ -524,6 +525,18 @@ function expJSON(){
   a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));
   a.download=`gastos-${bkey()}.json`;a.click();
   showFB('cp-fb','Descargado ✓','ok');
+}
+function expCSV(){
+  const rows=[['Fecha','Concepto','Categoría','Importe €','Nota']];
+  [...state.gastos].sort((a,b)=>a.fecha.localeCompare(b.fecha)).forEach(g=>{
+    rows.push([g.fecha||'', g.concepto||'', CM[g.cat]?.label||g.cat||'',
+      String(g.importe||0).replace('.',','), g.nota||'']);
+  });
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download=`gastos-${bkey()}.csv`;a.click();
+  showFB('cp-fb','CSV descargado ✓','ok');
 }
 function cpJSON(){
   navigator.clipboard.writeText(JSON.stringify(state,null,2))
