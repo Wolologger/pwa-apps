@@ -32,7 +32,7 @@
     <div class="wnav-sep"></div>
     <div class="wnav-title" id="wnav-title">MASCOTAS</div>
 
-  <div class="wnav-version">v2.3</div>
+  <div class="wnav-version">v2.4</div>
 </div>
   <div class="sync-bar" id="sync-bar">
     <div class="sync-status">
@@ -289,25 +289,6 @@ function showTab(name, el) {
   if (fabLabels[name]) { fabBtn.textContent = fabLabels[name]; fab.style.display = 'block'; }
   else fab.style.display = 'none';
   render();
-
-// ── Sync desde Firebase al autenticarse (fix: auth puede llegar tarde) ──
-if (typeof WStore !== 'undefined') {
-  WStore.syncOnLoad('mascotas', 'data', fresh => {
-    if (fresh && fresh.pets) { state = fresh; nid = state.nextId||1; if(state.pets.length) activePetId = state.pets[0].id; render(); }
-  });
-  window.addEventListener('wapps:recovered', () => {
-    const fresh = WStore.get('mascotas', 'data');
-    if (fresh && fresh.pets) { state = fresh; nid = state.nextId||1; if(state.pets.length) activePetId = state.pets[0].id; render(); }
-  });
-  window.addEventListener('wapps:auth-change', e => {
-    if (!e.detail?.user) return;
-    WStore.syncOnLoad('mascotas', 'data', fresh => {
-      if (fresh && fresh.pets) { state = fresh; nid = state.nextId||1; if(state.pets.length) activePetId = state.pets[0].id; render(); }
-    });
-
-    updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
-  });
-}
 }
 
 function fabAction() {
@@ -861,11 +842,26 @@ const OB_STEPS = [
 ];
 
 if(typeof WOnboarding!=='undefined')WOnboarding.show('mascotas', OB_STEPS);
-// Limitar fechas de nacimiento a hoy (no permitir futuras)
 (function(){ const _t=today(); ['fp-nacimiento'].forEach(id=>{const el=document.getElementById(id); if(el) el.max=_t;}); })();
 render();
-// Alertas de cumpleaños al cargar (delay para que el toast sea visible)
 setTimeout(checkBirthdayAlerts, 1200);
+
+if (typeof WStore !== 'undefined') {
+  WStore.syncOnLoad('mascotas', 'data', fresh => {
+    if (fresh && fresh.pets) { state = fresh; nid = state.nextId||1; if(state.pets.length) activePetId = state.pets[0].id; render(); }
+  });
+  window.addEventListener('wapps:recovered', () => {
+    const fresh = WStore.get('mascotas', 'data');
+    if (fresh && fresh.pets) { state = fresh; nid = state.nextId||1; if(state.pets.length) activePetId = state.pets[0].id; render(); }
+  });
+  window.addEventListener('wapps:auth-change', e => {
+    if (!e.detail?.user) return;
+    WStore.syncOnLoad('mascotas', 'data', fresh => {
+      if (fresh && fresh.pets) { state = fresh; nid = state.nextId||1; if(state.pets.length) activePetId = state.pets[0].id; render(); }
+    });
+    updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
+  });
+}
 </script>
 
 </body>

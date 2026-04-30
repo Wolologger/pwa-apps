@@ -1,0 +1,19 @@
+# Configuración local de Claude Code
+.claude/
+
+# Credenciales Firebase (nunca subir al repo)
+wapps-config.js
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/settings.json
+*.swp
+*.swo
+*~
+
+# Node (si se usa en algún momento)
+node_modules/

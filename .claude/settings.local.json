@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs -I{} basename {})",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(grep -v \":0$\")",
+      "Bash(grep -v \":1$\")",
+      "Bash(grep -E \"<[a-z]+[^>]*$\" /c/Git/pwa-apps/coches.html /c/Git/pwa-apps/ninos.html /c/Git/pwa-apps/suministros.html)",
+      "Bash(awk -F: '{print $1\":\"$3}')"
+    ]
+  }
+}
