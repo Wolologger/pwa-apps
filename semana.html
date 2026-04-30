@@ -10,17 +10,7 @@
 <title>Semana — W//APPS</title>
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
-<script>
-// Haptic feedback
-function haptic(p){
-  if(!navigator.vibrate)return;
-  if(p==='light')navigator.vibrate(8);
-  else if(p==='medium')navigator.vibrate(18);
-  else if(p==='success')navigator.vibrate([8,50,8]);
-  else if(p==='error')navigator.vibrate([30,60,30]);
-  else navigator.vibrate(p);
-}
-</script>
+<script src="wapps-utils.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-config.js"></script>
@@ -178,11 +168,10 @@ function save() {
 window.addEventListener('beforeunload', () => { if (_saveDebounce) _saveImmediate(); }, {once:true});
 
 function nxtId(){return++(state.nextId);}
-function p2(n){return String(n).padStart(2,'0');}
+
 function dateKey(d){return`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;}
 function todayKey(){return dateKey(new Date());}
 function parseDate(s){const[y,m,d]=s.split('-');return new Date(+y,+m-1,+d);}
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 function getMonday(offset=0){
   const d=new Date();const day=d.getDay();
@@ -705,31 +694,6 @@ if (typeof WStore !== 'undefined') {
 // DOM ya está listo (script al final del body) — ocultar spinner inmediatamente
 const _loadEl = document.getElementById('wapp-loading');
 if(_loadEl){ _loadEl.classList.add('fade'); setTimeout(()=>_loadEl.remove(), 350); }
-</script>
-
-async function manualSync(){
-  const fb=_fb(),sync=_sync();if(!fb||!sync)return;
-  const user=fb.getUser();if(!user||!fb.isOnline())return;
-  const btn=document.getElementById('sync-btn');
-  const originalText = btn?.textContent || '↑ SYNC';
-  updateSyncUI('syncing',sync.getPending().length);
-  if(btn)btn.disabled=true;
-  const result = await sync.syncAll(user.uid);
-  updateSyncUI(fb.isOnline()?'online':'offline',sync.getPending().length);
-  if(btn){
-    const {pushed=0,failed=0}=result||{};
-    if(pushed===0 && failed===0) btn.textContent='✓ Al día';
-    else if(failed>0) btn.textContent=`⚠ ${pushed}/${pushed+failed}`;
-    else btn.textContent=`✓ ${pushed}`;
-    setTimeout(()=>{if(btn)btn.textContent=originalText;},2500);
-  }
-}
-
-window.addEventListener('wapps:online',()=>updateSyncUI('online',_sync()?.getPending().length??0));
-window.addEventListener('wapps:offline',()=>updateSyncUI('offline',_sync()?.getPending().length??0));
-window.addEventListener('wapps:sync-start',()=>updateSyncUI('syncing',_sync()?.getPending().length??0));
-window.addEventListener('wapps:sync-done',()=>{const fb=_fb();updateSyncUI(fb?(fb.isOnline()?'online':'offline'):'offline',_sync()?.getPending().length??0);});
-window.addEventListener('wapps:pending-change',e=>{const fb=_fb(),label=document.getElementById('sync-label');const isSyncing=label?.className?.includes('syncing');updateSyncUI(isSyncing?'syncing':(fb?(fb.isOnline()?'online':'offline'):'offline'),e.detail.pending.length);});
 </script>
 </body>
 </html>

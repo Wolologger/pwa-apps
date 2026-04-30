@@ -38,14 +38,8 @@
   } catch(e) {}
 })();
 
-function haptic(p='light'){if(!navigator.vibrate)return;
-  if(p==='light')navigator.vibrate(8);
-  else if(p==='medium')navigator.vibrate(18);
-  else if(p==='success')navigator.vibrate([8,50,8]);
-  else if(p==='error')navigator.vibrate([30,60,30]);
-  else navigator.vibrate(p);}
-
 </script>
+<script src="wapps-utils.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="mobile-web-app-capable" content="yes">
@@ -171,9 +165,6 @@ function wuid() {
   return Date.now();
 }
 function nxtId(){ return wuid(); }
-function esc(s){var t=String(s||'');t=t.replace(/&/g,'&amp;');t=t.replace(new RegExp('<','g'),'&lt;');t=t.replace(new RegExp('>','g'),'&gt;');t=t.replace(new RegExp(String.fromCharCode(34),'g'),'&quot;');return t;}
-function today(){const d=new Date();return`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;}
-function p2(n){return String(n).padStart(2,'0');}
 function daysSince(dateStr){if(!dateStr)return null;return Math.floor((new Date()-new Date(dateStr))/(1000*60*60*24));}
 
 function showTab(name,el){
@@ -369,33 +360,6 @@ if(typeof WStore!=='undefined'){
   });
 }
 
-async function manualSync(){
-  const fb=_fb(),sync=_sync();if(!fb||!sync)return;
-  const user=fb.getUser();if(!user||!fb.isOnline())return;
-  const btn=document.getElementById('sync-btn');
-  const originalText = btn?.textContent || '↑ SYNC';
-  updateSyncUI('syncing',sync.getPending().length);
-  if(btn)btn.disabled=true;
-  const result = await sync.syncAll(user.uid);
-  updateSyncUI(fb.isOnline()?'online':'offline',sync.getPending().length);
-  if(btn){
-    const {pushed=0,failed=0}=result||{};
-    if(pushed===0 && failed===0) btn.textContent='✓ Al día';
-    else if(failed>0) btn.textContent=`⚠ ${pushed}/${pushed+failed}`;
-    else btn.textContent=`✓ ${pushed}`;
-    setTimeout(()=>{if(btn)btn.textContent=originalText;},2500);
-  }
-}
-window.addEventListener('wapps:online',      () => updateSyncUI('online',  _sync()?.getPending().length ?? 0));
-window.addEventListener('wapps:offline',     () => updateSyncUI('offline', _sync()?.getPending().length ?? 0));
-window.addEventListener('wapps:sync-start',  () => updateSyncUI('syncing', _sync()?.getPending().length ?? 0));
-window.addEventListener('wapps:sync-done',   () => { const fb=_fb(); updateSyncUI(fb?(fb.isOnline()?'online':'offline'):'offline', _sync()?.getPending().length??0); });
-window.addEventListener('wapps:pending-change', e => {
-  const fb=_fb(); const label=document.getElementById('sync-label');
-  const isSyncing=label?.className?.includes('syncing');
-  const state=isSyncing?'syncing':(fb?(fb.isOnline()?'online':'offline'):'offline');
-  updateSyncUI(state, e.detail.pending.length);
-});
 
 </script>
 </body>

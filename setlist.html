@@ -10,17 +10,7 @@
 <title>Setlist — W//APPS</title>
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
-<script>
-// Haptic feedback
-function haptic(p){
-  if(!navigator.vibrate)return;
-  if(p==='light')navigator.vibrate(8);
-  else if(p==='medium')navigator.vibrate(18);
-  else if(p==='success')navigator.vibrate([8,50,8]);
-  else if(p==='error')navigator.vibrate([30,60,30]);
-  else navigator.vibrate(p);
-}
-</script>
+<script src="wapps-utils.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-config.js"></script>
@@ -278,9 +268,6 @@ function save() {
 window.addEventListener('beforeunload', () => { if (_saveDebounce) _saveImmediate(); }, {once:true});
 
 function nxtId() { return ++nid; }
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
 
 function activeBand() {
   if (activeBandId !== null) return state.bands.find(b => b.id === activeBandId) || state.bands[0];
@@ -1531,47 +1518,6 @@ if (typeof WStore !== 'undefined') {
     updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
   });
 }
-
-</script>
-<script>
-
-// Sync bar
-function updateSyncUI(state,pendingCount){
-  const dot=document.getElementById('sync-dot'),label=document.getElementById('sync-label'),btn=document.getElementById('sync-btn'),pend=document.getElementById('sync-pending');
-  if(!dot)return;
-  dot.className='sync-dot '+state;label.className='sync-label '+state;
-  const labels={online:'ONLINE',offline:'OFFLINE',syncing:'SINCRONIZANDO...'};
-  label.textContent=labels[state]||state.toUpperCase();
-  pend.textContent=pendingCount>0?'· '+pendingCount+' PENDIENTE'+(pendingCount>1?'S':''):'';
-  btn.disabled=!(state==='online'&&_fb()&&_fb().getUser());
-  const pullBtn = document.getElementById('pull-btn');
-  if (pullBtn) pullBtn.disabled = !(state === 'online' && _fb() && _fb().getUser());
-  const pushAppBtn = document.getElementById('push-app-btn');
-  if (pushAppBtn) pushAppBtn.disabled = false;
-}
-async function manualSync(){
-  const fb=_fb(),sync=_sync();if(!fb||!sync)return;
-  const user=fb.getUser();if(!user||!fb.isOnline())return;
-  const btn=document.getElementById('sync-btn');
-  const originalText = btn?.textContent || '↑ SYNC';
-  updateSyncUI('syncing',sync.getPending().length);
-  if(btn)btn.disabled=true;
-  const result = await sync.syncAll(user.uid);
-  updateSyncUI(fb.isOnline()?'online':'offline',sync.getPending().length);
-  if(btn){
-    const {pushed=0,failed=0}=result||{};
-    if(pushed===0 && failed===0) btn.textContent='✓ Al día';
-    else if(failed>0) btn.textContent=`⚠ ${pushed}/${pushed+failed}`;
-    else btn.textContent=`✓ ${pushed}`;
-    setTimeout(()=>{if(btn)btn.textContent=originalText;},2500);
-  }
-}
-
-window.addEventListener('wapps:online',()=>updateSyncUI('online',_sync()?.getPending().length??0));
-window.addEventListener('wapps:offline',()=>updateSyncUI('offline',_sync()?.getPending().length??0));
-window.addEventListener('wapps:sync-start',()=>updateSyncUI('syncing',_sync()?.getPending().length??0));
-window.addEventListener('wapps:sync-done',()=>{const fb=_fb();updateSyncUI(fb?(fb.isOnline()?'online':'offline'):'offline',_sync()?.getPending().length??0);});
-window.addEventListener('wapps:pending-change',e=>{const fb=_fb(),label=document.getElementById('sync-label');const isSyncing=label?.className?.includes('syncing');updateSyncUI(isSyncing?'syncing':(fb?(fb.isOnline()?'online':'offline'):'offline'),e.detail.pending.length);});
 
 </script>
 </body>

@@ -76,7 +76,6 @@ const WStore = (() => {
         }
       }
       localStorage.setItem(DONE_KEY, '1');
-      if (migrated > 0) console.info(`[WStore] Migración legacy v2: ${migrated} claves migradas.`);
     } catch(e) {
       console.warn('[WStore] migrateLegacy error:', e);
     }
@@ -99,10 +98,8 @@ const WStore = (() => {
         if (typeof WFirebase === 'undefined' || typeof WSync === 'undefined') return;
         const user = WFirebase.getUser();
         if (!user || !WFirebase.isOnline()) return;
-        console.info('[WStore] localStorage vacío detectado — recuperando desde Firestore…');
         const ok = await WSync.pullAll(user.uid);
         if (ok) {
-          console.info('[WStore] Datos recuperados desde Firestore ✓');
           // Emitir evento global para que las apps que ya cargaron se re-rendericen
           window.dispatchEvent(new CustomEvent('wapps:recovered', { detail: { source: 'firestore' } }));
         }
@@ -685,9 +682,6 @@ const WTheme = (() => {
     const line  = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
     const line2 = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)';
     const grid  = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
-
-    // Contraste del botón: en modo claro el fondo oscuro del btn-y queda mal
-    const btnBg = isDark ? bg : bg2;
 
     return `
 :root {
