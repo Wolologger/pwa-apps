@@ -1,4 +1,4 @@
-const CACHE = 'wapps-v11.0';
+const CACHE = 'wapps-v11.1';
 
 // Núcleo: solo lo imprescindible para arrancar offline y mostrar fallbacks.
 // El resto de páginas HTML se cachean la primera vez que el usuario las visita (lazy cache).
@@ -7,6 +7,7 @@ const PRECACHE_CORE = [
   '/pwa-apps/manifest.json',
   '/pwa-apps/wapps-config.js',
   '/pwa-apps/wapps-utils.js',
+  '/pwa-apps/wapps-common.css',
   '/pwa-apps/wapps-store.js',
   '/pwa-apps/wapps-firebase.js',
   '/pwa-apps/wapps-onboarding.js',
