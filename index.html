@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" id="dyn-favicon" href="icons/icon-192.png" type="image/png">
 <title>W // APPS</title>
-<!-- version: 3.11.0 -->
+<!-- version: 3.13.0 -->
 <!-- Firebase SDK v9 compat -->
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
@@ -245,6 +245,20 @@ const CHANGELOG = [
       { type: 'imp', text: 'SYNC con feedback: "✓ Al día", "✓ N" o "⚠ N/M" durante 2.5 s' },
       { type: 'imp', text: 'preconnect a fonts.googleapis, fonts.gstatic y firestore (-100-300 ms primera carga)' },
       { type: 'del', text: 'Hero "MIS HERRAMIENTAS" y carrusel ticker horizontal' },
+    ],
+  }, {
+    version: 'v3.13.0',
+    date: 'Abril 2026',
+    items: [
+      { type: 'new', text: 'Toggle de tareas desde el dashboard — pulsar ○ en el widget Hoy marca/desmarca sin abrir semana.html' },
+      { type: 'new', text: 'Predicción próxima factura en suministros — media de días entre facturas + fecha estimada + color semáforo' },
+      { type: 'new', text: 'Detector de gasto inusual en gastos-diarios — aviso si importe > media + 2σ de la categoría (últimos 90d)' },
+      { type: 'new', text: 'Export CSV (separador ;, BOM UTF-8) en suministros, gastos-diarios y coches' },
+      { type: 'fix', text: 'mascotas.html — bloque syncOnLoad estaba dentro de showTab(), se ejecutaba en cada cambio de pestaña' },
+      { type: 'fix', text: '16 apps — listeners wapps:online/offline/sync-start/sync-done/pending-change duplicados eliminados' },
+      { type: 'fix', text: 'ajustes.html — código funcional ignorado dentro de <script src="..."> (mismo bug que suministros v4.7.1)' },
+      { type: 'imp', text: 'WStore.get() usa cache en memoria con invalidación por wapps:change (evita JSON.parse en cada lectura)' },
+      { type: 'imp', text: 'gastos-diarios — .select() en campo importe tras añadir gasto (sobreescribir sin borrar manualmente)' },
     ],
   }, {
     version: 'v3.12.0',
@@ -1055,8 +1069,24 @@ function renderDashTasks(){
   count.textContent=pending;
   body.innerHTML=tasks.slice(0,4).map(t=>{
     const txt=String(t.text||'').replace(/</g,'&lt;');
-    return `<div class="dash-task-item ${t.done?'done':''}"><span class="dash-task-check">${t.done?'✓':'○'}</span><span>${txt}</span></div>`;
+    return `<div class="dash-task-item ${t.done?'done':''}" onclick="dashToggleTask('${today}',${t.id})" style="cursor:pointer;user-select:none"><span class="dash-task-check">${t.done?'✓':'○'}</span><span>${txt}</span></div>`;
   }).join('') + (tasks.length>4?`<div class="dash-empty">+${tasks.length-4} más</div>`:'');
+}
+
+function dashToggleTask(key, id) {
+  const semData = (typeof WStore !== 'undefined' && WStore.get('semana','data'))
+    || JSON.parse(localStorage.getItem('wapps.semana.data') || localStorage.getItem('semana_v2') || 'null');
+  if (!semData || !semData.tasks) return;
+  const task = (semData.tasks[key] || []).find(t => t.id === id);
+  if (!task) return;
+  task.done = !task.done;
+  semData._updatedAt = new Date().toISOString();
+  if (typeof WStore !== 'undefined') {
+    WStore.set('semana', 'data', semData);
+  } else {
+    try { localStorage.setItem('wapps.semana.data', JSON.stringify(semData)); } catch(e) {}
+  }
+  renderDashTasks();
 }
 
 function renderDashNext(){
