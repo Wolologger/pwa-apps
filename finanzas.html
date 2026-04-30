@@ -10,17 +10,7 @@
 <title>Finanzas — W//APPS</title>
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
-<script>
-// Haptic feedback
-function haptic(p){
-  if(!navigator.vibrate)return;
-  if(p==='light')navigator.vibrate(8);
-  else if(p==='medium')navigator.vibrate(18);
-  else if(p==='success')navigator.vibrate([8,50,8]);
-  else if(p==='error')navigator.vibrate([30,60,30]);
-  else navigator.vibrate(p);
-}
-</script>
+<script src="wapps-utils.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-config.js"></script>
@@ -107,8 +97,6 @@ function wuid() {
   return Date.now();
 }
 function nxtId(){ return wuid(); }
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function fmt(n,d=2){return Number(n||0).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d});}
 function toMonthly(item){return item.importe/(FREQ_M[item.freq]||1);}
 
 // ── READ FROM OTHER APPS ──

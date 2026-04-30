@@ -12,17 +12,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
-<script>
-// Haptic feedback
-function haptic(p){
-  if(!navigator.vibrate)return;
-  if(p==='light')navigator.vibrate(8);
-  else if(p==='medium')navigator.vibrate(18);
-  else if(p==='success')navigator.vibrate([8,50,8]);
-  else if(p==='error')navigator.vibrate([30,60,30]);
-  else navigator.vibrate(p);
-}
-</script>
+<script src="wapps-utils.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-config.js"></script>
@@ -159,8 +149,6 @@ function wuid() {
   return Date.now();
 }
 function nxtId(){ return wuid(); }
-function today(){const d=new Date();return`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;}
-function p2(n){return String(n).padStart(2,'0');}
 function bkey(){return`${vy}-${p2(vm+1)}`;}
 function monthData(){const pfx=bkey();return state.gastos.filter(g=>g.fecha.startsWith(pfx));}
 
@@ -560,7 +548,6 @@ function showFB(id,msg,type){
   el.textContent=msg;el.className='fb fb-'+(type==='ok'?'ok':'err');
   el.style.display='block';if(type==='ok')setTimeout(()=>el.style.display='none',2500);
 }
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 // ── INIT ──
 initCatPicker();

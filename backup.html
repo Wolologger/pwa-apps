@@ -12,17 +12,7 @@
 <!-- version: 1.1.0 -->
 <!-- Firebase SDK -->
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
-<script>
-// Haptic feedback
-function haptic(p){
-  if(!navigator.vibrate)return;
-  if(p==='light')navigator.vibrate(8);
-  else if(p==='medium')navigator.vibrate(18);
-  else if(p==='success')navigator.vibrate([8,50,8]);
-  else if(p==='error')navigator.vibrate([30,60,30]);
-  else navigator.vibrate(p);
-}
-</script>
+<script src="wapps-utils.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-config.js"></script>
@@ -229,7 +219,6 @@ function fmtDate(iso) {
   return d.toLocaleDateString('es-ES', {day:'2-digit',month:'short',year:'numeric'}) + ' ' +
          d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
 }
-function today() { return new Date().toISOString().slice(0,10); }
 function nowISO() { return new Date().toISOString(); }
 
 // ── COLLECT DATA ──

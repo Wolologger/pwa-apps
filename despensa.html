@@ -12,17 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <!-- ★ Bus compartido -->
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
-<script>
-// Haptic feedback
-function haptic(p){
-  if(!navigator.vibrate)return;
-  if(p==='light')navigator.vibrate(8);
-  else if(p==='medium')navigator.vibrate(18);
-  else if(p==='success')navigator.vibrate([8,50,8]);
-  else if(p==='error')navigator.vibrate([30,60,30]);
-  else navigator.vibrate(p);
-}
-</script>
+<script src="wapps-utils.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-config.js"></script>
@@ -221,8 +211,6 @@ let currentTab = 'despensa';
 // Escuchar cambios de otras apps en tiempo real (ej: compra marca algo)
 WStore.on('compra','data', () => renderConexiones());
 
-function today(){ const d=new Date(); return`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`; }
-function p2(n){ return String(n).padStart(2,'0'); }
 function daysUntil(dateStr){
   if(!dateStr) return null;
   return Math.ceil((new Date(dateStr)-new Date(today()))/(1000*60*60*24));
@@ -237,7 +225,6 @@ function expBadge(dateStr){
   return`<span class="exp-badge exp-ok">${dateStr.slice(5).replace('-','/')}</span>`;
 }
 function sortAlimentos(arr){ return [...arr].sort((a,b)=>{ const da=daysUntil(a.fecha), db=daysUntil(b.fecha); if(da===null&&db===null)return a.nombre.localeCompare(b.nombre); if(da===null)return 1; if(db===null)return -1; return da-db; }); }
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 // ── TABS ──
 function qaStripAdd(){

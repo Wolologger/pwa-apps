@@ -11,17 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
-<script>
-// Haptic feedback (silencioso si el dispositivo no lo soporta)
-function haptic(p) {
-  if (!navigator.vibrate) return;
-  if (p === 'light') navigator.vibrate(8);
-  else if (p === 'medium') navigator.vibrate(18);
-  else if (p === 'success') navigator.vibrate([8, 50, 8]);
-  else if (p === 'error') navigator.vibrate([30, 60, 30]);
-  else navigator.vibrate(p);
-}
-</script>
+<script src="wapps-utils.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-config.js"></script>
@@ -749,31 +739,12 @@ function _saveImmediate() {
 
 function save() { _saveImmediate(); }
 
-// ── TOAST ──
-let _toastTimer = null;
-function showToast(msg, isErr = false) {
-  let el = document.getElementById('toast-sui');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = 'toast-sui';
-    el.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg2);border:0.5px solid var(--border2);border-radius:8px;padding:10px 18px;font-size:12px;font-family:var(--fm);color:var(--text);z-index:9999;max-width:320px;text-align:center;opacity:0;transition:opacity 0.25s;pointer-events:none;';
-    document.body.appendChild(el);
-  }
-  el.textContent = msg;
-  el.style.color = isErr ? 'var(--r)' : 'var(--g)';
-  el.style.opacity = '1';
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => { el.style.opacity = '0'; }, 2800);
-}
-
 // wuid(): ID numérico único basado en timestamp. Seguro en onclick="fn(id)".
 // Probabilidad de colisión entre 2 dispositivos en el mismo millisegundo: ~0 en uso real.
 function wuid() {
   return Date.now();
 }
 function nxtId(){ return wuid(); }
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function fmt(n, dec=2) { return Number(n).toLocaleString('es-ES', {minimumFractionDigits:dec, maximumFractionDigits:dec}); }
 
 // ── TIPO ──
 function setTipo(t) {

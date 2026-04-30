@@ -10,6 +10,7 @@
 <title>Decisor — W//APPS</title>
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<script src="wapps-utils.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="wapps-config.js"></script>
@@ -126,7 +127,6 @@ function save() {
 window.addEventListener('beforeunload', () => { if (_saveDebounce) _saveImmediate(); }, {once:true});
 
 function nxtId(){return++(state.nextId);}
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 function showTab(name,el){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));

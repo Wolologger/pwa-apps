@@ -182,25 +182,6 @@ const WFirebase = (() => {
   function isReady()   { return _ready; }
   function getLastAuth() { return _lastAuthEvent; }
 
-  // Replay del último auth-change para listeners que se registran tarde.
-  // Llamado al final de la carga del módulo; reemite el evento en el próximo
-  // tick si ya había usuario autenticado (caso típico: la app monta su listener
-  // después de que Firebase ya autenticó silenciosamente vía sesión persistente).
-  function _replayLastAuth() {
-    if (_lastAuthEvent) {
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('wapps:auth-change', { detail: _lastAuthEvent }));
-      }, 0);
-    } else {
-      // Aún sin auth — esperar y re-chequear cuando WFirebase esté listo
-      setTimeout(() => {
-        if (_lastAuthEvent) {
-          window.dispatchEvent(new CustomEvent('wapps:auth-change', { detail: _lastAuthEvent }));
-        }
-      }, 500);
-    }
-  }
-
   // ── Firestore push ────────────────────────────────────────────────
   async function pushToFirestore(uid, key, data) {
     if (!_ready || !uid) return false;
@@ -523,7 +504,6 @@ const WSync = (() => {
           if (local.nextId || data.nextId) {
             merged.nextId = Math.max(local.nextId || 0, data.nextId || 0);
           }
-          console.info(`[WSync] merge inteligente aplicado: ${fsKey}`);
         } else {
           // Diferencia > 24h o clave sin merge map — gana el más reciente
           merged = { ...data };
@@ -603,7 +583,6 @@ const WSync = (() => {
         const data = JSON.parse(oldRaw);
         // Migrar al vuelo: copiar a clave nueva para que futuras lecturas sean directas
         localStorage.setItem('wapps.' + key, JSON.stringify(data));
-        console.info(`[WSync] migración al vuelo: ${legacyKey} → wapps.${key}`);
         return data;
       }
     }
@@ -641,7 +620,6 @@ const WSync = (() => {
         if (ok) {
           pushed++;
           clearPending(key);
-          console.info(`[WSync] pushAll ${key}: subversión v${version}`);
         } else {
           // Revertir versión si falló
           try { localStorage.setItem('wapps.pushver.' + key, String(version - 1)); } catch(e) {}
@@ -653,7 +631,6 @@ const WSync = (() => {
       }
     }
 
-    console.info(`[WSync] pushAll: ${pushed} subidas, ${failed} fallidas, ${skipped} sin datos`);
     window.dispatchEvent(new CustomEvent('wapps:sync-done', { detail: { pushed, failed } }));
     return { pushed, failed };
   }
@@ -700,6 +677,5 @@ const WSync = (() => {
       }
     }
     keysToRemove.forEach(k => localStorage.removeItem(k));
-    console.info('[WFirebase] logout: limpiados', keysToRemove.length, 'keys locales');
   };
 })();

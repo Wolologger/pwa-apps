@@ -9,7 +9,10 @@
 <meta name="theme-color" content="#0a0a09">
 <link rel="manifest" href="manifest.json">
 <title>Ajustes — W//APPS</title>
-<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js">
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<script src="wapps-utils.js"></script>
+<script>
 // ── Error log de sync ──────────────────────────────────────────
 const _syncErrors = JSON.parse(localStorage.getItem('wapps.syncErrors') || '[]');
 function _logSyncError(msg) {
