@@ -350,7 +350,6 @@ const WStore = (() => {
   return { get, set, on, bridge, syncOnLoad, syncAllOnLoad };
 })();
 
-
 // ═══════════════════════════════════════════════════════════════
 // NOTIFY — sistema de notificaciones
 // ═══════════════════════════════════════════════════════════════
@@ -565,7 +564,6 @@ const WNotify = (() => {
   return { request, send, check, getConfig, setConfig, renderConfigPanel, _toggleConfig };
 })();
 
-
 // ═══════════════════════════════════════════════════════════════
 // AUTO-CHECK al cargar cualquier página
 // ═══════════════════════════════════════════════════════════════
@@ -584,7 +582,6 @@ window.addEventListener('DOMContentLoaded', () => {
   // Pequeño delay para no bloquear el render inicial
   setTimeout(() => WNotify.check(), 2000);
 });
-
 
 // ═══════════════════════════════════════════════════════════════
 // WTRANSITION — fade-out/in entre páginas
@@ -631,7 +628,6 @@ const WTransition = (() => {
 
   return { go };
 })();
-
 
 // ═══════════════════════════════════════════════════════════════
 // ═══════════════════════════════════════════════════════════════
@@ -830,7 +826,6 @@ body, .fm, input, select, button { font-size:${fs.body}; }
   return { get, getAll, setMode, setAccent, setFontSize, apply, ACCENTS, FONT_SIZES };
 })();
 
-
 // ═══════════════════════════════════════════════════════════════
 // WSKELETON — skeleton loaders para contenido en carga
 // ═══════════════════════════════════════════════════════════════
@@ -871,7 +866,6 @@ const WSkeleton = (() => {
 
   return { cards, empty, injectCSS };
 })();
-
 
 // ═══════════════════════════════════════════════════════════════
 // WPDF — exportación a PDF con jsPDF

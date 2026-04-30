@@ -81,8 +81,8 @@ const WFirebase = (() => {
   // Online/Offline
   // _online refleja navigator.onLine pero puede ser forzado por otras capas (p.ej. ping periódico)
   window.addEventListener('online',  () => { _online = true;  window.dispatchEvent(new CustomEvent('wapps:online')); });
-  window.addEventListener('offline', () => { 
-    _online = false; 
+  window.addEventListener('offline', () => {
+    _online = false;
     _lastLatency = null;
     window.dispatchEvent(new CustomEvent('wapps:offline'));
     window.dispatchEvent(new CustomEvent('wapps:latency', { detail: { ms: null, reason: 'navigator-offline' } }));
@@ -307,7 +307,6 @@ if (typeof window !== 'undefined' && window.WFirebase) {
     setTimeout(_wfb_post_init, 100);
   }
 }
-
 
 // ═══════════════════════════════════════════════════════════════
 // WSYNC — cola de pendientes + sync manual y automático

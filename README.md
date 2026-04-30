@@ -1,230 +1,93 @@
-# W//APPS
-
-Panel de herramientas personales en formato PWA. Funciona como aplicación instalable en móvil y escritorio, con soporte offline completo y sincronización opcional con Firebase.
-
----
-
-## Módulos incluidos
-
-| App | Archivo | Descripción |
-|---|---|---|
-| 🏠 Inicio | `index.html` | Panel principal y acceso a todas las apps |
-| 🥦 Despensa | `despensa.html` | Inventario con alertas de caducidad |
-| 🛒 Compra | `compra.html` | Lista de la compra con categorías y establecimientos |
-| 💰 Gastos | `gastos-diarios.html` | Control de gastos diarios |
-| 📊 Finanzas | `finanzas.html` | Ingresos, gastos fijos y presupuesto mensual |
-| 💡 Suministros | `suministros.html` | Registro de facturas de luz, gas y agua |
-| 🏗️ Mi Obra | `obra.html` | Gestión de tareas y gastos de reforma |
-| 🚗 Coches | `coches.html` | Mantenimiento, servicios y repostajes |
-| 🐾 Mascotas | `mascotas.html` | Salud y seguimiento de mascotas |
-| 👶 Niños | `ninos.html` | Registro de hitos y crecimiento |
-| 🎸 Instrumentos | `instrumentos.html` | Inventario de equipo musical |
-| 🎵 Setlist | `setlist.html` | Listas de canciones para actuaciones |
-| ❤️ Deseados | `deseados.html` | Lista de deseos y seguimiento de precios |
-| 📅 Semana | `semana.html` | Planificador semanal |
-| 🎲 Decisor | `decisor.html` | Herramienta de toma de decisiones |
-| 💾 Backup | `backup.html` | Copia de seguridad y sincronización Firebase |
-
----
-
-## Arquitectura
-
-```
-localStorage (siempre)
-    └── WStore.get / WStore.set
-            └── WSync (cola offline)
-                    └── Firebase Firestore (cuando hay sesión y red)
-                            └── onSnapshot (tiempo real → WStore.watchRealtime)
-```
-
-- **Sin conexión**: todo funciona con `localStorage`. Los cambios se marcan como pendientes en `wapps.pending` (persiste entre sesiones).
-- **Con conexión y sesión**: los datos se suben a Firestore automáticamente. Gana siempre el más reciente por `_updatedAt`. Al cerrar la pestaña, `WSync` hace un flush de pendientes vía `visibilitychange`/`pagehide`.
-- **Tiempo real**: `WStore.watchRealtime` mantiene un listener `onSnapshot` activo con merge campo a campo. Los listeners se limpian solos en `pagehide`. Un toast sutil confirma cada actualización remota.
-- **Service Worker** (`sw.js` v9.0): precaché reducido al núcleo; el resto se cachea al visitar (lazy). Estrategia stale-while-revalidate para HTML con banner de actualización no intrusivo.
-- **Seguridad**: sesión expira tras 8 h de inactividad (configurable). Credenciales placeholder en `wapps-config.js` se detectan al arrancar.
-- **Resiliencia**: `QuotaExceededError` de localStorage muestra banner de alerta en lugar de fallar silenciosamente.
-
----
-
-## Módulos compartidos
-
-| Archivo | Descripción |
-|---|---|
-| `wapps-store.js` | Bus de datos (`WStore`), notificaciones (`WNotify`), cola offline, banner de actualización (`WUpdate`) |
-| `wapps-firebase.js` | Auth con Google y sincronización Firestore (`WFirebase`, `WSync`) |
-| `wapps-onboarding.js` | Sistema de onboarding para nuevos usuarios |
-| `sw.js` | Service Worker — offline, caché, detección de actualizaciones |
-| `manifest.json` | Manifiesto PWA — iconos, shortcuts, colores |
-| `offline.html` | Página de fallback cuando no hay red ni caché |
-
----
-
-## Instalación
-
-### Como PWA (recomendado)
-1. Sube todos los archivos a tu servidor o GitHub Pages
-2. Abre la URL en Chrome o Safari
-3. Instala con "Añadir a pantalla de inicio"
-
-### Como APK (Android)
-Generada con [PWABuilder](https://pwabuilder.com) — Trusted Web Activity (TWA). Las notificaciones y el Service Worker funcionan exactamente igual que en el navegador.
-
----
-
-## Firebase (opcional)
-
-La sincronización en la nube es completamente opcional. Sin cuenta de Firebase, la app funciona al 100% en local.
-
-Para activarla:
-1. Crea un proyecto en [console.firebase.google.com](https://console.firebase.google.com)
-2. Activa **Authentication → Google**
-3. Activa **Firestore Database**
-4. Sustituye la configuración en `wapps-firebase.js`
-
-### Estructura de datos en Firestore
-
-```
-users/
-  {uid}/
-    data/
-      despensa_items
-      compra_data
-      suministros_data
-      finanzas_data
-      gastos_data
-      semana_data
-      deseados_data
-      obra_data
-      instrumentos_data
-      setlist_data
-      mascotas_data
-```
-
-### Reglas de seguridad recomendadas
-
-**Configuración:**
-1. Copia `wapps-config.example.js` → `wapps-config.js`
-2. Rellena tus credenciales Firebase
-3. `wapps-config.js` está en `.gitignore` — nunca se sube al repo
-
-```js
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId}/data/{document} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-  }
-}
-```
-
----
-
-## Sincronización en tiempo real
-
-`WStore.watchRealtime` abre un listener `onSnapshot` sobre un documento Firestore. Cuando otro dispositivo guarda un cambio, llega automáticamente sin recargar la página.
-
-```js
-// Activar sync en tiempo real para una app concreta
-const unsubscribe = WStore.watchRealtime('despensa', 'items', data => {
-  render(data); // se llama cada vez que cambia en cualquier dispositivo
-});
-
-// Detener el listener (p.ej. al salir de la página)
-unsubscribe();
-```
-
-El listener compara `_updatedAt`: si el dato local ya es igual o más reciente, ignora la actualización remota. Esto evita bucles y conflictos con ediciones simultáneas.
-
----
-
-## Banner de actualización
-
-Cuando se despliega una nueva versión, el Service Worker detecta el cambio y muestra automáticamente un banner en la parte inferior de la pantalla:
-
-> ⚡ Hay una actualización disponible — **[Recargar]** ✕
-
-El usuario decide cuándo recargar. La app nunca se recarga sola. El banner aparece tanto si el SW detecta cambios por ETag/Last-Modified como si queda en estado `waiting`.
-
----
-
-## Notificaciones
-
-`WNotify` gestiona alertas automáticas. Para activarlas en cualquier página:
-
-```js
-WNotify.renderConfigPanel('id-del-contenedor'); // muestra los toggles de config
-WNotify.check();                                 // lanza el check inmediato
-```
-
-Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas sin registrar, presupuesto al límite, tareas del día, días sin registrar gastos.
-
----
-
 ## Changelog
 
+### v4.7.0
+- **Limpieza** — Minificación CSS en 20 apps: bloques `<style>` compactados (~11 KB ahorrados en total).
+- **Limpieza** — Trailing whitespace y líneas en blanco múltiples eliminados de todos los archivos.
+- **Docs** — `README.md`: changelog completo con todas las entradas faltantes de v4.1.0 a v4.6.2.
+- `sw.js` v10.6, manifest v4.7.0
+
+
+### v4.6.2
+- **Fix** — `despensa.html`: `render()` sin definición en listeners `wapps:recovered` → corregido a `renderDespensa()`.
+- `sw.js` v10.5, manifest v4.6.2
+
 ### v4.6.1
-- **Fix** — `coches`, `ninos`, `obra`, `suministros`: `haptic()` no definida (`ReferenceError`) al añadir elementos — la limpieza del boilerplate había eliminado la función junto con el resto del inline.
-- **Fix** — `index.html`: `hero-info-grid` con 7 bloques en grid de 3 columnas fijas dejaba un hueco vacío. Cambiado a `auto-fit / minmax(120px,1fr)` para adaptarse limpiamente.
+- **Fix** — `coches`, `ninos`, `obra`, `suministros`: `haptic()` no definida (`ReferenceError`) al añadir elementos — la limpieza del boilerplate había eliminado la función.
+- **Fix** — `index.html`: `hero-info-grid` con 7 bloques en grid de 3 columnas fijas dejaba un hueco vacío → cambiado a `auto-fit / minmax(120px,1fr)`.
 - `sw.js` v10.4, manifest v4.6.1
 
 ### v4.6.0
-- **Limpieza L12** — Eliminado boilerplate sync inline de 16 apps (~35 KB en total): `_fb()`, `_sync()`, `updateSyncUI()`, `manualSync()`, `manualPull()`, `manualPushApp()`. Todas dependen ahora de `wapps-sync-ui.js`.
-- **Limpieza L13** — `manualPull()` centralizado en módulo. `wapps-nav.js` ya usa `typeof manualPull === 'function'` para compatibilidad.
-- **Rendimiento P3** — Debounce de 200ms en `save()` añadido a `compra`, `decisor`, `deseados`, `finanzas`, `mascotas`, `semana`, `setlist`.
+- **Limpieza L12** — Eliminado boilerplate sync inline de 16 apps (~35 KB): `_fb()`, `_sync()`, `updateSyncUI()`, `manualSync/Pull/PushApp()`. Todas usan `wapps-sync-ui.js`.
+- **Limpieza L13** — `manualPull()` centralizado en módulo.
+- **Rendimiento P3** — Debounce 200ms en `save()` añadido a `compra`, `decisor`, `deseados`, `finanzas`, `mascotas`, `semana`, `setlist`.
 - `sw.js` v10.3, manifest v4.6.0
 
 ### v4.5.1
-- **Fix crítico** — `suministros.html`: el bloque HTML de predicciones de facturas se inyectó dentro del bloque `<script>` → `SyntaxError` que rompía tabs, facturas y toda la navegación de la app. Movido al lugar correcto dentro del panel `<div id="resumen">`.
-- **Fix crítico** — `coches.html`, `ninos.html`, `obra.html`: la inyección automática del debounce partió la función `_saveImmediate()` separando el `try` del `catch` con `function save()` en medio → `SyntaxError` silencioso que impedía añadir coches, guardar niños o cualquier elemento en obra.
+- **Fix crítico** — `suministros.html`: HTML de predicciones inyectado dentro del `<script>` → SyntaxError que rompía tabs y navegación.
+- **Fix crítico** — `coches.html`, `ninos.html`, `obra.html`: debounce partió `_saveImmediate()` separando `try` del `catch` → SyntaxError silencioso, imposible añadir elementos.
 - `sw.js` v10.2, manifest v4.5.1
 
 ### v4.5.0
-- **Fix crítico** — `coches.html` y 15 apps más: `wuid()` devolvía UUID con guiones (`550e8400-...`) que al insertarse en `onclick="fn(${item.id})"` generaban JS inválido (guiones = operadores). Resultado: no se podían añadir coches ni items. Revertido a `Date.now()` numérico.
-- **Fix crítico** — Sync nunca quedaba a la par entre dispositivos: `WStore.set()` guardaba local con `_updatedAt=T1` pero `pushToFirestore()` subía a Firebase con `_updatedAt=T2` (posterior). Firebase quedaba siempre más nuevo → `syncOnLoad` descargaba innecesariamente → bucle infinito. Arreglado con `pushToFirestoreExact()` que preserva el timestamp exacto del payload local.
-- **Mejora** — Hero index: bloque "Latencia" eliminado. Sustituido por "Datos en Firebase" que muestra KB sincronizados / 1 MB máximo de Firestore, porcentaje y aviso cuando hay pendientes.
+- **Fix crítico** — `wuid()` devolvía UUID con guiones en 16 apps → `onclick="fn(${id})"` generaba JS inválido. Revertido a `Date.now()` numérico.
+- **Fix crítico** — Sync nunca quedaba a la par: `WStore.set()` y `pushToFirestore()` generaban `_updatedAt` distintos → Firebase siempre más nuevo → descarga infinita. Arreglado con `pushToFirestoreExact()`.
+- **Fix** — `manualPull()` hacía `location.reload()` en 14 apps → cambiado a `wapps:recovered` (sin recarga).
+- **Fix** — Botón SYNC requería `pendingCount > 0` en 4 apps → habilitado con solo online+usuario.
+- **Nuevo** — Favicon dinámico en `index.html`: 🟢/🟡/🔴 según estado de red y pendientes (Canvas 32×32px).
+- **Nuevo** — iPad landscape: media queries `orientation:landscape` en 19 apps, grids ampliados, `max-width:900px`.
+- **Nuevo** — Haptic en 8 apps restantes: `obra`, `coches`, `ninos`, `setlist`, `instrumentos`, `finanzas`, `suministros`, `backup`.
+- **Nuevo** — `B4`: IDs con `wuid()` = `Date.now()` — sin colisiones entre dispositivos en uso real.
+- **Mejora** — Hero index: "Latencia" → "Datos en Firebase" (KB sincronizados / 1 MB, porcentaje, aviso pendientes).
 - `sw.js` v10.1, manifest v4.5.0
 
 ### v4.4.0
-- **Nuevo** — Categorización automática de gastos por concepto: "Mercadona"→supermercado, "Repsol"→gasolina, etc. (30 reglas, cubre ~80%)
-- **Nuevo** — Búsqueda global en datos: prefijo `>` en el buscador del index busca en gastos, tareas, despensa y compra
-- **Nuevo** — Alertas de cumpleaños en `mascotas` y `ninos`: toast al abrir si hoy es el día
-- **Nuevo** — Predicción de próxima factura en `suministros`: media histórica de intervalos → fecha estimada con color
-- **Nuevo** — Estadísticas por día de semana en `gastos-diarios`: barras con total Lun-Dom
-- **Nuevo** — Panel de errores de sync en `ajustes`: log de los últimos 20 fallos de push a Firestore
-- **Nuevo** — Stats por app en `ajustes`: grid con nº items, KB y fecha de última edición
-- **Nuevo** — `wapps-sync-ui.js`: módulo compartido con `_fb()`, `_sync()`, `updateSyncUI()`, `manualSync/Pull/PushApp()` — incluido en 16 apps
-- **Mejora** — Haptic feedback en acciones clave: toggle tareas, añadir gasto, swipe de vuelta, pull-to-refresh
-- **Mejora** — View Transitions API en `wapps-nav.js`: navegación con fade entre páginas (Chrome/Android)
-- **Mejora** — Pull-to-refresh en todas las apps: arrastrar desde arriba → refresca datos
-- **Fix** — B2: localStorage limpiado al hacer logout (evita datos de cuenta anterior visibles a la siguiente)
-- **Fix** — L2: CSS muerto eliminado en `ninos.html` (~1 KB, 11 reglas)
+- **Nuevo** — Categorización automática de gastos: "Mercadona"→supermercado, "Repsol"→gasolina (30 reglas, ~80% cobertura).
+- **Nuevo** — Búsqueda global: prefijo `>` en el buscador del index busca en gastos, tareas, despensa y compra.
+- **Nuevo** — Alertas de cumpleaños en `mascotas` y `ninos`: toast al abrir si hoy es el día.
+- **Nuevo** — Predicción de próxima factura en `suministros`: fecha estimada + días restantes con color.
+- **Nuevo** — Stats por día de semana en `gastos-diarios`: barras horizontales Lun-Dom.
+- **Nuevo** — Panel de errores de sync en `ajustes`: log últimos 20 fallos con timestamp.
+- **Nuevo** — Stats por app en `ajustes`: grid con nº items, KB y fecha de última edición.
+- **Nuevo** — Quick-add en `despensa`: barra inline para añadir productos sin formulario completo.
+- **Nuevo** — Quick-new en `suministros`: botones ⚡/🔥/💧 que abren formulario con tipo preseleccionado.
+- **Nuevo** — Detección de duplicados en `deseados` por nombre normalizado.
+- **Mejora** — `inputmode="decimal"` en 36 inputs numéricos (coches, mascotas, ninos, obra, finanzas, gastos-diarios).
+- **Mejora** — `aria-label` en botones icon-only en `coches`, `finanzas`, `obra`, `setlist`.
+- **Mejora** — Haptic feedback, View Transitions API, Pull-to-refresh universal vía `wapps-nav.js`.
+- **Fix** — B2: `localStorage` limpiado al logout.
+- **Fix** — L2: 11 reglas CSS muertas eliminadas de `ninos.html`.
+- **Fix** — L1: Modal QR y funciones muertas eliminados de `setlist.html`.
 - `sw.js` v10.0, manifest v4.4.0
 
 ### v4.3.0
-- **Nuevo** — SW cachea Firebase SDK, Fonts y jsPDF (Cloudflare) — app arranca offline tras primera visita
-- **Nuevo** — Dashboard pausa su setInterval cuando la pestaña está oculta (ahorra batería)
-- **Nuevo** — Latencia muestra `—` inmediato al perder conexión (no espera 30s)
-- **Fix** — 5 apps: debounce de `save()` a 200ms (ninos, obra, coches, gastos-diarios, suministros)
-- **Fix** — `manifest.json`: shortcuts mejorados (añadida Semana)
-- **Fix** — L1: Modal QR eliminado de `setlist.html`
+- **Nuevo** — SW cachea Firebase SDK, Fonts y jsPDF (Cloudflare) — app arranca 100% offline.
+- **Nuevo** — Dashboard pausa `setInterval` cuando pestaña oculta (ahorra batería).
+- **Nuevo** — Prefetch on hover/touchstart en tarjetas del index → navegación instantánea.
+- **Nuevo** — Modo claro `index.html`: `.cmd-bar`/`.cmd-dropdown`/`.icon-card:hover` con colores hardcoded → variables CSS.
+- **Fix** — Debounce 200ms en `save()`: `ninos`, `obra`, `coches`, `gastos-diarios`, `suministros`.
+- **Fix** — Shortcuts manifest mejorados (Semana añadida, Gastos primero).
+- **Fix** — Latencia muestra `—` inmediato al perder conexión.
+- `sw.js` v9.6, manifest v4.3.0
+
+### v4.2.1
+- **Nuevo** — Prefetch dinámico en `index.html`: `<link rel="prefetch">` al primer hover/touchstart por tarjeta.
+- **Fix** — `index.html`: `.cmd-bar` hardcoded `#111110` → `var(--bg2)`.
 
 ### v4.2.0
-- **Fix crítico** — `pullFromFirestore` borraba `_updatedAt` → `syncOnLoad` no podía comparar timestamps → iPad nunca recibía datos del móvil (10/10 tests pasan)
-- **Nuevo** — Monitor de latencia/conectividad en `wapps-firebase.js`: ping a Cloudflare cada 30s, emite `wapps:latency`, corrige `navigator.onLine` cuando miente
-- **Nuevo** — Auth event replay: `wapps:auth-change` se reemite al DOMContentLoaded para listeners tardíos (arregla "semana offline")
-- **Nuevo** — `WFirebase.setOnline()`: permite forzar estado offline si el ping falla
-- **Nuevo** — `WFirebase.getLastAuth()`: acceso al último evento de auth
+- **Fix crítico** — `pullFromFirestore` preserva `_updatedAt` — causa raíz de que iPad nunca recibía datos del móvil.
+- **Nuevo** — Monitor de latencia en `wapps-firebase.js`: ping Cloudflare 30s, `wapps:latency`, corrige `navigator.onLine`.
+- **Nuevo** — Auth event replay: `wapps:auth-change` se reemite al DOMContentLoaded (arregla "semana offline").
+- **Nuevo** — `WFirebase.setOnline()`, `WFirebase.getLastAuth()`.
+- **Nuevo** — `wapps-pdf.js`: WPDF con jsPDF lazy-load en `gastos-diarios`, `obra`, `suministros`, `setlist`.
 
 ### v4.1.1
-- **Fix crítico** — `pullFromFirestore` preserva `_updatedAt` (causa raíz de iPad sin datos del móvil)
-- **Nuevo** — Indicador de latencia en hero del index (Cloudflare ping)
-- **Mejora** — Hero del index: 6 bloques de info útil (última sync, backup, pendientes, datos KB, estado, latencia)
+- **Fix crítico** — `pullFromFirestore` borraba `_updatedAt` → `syncOnLoad` comparaba con timestamp 0 → iPad nunca recibía datos del móvil.
+- **Nuevo** — Indicador de latencia en hero del index.
+- **Mejora** — Hero del index: 6 bloques de info útil.
 
 ### v4.1.0
-- **Fix** — Botón SYNC no requiere pendientes para habilitarse (13 apps)
-- **Mejora** — Responsive mejorado: body full-width, contenido centrado (sin bordes en iPad)
-- **Nuevo** — `wapps-nav.js`: ESC y swipe desde borde izq vuelven al home
+- **Fix** — Botón SYNC habilitado sin requerir pendientes > 0 (13 apps).
+- **Mejora** — Responsive: body full-width, contenido centrado sin bordes en iPad.
+- **Nuevo** — `wapps-nav.js`: ESC y swipe desde borde izquierdo vuelven al home.
 
 ### v4.0.0
 
