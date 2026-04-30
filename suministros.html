@@ -36,7 +36,7 @@
     <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
     <div class="wnav-sep"></div>
     <div class="wnav-title">SUMINISTROS</div>
-    <div class="wnav-version">v1.4</div>
+    <div class="wnav-version">v1.5</div>
   </div>
   <div class="sync-bar" id="sync-bar">
     <div class="sync-status">
@@ -1045,6 +1045,60 @@ function chartOpts(unit) {
 }
 
 // ── RESUMEN ──
+function renderPredictions() {
+  const el = document.getElementById('predictions-block');
+  if (!el) return;
+  const today_ms = Date.now();
+  let html = '';
+
+  ['luz','gas','agua'].forEach(tipo => {
+    const tf = state.facturas
+      .filter(f => f.tipo === tipo && f.inicio)
+      .sort((a, b) => a.inicio.localeCompare(b.inicio));
+    if (tf.length < 2) return;
+
+    // Calcular gaps en días entre facturas consecutivas
+    const gaps = [];
+    for (let i = 1; i < tf.length; i++) {
+      const d0 = new Date(tf[i-1].inicio).getTime();
+      const d1 = new Date(tf[i].inicio).getTime();
+      const diff = Math.round((d1 - d0) / 86400000);
+      if (diff > 5) gaps.push(diff); // ignorar gaps < 5d (datos erróneos)
+    }
+    if (!gaps.length) return;
+
+    const avgDays = Math.round(gaps.reduce((s, v) => s + v, 0) / gaps.length);
+    const lastDate = new Date(tf[tf.length - 1].inicio);
+    const nextDate = new Date(lastDate.getTime() + avgDays * 86400000);
+    const daysLeft = Math.round((nextDate.getTime() - today_ms) / 86400000);
+
+    // Color según urgencia
+    const color = daysLeft < 0 ? 'var(--r)' : daysLeft <= 7 ? 'var(--o)' : daysLeft <= 14 ? 'var(--luz)' : 'var(--g)';
+    const label = daysLeft < 0
+      ? `Hace ${Math.abs(daysLeft)}d`
+      : daysLeft === 0 ? 'Hoy'
+      : `En ${daysLeft}d`;
+
+    // Media de importe de las últimas 3 facturas para la estimación
+    const lastImportes = tf.slice(-3).map(f => f.importe);
+    const avgImporte = lastImportes.reduce((s, v) => s + v, 0) / lastImportes.length;
+
+    html += `<div style="display:flex;align-items:center;gap:12px;background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:8px;">
+      <div style="font-size:20px;flex-shrink:0">${TIPO_EMOJI[tipo]}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;color:var(--muted);font-family:var(--fm)">${tipo.toUpperCase()} · cada ~${avgDays}d</div>
+        <div style="font-family:var(--fh);font-size:16px;letter-spacing:0.3px">${nextDate.toLocaleDateString('es-ES',{day:'2-digit',month:'short'})}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-family:var(--fh);font-size:20px;color:${color}">${label}</div>
+        <div style="font-size:10px;color:var(--muted);font-family:var(--fm)">~${fmt(avgImporte)} €</div>
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML = html || '<div style="font-size:12px;color:var(--muted);font-family:var(--fm);padding:8px 0">Añade al menos 2 facturas por tipo para ver predicciones.</div>';
+}
+
 function renderResumen() {
   renderPredictions();
   const anios = allAnios();
