@@ -54,13 +54,13 @@ body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--fm
 .hero{padding:28px 20px 20px;border-bottom:1px solid var(--line2);position:relative;overflow:hidden;}
 .hero-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
 .hero-info{padding:18px 20px 16px;border-bottom:1px solid var(--line2);background:var(--bg);}
-.hero-info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line2);border:1px solid var(--line2);}
+.hero-info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;background:var(--line2);border:1px solid var(--line2);}
 .info-block{background:var(--bg2);padding:10px 12px;display:flex;flex-direction:column;gap:3px;min-height:52px;}
 .info-lbl{font-size:8px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);font-family:var(--fm);}
 .info-val{font-size:13px;color:var(--text);font-family:var(--fm);line-height:1.2;}
 .info-val strong{font-family:var(--fh);font-size:18px;color:var(--y);}
 @media (max-width:480px){
-  .hero-info-grid{grid-template-columns:repeat(2,1fr);}
+  /* hero-info-grid usa auto-fit — no override needed en móvil */
 }
 .hero-stat{font-size:11px;color:var(--muted);}
 .hero-stat strong{color:var(--text);font-weight:500;}
@@ -315,7 +315,7 @@ a.dash-card:hover{background:var(--bg3);}
 @media (min-width:720px) and (orientation:landscape){
   .dash-grid{grid-template-columns:repeat(4,1fr);}
   .icon-grid{grid-template-columns:repeat(5,1fr);}
-  .hero-info-grid{grid-template-columns:repeat(6,1fr);}
+  .hero-info-grid{grid-template-columns:repeat(7,1fr);}  /* 7 bloques en una fila */
 }
 @media (min-width:1200px){
   .dash-grid{grid-template-columns:repeat(4,1fr);}
@@ -365,7 +365,7 @@ a.dash-card:hover{background:var(--bg3);}
     <div class="topbar-right">
       <button class="version-badge" onclick="openChangelog()" title="Ver changelog">
         <span class="version-dot"></span>
-        <span id="version-display">v4.6.0</span>
+        <span id="version-display">v4.6.1</span>
       </button>
       <div class="clock" id="clock">--:--</div>
       <button class="auth-btn" id="auth-btn" onclick="handleAuth()" title="Login con Google">
@@ -531,7 +531,7 @@ a.dash-card:hover{background:var(--bg3);}
 const GITHUB_USER='Wolologger';
 const GITHUB_REPO='pwa-apps';
 
-const APP_VERSION = 'v4.6.0';
+const APP_VERSION = 'v4.6.1';
 
 // ── CHANGELOG ──────────────────────────────────────────────────────
 const CHANGELOG = [

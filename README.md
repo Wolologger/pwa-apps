@@ -163,6 +163,11 @@ Tipos de alerta disponibles: caducidades en despensa, stock mínimo, facturas si
 
 ## Changelog
 
+### v4.6.1
+- **Fix** — `coches`, `ninos`, `obra`, `suministros`: `haptic()` no definida (`ReferenceError`) al añadir elementos — la limpieza del boilerplate había eliminado la función junto con el resto del inline.
+- **Fix** — `index.html`: `hero-info-grid` con 7 bloques en grid de 3 columnas fijas dejaba un hueco vacío. Cambiado a `auto-fit / minmax(120px,1fr)` para adaptarse limpiamente.
+- `sw.js` v10.4, manifest v4.6.1
+
 ### v4.6.0
 - **Limpieza L12** — Eliminado boilerplate sync inline de 16 apps (~35 KB en total): `_fb()`, `_sync()`, `updateSyncUI()`, `manualSync()`, `manualPull()`, `manualPushApp()`. Todas dependen ahora de `wapps-sync-ui.js`.
 - **Limpieza L13** — `manualPull()` centralizado en módulo. `wapps-nav.js` ya usa `typeof manualPull === 'function'` para compatibilidad.

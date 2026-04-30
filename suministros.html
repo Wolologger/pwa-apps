@@ -13,6 +13,16 @@
 
 
 
+
+// Haptic feedback (silencioso si el dispositivo no lo soporta)
+function haptic(p) {
+  if (!navigator.vibrate) return;
+  if (p === 'light') navigator.vibrate(8);
+  else if (p === 'medium') navigator.vibrate(18);
+  else if (p === 'success') navigator.vibrate([8, 50, 8]);
+  else if (p === 'error') navigator.vibrate([30, 60, 30]);
+  else navigator.vibrate(p);
+}
 </script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
