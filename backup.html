@@ -583,16 +583,6 @@ function showToast(msg, isErr=false) {
 // ── INIT ──
 render();
 
-window.addEventListener('wapps:online',      () => updateSyncUI('online',  _sync()?.getPending().length ?? 0));
-window.addEventListener('wapps:offline',     () => updateSyncUI('offline', _sync()?.getPending().length ?? 0));
-window.addEventListener('wapps:sync-start',  () => updateSyncUI('syncing', _sync()?.getPending().length ?? 0));
-window.addEventListener('wapps:sync-done',   () => { const fb=_fb(); updateSyncUI(fb?(fb.isOnline()?'online':'offline'):'offline', _sync()?.getPending().length??0); });
-window.addEventListener('wapps:pending-change', e => {
-  const fb=_fb(); const label=document.getElementById('sync-label');
-  const isSyncing=label?.className?.includes('syncing');
-  const state=isSyncing?'syncing':(fb?(fb.isOnline()?'online':'offline'):'offline');
-  updateSyncUI(state, e.detail.pending.length);
-});
 window.addEventListener('wapps:auth-change', () => {
   updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
 });

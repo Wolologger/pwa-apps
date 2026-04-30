@@ -481,30 +481,5 @@ if (typeof WStore !== 'undefined') {
 }
 </script>
 
-<script>
-async function manualSync(){
-  const fb=_fb(),sync=_sync();if(!fb||!sync)return;
-  const user=fb.getUser();if(!user||!fb.isOnline())return;
-  const btn=document.getElementById('sync-btn');
-  const originalText = btn?.textContent || '↑ SYNC';
-  updateSyncUI('syncing',sync.getPending().length);
-  if(btn)btn.disabled=true;
-  const result = await sync.syncAll(user.uid);
-  updateSyncUI(fb.isOnline()?'online':'offline',sync.getPending().length);
-  if(btn){
-    const {pushed=0,failed=0}=result||{};
-    if(pushed===0 && failed===0) btn.textContent='✓ Al día';
-    else if(failed>0) btn.textContent=`⚠ ${pushed}/${pushed+failed}`;
-    else btn.textContent=`✓ ${pushed}`;
-    setTimeout(()=>{if(btn)btn.textContent=originalText;},2500);
-  }
-}
-
-window.addEventListener('wapps:online',()=>updateSyncUI('online',_sync()?.getPending().length??0));
-window.addEventListener('wapps:offline',()=>updateSyncUI('offline',_sync()?.getPending().length??0));
-window.addEventListener('wapps:sync-start',()=>updateSyncUI('syncing',_sync()?.getPending().length??0));
-window.addEventListener('wapps:sync-done',()=>{const fb=_fb();updateSyncUI(fb?(fb.isOnline()?'online':'offline'):'offline',_sync()?.getPending().length??0);});
-window.addEventListener('wapps:pending-change',e=>{const fb=_fb(),label=document.getElementById('sync-label');const isSyncing=label?.className?.includes('syncing');updateSyncUI(isSyncing?'syncing':(fb?(fb.isOnline()?'online':'offline'):'offline'),e.detail.pending.length);});
-</script>
 </body>
 </html>

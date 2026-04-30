@@ -348,15 +348,6 @@ async function uploadAll() {
   }
 }
 
-window.addEventListener('wapps:online',         () => updateSyncUI('online',  _sync()?.getPending().length ?? 0));
-window.addEventListener('wapps:offline',        () => updateSyncUI('offline', _sync()?.getPending().length ?? 0));
-window.addEventListener('wapps:sync-start',     () => updateSyncUI('syncing', _sync()?.getPending().length ?? 0));
-window.addEventListener('wapps:sync-done',      () => { const fb=_fb(); updateSyncUI(fb?(fb.isOnline()?'online':'offline'):'offline', _sync()?.getPending().length??0); });
-window.addEventListener('wapps:pending-change', e => {
-  const fb=_fb(), label=document.getElementById('sync-label');
-  const isSyncing = label?.className?.includes('syncing');
-  updateSyncUI(isSyncing?'syncing':(fb?(fb.isOnline()?'online':'offline'):'offline'), e.detail.pending.length);
-});
 
 // ── Cuenta ─────────────────────────────────────────────────────────
 function renderUser(user) {
