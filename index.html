@@ -1054,12 +1054,44 @@ function renderDashDate(){
   el.textContent=`${days[d.getDay()]} · ${d.getDate()} ${months[d.getMonth()]}`;
 }
 
+function _weekKey(offsetDays) {
+  const d = new Date(); d.setDate(d.getDate() + offsetDays);
+  return `${d.getFullYear()}-${_p2(d.getMonth()+1)}-${_p2(d.getDate())}`;
+}
+
 function renderDashTasks(){
   const body=document.getElementById('dash-tasks-body');
   const count=document.getElementById('dash-tasks-count');
   if(!body) return;
   const semana=_wappsData('semana','data') || _readLS('semana_v2') || {tasks:{}};
   const today=_todayKey();
+  const isMonday = new Date().getDay() === 1;
+
+  // Los lunes: mostrar resumen de la semana anterior en lugar de las tareas de hoy
+  if (isMonday) {
+    const gastos = _wappsData('gastos','data');
+    let gastosSem = 0, tareasHechas = 0, tareasPend = 0;
+    for (let i = 1; i <= 7; i++) {
+      const k = _weekKey(-i);
+      const ts = (semana.tasks && semana.tasks[k]) || [];
+      tareasHechas += ts.filter(t => t.done).length;
+      tareasPend += ts.filter(t => !t.done).length;
+    }
+    if (gastos?.gastos) {
+      const mon = new Date(); mon.setDate(mon.getDate() - 7);
+      gastosSem = gastos.gastos
+        .filter(g => g.fecha >= mon.toISOString().slice(0,10))
+        .reduce((s, g) => s + (g.importe || 0), 0);
+    }
+    count.textContent = '↩';
+    body.innerHTML = `
+      <div style="font-size:9px;color:var(--y);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-family:var(--fm)">Semana anterior</div>
+      <div class="dash-row"><span class="dash-lbl">💸 Gastos</span><span class="dash-val">${gastosSem > 0 ? gastosSem.toLocaleString('es-ES',{minimumFractionDigits:0,maximumFractionDigits:0}) + ' €' : '—'}</span></div>
+      <div class="dash-row"><span class="dash-lbl">✓ Completadas</span><span class="dash-val" style="color:var(--g)">${tareasHechas}</span></div>
+      ${tareasPend > 0 ? `<div class="dash-row"><span class="dash-lbl">○ Pendientes</span><span class="dash-val" style="color:var(--o)">${tareasPend}</span></div>` : ''}`;
+    return;
+  }
+
   const tasks=(semana.tasks && semana.tasks[today]) || [];
   if(tasks.length===0){
     body.innerHTML='<div class="dash-empty">Sin tareas para hoy</div>';

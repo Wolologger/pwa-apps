@@ -60,7 +60,7 @@
   <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
   <div class="wnav-sep"></div>
   <div class="wnav-title">DESPENSA</div>
-  <div class="wnav-version">v1.7</div>
+  <div class="wnav-version">v1.8</div>
 </div>
 
 <div class="tabs">
@@ -212,20 +212,42 @@ let currentTab = 'despensa';
 // Escuchar cambios de otras apps en tiempo real (ej: compra marca algo)
 WStore.on('compra','data', () => renderConexiones());
 
+// Vida útil estimada por categoría (días desde la fecha de compra/adición)
+const SHELF_LIFE = {
+  'lacteos':7, 'frutas':5, 'verduras':7, 'carnes':3, 'pescados':2,
+  'panaderia':4, 'huevos':21, 'precocinados':3, 'bebidas':180,
+  'conservas':730, 'pasta':365, 'legumbres':365, 'cereales':180,
+  'condimentos':365, 'snacks':90, 'dulces':90, 'congelados':90,
+  'otros':30
+};
+
 function daysUntil(dateStr){
   if(!dateStr) return null;
   return Math.ceil((new Date(dateStr)-new Date(today()))/(1000*60*60*24));
 }
+
+// Devuelve la fecha de caducidad estimada para un alimento sin fecha
+// basándose en su categoría y la fecha en que se añadió (campo added o hoy)
+function estimatedExpiry(alimento) {
+  if (alimento.fecha) return null; // ya tiene fecha real
+  const shelfDays = SHELF_LIFE[alimento.cat] || SHELF_LIFE['otros'];
+  const base = new Date(alimento.added || today());
+  const exp = new Date(base);
+  exp.setDate(exp.getDate() + shelfDays);
+  return exp.toISOString().slice(0,10);
+}
 function urgencyColor(d){ if(d===null)return'#30d880'; if(d<=0)return'#f04030'; if(d<=3)return'#f09030'; if(d<=7)return'#e8f040'; return'#30d880'; }
-function expBadge(dateStr){
-  const d=daysUntil(dateStr);
+function expBadge(dateStr, alimento){
+  const estimated = !dateStr && alimento ? estimatedExpiry(alimento) : null;
+  const effectiveDate = dateStr || estimated;
+  const d = daysUntil(effectiveDate);
   if(d===null) return`<span class="exp-badge exp-sin">Sin fecha</span>`;
   if(d<=0) return`<span class="exp-badge exp-hoy">${d===0?'Caduca HOY':'Caducado'}</span>`;
-  if(d<=3) return`<span class="exp-badge exp-pronto">${d}d</span>`;
-  if(d<=7) return`<span class="exp-badge exp-pronto" style="background:rgba(232,240,64,0.1);color:var(--y);border-color:rgba(232,240,64,0.3)">${d}d</span>`;
-  return`<span class="exp-badge exp-ok">${dateStr.slice(5).replace('-','/')}</span>`;
+  if(d<=3) return`<span class="exp-badge exp-pronto">${d}d${estimated?' ~':''}</span>`;
+  if(d<=7) return`<span class="exp-badge exp-pronto" style="background:rgba(232,240,64,0.1);color:var(--y);border-color:rgba(232,240,64,0.3)">${d}d${estimated?' ~':''}</span>`;
+  return`<span class="exp-badge exp-ok">${effectiveDate.slice(5).replace('-','/')}${estimated?' ~':''}</span>`;
 }
-function sortAlimentos(arr){ return [...arr].sort((a,b)=>{ const da=daysUntil(a.fecha), db=daysUntil(b.fecha); if(da===null&&db===null)return a.nombre.localeCompare(b.nombre); if(da===null)return 1; if(db===null)return -1; return da-db; }); }
+function sortAlimentos(arr){ return [...arr].sort((a,b)=>{ const da=daysUntil(a.fecha||estimatedExpiry(a)), db=daysUntil(b.fecha||estimatedExpiry(b)); if(da===null&&db===null)return a.nombre.localeCompare(b.nombre); if(da===null)return 1; if(db===null)return -1; return da-db; }); }
 
 // ── TABS ──
 function qaStripAdd(){
@@ -317,8 +339,9 @@ function mapCat(despensaCat){
 
 // ── RENDER DESPENSA ──
 function renderAlertasCaducidad() {
-  const hoy = state.alimentos.filter(a=>{const d=daysUntil(a.fecha);return d!==null&&d<=0;});
-  const pronto = state.alimentos.filter(a=>{const d=daysUntil(a.fecha);return d!==null&&d>0&&d<=3;});
+  const effectDate = a => a.fecha || estimatedExpiry(a);
+  const hoy = state.alimentos.filter(a=>{const d=daysUntil(effectDate(a));return d!==null&&d<=0;});
+  const pronto = state.alimentos.filter(a=>{const d=daysUntil(effectDate(a));return d!==null&&d>0&&d<=3;});
   const el = document.getElementById('alert-caducidad');
   if(!hoy.length && !pronto.length){ el.className='alert-bar'; return; }
   let msg='';
@@ -374,7 +397,7 @@ function aliRow(a){
     <div class="ali-body">
       <div style="display:flex;align-items:center;gap:8px;">
         <span class="ali-name">${esc(a.nombre)}</span>
-        ${expBadge(a.fecha)}
+        ${expBadge(a.fecha, a)}
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
         <button onclick="event.stopPropagation();changeStock(${a.id},-1)" style="width:22px;height:22px;border-radius:50%;background:var(--bg3);border:0.5px solid var(--border2);color:var(--text);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
