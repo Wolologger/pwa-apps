@@ -122,11 +122,12 @@ const WStore = (() => {
   }
 
   // Cache en memoria para evitar JSON.parse en cada llamada a get()
+  // set() actualiza directamente; el listener sincroniza si otro módulo emite wapps:change
   const _memCache = Object.create(null);
+  let _settingKey = null; // evita doble escritura cuando el propio set() emite el evento
   window.addEventListener('wapps:change', e => {
-    if (e.detail?.app && e.detail?.key) {
-      _memCache[`${e.detail.app}.${e.detail.key}`] = e.detail.value;
-    }
+    const k = e.detail?.app && e.detail?.key ? `${e.detail.app}.${e.detail.key}` : null;
+    if (k && k !== _settingKey) _memCache[k] = e.detail.value;
   });
 
   function get(app, key) {
@@ -152,13 +153,12 @@ const WStore = (() => {
 
       localStorage.setItem(sk, JSON.stringify(payload));
 
-      // Actualizar cache en memoria antes del evento
-      _memCache[`${app}.${key}`] = payload;
-
-      // Emitir evento personalizado para listeners en la misma pestaña
-      window.dispatchEvent(new CustomEvent('wapps:change', {
-        detail: { app, key, value: payload }
-      }));
+      // Actualizar cache y emitir evento (el listener ignora esta clave para evitar doble update)
+      const cacheKey = `${app}.${key}`;
+      _memCache[cacheKey] = payload;
+      _settingKey = cacheKey;
+      window.dispatchEvent(new CustomEvent('wapps:change', { detail: { app, key, value: payload } }));
+      _settingKey = null;
 
       // ── Firebase sync ─────────────────────────────────────────
       const storeKey = `${app}.${key}`;

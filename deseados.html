@@ -78,7 +78,7 @@
         <div class="field-row">
           <div class="field">
             <div class="field-label">Precio estimado €</div>
-            <input type="number" id="f-precio" placeholder="0.00" step="0.01" min="0">
+            <input type="number" inputmode="decimal" id="f-precio" placeholder="0.00" step="0.01" min="0">
           </div>
           <div class="field">
             <div class="field-label">Categoría</div>
@@ -308,7 +308,7 @@ function priceHistHTML(i) {
   const hist = (i.historialPrecios || []).slice(-5).reverse();
   if (!hist.length) {
     return `<div style="display:flex;align-items:center;gap:6px;margin-top:8px;">
-      <input type="number" id="ph-price-${i.id}" placeholder="Precio €" step="0.01" min="0"
+      <input type="number" inputmode="decimal" id="ph-price-${i.id}" placeholder="Precio €" step="0.01" min="0"
         style="flex:1;background:var(--bg3);border:0.5px solid var(--border2);color:var(--text);font-family:var(--fm);font-size:11px;padding:5px 8px;border-radius:6px;outline:none;"
         onkeydown="if(event.key==='Enter')addPriceRecord(${i.id},event)">
       <button class="btn btn-sm" style="flex-shrink:0;font-size:10px;padding:5px 10px;" onclick="addPriceRecord(${i.id},event)">+ Anotar</button>
@@ -330,7 +330,7 @@ function priceHistHTML(i) {
       <span>${h.fecha}</span><span style="color:var(--text);">${fmt(h.precio)} €</span>
     </div>`).join('')}
     <div style="display:flex;align-items:center;gap:6px;margin-top:8px;">
-      <input type="number" id="ph-price-${i.id}" placeholder="Nuevo precio €" step="0.01" min="0"
+      <input type="number" inputmode="decimal" id="ph-price-${i.id}" placeholder="Nuevo precio €" step="0.01" min="0"
         style="flex:1;background:var(--bg);border:0.5px solid var(--border2);color:var(--text);font-family:var(--fm);font-size:11px;padding:5px 8px;border-radius:6px;outline:none;"
         onkeydown="if(event.key==='Enter')addPriceRecord(${i.id},event)">
       <button class="btn btn-sm" style="flex-shrink:0;font-size:10px;padding:5px 10px;" onclick="addPriceRecord(${i.id},event)">+ Anotar</button>
@@ -361,7 +361,7 @@ function wishCard(i){
     <div class="edit-form ${isEd?'open':''}" id="ef-${i.id}">
       <div class="ef-row">
         <div><div class="field-label">Nombre</div><input type="text" id="ei-n-${i.id}" value="${esc(i.nombre)}"></div>
-        <div><div class="field-label">Precio €</div><input type="number" id="ei-p-${i.id}" value="${i.precio||''}" step="0.01"></div>
+        <div><div class="field-label">Precio €</div><input type="number" inputmode="decimal" id="ei-p-${i.id}" value="${i.precio||''}" step="0.01"></div>
       </div>
       <div class="ef-row">
         <div><div class="field-label">Categoría</div><select id="ei-c-${i.id}">${Object.entries(CATS).map(([k,v])=>`<option value="${k}"${k===i.cat?' selected':''}>${v}</option>`).join('')}</select></div>

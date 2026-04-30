@@ -104,11 +104,11 @@
         <div class="field-row">
           <div class="field">
             <div class="field-label">Importe total €</div>
-            <input type="number" id="f-importe" placeholder="0.00 (negativo para reajuste)" step="0.01">
+            <input type="number" inputmode="decimal" id="f-importe" placeholder="0.00 (negativo para reajuste)" step="0.01">
           </div>
           <div class="field">
             <div class="field-label">Consumo</div>
-            <input type="number" id="f-consumo" placeholder="kWh / m³" step="0.01" min="0">
+            <input type="number" inputmode="decimal" id="f-consumo" placeholder="kWh / m³" step="0.01" min="0">
           </div>
         </div>
         <div class="field-row">
@@ -739,7 +739,12 @@ function _saveImmediate() {
   if (typeof WStore !== 'undefined') WStore.set('suministros', 'data', state);
 }
 
-function save() { _saveImmediate(); }
+let _saveDebounce = null;
+function save() {
+  if (_saveDebounce) clearTimeout(_saveDebounce);
+  _saveDebounce = setTimeout(() => { _saveDebounce = null; _saveImmediate(); }, 200);
+}
+window.addEventListener('beforeunload', () => { if (_saveDebounce) _saveImmediate(); }, {once:true});
 
 // wuid(): ID numérico único basado en timestamp. Seguro en onclick="fn(id)".
 // Probabilidad de colisión entre 2 dispositivos en el mismo millisegundo: ~0 en uso real.
@@ -963,8 +968,8 @@ function renderFacturas() {
         </div>
         <div><div class="field-label">Empresa</div><input type="text" id="ei-emp-${f.id}" value="${esc(f.empresa)}" style="margin-bottom:7px;"></div>
         <div class="ef-row">
-          <div><div class="field-label">Importe €</div><input type="number" id="ei-imp-${f.id}" value="${f.importe}" step="0.01"></div>
-          <div><div class="field-label">Consumo</div><input type="number" id="ei-con-${f.id}" value="${f.consumo||''}" step="0.01"></div>
+          <div><div class="field-label">Importe €</div><input type="number" inputmode="decimal" id="ei-imp-${f.id}" value="${f.importe}" step="0.01"></div>
+          <div><div class="field-label">Consumo</div><input type="number" inputmode="decimal" id="ei-con-${f.id}" value="${f.consumo||''}" step="0.01"></div>
         </div>
         <div class="ef-row">
           <div><div class="field-label">Inicio</div><input type="date" id="ei-ini-${f.id}" value="${f.inicio||''}"></div>

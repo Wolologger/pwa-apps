@@ -292,7 +292,7 @@ function renderCompra(){
     <input class="quick-input" id="qi-text" placeholder="Añadir artículo…" onkeydown="if(event.key==='Enter')addItem()">
     <select class="cat-select" id="qi-cat">${catOpts}</select>
     <div class="qty-group">
-      <input class="qty-num" id="qi-num" type="number" min="0" step="any" placeholder="—" title="Cantidad">
+      <input class="qty-num" id="qi-num" type="number" inputmode="decimal" min="0" step="any" placeholder="—" title="Cantidad">
       <select class="qty-unit" id="qi-unit" title="Unidad">
         <option value="uds">uds</option>
         <option value="kg">kg</option>
@@ -331,7 +331,7 @@ function renderCompra(){
       <div id="qe-${i.id}" style="display:none;padding:5px 0 8px 30px;">
         <div style="display:flex;gap:6px;align-items:center;">
           <div class="qty-group">
-            <input class="qty-num" id="qe-num-${i.id}" type="number" min="0" step="any"
+            <input class="qty-num" id="qe-num-${i.id}" type="number" inputmode="decimal" min="0" step="any"
               value="${extractNum(i.qty)}" placeholder="—"
               onkeydown="if(event.key==='Enter')saveQtyEdit(${i.id})">
             <select class="qty-unit" id="qe-unit-${i.id}">${UNITS.map(u=>`<option value="${u}"${extractUnit(i.qty)===u?' selected':''}>${u}</option>`).join('')}</select>
@@ -489,7 +489,7 @@ function openModalPrecios(doneItems){
       <div class="price-cat-dot"></div>
       <span class="price-name">${esc(item.text)}</span>
       ${item.qty ? `<span class="price-qty">${esc(item.qty)}</span>` : ''}
-      <input class="price-input" type="number" step="0.01" min="0"
+      <input class="price-input" type="number" inputmode="decimal" step="0.01" min="0"
         id="pi-${idx}" placeholder="0,00"
         oninput="recalcTotal()"
         onkeydown="if(event.key==='Enter'){var n=document.getElementById('pi-${idx+1}');if(n)n.focus();}">
