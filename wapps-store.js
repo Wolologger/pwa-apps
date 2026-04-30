@@ -121,11 +121,23 @@ const WStore = (() => {
     return `${PREFIX}${app}.${key}`;
   }
 
+  // Cache en memoria para evitar JSON.parse en cada llamada a get()
+  const _memCache = Object.create(null);
+  window.addEventListener('wapps:change', e => {
+    if (e.detail?.app && e.detail?.key) {
+      _memCache[`${e.detail.app}.${e.detail.key}`] = e.detail.value;
+    }
+  });
+
   function get(app, key) {
+    const cacheKey = `${app}.${key}`;
+    if (cacheKey in _memCache) return _memCache[cacheKey];
     const sk = storageKey(app, key);
     try {
       const v = localStorage.getItem(sk);
-      return v !== null ? JSON.parse(v) : null;
+      const parsed = v !== null ? JSON.parse(v) : null;
+      _memCache[cacheKey] = parsed;
+      return parsed;
     } catch(e) {}
     return null;
   }
@@ -139,6 +151,9 @@ const WStore = (() => {
         : value;
 
       localStorage.setItem(sk, JSON.stringify(payload));
+
+      // Actualizar cache en memoria antes del evento
+      _memCache[`${app}.${key}`] = payload;
 
       // Emitir evento personalizado para listeners en la misma pestaña
       window.dispatchEvent(new CustomEvent('wapps:change', {

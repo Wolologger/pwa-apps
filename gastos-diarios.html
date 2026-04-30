@@ -46,7 +46,7 @@
   <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
   <div class="wnav-sep"></div>
   <div class="wnav-title">GASTOS DIARIOS</div>
-  <div class="wnav-version">v2.4</div>
+  <div class="wnav-version">v2.5</div>
 </div>
   <div class="sync-bar" id="sync-bar">
     <div class="sync-status">
@@ -233,22 +233,41 @@ function autoCat(concepto) {
   return null;
 }
 
+// Devuelve { mean, sigma } de los importes de una categoría (últimos 90 días)
+function catStats(cat) {
+  const since = new Date(); since.setDate(since.getDate() - 90);
+  const vals = state.gastos
+    .filter(g => g.cat === cat && new Date(g.fecha) >= since)
+    .map(g => g.importe);
+  if (vals.length < 3) return null;
+  const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+  const sigma = Math.sqrt(vals.reduce((s, v) => s + (v - mean) ** 2, 0) / vals.length);
+  return { mean, sigma };
+}
+
 function qaAdd(){
   haptic('light');
   const imp=parseFloat(document.getElementById('qa-imp').value);
   let con=document.getElementById('qa-con').value.trim();
   if(isNaN(imp)||imp<=0)return;
   if(!con)con=CM[selCat].label;
-  // Auto-categorizar por concepto si la categoría sigue en "otros" (no elegida manualmente)
   const detectedCat = autoCat(con);
   const finalCat = (selCat === 'otros' && detectedCat) ? detectedCat : selCat;
-  // Si se auto-detectó, actualizar la UI de categoría
   if (finalCat !== selCat) selectCat(finalCat);
+
+  // Detector de gasto inusual (2σ)
+  const stats = catStats(finalCat);
+  if (stats && stats.sigma > 0 && imp > stats.mean + 2 * stats.sigma) {
+    haptic('medium');
+    showToast(`⚠ Gasto inusual: ${fmt(imp)} € (media ${fmt(stats.mean)} €)`, true);
+  }
+
   state.gastos.push({id:nxtId(),importe:imp,concepto:con,fecha:today(),cat:finalCat,nota:''});
   document.getElementById('qa-imp').value='';
   document.getElementById('qa-con').value='';
-  document.getElementById('qa-imp').focus();
-  // pulse animation on remaining
+  const _imp = document.getElementById('qa-imp');
+  _imp.focus();
+  _imp.select();
   const el=document.getElementById('hero-remaining');
   el.style.transform='scale(0.97)';setTimeout(()=>el.style.transform='',150);
   save();render();
