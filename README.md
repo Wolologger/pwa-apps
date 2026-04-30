@@ -1,5 +1,10 @@
 ## Changelog
 
+### v4.7.1
+- **Fix crítico** — `haptic()` definida dentro de `<script src="firebase-app-compat.js">` en 12 apps: los navegadores ignoran el contenido inline de scripts con atributo `src`, por lo que la función **nunca se ejecutaba**. Causa raíz de todos los `ReferenceError: haptic is not defined`. Movida a un `<script>` standalone en las 21 apps HTML.
+- **Fix** — Meta tag `apple-mobile-web-app-capable` deprecado → añadido `mobile-web-app-capable` en todas las apps.
+- `sw.js` v10.7, manifest v4.7.1
+
 ### v4.7.0
 - **Limpieza** — Minificación CSS en 20 apps: bloques `<style>` compactados (~11 KB ahorrados en total).
 - **Limpieza** — Trailing whitespace y líneas en blanco múltiples eliminados de todos los archivos.

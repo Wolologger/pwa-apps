@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Gastos">
@@ -10,50 +11,17 @@
 <title>Gastos</title>
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js">
-
-// ── Haptic feedback (silencioso si el dispositivo no lo soporta) ──
-function haptic(pattern='light') {
-  if (!navigator.vibrate) return;
-  if (pattern === 'light') navigator.vibrate(8);
-  else if (pattern === 'medium') navigator.vibrate(18);
-  else if (pattern === 'success') navigator.vibrate([8, 50, 8]);
-  else if (pattern === 'error') navigator.vibrate([30, 60, 30]);
-  else navigator.vibrate(pattern);
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin><script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<script>
+// Haptic feedback
+function haptic(p){
+  if(!navigator.vibrate)return;
+  if(p==='light')navigator.vibrate(8);
+  else if(p==='medium')navigator.vibrate(18);
+  else if(p==='success')navigator.vibrate([8,50,8]);
+  else if(p==='error')navigator.vibrate([30,60,30]);
+  else navigator.vibrate(p);
 }
-
-// ── Stats por día de la semana ─────────────────────────────────
-function renderDayStats() {
-  const el = document.getElementById('day-stats-block');
-  if (!el) return;
-  const days = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-  const totals = new Array(7).fill(0);
-  const counts = new Array(7).fill(0);
-  (state.gastos || []).forEach(g => {
-    if (!g.fecha) return;
-    const d = new Date(g.fecha + 'T12:00:00');
-    totals[d.getDay()] += Number(g.importe||0);
-    counts[d.getDay()]++;
-  });
-  const max = Math.max(...totals, 1);
-  const total = totals.reduce((a,b)=>a+b,0);
-  const topDay = totals.indexOf(Math.max(...totals));
-  el.innerHTML = `<div style="font-size:9px;color:var(--muted);font-family:var(--fm);margin-bottom:8px;letter-spacing:1px">GASTOS POR DÍA DE SEMANA</div>` +
-    days.map((d,i) => {
-      const pct = Math.round((totals[i]/max)*100);
-      const avg = counts[i] ? (totals[i]/counts[i]).toFixed(1) : 0;
-      const isTop = i === topDay && totals[i] > 0;
-      return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-family:var(--fm);font-size:10px">
-        <span style="width:24px;color:${isTop?'var(--y)':'var(--muted)'}${isTop?';font-weight:600':''}">${d}</span>
-        <div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
-          <div style="height:100%;width:${pct}%;background:${isTop?'var(--y)':'var(--b)'};border-radius:3px;transition:width 0.4s"></div>
-        </div>
-        <span style="color:${isTop?'var(--y)':'var(--text)'};width:60px;text-align:right">${totals[i].toFixed(0)} €</span>
-      </div>`;
-    }).join('') +
-    `<div style="font-size:9px;color:var(--muted);font-family:var(--fm);margin-top:6px">Día con más gasto: <span style="color:var(--y)">${days[topDay]}</span> · Total histórico: <strong style="color:var(--text)">${total.toFixed(0)} €</strong></div>`;
-}
-
 </script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
