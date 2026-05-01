@@ -216,7 +216,7 @@
     <div class="cl-modal">
       <div class="cl-handle"></div>
       <div class="cl-header">
-        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v4.8.0</span></div>
+        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v4.8.1</span></div>
         <button class="cl-close" onclick="closeChangelog()">✕</button>
       </div>
       <div class="cl-body" id="cl-body"></div>
@@ -229,11 +229,19 @@
 const GITHUB_USER='Wolologger';
 const GITHUB_REPO='pwa-apps';
 
-const APP_VERSION = 'v4.8.0';
+const APP_VERSION = 'v4.8.1';
 
 // ── CHANGELOG ──────────────────────────────────────────────────────
 const CHANGELOG = [
   {
+    version: 'v4.8.1',
+    date: 'Mayo 2026',
+    items: [
+      { type: 'fix', text: 'ninos.html v2.3 — syncOnLoad dentro de showTab() detectado por tests: acumulaba listeners en cada cambio de pestaña' },
+      { type: 'fix', text: 'wapps-firebase.js — pushAll (botón SUBIR TODO) usaba pushToFirestore en lugar de pushToFirestoreExact: generaba un _updatedAt más reciente que el local, causando un download innecesario en el siguiente syncOnLoad' },
+      { type: 'new', text: 'Tests Firebase/sync (362 total): cola de pendientes, _mergeArrays, _mergeArraysForKey, pullAll decisión merge/skip/replace, pushToFirestoreExact vs Exact, offline guard, logout cleanup, retry backoff, SW stale-while-revalidate' },
+    ],
+  }, {
     version: 'v4.8.0',
     date: 'Mayo 2026',
     items: [

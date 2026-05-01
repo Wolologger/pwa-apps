@@ -616,7 +616,9 @@ const WSync = (() => {
         const fsKey = key.replace('.', '_');
         const version = _incPushVersion(key);
         const dataWithVersion = { ...data, _pushVersion: version };
-        const ok = await WFirebase.pushToFirestore(uid, fsKey, dataWithVersion);
+        // pushToFirestoreExact preserva el _updatedAt local → evita el ciclo
+        // "remote más nuevo → download innecesario" que causaba pushToFirestore regular
+        const ok = await WFirebase.pushToFirestoreExact(uid, fsKey, dataWithVersion);
         if (ok) {
           pushed++;
           clearPending(key);

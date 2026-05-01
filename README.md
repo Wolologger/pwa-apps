@@ -1,5 +1,10 @@
 ## Changelog
 
+### v4.8.1 — Mayo 2026
+- **Fix** — `wapps-firebase.js`: `pushAll` (botón ⬆ SUBIR TODO) usaba `pushToFirestore` (genera nuevo `_updatedAt`) en lugar de `pushToFirestoreExact`. Esto causaba que el remoto quedara con un timestamp más reciente que el local → el siguiente `syncOnLoad` veía `remoteTs > localTs` y descargaba de vuelta innecesariamente. Corregido a `pushToFirestoreExact`.
+- **Fix** — `ninos.html v2.3`: bloque `syncOnLoad` dentro de `showTab()` — mismo bug que mascotas/coches, detectado por los tests de regresión.
+- **Tests** — Suite Firebase/sync: 362 tests totales en 5 archivos. Cubre cola de pendientes, merge inteligente de arrays, decisión merge/replace/skip de `pullAll`, `pushToFirestoreExact` vs deriva de timestamps, comportamiento offline, logout cleanup, retry con backoff exponencial, estrategia stale-while-revalidate del SW.
+
 ### v4.8.0 — Mayo 2026
 - **Fix crítico** — `mascotas.html v2.5`: doble declaración `function save()` causaba que `_saveImmediate` apuntara a la versión debounce por hoisting → bucle infinito al guardar → la app se bloqueaba completamente. Renombrado a `function _saveImmediate()`.
 - **Fix crítico** — `coches.html v2.3`: bloque `syncOnLoad` + `wapps:auth-change` estaban dentro de `showTab()`, acumulando listeners duplicados en cada cambio de pestaña.
