@@ -33,7 +33,7 @@
     <div class="wnav-sep"></div>
     <div class="wnav-title" id="wnav-title">MASCOTAS</div>
 
-  <div class="wnav-version">v2.4</div>
+  <div class="wnav-version">v2.5</div>
 </div>
   <div class="sync-bar" id="sync-bar">
     <div class="sync-status">
@@ -217,14 +217,12 @@ function loadState() {
   try { const r = localStorage.getItem('mascotas_v1'); if (r) return JSON.parse(r); } catch(e) {}
   return { pets: [], nextId: 1 };
 }
-function save() {
+function _saveImmediate() {
   state.nextId = nid;
   try { localStorage.setItem('mascotas_v1', JSON.stringify(state)); if(typeof WStore!=='undefined') WStore.set('mascotas','data',state); } catch(e) {}
 }
 
-// Debounce: agrupa saves consecutivos en uno (200ms)
 let _saveDebounce = null;
-const _saveImmediate = save;
 function save() {
   if (_saveDebounce) clearTimeout(_saveDebounce);
   _saveDebounce = setTimeout(() => { _saveDebounce = null; _saveImmediate(); }, 200);
@@ -846,6 +844,22 @@ if(typeof WOnboarding!=='undefined')WOnboarding.show('mascotas', OB_STEPS);
 (function(){ const _t=today(); ['fp-nacimiento'].forEach(id=>{const el=document.getElementById(id); if(el) el.max=_t;}); })();
 render();
 setTimeout(checkBirthdayAlerts, 1200);
+
+if (typeof WStore !== 'undefined') {
+  WStore.syncOnLoad('mascotas', 'data', fresh => {
+    if (fresh && fresh.pets) { state = fresh; nid = state.nextId||1; if(state.pets.length) activePetId = state.pets[0].id; render(); }
+  });
+  window.addEventListener('wapps:recovered', () => {
+    const fresh = WStore.get('mascotas', 'data');
+    if (fresh && fresh.pets) { state = fresh; nid = state.nextId||1; if(state.pets.length) activePetId = state.pets[0].id; render(); }
+  });
+  window.addEventListener('wapps:auth-change', e => {
+    if (!e.detail?.user) return;
+    WStore.syncOnLoad('mascotas', 'data', fresh => {
+      if (fresh && fresh.pets) { state = fresh; nid = state.nextId||1; if(state.pets.length) activePetId = state.pets[0].id; render(); }
+    });
+  });
+}
 
 </body>
 </html>

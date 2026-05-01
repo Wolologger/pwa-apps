@@ -33,7 +33,7 @@
     <div class="wnav-sep"></div>
     <div class="wnav-title" id="wnav-title">COCHES</div>
 
-  <div class="wnav-version">v2.2</div>
+  <div class="wnav-version">v2.3</div>
 </div>
   <div class="sync-bar" id="sync-bar">
     <div class="sync-status">
@@ -381,25 +381,6 @@ function showTab(name, el) {
   if (fabLabels[name]) { fabBtn.textContent = fabLabels[name]; fab.style.display = 'block'; }
   else fab.style.display = 'none';
   render();
-
-// ── Sync desde Firebase al autenticarse (fix: auth puede llegar tarde) ──
-if (typeof WStore !== 'undefined') {
-  WStore.syncOnLoad('coches', 'data', fresh => {
-    if (fresh && fresh.cars) { state = fresh; nid = state.nextId||1; if(state.cars.length) activeCarId = state.cars[0].id; render(); }
-  });
-  window.addEventListener('wapps:recovered', () => {
-    const fresh = WStore.get('coches', 'data');
-    if (fresh && fresh.cars) { state = fresh; nid = state.nextId||1; if(state.cars.length) activeCarId = state.cars[0].id; render(); }
-  });
-  window.addEventListener('wapps:auth-change', e => {
-    if (!e.detail?.user) return;
-    WStore.syncOnLoad('coches', 'data', fresh => {
-      if (fresh && fresh.cars) { state = fresh; nid = state.nextId||1; if(state.cars.length) activeCarId = state.cars[0].id; render(); }
-    });
-
-    updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
-  });
-}
 }
 
 function fabAction() {
@@ -1128,6 +1109,22 @@ const OB_STEPS = [
 
 if(typeof WOnboarding!=='undefined')WOnboarding.show('coches', OB_STEPS);
 render();
+
+if (typeof WStore !== 'undefined') {
+  WStore.syncOnLoad('coches', 'data', fresh => {
+    if (fresh && fresh.cars) { state = fresh; nid = state.nextId||1; if(state.cars.length) activeCarId = state.cars[0].id; render(); }
+  });
+  window.addEventListener('wapps:recovered', () => {
+    const fresh = WStore.get('coches', 'data');
+    if (fresh && fresh.cars) { state = fresh; nid = state.nextId||1; if(state.cars.length) activeCarId = state.cars[0].id; render(); }
+  });
+  window.addEventListener('wapps:auth-change', e => {
+    if (!e.detail?.user) return;
+    WStore.syncOnLoad('coches', 'data', fresh => {
+      if (fresh && fresh.cars) { state = fresh; nid = state.nextId||1; if(state.cars.length) activeCarId = state.cars[0].id; render(); }
+    });
+  });
+}
 </script>
 
 </body>
