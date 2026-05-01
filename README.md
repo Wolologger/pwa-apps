@@ -1,5 +1,23 @@
 ## Changelog
 
+### v4.8.0 — Mayo 2026
+- **Fix crítico** — `mascotas.html v2.5`: doble declaración `function save()` causaba que `_saveImmediate` apuntara a la versión debounce por hoisting → bucle infinito al guardar → la app se bloqueaba completamente. Renombrado a `function _saveImmediate()`.
+- **Fix crítico** — `coches.html v2.3`: bloque `syncOnLoad` + `wapps:auth-change` estaban dentro de `showTab()`, acumulando listeners duplicados en cada cambio de pestaña.
+- **Fix crítico** — 6 apps (`decisor v1.3`, `finanzas v1.6`, `compra v1.9`, `deseados v1.7`, `semana v2.0`, `setlist v1.6`): mismo patrón `const _saveImmediate = save` — por hoisting JavaScript ambas `function save()` se elevan y la segunda gana, haciendo que `_saveImmediate()` llame a la versión debounce recursivamente. `save()` nunca persistía datos.
+
+### v4.7.3 — Mayo 2026
+- **Mejora** — `wapps-store.js`: `_memCache` con invalidación por `wapps:change` — evita `JSON.parse` en cada lectura de WStore.
+- **Mejora** — `wapps-store.js`: guard `_settingKey` para prevenir doble escritura en `_memCache` al emitir el evento desde `set()`.
+- **Fix** — Debounce `save()` en `mascotas` y `coches` con `beforeunload` flush inmediato.
+- **Fix** — Merge conflicts resueltos en `sw.js` (v11.1) y `wapps-firebase.js` (681 líneas limpias, duplicado eliminado).
+
+### v4.7.2 — Mayo 2026
+- **Nuevo** — `wapps-common.css`: hoja compartida cargada en las 19 apps. Incluye `touch-action:manipulation` (elimina 300ms tap delay), `:focus-visible` accesible, scroll fade con `mask-image`, responsive gap 480–719 px.
+- **Nuevo** — `index.html`: resumen semanal en el widget Hoy — los lunes muestra total de gastos de la semana anterior + tareas hechas/pendientes.
+- **Nuevo** — `despensa.html v1.8`: estimación automática de caducidad por tipo con `SHELF_LIFE` (lácteos 7d, carnes 3d, pescados 2d, conservas 730d…). Muestra `~` cuando la fecha es estimada.
+- **Limpieza** — Auditoría de código muerto: variables sin uso, `console.info`, función `_replayLastAuth` eliminados de `wapps-firebase.js` y `wapps-store.js`.
+- `sw.js` v11.1
+
 ### v4.7.1
 - **Fix crítico** — `haptic()` definida dentro de `<script src="firebase-app-compat.js">` en 12 apps: los navegadores ignoran el contenido inline de scripts con atributo `src`, por lo que la función **nunca se ejecutaba**. Causa raíz de todos los `ReferenceError: haptic is not defined`. Movida a un `<script>` standalone en las 21 apps HTML.
 - **Fix** — Meta tag `apple-mobile-web-app-capable` deprecado → añadido `mobile-web-app-capable` en todas las apps.

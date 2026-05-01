@@ -216,7 +216,7 @@
     <div class="cl-modal">
       <div class="cl-handle"></div>
       <div class="cl-header">
-        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v4.4.0</span></div>
+        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v4.8.0</span></div>
         <button class="cl-close" onclick="closeChangelog()">✕</button>
       </div>
       <div class="cl-body" id="cl-body"></div>
@@ -229,11 +229,125 @@
 const GITHUB_USER='Wolologger';
 const GITHUB_REPO='pwa-apps';
 
-const APP_VERSION = 'v4.7.3';
+const APP_VERSION = 'v4.8.0';
 
 // ── CHANGELOG ──────────────────────────────────────────────────────
 const CHANGELOG = [
   {
+    version: 'v4.8.0',
+    date: 'Mayo 2026',
+    items: [
+      { type: 'fix', text: 'mascotas v2.5 — doble function save() por hoisting hacía que _saveImmediate apuntara a la versión debounce → bucle infinito al guardar. Renombrado a _saveImmediate()' },
+      { type: 'fix', text: 'coches v2.3 — bloque syncOnLoad dentro de showTab() acumulaba listeners duplicados en cada cambio de pestaña. Movido al nivel superior' },
+      { type: 'fix', text: '6 apps (decisor, finanzas, compra, deseados, semana, setlist) — mismo bug const _saveImmediate = save: por hoisting _saveImmediate apuntaba a debounce → save nunca persiste' },
+    ],
+  }, {
+    version: 'v4.7.3',
+    date: 'Mayo 2026',
+    items: [
+      { type: 'imp', text: 'WStore._memCache: cache en memoria con invalidación por wapps:change — evita JSON.parse en cada lectura' },
+      { type: 'imp', text: 'WStore._settingKey: guard para evitar doble escritura en _memCache al emitir wapps:change desde set()' },
+      { type: 'fix', text: 'Debounce save() en mascotas y coches — beforeunload hace flush inmediato' },
+      { type: 'fix', text: 'Merge conflicts resueltos en sw.js (v11.1) y wapps-firebase.js (681 líneas limpias)' },
+    ],
+  }, {
+    version: 'v4.7.2',
+    date: 'Mayo 2026',
+    items: [
+      { type: 'new', text: 'wapps-common.css: hoja compartida con touch-action:manipulation, :focus-visible, scroll fade, responsive 380/480/719 px' },
+      { type: 'new', text: 'index.html — resumen semanal en el widget Hoy (lunes: total gastos + tareas hechas/pendientes de la semana anterior)' },
+      { type: 'new', text: 'despensa.html v1.8 — estimación automática de caducidad por tipo (SHELF_LIFE: lácteos 7d, carnes 3d, conservas 730d…)' },
+      { type: 'imp', text: 'Auditoría de código muerto: variables sin uso, console.info, funciones _replayLastAuth eliminados' },
+    ],
+  }, {
+    version: 'v4.7.1',
+    date: 'Abril 2026',
+    items: [
+      { type: 'fix', text: 'haptic() definida dentro de <script src="..."> en 12 apps: el contenido inline es ignorado por el browser → ReferenceError. Movida a <script> standalone en las 21 apps' },
+      { type: 'imp', text: 'Meta tag apple-mobile-web-app-capable deprecado → añadido mobile-web-app-capable en todas las apps' },
+    ],
+  }, {
+    version: 'v4.7.0',
+    date: 'Abril 2026',
+    items: [
+      { type: 'imp', text: 'CSS minificado en 20 apps: bloques <style> compactados (~11 KB ahorrados en total)' },
+      { type: 'imp', text: 'Trailing whitespace y líneas en blanco múltiples eliminados de todos los archivos' },
+      { type: 'imp', text: 'README.md: changelog completo con todas las entradas faltantes de v4.1.0 a v4.6.2' },
+    ],
+  }, {
+    version: 'v4.6.2',
+    date: 'Abril 2026',
+    items: [
+      { type: 'fix', text: 'despensa.html — render() sin definición en listener wapps:recovered → corregido a renderDespensa()' },
+    ],
+  }, {
+    version: 'v4.6.1',
+    date: 'Abril 2026',
+    items: [
+      { type: 'fix', text: 'coches, ninos, obra, suministros — haptic() no definida (ReferenceError) al añadir elementos tras refactor' },
+      { type: 'fix', text: 'index.html — hero-info-grid con 7 bloques en grid de 3 cols fijas dejaba hueco → auto-fit / minmax(90px,1fr)' },
+    ],
+  }, {
+    version: 'v4.6.0',
+    date: 'Abril 2026',
+    items: [
+      { type: 'del', text: 'Boilerplate sync inline eliminado de 16 apps (~35 KB): _fb(), _sync(), updateSyncUI(), manualSync/Pull/PushApp() centralizados en wapps-sync-ui.js' },
+      { type: 'new', text: 'wapps-utils.js: módulo compartido con haptic(), p2(), today(), fmt(), esc(), showToast() — elimina duplicación en 14 apps' },
+      { type: 'imp', text: 'Debounce 200ms en save() añadido a compra, decisor, deseados, finanzas, mascotas, semana, setlist' },
+    ],
+  }, {
+    version: 'v4.5.1',
+    date: 'Abril 2026',
+    items: [
+      { type: 'fix', text: 'suministros.html — HTML de predicciones inyectado dentro del <script> → SyntaxError que rompía tabs y navegación' },
+      { type: 'fix', text: 'coches, ninos, obra — debounce partió _saveImmediate() separando try del catch → SyntaxError silencioso, imposible añadir elementos' },
+    ],
+  }, {
+    version: 'v4.5.0',
+    date: 'Abril 2026',
+    items: [
+      { type: 'fix', text: 'wuid() devolvía UUID con guiones en 16 apps → onclick="fn(${id})" generaba JS inválido. Revertido a Date.now() numérico' },
+      { type: 'fix', text: 'WStore.set() y pushToFirestore() generaban _updatedAt distintos → Firebase siempre más nuevo → descarga infinita. Arreglado con pushToFirestoreExact()' },
+      { type: 'new', text: 'Favicon dinámico en index.html: 🟢/🟡/🔴 según estado de red y pendientes (Canvas 32×32 px)' },
+      { type: 'new', text: 'iPad landscape: media queries orientation:landscape en 19 apps, grids ampliados, max-width:900 px' },
+      { type: 'new', text: 'Haptic feedback en 8 apps restantes: obra, coches, ninos, setlist, instrumentos, finanzas, suministros, backup' },
+    ],
+  }, {
+    version: 'v4.4.0',
+    date: 'Abril 2026',
+    items: [
+      { type: 'new', text: 'Categorización automática de gastos: "Mercadona"→supermercado, "Repsol"→gasolina (30 reglas, ~80% cobertura)' },
+      { type: 'new', text: 'Búsqueda global: prefijo > en el buscador del index busca en gastos, tareas, despensa y compra' },
+      { type: 'new', text: 'Alertas de cumpleaños en mascotas y ninos: toast al abrir si hoy es el día' },
+      { type: 'new', text: 'Stats por día de semana en gastos-diarios: barras horizontales Lun-Dom' },
+      { type: 'new', text: 'Panel de errores de sync en ajustes: log últimos 20 fallos con timestamp' },
+      { type: 'imp', text: 'inputmode="decimal" en 36 inputs numéricos — teclado correcto en iOS/Android' },
+    ],
+  }, {
+    version: 'v4.3.0',
+    date: 'Abril 2026',
+    items: [
+      { type: 'new', text: 'SW cachea Firebase SDK, Fonts y jsPDF (Cloudflare) — app arranca 100% offline tras primera visita' },
+      { type: 'new', text: 'Dashboard pausa setInterval cuando pestaña oculta (ahorra batería)' },
+      { type: 'fix', text: 'Debounce 200ms en save(): ninos, obra, coches, gastos-diarios, suministros' },
+    ],
+  }, {
+    version: 'v4.2.0',
+    date: 'Abril 2026',
+    items: [
+      { type: 'fix', text: 'pullFromFirestore preserva _updatedAt — causa raíz de que iPad nunca recibía datos del móvil' },
+      { type: 'new', text: 'Monitor de latencia: ping Cloudflare 30s, wapps:latency — corrige navigator.onLine falsos' },
+      { type: 'new', text: 'Auth event replay: wapps:auth-change se reemite al DOMContentLoaded — arregla apps offline al arrancar' },
+    ],
+  }, {
+    version: 'v4.1.0',
+    date: 'Abril 2026',
+    items: [
+      { type: 'fix', text: 'Botón SYNC habilitado sin requerir pendientes > 0 (13 apps)' },
+      { type: 'imp', text: 'Responsive: body full-width, contenido centrado sin bordes en iPad' },
+      { type: 'new', text: 'wapps-nav.js: tecla ESC y swipe desde borde izquierdo vuelven al home' },
+    ],
+  }, {
     version: 'v4.0.0',
     date: 'Abril 2026',
     items: [

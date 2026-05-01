@@ -27,7 +27,7 @@
   <div class="wnav">
     <a class="wnav-back" href="index.html"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="var(--y)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a>
-  <div class="wnav-version">v1.2</div>
+  <div class="wnav-version">v1.3</div>
 </div>
     <div class="wnav-sep"></div>
     <div class="wnav-title">DECISOR</div>
@@ -111,16 +111,14 @@ function loadState(){
   try{const r=localStorage.getItem('decisor_v1');if(r)return JSON.parse(r);}catch(e){}
   return{presets:JSON.parse(JSON.stringify(DEFAULT_PRESETS)),nextId:10};
 }
-function save(){
+function _saveImmediate(){
   if (typeof WStore !== 'undefined') {
     try { WStore.set('decisor','data',state); return; } catch(e){}
   }
   try{localStorage.setItem('decisor_v1',JSON.stringify(state));}catch(e){}
 }
 
-// Debounce: agrupa saves consecutivos en uno (200ms)
 let _saveDebounce = null;
-const _saveImmediate = save;
 function save() {
   if (_saveDebounce) clearTimeout(_saveDebounce);
   _saveDebounce = setTimeout(() => { _saveDebounce = null; _saveImmediate(); }, 200);

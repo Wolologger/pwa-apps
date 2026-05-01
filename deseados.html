@@ -59,7 +59,7 @@
     <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
     <div class="wnav-sep"></div>
     <div class="wnav-title">LISTA DE DESEADOS</div>
-  <div class="wnav-version">v1.6</div>
+  <div class="wnav-version">v1.7</div>
   </div>
 
   <div class="tabs">
@@ -156,11 +156,9 @@ function loadState(){
   try{const r=localStorage.getItem('deseados_v1');if(r){const s=JSON.parse(r);s.items.forEach(i=>{if(!i.prio)i.prio='media';});return s;}}catch(e){}
   return{items:[],nextId:1};}
 
-function save(){state.nextId=nid;try{localStorage.setItem('deseados_v2',JSON.stringify(state));if(typeof WStore!=='undefined')WStore.set('deseados','data',state);}catch(e){}}
+function _saveImmediate(){state.nextId=nid;try{localStorage.setItem('deseados_v2',JSON.stringify(state));if(typeof WStore!=='undefined')WStore.set('deseados','data',state);}catch(e){}}
 
-// Debounce: agrupa saves consecutivos en uno (200ms)
 let _saveDebounce = null;
-const _saveImmediate = save;
 function save() {
   if (_saveDebounce) clearTimeout(_saveDebounce);
   _saveDebounce = setTimeout(() => { _saveDebounce = null; _saveImmediate(); }, 200);

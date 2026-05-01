@@ -55,7 +55,7 @@
     <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
     <div class="wnav-sep"></div>
     <div class="wnav-title">LISTA DE LA COMPRA</div>
-  <div class="wnav-version">v1.8</div>
+  <div class="wnav-version">v1.9</div>
   </div>
   <div class="list-bar" id="list-bar"></div>
   <div class="tabs">
@@ -147,11 +147,9 @@ function loadState(){
     history:[] // [{date, items:[]}] — completed lists
   };
 }
-function save(){state.nextId=nid;try{localStorage.setItem('compra_v2',JSON.stringify(state));}catch(e){}if(typeof WStore!=='undefined')WStore.set('compra','data',state);}
+function _saveImmediate(){state.nextId=nid;try{localStorage.setItem('compra_v2',JSON.stringify(state));}catch(e){}if(typeof WStore!=='undefined')WStore.set('compra','data',state);}
 
-// Debounce: agrupa saves consecutivos en uno (200ms)
 let _saveDebounce = null;
-const _saveImmediate = save;
 function save() {
   if (_saveDebounce) clearTimeout(_saveDebounce);
   _saveDebounce = setTimeout(() => { _saveDebounce = null; _saveImmediate(); }, 200);

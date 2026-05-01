@@ -111,7 +111,7 @@
     <div class="wnav-title" id="wnav-title">SETLIST</div>
     <button class="wnav-act-btn" id="perf-launch-btn" onclick="launchPerfMode()">▶ ACTUAR</button>
 
-  <div class="wnav-version">v1.5</div>
+  <div class="wnav-version">v1.6</div>
 </div>
 
   <!-- BAND BAR -->
@@ -251,7 +251,7 @@ function loadState() {
   try { const r = localStorage.getItem('setlist_v1'); if (r) return JSON.parse(r); } catch(e) {}
   return { bands: [], songs: [], setlists: [], ensayos: [], nextId: 1 };
 }
-function save() {
+function _saveImmediate() {
   state.nextId = nid;
   if (!state.ensayos)  state.ensayos  = [];
   if (!state.setlists) state.setlists = [];
@@ -259,9 +259,7 @@ function save() {
   try { localStorage.setItem('setlist_v1', JSON.stringify(state)); } catch(e) {}
 }
 
-// Debounce: agrupa saves consecutivos en uno (200ms)
 let _saveDebounce = null;
-const _saveImmediate = save;
 function save() {
   if (_saveDebounce) clearTimeout(_saveDebounce);
   _saveDebounce = setTimeout(() => { _saveDebounce = null; _saveImmediate(); }, 200);

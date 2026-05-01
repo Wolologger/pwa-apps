@@ -51,7 +51,7 @@
   <div class="wnav">
     <a class="wnav-back" href="index.html"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="var(--y)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a>
-  <div class="wnav-version">v1.9</div>
+  <div class="wnav-version">v2.0</div>
 </div>
     <div class="wnav-sep"></div>
     <div class="wnav-title" id="wnav-title">SEMANA</div>
@@ -157,11 +157,9 @@ function loadState(){
   try{const r=localStorage.getItem('semana_v1');if(r){const s=JSON.parse(r);return{tasks:s.tasks||{},events:[],nextId:100};}}catch(e){}
   return{tasks:{},events:[],recurring:[],nextId:100};
 }
-function save(){try{localStorage.setItem('semana_v2',JSON.stringify(state));if(typeof WStore!=='undefined')WStore.set('semana','data',state);}catch(e){}}
+function _saveImmediate(){try{localStorage.setItem('semana_v2',JSON.stringify(state));if(typeof WStore!=='undefined')WStore.set('semana','data',state);}catch(e){}}
 
-// Debounce: agrupa saves consecutivos en uno (200ms)
 let _saveDebounce = null;
-const _saveImmediate = save;
 function save() {
   if (_saveDebounce) clearTimeout(_saveDebounce);
   _saveDebounce = setTimeout(() => { _saveDebounce = null; _saveImmediate(); }, 200);
