@@ -1,5 +1,9 @@
 ## Changelog
 
+### v4.8.2 — Mayo 2026
+- **Fix** — `hero-info-grid` (7 bloques de métricas): `auto-fit, minmax(90px,1fr)` creaba una celda vacía visible (~93×52 px del color `--line2`) cuando 7 ítems no son divisibles exactamente por el número de columnas. Corregido a columnas explícitas: 2 cols en ≤359 px, 4 cols con `:last-child { grid-column: span 2 }` en 360–559 px (el ítem 7 siempre rellena la última fila), y 7 cols en ≥560 px (una sola fila).
+- **Fix** — `.grid-bg` (`position:fixed;inset:0`): la regla `@media (min-width:1200px) { body > *:not(...) { max-width:1100px } }` le aplicaba ese max-width, haciendo que el patrón de cuadrícula solo cubriera 1100 px desde la izquierda y dejara la zona derecha de la pantalla sin fondo. Añadido `:not(.grid-bg)` a la lista de exclusiones.
+
 ### v4.8.1 — Mayo 2026
 - **Fix** — `wapps-firebase.js`: `pushAll` (botón ⬆ SUBIR TODO) usaba `pushToFirestore` (genera nuevo `_updatedAt`) en lugar de `pushToFirestoreExact`. Esto causaba que el remoto quedara con un timestamp más reciente que el local → el siguiente `syncOnLoad` veía `remoteTs > localTs` y descargaba de vuelta innecesariamente. Corregido a `pushToFirestoreExact`.
 - **Fix** — `ninos.html v2.3`: bloque `syncOnLoad` dentro de `showTab()` — mismo bug que mascotas/coches, detectado por los tests de regresión.
