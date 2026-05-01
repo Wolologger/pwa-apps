@@ -1,0 +1,19 @@
+{
+  "name": "pwa-apps",
+  "version": "1.0.0",
+  "description": "W//APPS — Suite de PWAs personales",
+  "private": true,
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Wolologger/pwa-apps.git"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  }
+}

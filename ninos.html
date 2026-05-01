@@ -91,7 +91,7 @@
     <div class="wnav-sep"></div>
     <div class="wnav-title" id="wnav-title">NIÑOS</div>
 
-  <div class="wnav-version">v2.2</div>
+  <div class="wnav-version">v2.3</div>
 </div>
 
   <div class="sync-bar" id="sync-bar">
@@ -459,25 +459,6 @@ function showTab(name, el) {
   if (fabLabels[name]) { fabBtn.textContent = fabLabels[name]; fab.style.display = 'block'; }
   else fab.style.display = 'none';
   render();
-
-// ── Sync desde Firebase al autenticarse (fix: auth puede llegar tarde) ──
-if (typeof WStore !== 'undefined') {
-  WStore.syncOnLoad('ninos', 'data', fresh => {
-    if (fresh && fresh.kids) { state = fresh; render(); }
-  });
-  window.addEventListener('wapps:recovered', () => {
-    const fresh = WStore.get('ninos', 'data');
-    if (fresh && fresh.kids) { state = fresh; render(); }
-  });
-  window.addEventListener('wapps:auth-change', e => {
-    if (!e.detail?.user) return;
-    WStore.syncOnLoad('ninos', 'data', fresh => {
-      if (fresh && fresh.kids) { state = fresh; render(); }
-    });
-
-    updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
-  });
-}
 }
 
 function fabAction() {
@@ -1246,12 +1227,25 @@ const OB_STEPS = [
 ];
 
 if(typeof WOnboarding!=='undefined')WOnboarding.show('ninos', OB_STEPS);
-// Limitar fechas de nacimiento a hoy (no permitir futuras)
 (function(){ const _t=today(); ['fk-nacimiento'].forEach(id=>{const el=document.getElementById(id); if(el) el.max=_t;}); })();
 render();
-// Alertas de cumpleaños al cargar
 setTimeout(checkBirthdayAlerts, 1200);
 
+if (typeof WStore !== 'undefined') {
+  WStore.syncOnLoad('ninos', 'data', fresh => {
+    if (fresh && fresh.kids) { state = fresh; render(); }
+  });
+  window.addEventListener('wapps:recovered', () => {
+    const fresh = WStore.get('ninos', 'data');
+    if (fresh && fresh.kids) { state = fresh; render(); }
+  });
+  window.addEventListener('wapps:auth-change', e => {
+    if (!e.detail?.user) return;
+    WStore.syncOnLoad('ninos', 'data', fresh => {
+      if (fresh && fresh.kids) { state = fresh; render(); }
+    });
+  });
+}
 
 </script>
 </body>
