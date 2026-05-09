@@ -1,5 +1,11 @@
 ## Changelog
 
+### v4.8.4 — Mayo 2026
+- **Fix crítico** — `wapps-firebase.js`: `pullAll` se ejecutaba 3 veces en los primeros 1.5s por cada carga de página con sesión activa: (1) llamada directa desde `onAuthStateChanged`, (2) desde el listener `wapps:auth-change` de WSync, (3) re-emitido por `_wfb_post_init` a los 0ms. Cada ejecución causaba un ciclo completo de lecturas Firestore + re-render en todas las apps. Fix: eliminado el pullAll directo (línea 62), añadido guard de 10 segundos en el listener de WSync.
+- **Fix crítico** — `compra.html v2.0`: `activeListId` no se actualizaba al recibir datos de Firebase via `wapps:recovered`/`syncOnLoad`. Si el usuario tenía localStorage limpio y los datos llegaban de Firestore, el estado se actualizaba con las listas pero `activeListId` seguía siendo `null` → el botón Añadir fallaba silenciosamente en cada intento.
+- **Fix crítico** — `ninos.html v2.5`: `activeKidId` no se actualizaba tras sync → añadir medicaciones, visitas o exámenes al niño fallaba sin feedback.
+- **Fix crítico** — `setlist.html v1.7`: `activeBandId` no se actualizaba tras sync → añadir canciones o setlists a la banda fallaba sin feedback.
+
 ### v4.8.3 — Mayo 2026
 - **Fix crítico** — `despensa.html v1.9` y `ninos.html v2.4`: `nid` no se reinicializaba en los listeners `wapps:recovered` y `wapps:auth-change`. Ambas apps tienen `state.nextId = nid` en `_saveImmediate()`. Al recibir datos frescos de Firebase (`state = fresh`), `nid` seguía con el valor anterior. La siguiente llamada a `_saveImmediate()` sobreescribía `state.nextId` con el valor viejo, corrompiendo el contador de IDs y arriesgando colisiones entre dispositivos.
 - **Fix** — `wapps-firebase.js` (×2) y `wapps-store.js` (×1): `key.replace('.', '_')` sustituido por `key.replace(/\./g, '_')`. Actualmente todos los WSTORE_KEYS tienen exactamente un punto, por lo que no había bug observable, pero el comportamiento con claves futuras de múltiple nivel era incorrecto.

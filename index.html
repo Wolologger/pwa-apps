@@ -216,7 +216,7 @@
     <div class="cl-modal">
       <div class="cl-handle"></div>
       <div class="cl-header">
-        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v4.8.3</span></div>
+        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v4.8.4</span></div>
         <button class="cl-close" onclick="closeChangelog()">✕</button>
       </div>
       <div class="cl-body" id="cl-body"></div>
@@ -229,11 +229,20 @@
 const GITHUB_USER='Wolologger';
 const GITHUB_REPO='pwa-apps';
 
-const APP_VERSION = 'v4.8.3';
+const APP_VERSION = 'v4.8.4';
 
 // ── CHANGELOG ──────────────────────────────────────────────────────
 const CHANGELOG = [
   {
+    version: 'v4.8.4',
+    date: 'Mayo 2026',
+    items: [
+      { type: 'fix', text: 'wapps-firebase.js — pullAll se ejecutaba 3 veces en los primeros 1.5s al arrancar (1 directo desde onAuthStateChanged + 2 desde re-emits de _wfb_post_init). Eliminado el pullAll directo y añadido guard de 10s en el listener de WSync' },
+      { type: 'fix', text: 'compra.html — activeListId no se actualizaba tras wapps:recovered/syncOnLoad. Si los datos venían de Firebase con listas, el botón Añadir retornaba silenciosamente porque activeListId seguía siendo null' },
+      { type: 'fix', text: 'ninos.html v2.5 — activeKidId no se actualizaba tras sync. Sin kid activo, añadir medicaciones/visitas/exámenes fallaba silenciosamente' },
+      { type: 'fix', text: 'setlist.html v1.7 — activeBandId no se actualizaba tras sync. Sin banda activa, añadir canciones/setlists no funcionaba' },
+    ],
+  }, {
     version: 'v4.8.3',
     date: 'Mayo 2026',
     items: [

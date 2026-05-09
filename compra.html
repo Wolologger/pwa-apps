@@ -55,7 +55,7 @@
     <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
     <div class="wnav-sep"></div>
     <div class="wnav-title">LISTA DE LA COMPRA</div>
-  <div class="wnav-version">v1.9</div>
+  <div class="wnav-version">v2.0</div>
   </div>
   <div class="list-bar" id="list-bar"></div>
   <div class="tabs">
@@ -645,16 +645,16 @@ render();
 // ── Sync desde Firebase al autenticarse (fix: auth puede llegar tarde) ──
 if (typeof WStore !== 'undefined') {
   WStore.syncOnLoad('compra', 'data', fresh => {
-    if (fresh && fresh.items) { state = fresh; nid = state.nextId||1; render(); }
+    if (fresh && fresh.items) { state = fresh; nid = state.nextId||1; if (!activeListId && state.lists?.length) activeListId = state.lists[0].id; render(); }
   });
   window.addEventListener('wapps:recovered', () => {
     const fresh = WStore.get('compra', 'data');
-    if (fresh && fresh.items) { state = fresh; nid = state.nextId||1; render(); }
+    if (fresh && fresh.items) { state = fresh; nid = state.nextId||1; if (!activeListId && state.lists?.length) activeListId = state.lists[0].id; render(); }
   });
   window.addEventListener('wapps:auth-change', e => {
     if (!e.detail?.user) return;
     WStore.syncOnLoad('compra', 'data', fresh => {
-      if (fresh && fresh.items) { state = fresh; nid = state.nextId||1; render(); }
+      if (fresh && fresh.items) { state = fresh; nid = state.nextId||1; if (!activeListId && state.lists?.length) activeListId = state.lists[0].id; render(); }
     });
 
     if (typeof updateSyncUI === 'function') updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);

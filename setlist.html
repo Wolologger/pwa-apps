@@ -111,7 +111,7 @@
     <div class="wnav-title" id="wnav-title">SETLIST</div>
     <button class="wnav-act-btn" id="perf-launch-btn" onclick="launchPerfMode()">▶ ACTUAR</button>
 
-  <div class="wnav-version">v1.6</div>
+  <div class="wnav-version">v1.7</div>
 </div>
 
   <!-- BAND BAR -->
@@ -1500,18 +1500,20 @@ window.addEventListener('storage', function(e) {
 
 if (typeof WStore !== 'undefined') {
   WStore.syncOnLoad('setlist', 'data', fresh => {
+    if (!fresh) return;
     state = fresh; nid = state.nextId||1;
     if (!state.ensayos) state.ensayos = [];
+    if (!activeBandId && state.bands?.length) activeBandId = state.bands[0].id;
     render();
   });
   window.addEventListener('wapps:recovered', () => {
     const fresh = WStore.get('setlist','data');
-    if (fresh && (fresh.bands||fresh.songs)) { state=fresh; nid=state.nextId||1; if(!state.ensayos)state.ensayos=[]; render(); }
+    if (fresh && (fresh.bands||fresh.songs)) { state=fresh; nid=state.nextId||1; if(!state.ensayos)state.ensayos=[]; if(!activeBandId&&state.bands?.length)activeBandId=state.bands[0].id; render(); }
   });
   window.addEventListener('wapps:auth-change', e => {
     if (!e.detail?.user) return;
     WStore.syncOnLoad('setlist', 'data', fresh => {
-      if (fresh) { state = fresh; nid = state.nextId||1; if (!state.ensayos) state.ensayos = []; render(); }
+      if (fresh) { state = fresh; nid = state.nextId||1; if (!state.ensayos) state.ensayos = []; if (!activeBandId && state.bands?.length) activeBandId = state.bands[0].id; render(); }
     });
 
     if (typeof updateSyncUI === 'function') updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);

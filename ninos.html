@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <script>
@@ -91,7 +91,7 @@
     <div class="wnav-sep"></div>
     <div class="wnav-title" id="wnav-title">NIÑOS</div>
 
-  <div class="wnav-version">v2.4</div>
+  <div class="wnav-version">v2.5</div>
 </div>
 
   <div class="sync-bar" id="sync-bar">
@@ -1233,16 +1233,16 @@ setTimeout(checkBirthdayAlerts, 1200);
 
 if (typeof WStore !== 'undefined') {
   WStore.syncOnLoad('ninos', 'data', fresh => {
-    if (fresh && fresh.kids) { state = fresh; nid = fresh.nextId || 1; render(); }
+    if (fresh && fresh.kids) { state = fresh; nid = fresh.nextId || 1; if (!activeKidId && fresh.kids?.length) activeKidId = fresh.kids[0].id; render(); }
   });
   window.addEventListener('wapps:recovered', () => {
     const fresh = WStore.get('ninos', 'data');
-    if (fresh && fresh.kids) { state = fresh; nid = fresh.nextId || 1; render(); }
+    if (fresh && fresh.kids) { state = fresh; nid = fresh.nextId || 1; if (!activeKidId && fresh.kids?.length) activeKidId = fresh.kids[0].id; render(); }
   });
   window.addEventListener('wapps:auth-change', e => {
     if (!e.detail?.user) return;
     WStore.syncOnLoad('ninos', 'data', fresh => {
-      if (fresh && fresh.kids) { state = fresh; nid = fresh.nextId || 1; render(); }
+      if (fresh && fresh.kids) { state = fresh; nid = fresh.nextId || 1; if (!activeKidId && fresh.kids?.length) activeKidId = fresh.kids[0].id; render(); }
     });
   });
 }

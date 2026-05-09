@@ -57,10 +57,9 @@ const WFirebase = (() => {
       _auth.onAuthStateChanged(user => {
         _user = user;
         _lastAuthEvent = { user };
-        // Al autenticarse: bajar siempre datos de Firestore, sin importar localStorage
-        if (user && _online) {
-          WSync.pullAll(user.uid).catch(() => {});
-        }
+        // El sync al autenticarse lo gestiona el listener wapps:auth-change de WSync.
+        // No llamar WSync.pullAll() aquí directamente: causaría una ejecución doble
+        // (esta + la del listener) que generaba 3 re-renders en los primeros 1.5s.
         window.dispatchEvent(new CustomEvent('wapps:auth-change', { detail: { user } }));
       });
     } catch(e) {
@@ -542,9 +541,17 @@ const WSync = (() => {
   // Esto es el fix principal para sync entre dispositivos: sin esto,
   // el segundo dispositivo nunca recibe los datos del primero si su
   // localStorage no está vacío.
+  //
+  // Guard de 10s: wapps-firebase.js re-emite wapps:auth-change varias veces
+  // al arrancar (re-emit en _wfb_post_init). Sin este guard, pullAll se ejecutaría
+  // 3 veces en los primeros 1.5s → 3 rondas de Firestore reads + 3 re-renders por app.
+  let _lastAuthSyncAt = 0;
   window.addEventListener('wapps:auth-change', async (e) => {
     const user = e.detail?.user;
-    if (!user || !WFirebase.isOnline()) return;
+    if (!user || !WFirebase.isOnline()) { _lastAuthSyncAt = 0; return; }
+    const now = Date.now();
+    if (now - _lastAuthSyncAt < 10000) return; // re-emit reciente — ya sincronizado
+    _lastAuthSyncAt = now;
     try {
       // Primero subir pendientes locales (por si el dispositivo tenía cambios offline)
       if (getPending().length > 0) await syncAll(user.uid);
