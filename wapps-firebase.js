@@ -359,7 +359,7 @@ const WSync = (() => {
     const raw = localStorage.getItem('wapps.' + key);
     if (!raw) { clearPending(key); return true; }
     const data = JSON.parse(raw);
-    const fsKey = key.replace('.', '_');
+    const fsKey = key.replace(/\./g, '_');
     try {
       const ok = await WFirebase.pushToFirestore(uid, fsKey, data);
       if (ok) { _retryCount.delete(key); return true; }
@@ -466,7 +466,7 @@ const WSync = (() => {
     try {
       const remote = await WFirebase.pullAll(uid);
       for (const [fsKey, data] of Object.entries(remote)) {
-        const storeKey = fsKey.replace('_', '.');
+        const storeKey = fsKey.replace('_', '.');  // solo reemplaza el 1.er _ (formato siempre app_key)
         const localKey = 'wapps.' + storeKey;
         const localRaw = localStorage.getItem(localKey);
         const local    = localRaw ? JSON.parse(localRaw) : null;
@@ -613,7 +613,7 @@ const WSync = (() => {
       try {
         const data = _readLocal(key);
         if (!data) { skipped++; continue; }
-        const fsKey = key.replace('.', '_');
+        const fsKey = key.replace(/\./g, '_');
         const version = _incPushVersion(key);
         const dataWithVersion = { ...data, _pushVersion: version };
         // pushToFirestoreExact preserva el _updatedAt local → evita el ciclo

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -686,7 +686,7 @@ if (typeof WStore !== 'undefined') {
       if (fresh && fresh.tasks) { state = fresh; render(); }
     });
 
-    updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
+    if (typeof updateSyncUI === 'function') updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
   });
 }
 // Hide spinner when app is ready

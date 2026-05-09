@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -389,7 +389,7 @@ async function handleAuth() {
 
 window.addEventListener('wapps:auth-change', e => {
   renderUser(e.detail.user);
-  updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
+  if (typeof updateSyncUI === 'function') updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
 });
 window.addEventListener('wapps:recovered', () => {
   // Ajustes no tiene estado propio; solo re-renderiza datos de usuario y stats

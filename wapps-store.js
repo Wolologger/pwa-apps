@@ -171,7 +171,7 @@ const WStore = (() => {
         if (typeof WFirebase !== 'undefined') {
           const user = WFirebase.getUser();
           if (user && WFirebase.isOnline()) {
-            const fsKey = storeKey.replace('.', '_');
+            const fsKey = storeKey.replace(/\./g, '_');
             // CRÍTICO: pasar el mismo payload (con el mismo _updatedAt) a Firestore
             // para que local y Firebase queden sincronizados exactamente.
             // pushToFirestore añade su propio _updatedAt — usamos el de payload

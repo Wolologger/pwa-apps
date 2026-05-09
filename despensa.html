@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -60,7 +60,7 @@
   <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
   <div class="wnav-sep"></div>
   <div class="wnav-title">DESPENSA</div>
-  <div class="wnav-version">v1.8</div>
+  <div class="wnav-version">v1.9</div>
 </div>
 
 <div class="tabs">
@@ -683,19 +683,19 @@ if (_loadEl)
 // ── Sync desde Firebase al autenticarse (fix: auth puede llegar tarde) ──
 if (typeof WStore !== 'undefined') {
   WStore.syncOnLoad('despensa', 'items', fresh => {
-    if (fresh && fresh.alimentos) { state = fresh; renderDespensa(); }
+    if (fresh && fresh.alimentos) { state = fresh; nid = fresh.nextId || 1; renderDespensa(); }
   });
   window.addEventListener('wapps:recovered', () => {
     const fresh = WStore.get('despensa', 'items');
-    if (fresh && fresh.alimentos) { state = fresh; renderDespensa(); }
+    if (fresh && fresh.alimentos) { state = fresh; nid = fresh.nextId || 1; renderDespensa(); }
   });
   window.addEventListener('wapps:auth-change', e => {
     if (!e.detail?.user) return;
     WStore.syncOnLoad('despensa', 'items', fresh => {
-      if (fresh && fresh.alimentos) { state = fresh; renderDespensa(); }
+      if (fresh && fresh.alimentos) { state = fresh; nid = fresh.nextId || 1; renderDespensa(); }
     });
 
-    updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
+    if (typeof updateSyncUI === 'function') updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
   });
 }
  { _loadEl.classList.add('fade'); setTimeout(() => { _loadEl.style.display='none'; _loadEl.remove(); }, 300); }

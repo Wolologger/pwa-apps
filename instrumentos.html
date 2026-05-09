@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <script>
@@ -357,7 +357,7 @@ if(typeof WStore!=='undefined'){
       if (fresh && fresh.items) { state = fresh; nid = state.nextId||1; updateFormFields(); render(); }
     });
 
-    updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
+    if (typeof updateSyncUI === 'function') updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
   });
 }
 

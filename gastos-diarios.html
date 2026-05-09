@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -628,7 +628,7 @@ if (typeof WStore !== 'undefined') {
       if (fresh && fresh.gastos) { state = fresh; nid = state.nextId||1; render(); }
     });
 
-    updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
+    if (typeof updateSyncUI === 'function') updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
   });
 }
 </script>

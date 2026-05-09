@@ -1,5 +1,10 @@
 ## Changelog
 
+### v4.8.3 — Mayo 2026
+- **Fix crítico** — `despensa.html v1.9` y `ninos.html v2.4`: `nid` no se reinicializaba en los listeners `wapps:recovered` y `wapps:auth-change`. Ambas apps tienen `state.nextId = nid` en `_saveImmediate()`. Al recibir datos frescos de Firebase (`state = fresh`), `nid` seguía con el valor anterior. La siguiente llamada a `_saveImmediate()` sobreescribía `state.nextId` con el valor viejo, corrompiendo el contador de IDs y arriesgando colisiones entre dispositivos.
+- **Fix** — `wapps-firebase.js` (×2) y `wapps-store.js` (×1): `key.replace('.', '_')` sustituido por `key.replace(/\./g, '_')`. Actualmente todos los WSTORE_KEYS tienen exactamente un punto, por lo que no había bug observable, pero el comportamiento con claves futuras de múltiple nivel era incorrecto.
+- **Fix defensivo** — 13 apps (`decisor`, `ajustes`, `backup`, `compra`, `finanzas`, `despensa`, `gastos-diarios`, `deseados`, `instrumentos`, `semana`, `obra`, `setlist`, `suministros`): `updateSyncUI(...)` se llamaba directamente desde `wapps:auth-change`. Como `wapps-sync-ui.js` se carga con `defer`, existe una ventana de tiempo (conexiones lentas) en la que la función no está definida. Añadido guard `if (typeof updateSyncUI === 'function')`.
+
 ### v4.8.2 — Mayo 2026
 - **Fix** — `hero-info-grid` (7 bloques de métricas): `auto-fit, minmax(90px,1fr)` creaba una celda vacía visible (~93×52 px del color `--line2`) cuando 7 ítems no son divisibles exactamente por el número de columnas. Corregido a columnas explícitas: 2 cols en ≤359 px, 4 cols con `:last-child { grid-column: span 2 }` en 360–559 px (el ítem 7 siempre rellena la última fila), y 7 cols en ≥560 px (una sola fila).
 - **Fix** — `.grid-bg` (`position:fixed;inset:0`): la regla `@media (min-width:1200px) { body > *:not(...) { max-width:1100px } }` le aplicaba ese max-width, haciendo que el patrón de cuadrícula solo cubriera 1100 px desde la izquierda y dejara la zona derecha de la pantalla sin fondo. Añadido `:not(.grid-bg)` a la lista de exclusiones.

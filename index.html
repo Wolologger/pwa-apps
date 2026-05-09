@@ -216,7 +216,7 @@
     <div class="cl-modal">
       <div class="cl-handle"></div>
       <div class="cl-header">
-        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v4.8.2</span></div>
+        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v4.8.3</span></div>
         <button class="cl-close" onclick="closeChangelog()">✕</button>
       </div>
       <div class="cl-body" id="cl-body"></div>
@@ -229,11 +229,19 @@
 const GITHUB_USER='Wolologger';
 const GITHUB_REPO='pwa-apps';
 
-const APP_VERSION = 'v4.8.2';
+const APP_VERSION = 'v4.8.3';
 
 // ── CHANGELOG ──────────────────────────────────────────────────────
 const CHANGELOG = [
   {
+    version: 'v4.8.3',
+    date: 'Mayo 2026',
+    items: [
+      { type: 'fix', text: 'despensa v1.9 y ninos v2.4 — nid no se reinicializaba tras wapps:recovered/auth-change. _saveImmediate() sobreescribía state.nextId con el valor antiguo, corrompiendo el contador de IDs al sincronizar entre dispositivos' },
+      { type: 'fix', text: 'wapps-firebase.js y wapps-store.js — replace(\'.\',"_") sin flag global sustituido por replace(/\\./g,"_") para robustez futura' },
+      { type: 'fix', text: '13 apps — updateSyncUI() sin guard typeof: si wapps-sync-ui.js (defer) no estaba cargado al disparar wapps:auth-change, lanzaba ReferenceError. Añadido if(typeof updateSyncUI===\'function\')' },
+    ],
+  }, {
     version: 'v4.8.2',
     date: 'Mayo 2026',
     items: [

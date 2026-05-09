@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -813,7 +813,7 @@ if (typeof WStore !== 'undefined') {
       if (fresh?.proyectos) { state = fresh; nid = state.nextId||200; activeProjectId = state.proyectos.find(p=>!p.archived)?.id || state.proyectos[0]?.id || null; render(); }
     });
 
-    updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
+    if (typeof updateSyncUI === 'function') updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
   });
 }
 
