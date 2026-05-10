@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -33,7 +33,7 @@
     <div class="wnav-sep"></div>
     <div class="wnav-title" id="wnav-title">MASCOTAS</div>
 
-  <div class="wnav-version">v2.5</div>
+  <div class="wnav-version">v2.6</div>
 </div>
   <div class="sync-bar" id="sync-bar">
     <div class="sync-status">
@@ -332,14 +332,14 @@ function addPet() {
   activePetId = pet.id;
   if (pet.nacimiento) addBirthdayToCalendar(pet.nombre, pet.nacimiento, pet.emoji);
   ['fp-nombre','fp-emoji','fp-raza','fp-nacimiento','fp-chip','fp-peso'].forEach(id => document.getElementById(id).value = '');
-  closeAddPet(); save(); render();
+  closeAddPet(); _saveImmediate(); render();
 }
 
 function delPet(id) {
   if (!confirm(`¿Eliminar esta mascota y todos sus datos?`)) return;
   state.pets = state.pets.filter(p => p.id !== id);
   activePetId = state.pets[0]?.id || null;
-  save(); render();
+  _saveImmediate(); render();
 }
 
 // ── RENDER ──
@@ -439,7 +439,7 @@ function savePetEdit(id) {
   p.nacimiento = document.getElementById('ep-b-'+id).value;
   p.chip = document.getElementById('ep-c-'+id).value.trim();
   if (p.nacimiento) addBirthdayToCalendar(p.nombre, p.nacimiento, p.emoji);
-  editPetId = null; save(); render();
+  editPetId = null; _saveImmediate(); render();
 }
 
 // ── MEDICACIÓN ──
@@ -463,14 +463,14 @@ function addMed() {
   const proxima = pet.meds[pet.meds.length-1].proxima;
   if (proxima) addToCalendar(`💊 ${nombre} (${pet.nombre})`, proxima, proxima, 'musica', '#c060f0', `Medicación: ${document.getElementById('fm-dosis')?.value||''}`);
 
-  save(); render();
+  _saveImmediate(); render();
 }
 
 function delMed(id) {
   const pet = activePet(); if (!pet) return;
   if (!confirm('¿Eliminar esta medicación?')) return;
   pet.meds = (pet.meds||[]).filter(m => m.id !== id);
-  save(); render();
+  _saveImmediate(); render();
 }
 
 function administerMed(petId, medId) {
@@ -485,7 +485,7 @@ function administerMed(petId, medId) {
     med.proxima = `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;
   }
   if (med.stock <= 2) addMedToShoppingList(petId, medId);
-  save(); render();
+  _saveImmediate(); render();
 }
 
 function addMedToShoppingList(petId, medId) {
@@ -581,7 +581,7 @@ function saveMedEdit(id) {
   m.proxima = document.getElementById('em-p-'+id).value;
   m.stock = parseInt(document.getElementById('em-s-'+id).value) || 0;
   m.notas = document.getElementById('em-no-'+id).value.trim();
-  editMedId = null; save(); render();
+  editMedId = null; _saveImmediate(); render();
 }
 
 // ── VETERINARIO ──
@@ -619,7 +619,7 @@ function addVisit() {
   ['fv-fecha','fv-vet','fv-motivo','fv-coste','fv-proxima','fv-notas'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('fv-fecha').value = today();
   document.getElementById('add-visit-panel').classList.remove('open');
-  save(); render();
+  _saveImmediate(); render();
 }
 
 function renderVeterinario() {
@@ -667,7 +667,7 @@ function delVisit(id) {
   const pet = activePet(); if (!pet) return;
   if (!confirm('¿Eliminar esta visita?')) return;
   pet.visits = (pet.visits||[]).filter(v => v.id !== id);
-  save(); render();
+  _saveImmediate(); render();
 }
 
 // ── PESO ──
@@ -679,7 +679,7 @@ function addWeight() {
   pet.weights.push({ id: nxtId(), peso, fecha, notas: document.getElementById('fw-notas').value.trim() });
   document.getElementById('fw-peso').value = '';
   document.getElementById('fw-notas').value = '';
-  save(); render();
+  _saveImmediate(); render();
 }
 
 function renderPeso() {
@@ -717,7 +717,7 @@ function renderPeso() {
 function delWeight(id) {
   const pet = activePet(); if (!pet) return;
   pet.weights = (pet.weights||[]).filter(w => w.id !== id);
-  save(); render();
+  _saveImmediate(); render();
 }
 
 // ── DATOS ──
@@ -750,7 +750,7 @@ function importFile(e) {
       if (!confirm(`¿Importar ${p.pets.length} mascotas?`)) return;
       state = p; nid = state.nextId||1;
       activePetId = state.pets[0]?.id || null;
-      save(); render(); showFB('Importado ✓','var(--g)');
+      _saveImmediate(); render(); showFB('Importado ✓','var(--g)');
     } catch(err) { showFB('Error: '+err.message,'var(--r)'); }
   }; r.readAsText(f);
 }

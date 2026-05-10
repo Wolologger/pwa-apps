@@ -216,7 +216,7 @@
     <div class="cl-modal">
       <div class="cl-handle"></div>
       <div class="cl-header">
-        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v4.8.4</span></div>
+        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v4.8.5</span></div>
         <button class="cl-close" onclick="closeChangelog()">✕</button>
       </div>
       <div class="cl-body" id="cl-body"></div>
@@ -229,11 +229,19 @@
 const GITHUB_USER='Wolologger';
 const GITHUB_REPO='pwa-apps';
 
-const APP_VERSION = 'v4.8.4';
+const APP_VERSION = 'v4.8.5';
 
 // ── CHANGELOG ──────────────────────────────────────────────────────
 const CHANGELOG = [
   {
+    version: 'v4.8.5',
+    date: 'Mayo 2026',
+    items: [
+      { type: 'fix', text: 'wapps-nav.js — pull-to-refresh se disparaba con cualquier scroll porque window.scrollY===0 siempre que el scroll vive en .content. Añadida comprobación de scrollTop de .content y zona táctil (<120px del top). Causa de la vibración constante en suministros y pérdida de datos en mascotas' },
+      { type: 'fix', text: 'mascotas v2.6 — addPet/addMed/addVisit/addWeight/del* usaban save() debounced (200ms). Si pull-to-refresh o sync disparaban en esa ventana, la mascota/dato recién añadido se perdía. Ahora usan _saveImmediate() → persistencia atómica' },
+      { type: 'new', text: 'Tests: nav-ptr.test.js (PTR solo activa cuando content está al top y toque en zona superior) y add-flow.test.js (persistencia inmediata, IDs activos tras sync, sync guard). Total: 406 tests' },
+    ],
+  }, {
     version: 'v4.8.4',
     date: 'Mayo 2026',
     items: [
