@@ -1,5 +1,8 @@
 ## Changelog
 
+### v4.8.7 — Mayo 2026
+- **Fix** — `index.html`: el banner `#update-bar` ("Nueva versión disponible") no estaba excluido del selector `body > *:not(...) { max-width: 1100px }` que se activa a ≥1200 px. Con `position:fixed; left:0; right:0` y un `max-width` heredado, el navegador ancla el elemento a la izquierda y lo recorta a 1100 px, dejando el lado derecho de la pantalla descubierto. Misma causa que el bug del `.grid-bg` corregido en v4.8.2. Solución: añadido `:not(#update-bar)` a la lista de exclusiones del selector.
+
 ### v4.8.6 — Mayo 2026
 - **Fix crítico** — `despensa.html v2.0`: `qaStripAdd()` (botón de quick-add) tenía dos bugs simultáneos: (1) guardaba en `state.items` en lugar de `state.alimentos`, que es la key que lee `renderDespensa()` → los alimentos añadidos por quick-add nunca aparecían en la lista; (2) llamaba a `save()` que no existe en despensa (solo existe `saveState()`) → `ReferenceError` silencioso que impedía la persistencia.
 - **Fix crítico** — `despensa.html`: el bloque `if (_loadEl)` en línea 681 quedaba sin cuerpo (el `{...}` de cierre del spinner estaba en la línea 701, después del bloque `if (typeof WStore !== 'undefined')` que se interpone). En JavaScript, esa llave aislada es un bloque independiente que ejecuta **siempre** → `TypeError: Cannot read properties of null` si no había elemento spinner en el DOM.
