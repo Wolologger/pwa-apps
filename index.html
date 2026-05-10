@@ -380,6 +380,21 @@ const CHANGELOG = [
       { type: 'new', text: 'Auth event replay: wapps:auth-change se reemite al DOMContentLoaded — arregla apps offline al arrancar' },
     ],
   }, {
+    version: 'v4.2.1',
+    date: 'Abril 2026',
+    items: [
+      { type: 'new', text: 'index.html — prefetch dinámico al primer hover/touchstart por tarjeta → navegación instantánea' },
+      { type: 'fix', text: 'index.html — .cmd-bar con color hardcoded #111110 → var(--bg2)' },
+    ],
+  }, {
+    version: 'v4.1.1',
+    date: 'Abril 2026',
+    items: [
+      { type: 'fix', text: 'pullFromFirestore borraba _updatedAt → syncOnLoad comparaba con timestamp 0 → iPad nunca recibía datos del móvil' },
+      { type: 'new', text: 'Indicador de latencia en hero del index (ms de ping a Cloudflare)' },
+      { type: 'imp', text: 'Hero del index: 6 bloques de info útil' },
+    ],
+  }, {
     version: 'v4.1.0',
     date: 'Abril 2026',
     items: [
@@ -435,6 +450,21 @@ const CHANGELOG = [
       { type: 'imp', text: 'Onboarding: tutorial en 10 apps nuevas' },
       { type: 'imp', text: 'Ajustes: panel de subida a Firebase por entidad' },
       { type: 'imp', text: 'Banner de nueva version disponible al actualizar SW' },
+    ],
+  }, {
+    version: 'v3.11.1',
+    date: 'Abril 2026',
+    items: [
+      { type: 'fix', text: 'semana, finanzas, gastos-diarios, deseados, mascotas, coches — doble llave ${{var}} en manualPushApp corregida' },
+      { type: 'imp', text: 'Version badge v1.x añadido a todas las apps que no lo tenían' },
+    ],
+  }, {
+    version: 'v3.10.1',
+    date: 'Abril 2026',
+    items: [
+      { type: 'fix', text: 'obra, compra, instrumentos, ninos — JS roto por ${{var}} en manualPushApp() → pantalla en blanco corregida' },
+      { type: 'fix', text: 'instrumentos, ninos, obra — esc() reescrita sin regex problemático (Unexpected token en algunos browsers)' },
+      { type: 'fix', text: 'backup — mascotas, coches y ninos incluidas en backup completo (wkey era null)' },
     ],
   }, {
     version: 'v3.9.0',
@@ -499,8 +529,30 @@ const CHANGELOG = [
       { type: 'new', text: 'instrumentos.html y ninos.html — barra sync completa añadida (faltaba desde v3.1.1)' },
       { type: 'imp', text: 'sw.js — cache bump v8.3 para forzar actualización en PWAs instaladas' },
     ]
-  },
-  {
+  }, {
+    version: 'v3.3.1',
+    date: 'Marzo 2026',
+    items: [
+      { type: 'imp', text: 'sw.js — stale-while-revalidate para HTML: sirve caché, actualiza en background, notifica UPDATE_AVAILABLE' },
+      { type: 'new', text: 'WUpdate — banner de actualización no intrusivo con botón "Recargar"' },
+      { type: 'new', text: 'WStore.watchRealtime(): sincronización en tiempo real entre dispositivos vía onSnapshot' },
+    ],
+  }, {
+    version: 'v3.3.0',
+    date: 'Marzo 2026',
+    items: [
+      { type: 'new', text: 'WTheme — sistema completo: modo dark/light, 6 acentos de color, 3 tamaños de fuente' },
+      { type: 'imp', text: 'ajustes.html — panel de apariencia con selector de acento y tamaño de fuente' },
+    ],
+  }, {
+    version: 'v3.2.0',
+    date: 'Marzo 2026',
+    items: [
+      { type: 'new', text: 'WSkeleton — skeleton loaders y empty states con botón de acción' },
+      { type: 'new', text: 'WPDF — exportación a PDF en gastos-diarios, obra y suministros (jsPDF lazy-load)' },
+      { type: 'imp', text: 'sw.js — precaché tolerante a fallos con Promise.allSettled' },
+    ],
+  }, {
     version: 'v3.1.1',
     date: 'Marzo 2026',
     items: [
@@ -521,8 +573,76 @@ const CHANGELOG = [
       { type: 'fix', text: 'backup.html — doRestore sube a Firestore inmediatamente tras restaurar' },
       { type: 'fix', text: 'wapps-firebase.js — pullAll usa > en vez de >= para no machacar restore' },
     ]
-  },
-  {
+  }, {
+    version: 'v3.1.0',
+    date: 'Marzo 2026',
+    items: [
+      { type: 'fix', text: 'Botón SYNC habilitado sin requerir pendientes > 0 (13 apps)' },
+      { type: 'imp', text: 'Responsive: contenido centrado sin bordes en iPad' },
+    ],
+  }, {
+    version: 'v3.0.0',
+    date: 'Marzo 2026',
+    items: [
+      { type: 'imp', text: 'Versión mayor — consolidación de todas las mejoras desde v2.2.0' },
+      { type: 'imp', text: 'offline.html, 404.html y ajustes.html excluidos del grid de apps' },
+      { type: 'new', text: 'ajustes.html accesible desde el botón ⚙️ del panel principal' },
+    ],
+  }, {
+    version: 'v2.10.0',
+    date: 'Marzo 2026',
+    items: [
+      { type: 'new', text: 'wapps-config.js — credenciales Firebase separadas del código fuente' },
+      { type: 'new', text: 'wapps-config.example.js — plantilla para nuevos desarrolladores' },
+      { type: 'imp', text: '.gitignore — wapps-config.js excluido del repo' },
+    ],
+  }, {
+    version: 'v2.9.0',
+    date: 'Marzo 2026',
+    items: [
+      { type: 'new', text: 'WTransition — fade-out/in de 160ms entre todas las páginas, sin parpadeo blanco' },
+    ],
+  }, {
+    version: 'v2.8.0',
+    date: 'Marzo 2026',
+    items: [
+      { type: 'new', text: 'ajustes.html — página central de ajustes' },
+    ],
+  }, {
+    version: 'v2.7.0',
+    date: 'Marzo 2026',
+    items: [
+      { type: 'del', text: 'Claves legacy eliminadas de wapps-store.js' },
+      { type: 'new', text: 'migrateLegacy() — migración one-shot al arrancar' },
+    ],
+  }, {
+    version: 'v2.6.0',
+    date: 'Marzo 2026',
+    items: [
+      { type: 'new', text: 'semana.html, instrumentos.html y setlist.html conectados a WStore y Firebase' },
+    ],
+  }, {
+    version: 'v2.5.0',
+    date: 'Marzo 2026',
+    items: [
+      { type: 'imp', text: 'Firebase SDK actualizado de 9.23.0 a 11.6.0' },
+      { type: 'new', text: '404.html — página de error con accesos directos a las apps' },
+    ],
+  }, {
+    version: 'v2.4.0',
+    date: 'Marzo 2026',
+    items: [
+      { type: 'imp', text: 'Indicador sync ONLINE/OFFLINE/SINCRONIZANDO extendido a todas las páginas' },
+      { type: 'new', text: 'coches.html y ninos.html conectados a WStore y Firebase' },
+    ],
+  }, {
+    version: 'v2.3.0',
+    date: 'Marzo 2026',
+    items: [
+      { type: 'imp', text: 'Offline completo: todas las páginas HTML en precaché del SW' },
+      { type: 'new', text: 'offline.html como fallback con redirección automática al recuperar red' },
+    ],
+  }, {
     version: 'v2.2.0',
     date: 'Marzo 2026',
     items: [
