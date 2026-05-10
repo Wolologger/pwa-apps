@@ -60,7 +60,7 @@
   <div class="wnav-logo"><a href="index.html">W<span>//</span>APPS</a></div>
   <div class="wnav-sep"></div>
   <div class="wnav-title">DESPENSA</div>
-  <div class="wnav-version">v1.9</div>
+  <div class="wnav-version">v2.0</div>
 </div>
 
 <div class="tabs">
@@ -252,16 +252,15 @@ function sortAlimentos(arr){ return [...arr].sort((a,b)=>{ const da=daysUntil(a.
 function qaStripAdd(){
   const inp=document.getElementById('qa-strip-nombre');
   const nombre=inp.value.trim();if(!nombre)return;
-  // Add directly to state with defaults
-  state.items=state.items||[];
-  state.items.push({
+  if(!state.alimentos)state.alimentos=[];
+  state.alimentos.push({
     id:Date.now(),nombre,qty:1,unidad:'ud',cat:'otros',
-    fecha:'',proveedor:'',precio:0,notas:'',
+    fecha:'',stock:1,stockMin:0,notas:'',
     added:new Date().toISOString().slice(0,10)
   });
   inp.value='';
   if(typeof haptic==='function')haptic('light');
-  save();renderDespensa();
+  saveState();renderDespensa();
 }
 function showTab(name,el){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
@@ -678,7 +677,7 @@ if(typeof WNotify !== 'undefined') WNotify.check();
 
 // Hide spinner when app is ready
 const _loadEl = document.getElementById('wapp-loading');
-if (_loadEl)
+if (_loadEl) { _loadEl.classList.add('fade'); setTimeout(() => { _loadEl.style.display='none'; _loadEl.remove(); }, 300); }
 
 // ── Sync desde Firebase al autenticarse (fix: auth puede llegar tarde) ──
 if (typeof WStore !== 'undefined') {
@@ -694,11 +693,9 @@ if (typeof WStore !== 'undefined') {
     WStore.syncOnLoad('despensa', 'items', fresh => {
       if (fresh && fresh.alimentos) { state = fresh; nid = fresh.nextId || 1; renderDespensa(); }
     });
-
     if (typeof updateSyncUI === 'function') updateSyncUI(_fb()?.isOnline() ? 'online' : 'offline', _sync()?.getPending().length ?? 0);
   });
 }
- { _loadEl.classList.add('fade'); setTimeout(() => { _loadEl.style.display='none'; _loadEl.remove(); }, 300); }
 
 // ── ONBOARDING ──
 const OB_STEPS = [

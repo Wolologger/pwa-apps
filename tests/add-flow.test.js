@@ -282,8 +282,8 @@ describe('Análisis estático — no hay ventanas de pérdida de datos', () => {
   CRITICAL_APPS.forEach(app => {
     test(`${app}.html — función add principal persiste datos`, () => {
       const html = fs.readFileSync(path.join(__dirname, `../${app}.html`), 'utf-8');
-      // Las funciones add deben llamar save() o _saveImmediate() antes de return
-      const hasImmediateSave = html.includes('_saveImmediate()') || html.includes('save()');
+      // Las funciones add deben llamar save() o _saveImmediate() o saveState()
+      const hasImmediateSave = html.includes('_saveImmediate()') || html.includes('save()') || html.includes('saveState()');
       expect(hasImmediateSave).toBe(true);
     });
   });

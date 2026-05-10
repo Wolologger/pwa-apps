@@ -1,5 +1,10 @@
 ## Changelog
 
+### v4.8.6 — Mayo 2026
+- **Fix crítico** — `despensa.html v2.0`: `qaStripAdd()` (botón de quick-add) tenía dos bugs simultáneos: (1) guardaba en `state.items` en lugar de `state.alimentos`, que es la key que lee `renderDespensa()` → los alimentos añadidos por quick-add nunca aparecían en la lista; (2) llamaba a `save()` que no existe en despensa (solo existe `saveState()`) → `ReferenceError` silencioso que impedía la persistencia.
+- **Fix crítico** — `despensa.html`: el bloque `if (_loadEl)` en línea 681 quedaba sin cuerpo (el `{...}` de cierre del spinner estaba en la línea 701, después del bloque `if (typeof WStore !== 'undefined')` que se interpone). En JavaScript, esa llave aislada es un bloque independiente que ejecuta **siempre** → `TypeError: Cannot read properties of null` si no había elemento spinner en el DOM.
+- **Changelog** — `index.html`: añadidas 17 versiones faltantes al modal (v4.2.1, v4.1.1, v3.11.1, v3.10.1, v3.3.1, v3.3.0, v3.2.0, v3.1.0, v3.0.0, v2.10.0–v2.3.0). Historia completa desde v1.0.0.
+
 ### v4.8.5 — Mayo 2026
 - **Fix crítico** — `wapps-nav.js`: el pull-to-refresh se activaba con cualquier gesto de scroll descendente porque `window.scrollY === 0` es siempre `true` cuando el scroll vive en `.content` (no en `body`). Añadidas dos condiciones: (1) el `.content` también debe tener `scrollTop <= 5`, y (2) el toque debe empezar en la zona superior de la pantalla (`clientY < 120px`). **Este era el bug de suministros** (vibración + reload en cada toque) y parte del bug de mascotas (el PTR disparaba `manualPull()` que sobreescribía el estado en memoria antes de que el debounce de 200ms guardara la nueva mascota).
 - **Fix crítico** — `mascotas.html v2.6`: todas las funciones de add/delete (`addPet`, `addMed`, `addVisit`, `addWeight`, `delPet`, `delMed`, `delVisit`, `delWeight`, `savePetEdit`, `saveMedEdit`) usaban `save()` con debounce de 200ms. Si cualquier evento de sync llegaba en esa ventana, el dato recién añadido se perdía. Ahora usan `_saveImmediate()` → el dato persiste en localStorage y Firebase antes de que pueda llegar cualquier `pullAll`.

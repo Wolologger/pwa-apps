@@ -216,7 +216,7 @@
     <div class="cl-modal">
       <div class="cl-handle"></div>
       <div class="cl-header">
-        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v4.8.5</span></div>
+        <div class="cl-header-title">CHANGELOG <span id="cl-version-title" style="color:var(--y);">v4.8.6</span></div>
         <button class="cl-close" onclick="closeChangelog()">✕</button>
       </div>
       <div class="cl-body" id="cl-body"></div>
@@ -229,11 +229,18 @@
 const GITHUB_USER='Wolologger';
 const GITHUB_REPO='pwa-apps';
 
-const APP_VERSION = 'v4.8.5';
+const APP_VERSION = 'v4.8.6';
 
 // ── CHANGELOG ──────────────────────────────────────────────────────
 const CHANGELOG = [
   {
+    version: 'v4.8.6',
+    date: 'Mayo 2026',
+    items: [
+      { type: 'fix', text: 'despensa v2.0 — qaStripAdd() usaba state.items (key incorrecta, nunca visibles) y llamaba save() que no existe en despensa → ReferenceError. Corregido a state.alimentos + saveState()' },
+      { type: 'fix', text: 'despensa — if (_loadEl) sin cuerpo en línea 681: el bloque { _loadEl.classList... } en línea 701 era código suelto que ejecutaba siempre → TypeError si _loadEl es null (sin spinner). Reestructurado como if (_loadEl) { ... } correcto' },
+    ],
+  }, {
     version: 'v4.8.5',
     date: 'Mayo 2026',
     items: [
